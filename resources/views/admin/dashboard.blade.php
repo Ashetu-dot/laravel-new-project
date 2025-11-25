@@ -26,30 +26,12 @@
         <div class="container-fluid">
             <!-- Statistics Row -->
             <div class="row">
-                <!-- Total Vendors -->
+                <!-- Total Admins -->
                 <div class="col-lg-3 col-6">
                     <div class="small-box text-bg-primary">
                         <div class="inner">
-                            <h3>156</h3>
-                            <p>Total Vendors</p>
-                        </div>
-                        <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M13.5 21.75c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9S9 3.97 9 9s2.015 9 4.5 9z"/>
-                            <path d="M3.75 21.75c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9S-.75 3.97-.75 9s2.015 9 4.5 9z"/>
-                            <path d="M23.25 21.75c2.485 0 4.5-4.03 4.5-9s-2.015-9-4.5-9-4.5 4.03-4.5 9 2.015 9 4.5 9z"/>
-                        </svg>
-                        <a href="#" class="small-box-footer link-light">
-                            View All <i class="bi bi-link-45deg"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Total Customers -->
-                <div class="col-lg-3 col-6">
-                    <div class="small-box text-bg-success">
-                        <div class="inner">
-                            <h3>2,847</h3>
-                            <p>Registered Customers</p>
+                            <h3>{{ $stats['total_admins'] ?? 0 }}</h3>
+                            <p>Total Admins</p>
                         </div>
                         <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
@@ -60,18 +42,34 @@
                     </div>
                 </div>
 
-                <!-- Pending Orders -->
+                <!-- Total Vendors -->
+                <div class="col-lg-3 col-6">
+                    <div class="small-box text-bg-success">
+                        <div class="inner">
+                            <h3>{{ $stats['total_vendors'] ?? 0 }}</h3>
+                            <p>Total Vendors</p>
+                        </div>
+                        <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                        </svg>
+                        <a href="#" class="small-box-footer link-light">
+                            View All <i class="bi bi-link-45deg"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Pending Vendors -->
                 <div class="col-lg-3 col-6">
                     <div class="small-box text-bg-warning">
                         <div class="inner">
-                            <h3>24</h3>
-                            <p>Pending Orders</p>
+                            <h3>{{ $stats['pending_vendors'] ?? 0 }}</h3>
+                            <p>Pending Vendors</p>
                         </div>
                         <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2z"/>
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
                         </svg>
                         <a href="#" class="small-box-footer link-dark">
-                            Process Now <i class="bi bi-link-45deg"></i>
+                            Review Now <i class="bi bi-link-45deg"></i>
                         </a>
                     </div>
                 </div>
@@ -80,7 +78,7 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box text-bg-danger">
                         <div class="inner">
-                            <h3>$12,847</h3>
+                            <h3>${{ number_format($stats['revenue'] ?? 0) }}</h3>
                             <p>Total Revenue</p>
                         </div>
                         <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24">
@@ -93,80 +91,302 @@
                 </div>
             </div>
 
-            <!-- Charts & Analytics Row -->
+            <!-- Additional Dashboard Content -->
             <div class="row">
-                <!-- Revenue Chart -->
+                <!-- Recent Activity -->
                 <div class="col-lg-8">
-                    <div class="card mb-4">
+                    <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Platform Revenue & Orders</h3>
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-clock-history"></i> Recent Activity
+                            </h5>
                         </div>
                         <div class="card-body">
-                            <div id="revenue-chart" style="min-height: 300px;"></div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Activity</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>John Doe</td>
+                                            <td>New vendor registration</td>
+                                            <td>2 minutes ago</td>
+                                            <td><span class="badge bg-success">Completed</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jane Smith</td>
+                                            <td>Profile update</td>
+                                            <td>5 minutes ago</td>
+                                            <td><span class="badge bg-warning">Pending</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Mike Johnson</td>
+                                            <td>Order placed</td>
+                                            <td>10 minutes ago</td>
+                                            <td><span class="badge bg-success">Completed</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Sarah Wilson</td>
+                                            <td>Payment received</td>
+                                            <td>15 minutes ago</td>
+                                            <td><span class="badge bg-success">Completed</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Quick Stats -->
                 <div class="col-lg-4">
-                    <div class="card mb-4">
+                    <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Quick Stats</h3>
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-graph-up"></i> Quick Stats
+                            </h5>
                         </div>
                         <div class="card-body">
-                            <div class="list-group list-group-flush">
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    Pending Vendor Approvals
-                                    <span class="badge bg-warning">8</span>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Active Users</span>
+                                    <strong>1,234</strong>
                                 </div>
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    Service Requests
-                                    <span class="badge bg-info">12</span>
+                                <div class="progress mt-1" style="height: 6px;">
+                                    <div class="progress-bar bg-success" style="width: 75%"></div>
                                 </div>
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    Low Trust Score Vendors
-                                    <span class="badge bg-danger">5</span>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Conversion Rate</span>
+                                    <strong>23.5%</strong>
                                 </div>
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    New Reviews
-                                    <span class="badge bg-success">23</span>
+                                <div class="progress mt-1" style="height: 6px;">
+                                    <div class="progress-bar bg-info" style="width: 45%"></div>
                                 </div>
-                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                    Chatbot Queries Today
-                                    <span class="badge bg-primary">156</span>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Bounce Rate</span>
+                                    <strong>12.8%</strong>
+                                </div>
+                                <div class="progress mt-1" style="height: 6px;">
+                                    <div class="progress-bar bg-warning" style="width: 28%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-0">
+                                <div class="d-flex justify-content-between">
+                                    <span>Avg. Session</span>
+                                    <strong>4m 32s</strong>
+                                </div>
+                                <div class="progress mt-1" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" style="width: 65%"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Recent Activity -->
+                    <!-- System Status -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-hdd-stack"></i> System Status
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Server Load</span>
+                                    <span class="badge bg-success">Normal</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Database</span>
+                                    <span class="badge bg-success">Online</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>API Services</span>
+                                    <span class="badge bg-success">Active</span>
+                                </div>
+                            </div>
+                            <div class="mb-0">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Storage</span>
+                                    <span class="badge bg-warning">75% Used</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mt-4">
+                <!-- Revenue Chart -->
+                <div class="col-lg-8">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Recent Activity</h3>
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-bar-chart-line"></i> Revenue Overview
+                            </h5>
                         </div>
-                        <div class="card-body p-0">
+                        <div class="card-body">
+                            <div class="chart-container" style="position: relative; height: 300px;">
+                                <!-- Revenue chart would go here -->
+                                <div class="d-flex align-items-center justify-content-center h-100">
+                                    <div class="text-center text-muted">
+                                        <i class="bi bi-bar-chart" style="font-size: 3rem;"></i>
+                                        <p class="mt-2">Revenue chart will be displayed here</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Vendors -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-trophy"></i> Top Vendors
+                            </h5>
+                        </div>
+                        <div class="card-body">
                             <div class="list-group list-group-flush">
-                                <div class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <small class="text-muted">New Vendor Registration</small>
-                                        <small class="text-muted">2 min ago</small>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Tech Solutions Inc.</h6>
+                                        <small class="text-muted">Electronics</small>
                                     </div>
-                                    <p class="mb-1">"Local Grocery Store" registered</p>
+                                    <span class="badge bg-primary">$12.5K</span>
                                 </div>
-                                <div class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <small class="text-muted">Order Completed</small>
-                                        <small class="text-muted">15 min ago</small>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Fresh Foods Market</h6>
+                                        <small class="text-muted">Groceries</small>
                                     </div>
-                                    <p class="mb-1">Order #ORD-2847 marked as delivered</p>
+                                    <span class="badge bg-primary">$9.8K</span>
                                 </div>
-                                <div class="list-group-item">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <small class="text-muted">New Review</small>
-                                        <small class="text-muted">1 hour ago</small>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Fashion Hub</h6>
+                                        <small class="text-muted">Clothing</small>
                                     </div>
-                                    <p class="mb-1">"Tech Repair Shop" received 5-star rating</p>
+                                    <span class="badge bg-primary">$7.2K</span>
                                 </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Home Essentials</h6>
+                                        <small class="text-muted">Home & Garden</small>
+                                    </div>
+                                    <span class="badge bg-primary">$6.5K</span>
+                                </div>
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">Auto Parts Pro</h6>
+                                        <small class="text-muted">Automotive</small>
+                                    </div>
+                                    <span class="badge bg-primary">$5.9K</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-cart-check"></i> Recent Orders
+                            </h5>
+                            <div class="card-tools">
+                                <a href="#" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-plus-circle"></i> View All Orders
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Customer</th>
+                                            <th>Vendor</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>#ORD-001</td>
+                                            <td>John Smith</td>
+                                            <td>Tech Solutions Inc.</td>
+                                            <td>$245.99</td>
+                                            <td><span class="badge bg-success">Delivered</span></td>
+                                            <td>Nov 15, 2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-002</td>
+                                            <td>Emma Wilson</td>
+                                            <td>Fashion Hub</td>
+                                            <td>$189.50</td>
+                                            <td><span class="badge bg-warning">Processing</span></td>
+                                            <td>Nov 14, 2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-003</td>
+                                            <td>Mike Johnson</td>
+                                            <td>Home Essentials</td>
+                                            <td>$320.75</td>
+                                            <td><span class="badge bg-info">Shipped</span></td>
+                                            <td>Nov 14, 2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>#ORD-004</td>
+                                            <td>Sarah Brown</td>
+                                            <td>Fresh Foods Market</td>
+                                            <td>$89.99</td>
+                                            <td><span class="badge bg-danger">Cancelled</span></td>
+                                            <td>Nov 13, 2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -175,56 +395,107 @@
         </div>
     </div>
 </main>
+
+<style>
+.small-box {
+    border-radius: 0.375rem;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.small-box .inner {
+    padding: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.small-box .inner h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    line-height: 1;
+}
+
+.small-box .inner p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.small-box-icon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1;
+    font-size: 5rem;
+    opacity: 0.3;
+    width: 80px;
+    height: 80px;
+    transition: all 0.3s ease;
+}
+
+.small-box:hover .small-box-icon {
+    transform: scale(1.1);
+    opacity: 0.4;
+}
+
+.small-box-footer {
+    position: relative;
+    text-align: center;
+    padding: 0.5rem 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    display: block;
+    background: rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.small-box-footer:hover {
+    background: rgba(0, 0, 0, 0.15);
+    color: #fff;
+    text-decoration: none;
+}
+
+.text-bg-warning .small-box-footer {
+    color: rgba(0, 0, 0, 0.8) !important;
+}
+
+.text-bg-warning .small-box-footer:hover {
+    color: #000 !important;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    padding: 1rem 1.25rem;
+}
+
+.card-title {
+    margin-bottom: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.progress {
+    border-radius: 0.375rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+</style>
 @endsection
-
-@push('scripts')
-<script>
-    // Dashboard specific JavaScript
-    document.addEventListener('DOMContentLoaded', function() {
-        // Update notification counts dynamically
-        updateNotificationCounts();
-        
-        // Initialize charts
-        initializeDashboardCharts();
-    });
-
-    function updateNotificationCounts() {
-        // You can fetch real data from your backend here
-        fetch('/admin/api/notification-counts')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('notification-count').textContent = data.total;
-                document.getElementById('pending-vendors-count').textContent = data.pending_vendors;
-            })
-            .catch(error => console.error('Error fetching notification counts:', error));
-    }
-
-    function initializeDashboardCharts() {
-        // Revenue chart configuration
-        const sales_chart_options = {
-            series: [{
-                name: 'Revenue',
-                data: [2800, 4800, 3900, 2900, 8600, 4700, 9200, 10800, 7500, 8200, 6900, 12500]
-            }, {
-                name: 'Orders',
-                data: [45, 78, 65, 52, 98, 72, 105, 128, 95, 110, 88, 145]
-            }],
-            chart: {
-                height: 300,
-                type: 'area',
-                toolbar: { show: false }
-            },
-            colors: ['#0d6efd', '#20c997'],
-            dataLabels: { enabled: false },
-            stroke: { curve: 'smooth' },
-            xaxis: {
-                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-            },
-            tooltip: { x: { format: 'MMM yyyy' } }
-        };
-
-        const sales_chart = new ApexCharts(document.querySelector('#revenue-chart'), sales_chart_options);
-        sales_chart.render();
-    }
-</script>
-@endpush

@@ -22,6 +22,7 @@ class Admin extends Authenticatable
         'image',
         'role',
         'status',
+        'last_login_at',
     ];
 
     protected $hidden = [
@@ -31,5 +32,6 @@ class Admin extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime', // Add this if you want to cast last_login_at to a datetime
     ];
 }

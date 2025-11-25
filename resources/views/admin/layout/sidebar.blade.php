@@ -1,16 +1,15 @@
 <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
-    <!-- Sidebar Brand -->
-    <div class="sidebar-brand">
+    <!-- ... existing sidebar brand ... -->
+<div>
+       <div class="sidebar-brand">
         <a href="{{ route('admin.dashboard') }}" class="brand-link">
-            <img src="{{ asset('admin/images/logo.png') }}" 
-                 alt="Local Vendor Finder Logo" 
+            <img src="{{ asset('admin/images/logo.png') }}"
+                 alt="Local Vendor Finder Logo"
                  class="brand-image opacity-75 shadow"
                  onerror="this.src='https://via.placeholder.com/150x50/007bff/ffffff?text=LVF+Admin'"/>
             <span class="brand-text fw-light">Vendor Finder</span>
         </a>
-    </div>
-
-    <!-- Sidebar Wrapper -->
+</div>
     <div class="sidebar-wrapper">
         <nav class="mt-2">
             <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation">
@@ -22,6 +21,38 @@
                     </a>
                 </li>
 
+                <!-- Admin Section -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link {{ request()->routeIs('admin.profile*') || request()->routeIs('admin.password*') ? 'active' : '' }}">
+                        <i class="nav-icon bi bi-person-gear"></i>
+                        <p>
+                            Admin
+                            <i class="nav-arrow bi bi-chevron-right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('admin.profile') }}" class="nav-link {{ request()->routeIs('admin.profile') ? 'active' : '' }}">
+                                <i class="nav-icon bi bi-person"></i>
+                                <p>My Profile</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.password.edit') }}" class="nav-link {{ request()->routeIs('admin.password*') ? 'active' : '' }}">
+                                <i class="nav-icon bi bi-shield-lock"></i>
+                                <p>Change Password</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.admins.list') }}" class="nav-link {{ request()->routeIs('admin.admins.*') ? 'active' : '' }}">
+                                <i class="nav-icon bi bi-people"></i>
+                                <p>Manage Admins</p>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- ... rest of your sidebar menu ... -->
                 <!-- User Management -->
                 <li class="nav-item">
                     <a href="#" class="nav-link">
@@ -193,6 +224,8 @@
                         <p>Chatbot AI</p>
                     </a>
                 </li>
+
+                
             </ul>
         </nav>
     </div>
