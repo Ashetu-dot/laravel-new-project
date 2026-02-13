@@ -332,41 +332,41 @@ public function index(Request $request)
      * ========================================================================
      */
 
-    /**
-     * Display a listing of customers.
-     */
-    public function customers(Request $request)
-    {
-        $search = $request->get('search');
-        $status = $request->get('status');
+ /**
+ * Display a listing of customers.
+ */
+public function customers(Request $request)
+{
+    $search = $request->get('search');
+    $status = $request->get('status');
 
-        $query = User::where('role', 'customer');
+    $query = User::where('role', 'customer');
 
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
-            });
-        }
-
-        if ($status !== null) {
-            $query->where('is_active', $status === 'active' ? 1 : 0);
-        }
-
-        $customers = $query->orderBy('created_at', 'desc')->paginate(15);
-        $customerStats = [
-            'total' => User::where('role', 'customer')->count(),
-            'active' => User::where('role', 'customer')->where('is_active', true)->count(),
-            'inactive' => User::where('role', 'customer')->where('is_active', false)->count(),
-            'new_this_month' => User::where('role', 'customer')
-                ->whereMonth('created_at', now()->month)
-                ->count(),
-        ];
-
-        return view('admin.customers.index', compact('customers', 'customerStats', 'search', 'status'));
+    if ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%")
+              ->orWhere('phone', 'like', "%{$search}%");
+        });
     }
 
+    if ($status !== null) {
+        $query->where('is_active', $status === 'active' ? 1 : 0);
+    }
+
+    $customers = $query->orderBy('created_at', 'desc')->paginate(15);
+    
+    $customerStats = [
+        'total' => User::where('role', 'customer')->count(),
+        'active' => User::where('role', 'customer')->where('is_active', true)->count(),
+        'inactive' => User::where('role', 'customer')->where('is_active', false)->count(),
+        'new_this_month' => User::where('role', 'customer')
+            ->whereMonth('created_at', now()->month)
+            ->count(),
+    ];
+
+    return view('admin.customers.index', compact('customers', 'customerStats', 'search', 'status'));
+}
     /**
      * Display the specified customer.
      */
@@ -384,6 +384,16 @@ public function index(Request $request)
 
         return view('admin.customers.show', compact('customer', 'totalSpent'));
     }
+
+    /**
+ * Show the form for editing the specified customer.
+ */
+public function editCustomer($id)
+{
+    $customer = User::where('role', 'customer')->findOrFail($id);
+    
+    return view('admin.customers.edit', compact('customer'));
+}
 
     /**
      * Update customer information.
@@ -588,15 +598,93 @@ public function index(Request $request)
     /**
      * Display catalog overview.
      */
-    public function catalog()
-    {
-        $totalProducts = Product::count();
-        $totalCategories = Category::count();
-        $outOfStock = Product::where('stock', '<=', 0)->count();
-        $recentProducts = Product::with('vendor')->latest()->limit(10)->get();
+   /**
+ * Display catalog overview.
+ */
+public function catalog()
+{
+    $totalProducts = Product::count();
+    $totalCategories = Category::count();
+    $outOfStock = Product::where('stock', '<=', 0)->count();
+    $recentProducts = Product::with(['vendor', 'category'])->latest()->limit(10)->get();
+    $activeVendorsCount = User::where('role', 'vendor')->where('is_active', true)->count();
 
-        return view('admin.catalog.index', compact('totalProducts', 'totalCategories', 'outOfStock', 'recentProducts'));
+    return view('admin.catalog.index', compact(
+        'totalProducts', 
+        'totalCategories', 
+        'outOfStock', 
+        'recentProducts',
+        'activeVendorsCount'
+    ));
+}
+
+
+/**
+ * Display inventory management page.
+ */
+public function inventory(Request $request)
+{
+    $search = $request->get('search');
+    $stockStatus = $request->get('stock_status');
+    
+    $query = Product::with(['vendor', 'category']);
+    
+    if ($search) {
+        $query->where('name', 'like', "%{$search}%")
+              ->orWhere('sku', 'like', "%{$search}%");
     }
+    
+    if ($stockStatus === 'low') {
+        $query->where('stock', '>', 0)
+              ->where('stock', '<', 10);
+    } elseif ($stockStatus === 'out') {
+        $query->where('stock', '<=', 0);
+    } elseif ($stockStatus === 'in') {
+        $query->where('stock', '>', 10);
+    }
+    
+    $products = $query->orderBy('stock', 'asc')->paginate(15);
+    
+    $stats = [
+        'total_products' => Product::count(),
+        'in_stock' => Product::where('stock', '>', 10)->count(),
+        'low_stock' => Product::where('stock', '>', 0)->where('stock', '<', 10)->count(),
+        'out_of_stock' => Product::where('stock', '<=', 0)->count(),
+        'total_value' => Product::sum(DB::raw('price * stock')),
+    ];
+    
+    return view('admin.inventory.index', compact('products', 'stats', 'search', 'stockStatus'));
+}
+
+/**
+ * Display low stock products.
+ */
+public function lowStock()
+{
+    $products = Product::with(['vendor', 'category'])
+        ->where('stock', '>', 0)
+        ->where('stock', '<', 10)
+        ->orderBy('stock', 'asc')
+        ->paginate(15);
+        
+    return view('admin.inventory.low-stock', compact('products'));
+}
+
+/**
+ * Restock a product.
+ */
+public function restock(Request $request, $id)
+{
+    $request->validate([
+        'quantity' => 'required|integer|min:1',
+    ]);
+    
+    $product = Product::findOrFail($id);
+    $product->stock += $request->quantity;
+    $product->save();
+    
+    return redirect()->back()->with('success', "Product restocked with {$request->quantity} units.");
+}
 
     /**
      * Display products listing.

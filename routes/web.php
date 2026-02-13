@@ -150,6 +150,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Customers Management
         Route::get('/customers', [AdminController::class, 'customers'])->name('customers');
         Route::get('/customers/{id}', [AdminController::class, 'showCustomer'])->name('customers.show');
+        Route::get('/customers/{id}/edit', [AdminController::class, 'editCustomer'])->name('customers.edit'); 
         Route::put('/customers/{id}', [AdminController::class, 'updateCustomer'])->name('customers.update');
         Route::delete('/customers/{id}', [AdminController::class, 'deleteCustomer'])->name('customers.delete');
 
@@ -165,6 +166,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/catalog', [AdminController::class, 'catalog'])->name('catalog');
         Route::get('/catalog/products', [AdminController::class, 'products'])->name('catalog.products');
         Route::get('/catalog/categories', [AdminController::class, 'categories'])->name('catalog.categories');
+        
+         // ======== INVENTORY MANAGEMENT ========
+        Route::get('/inventory', [AdminController::class, 'inventory'])->name('inventory');
+        Route::get('/inventory/low-stock', [AdminController::class, 'lowStock'])->name('inventory.low-stock');
+        Route::post('/inventory/{product}/restock', [AdminController::class, 'restock'])->name('inventory.restock');
 
         // Promotions Management
         Route::get('/promotions', [AdminController::class, 'promotions'])->name('promotions');
