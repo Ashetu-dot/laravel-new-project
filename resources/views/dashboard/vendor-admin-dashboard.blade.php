@@ -1058,36 +1058,29 @@
                 </div>
 
                 <!-- Notifications Panel -->
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Recent Notifications</h3>
-        <a href="{{ route('admin.notifications') }}" style="color: var(--primary-gold); font-size: 14px; text-decoration: none; font-weight: 500;">View All</a>
-    </div>
-    <div class="notifications-list">
-        @if(isset($recentNotifications) && $recentNotifications->count() > 0)
-            @forelse($recentNotifications as $notification)
-            <div class="notification-item">
-                <div class="notif-dot" style="background-color: {{ $notification->data['color'] ?? 'var(--accent-blue)' }};"></div>
-                <div class="notif-content">
-                    <h6>{{ $notification->data['title'] ?? 'New Notification' }}</h6>
-                    <p>{{ $notification->data['message'] ?? 'You have a new notification.' }}</p>
-                    <span class="notif-time">{{ $notification->created_at->diffForHumans() }}</span>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Notifications</h3>
+                        <a href="{{ route('admin.notifications') }}" style="color: var(--primary-gold); font-size: 14px; text-decoration: none; font-weight: 500;">View All</a>
+                    </div>
+                    <div class="notifications-list">
+                        @forelse($recentNotifications ?? [] as $notification)
+                        <div class="notification-item">
+                            <div class="notif-dot" style="background-color: {{ $notification->color ?? 'var(--accent-blue)' }};"></div>
+                            <div class="notif-content">
+                                <h6>{{ $notification->title ?? 'New Vendor Registration' }}</h6>
+                                <p>{{ $notification->message ?? 'TechWorld Inc. has requested to join the platform.' }}</p>
+                                <span class="notif-time">{{ $notification->created_at->diffForHumans() ?? '2 mins ago' }}</span>
+                            </div>
+                        </div>
+                        @empty
+                        <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                            <i class="ri-notification-off-line" style="font-size: 32px; margin-bottom: 12px; display: block;"></i>
+                            <p>No new notifications</p>
+                        </div>
+                        @endforelse
+                    </div>
                 </div>
-            </div>
-            @empty
-            <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
-                <i class="ri-notification-off-line" style="font-size: 32px; margin-bottom: 12px; display: block;"></i>
-                <p>No new notifications</p>
-            </div>
-            @endforelse
-        @else
-            <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
-                <i class="ri-notification-off-line" style="font-size: 32px; margin-bottom: 12px; display: block;"></i>
-                <p>No notifications available</p>
-            </div>
-        @endif
-    </div>
-</div>
             </div>
 
         </div>
