@@ -2,21 +2,21 @@
 
 namespace App\Services\Admin;
 
-use App\Models\Admin;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cookie;
-use App\Models\Vendor; // We'll create this later
-use App\Models\Customer; // We'll create this later
-use App\Models\Order; // We'll create this later
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\Category;
 
 class AdminService
 {
     const REMEMBER_ME_COOKIE = 'admin_remember';
     const REMEMBER_ME_DURATION = 3600; // 1 hour in seconds
 
-    /**
+/**
      * Attempt to login admin with email and password
      *
      * @param string $email
@@ -27,21 +27,39 @@ class AdminService
     public function login(string $email, string $password, bool $remember = false): int
     {
         try {
-            // Attempt to authenticate the admin
-            if (Auth::guard('admin')->attempt([
+            // Check if user exists with role = 'admin'
+            $user = User::where('email', $email)
+                        ->where('role', 'admin')
+                        ->where('is_active', true)
+                        ->first();
+
+            if (!$user) {
+                Log::warning('Admin login failed - user not found or not admin', [
+                    'email' => $email,
+                    'ip' => request()->ip()
+                ]);
+                return 0;
+            }
+
+            // Attempt to authenticate using the default guard
+            if (Auth::attempt([
                 'email' => $email,
-                'password' => $password,
-                'status' => 'active'
+                'password' => $password
             ], $remember)) {
+
+                // Verify the authenticated user is still an admin
+                if (Auth::user()->role !== 'admin') {
+                    Auth::logout();
+                    return 0;
+                }
 
                 // Regenerate session for security
                 request()->session()->regenerate();
 
                 // Update last login timestamp
-                $admin = Auth::guard('admin')->user();
-                if ($admin && method_exists($admin, 'updateLastLogin')) {
-                    $admin->updateLastLogin();
-                }
+                $admin = Auth::user();
+                $admin->last_login_at = now();
+                $admin->save();
 
                 // Handle remember me cookie
                 if ($remember) {
@@ -53,6 +71,7 @@ class AdminService
                 // Log the successful login
                 Log::info('Admin login successful', [
                     'email' => $email,
+                    'admin_id' => $admin->id,
                     'remember_me' => $remember,
                     'ip' => request()->ip(),
                     'user_agent' => request()->userAgent()
@@ -62,7 +81,7 @@ class AdminService
             }
 
             // Log failed login attempt
-            Log::warning('Admin login failed', [
+            Log::warning('Admin login failed - invalid password', [
                 'email' => $email,
                 'ip' => request()->ip(),
                 'user_agent' => request()->userAgent()
@@ -198,7 +217,7 @@ class AdminService
             // Clear remember me cookie on logout
             $this->clearRememberMeCookie();
 
-            Auth::guard('admin')->logout();
+            Auth::logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
 
@@ -217,11 +236,17 @@ class AdminService
     /**
      * Get current authenticated admin
      *
-     * @return Admin|null
+     * @return User|null
      */
-    public function getCurrentAdmin(): ?Admin
+    public function getCurrentAdmin(): ?User
     {
-        return Auth::guard('admin')->user();
+        $user = Auth::user();
+
+        if ($user && $user->role === 'admin') {
+            return $user;
+        }
+
+        return null;
     }
 
     /**
@@ -231,21 +256,27 @@ class AdminService
      */
     public function isAuthenticated(): bool
     {
-        return Auth::guard('admin')->check();
+        return Auth::check() && Auth::user()->role === 'admin';
     }
 
     /**
      * Create a new admin user
      *
      * @param array $adminData
-     * @return Admin|null
+     * @return User|null
      */
-    public function createAdmin(array $adminData): ?Admin
+    public function createAdmin(array $adminData): ?User
     {
         try {
             $adminData['password'] = Hash::make($adminData['password']);
+            $adminData['role'] = 'admin';
+            $adminData['is_active'] = $adminData['is_active'] ?? true;
+            $adminData['products_count'] = 0;
+            $adminData['rating'] = 0;
+            $adminData['total_reviews'] = 0;
+            $adminData['country'] = $adminData['country'] ?? 'USA';
 
-            $admin = Admin::create($adminData);
+            $admin = User::create($adminData);
 
             Log::info('New admin created', [
                 'admin_id' => $admin->id,
@@ -274,11 +305,22 @@ class AdminService
     public function updateAdmin(int $adminId, array $updateData): int
     {
         try {
+            $admin = User::where('id', $adminId)
+                        ->where('role', 'admin')
+                        ->first();
+
+            if (!$admin) {
+                return 0;
+            }
+
             if (isset($updateData['password'])) {
                 $updateData['password'] = Hash::make($updateData['password']);
             }
 
-            $result = Admin::where('id', $adminId)->update($updateData);
+            // Remove role from update data if present (prevents changing role)
+            unset($updateData['role']);
+
+            $result = $admin->update($updateData);
 
             if ($result) {
                 Log::info('Admin profile updated', ['admin_id' => $adminId]);
@@ -301,11 +343,13 @@ class AdminService
      * Get admin by ID
      *
      * @param int $adminId
-     * @return Admin|null
+     * @return User|null
      */
-    public function getAdminById(int $adminId): ?Admin
+    public function getAdminById(int $adminId): ?User
     {
-        return Admin::find($adminId);
+        return User::where('id', $adminId)
+                   ->where('role', 'admin')
+                   ->first();
     }
 
     /**
@@ -316,34 +360,38 @@ class AdminService
      */
     public function getAllAdmins(int $perPage = 15)
     {
-        return Admin::latest()->paginate($perPage);
+        return User::where('role', 'admin')
+                   ->latest()
+                   ->paginate($perPage);
     }
 
     /**
      * Change admin status (active/inactive)
      *
      * @param int $adminId
-     * @param string $status
+     * @param bool $status
      * @return int 1 for success, 0 for failure
      */
-    public function changeAdminStatus(int $adminId, string $status): int
+    public function changeAdminStatus(int $adminId, bool $status): int
     {
         try {
-            if (!in_array($status, ['active', 'inactive'])) {
+            $admin = User::where('id', $adminId)
+                        ->where('role', 'admin')
+                        ->first();
+
+            if (!$admin) {
                 return 0;
             }
 
-            $result = Admin::where('id', $adminId)->update(['status' => $status]);
+            $admin->is_active = $status;
+            $admin->save();
 
-            if ($result) {
-                Log::info('Admin status changed', [
-                    'admin_id' => $adminId,
-                    'status' => $status
-                ]);
-                return 1;
-            }
+            Log::info('Admin status changed', [
+                'admin_id' => $adminId,
+                'status' => $status ? 'active' : 'inactive'
+            ]);
 
-            return 0;
+            return 1;
 
         } catch (\Exception $e) {
             Log::error('Failed to change admin status', [
@@ -356,7 +404,7 @@ class AdminService
     }
 
     /**
-     * Delete admin (soft delete if implemented)
+     * Delete admin
      *
      * @param int $adminId
      * @return int 1 for success, 0 for failure
@@ -364,14 +412,17 @@ class AdminService
     public function deleteAdmin(int $adminId): int
     {
         try {
-            $admin = Admin::find($adminId);
+            $admin = User::where('id', $adminId)
+                        ->where('role', 'admin')
+                        ->first();
 
             if (!$admin) {
                 return 0;
             }
 
             // Prevent deleting yourself
-            if ($admin->id === Auth::guard('admin')->id()) {
+            $currentAdmin = $this->getCurrentAdmin();
+            if ($currentAdmin && $currentAdmin->id === $adminId) {
                 return 0;
             }
 
@@ -398,45 +449,29 @@ class AdminService
     public function getDashboardStats(): array
     {
         try {
-            // Basic stats that will work immediately
             $stats = [
-                'total_admins' => Admin::where('status', 'active')->count(),
-                'total_vendors' => 0,
-                'total_customers' => 0,
-                'pending_vendors' => 0,
-                'total_orders' => 0,
-                'revenue' => 0,
-                'today_orders' => 0,
-                'weekly_revenue' => 0,
+                'total_admins' => User::where('role', 'admin')->count(),
+                'active_admins' => User::where('role', 'admin')->where('is_active', true)->count(),
+                'total_vendors' => User::where('role', 'vendor')->count(),
+                'active_vendors' => User::where('role', 'vendor')->where('is_active', true)->count(),
+                'pending_vendors' => User::where('role', 'vendor')->whereNull('email_verified_at')->count(),
+                'total_customers' => User::where('role', 'customer')->count(),
+                'active_customers' => User::where('role', 'customer')->where('is_active', true)->count(),
+                'total_orders' => Order::count(),
+                'pending_orders' => Order::where('status', 'pending')->count(),
+                'completed_orders' => Order::where('status', 'completed')->count(),
+                'total_revenue' => Order::where('status', 'completed')->sum('total_amount') ?? 0,
+                'today_orders' => Order::whereDate('created_at', today())->count(),
+                'today_revenue' => Order::whereDate('created_at', today())->where('status', 'completed')->sum('total_amount') ?? 0,
+                'total_products' => Product::count(),
+                'out_of_stock' => Product::where('stock', '<=', 0)->count(),
+                'total_categories' => Category::count(),
             ];
 
-            // Try to get vendor stats if Vendor model exists
-            if (class_exists('App\Models\Vendor')) {
-                $stats['total_vendors'] = \App\Models\Vendor::count();
-                $stats['pending_vendors'] = \App\Models\Vendor::where('status', 'pending')->count();
-            }
-
-            // Try to get customer stats if Customer model exists
-            if (class_exists('App\Models\Customer')) {
-                $stats['total_customers'] = \App\Models\Customer::count();
-            }
-
-            // Try to get order stats if Order model exists
-            if (class_exists('App\Models\Order')) {
-                $stats['total_orders'] = \App\Models\Order::count();
-                $stats['today_orders'] = \App\Models\Order::whereDate('created_at', today())->count();
-
-                // Calculate weekly revenue
-                $weeklyRevenue = \App\Models\Order::where('created_at', '>=', now()->subWeek())
-                    ->where('status', 'completed')
-                    ->sum('total_amount');
-                $stats['weekly_revenue'] = $weeklyRevenue ?? 0;
-            }
-
-            // Calculate total revenue if available
-            if (class_exists('App\Models\Transaction')) {
-                $stats['revenue'] = \App\Models\Transaction::where('status', 'completed')->sum('amount');
-            }
+            // Calculate weekly revenue
+            $stats['weekly_revenue'] = Order::where('created_at', '>=', now()->subWeek())
+                ->where('status', 'completed')
+                ->sum('total_amount') ?? 0;
 
             return $stats;
 
@@ -445,15 +480,23 @@ class AdminService
                 'error' => $e->getMessage()
             ]);
 
-            // Return safe default stats
             return [
-                'total_admins' => Admin::where('status', 'active')->count(),
-                'total_vendors' => 0,
-                'total_customers' => 0,
-                'pending_vendors' => 0,
+                'total_admins' => User::where('role', 'admin')->count(),
+                'active_admins' => User::where('role', 'admin')->where('is_active', true)->count(),
+                'total_vendors' => User::where('role', 'vendor')->count(),
+                'active_vendors' => User::where('role', 'vendor')->where('is_active', true)->count(),
+                'pending_vendors' => User::where('role', 'vendor')->whereNull('email_verified_at')->count(),
+                'total_customers' => User::where('role', 'customer')->count(),
+                'active_customers' => User::where('role', 'customer')->where('is_active', true)->count(),
                 'total_orders' => 0,
-                'revenue' => 0,
+                'pending_orders' => 0,
+                'completed_orders' => 0,
+                'total_revenue' => 0,
                 'today_orders' => 0,
+                'today_revenue' => 0,
+                'total_products' => 0,
+                'out_of_stock' => 0,
+                'total_categories' => 0,
                 'weekly_revenue' => 0,
             ];
         }
@@ -470,7 +513,8 @@ class AdminService
             $activities = [];
 
             // Recent admin logins
-            $recentLogins = Admin::where('last_login_at', '>=', now()->subDays(7))
+            $recentLogins = User::where('role', 'admin')
+                ->whereNotNull('last_login_at')
                 ->orderBy('last_login_at', 'desc')
                 ->take(5)
                 ->get();
@@ -480,16 +524,45 @@ class AdminService
                     'type' => 'admin_login',
                     'message' => "{$admin->name} logged in",
                     'time' => $admin->last_login_at,
-                    'icon' => 'bi-person-circle'
+                    'icon' => 'ri-user-settings-line'
                 ];
             }
 
-            // You can add more activity types here as you develop the application
-            // - New vendor registrations
-            // - New orders
-            // - System events, etc.
+            // Recent vendor registrations
+            $recentVendors = User::where('role', 'vendor')
+                ->latest()
+                ->take(5)
+                ->get();
 
-            return $activities;
+            foreach ($recentVendors as $vendor) {
+                $activities[] = [
+                    'type' => 'vendor_registration',
+                    'message' => "New vendor registered: " . ($vendor->business_name ?? $vendor->name),
+                    'time' => $vendor->created_at,
+                    'icon' => 'ri-store-line'
+                ];
+            }
+
+            // Recent orders
+            $recentOrders = Order::latest()
+                ->take(5)
+                ->get();
+
+            foreach ($recentOrders as $order) {
+                $activities[] = [
+                    'type' => 'new_order',
+                    'message' => "New order #{$order->order_number} placed",
+                    'time' => $order->created_at,
+                    'icon' => 'ri-shopping-cart-line'
+                ];
+            }
+
+            // Sort by time descending
+            usort($activities, function($a, $b) {
+                return strtotime($b['time']) - strtotime($a['time']);
+            });
+
+            return array_slice($activities, 0, 10);
 
         } catch (\Exception $e) {
             Log::error('Error fetching recent activities', [
@@ -501,22 +574,6 @@ class AdminService
     }
 
     /**
-     * Get chart data for dashboard
-     *
-     * @return array
-     */
-    public function getChartData(): array
-    {
-        // Default chart data - you can enhance this later
-        return [
-            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            'revenue' => [0, 0, 0, 0, 0, 0],
-            'orders' => [0, 0, 0, 0, 0, 0],
-            'vendors' => [0, 0, 0, 0, 0, 0],
-        ];
-    }
-
-    /**
      * Search admins by name or email
      *
      * @param string $searchTerm
@@ -525,8 +582,11 @@ class AdminService
      */
     public function searchAdmins(string $searchTerm, int $perPage = 15)
     {
-        return Admin::where('name', 'like', "%{$searchTerm}%")
-            ->orWhere('email', 'like', "%{$searchTerm}%")
+        return User::where('role', 'admin')
+            ->where(function($query) use ($searchTerm) {
+                $query->where('name', 'like', "%{$searchTerm}%")
+                      ->orWhere('email', 'like', "%{$searchTerm}%");
+            })
             ->latest()
             ->paginate($perPage);
     }
@@ -535,11 +595,13 @@ class AdminService
      * Get admin by email
      *
      * @param string $email
-     * @return Admin|null
+     * @return User|null
      */
-    public function getAdminByEmail(string $email): ?Admin
+    public function getAdminByEmail(string $email): ?User
     {
-        return Admin::where('email', $email)->first();
+        return User::where('email', $email)
+                   ->where('role', 'admin')
+                   ->first();
     }
 
     /**
@@ -551,7 +613,9 @@ class AdminService
      */
     public function verifyPassword(int $adminId, string $password): bool
     {
-        $admin = Admin::find($adminId);
+        $admin = User::where('id', $adminId)
+                     ->where('role', 'admin')
+                     ->first();
 
         if (!$admin) {
             return false;
@@ -570,18 +634,19 @@ class AdminService
     public function updatePassword(int $adminId, string $newPassword): int
     {
         try {
-            $hashedPassword = Hash::make($newPassword);
+            $admin = User::where('id', $adminId)
+                        ->where('role', 'admin')
+                        ->first();
 
-            $result = Admin::where('id', $adminId)->update([
-                'password' => $hashedPassword
-            ]);
-
-            if ($result) {
-                Log::info('Admin password updated', ['admin_id' => $adminId]);
-                return 1;
+            if (!$admin) {
+                return 0;
             }
 
-            return 0;
+            $admin->password = Hash::make($newPassword);
+            $admin->save();
+
+            Log::info('Admin password updated', ['admin_id' => $adminId]);
+            return 1;
 
         } catch (\Exception $e) {
             Log::error('Failed to update admin password', [
@@ -602,7 +667,7 @@ class AdminService
      */
     public function emailExists(string $email, ?int $excludeAdminId = null): bool
     {
-        $query = Admin::where('email', $email);
+        $query = User::where('email', $email);
 
         if ($excludeAdminId) {
             $query->where('id', '!=', $excludeAdminId);

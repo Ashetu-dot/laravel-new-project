@@ -74,6 +74,35 @@ Route::middleware(['auth'])->group(function () {
     })->middleware(['throttle:6,1'])->name('verification.send');
 });
 
+
+
+// =========================================================================
+// PASSWORD RESET ROUTES
+// =========================================================================
+Route::middleware('guest')->group(function () {
+    // Password Reset Request
+    Route::get('/forgot-password', function () {
+        return view('auth.forgot-password');
+    })->name('password.request');
+
+    Route::post('/forgot-password', [VendorCustomerController::class, 'sendResetLinkEmail'])
+        ->name('password.email');
+
+    // Password Reset
+    Route::get('/reset-password/{token}', function (string $token) {
+        return view('auth.reset-password', ['token' => $token]);
+    })->name('password.reset');
+
+    Route::post('/reset-password', [VendorCustomerController::class, 'resetPassword'])
+        ->name('password.update');
+});
+// =========================================================================
+// STATIC PAGES
+// =========================================================================
+Route::view('/privacy-policy', 'pages.privacy-policy')->name('privacy.policy');
+Route::view('/terms-of-service', 'pages.terms-of-service')->name('terms.service');
+
+
 // =========================================================================
 // VENDOR & CUSTOMER DASHBOARDS (Verified only)
 // =========================================================================
@@ -122,12 +151,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Guest admin routes
     Route::middleware('guest')->group(function () {
-    
-    
+
+
     // Guest admin routes (no middleware needed here - controller handles it)
     Route::get('/login', [AdminController::class, 'create'])->name('login');
     Route::post('/login', [AdminController::class, 'store'])->name('login.submit');
-    
+
     });
 
     // Protected admin routes - WITHOUT middleware first
@@ -139,7 +168,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Dashboard
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
         Route::get('/search', [AdminController::class, 'search'])->name('search');
-        
+
         // ======== MANAGEMENT ROUTES ========
 
         // Orders Management
@@ -150,7 +179,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Customers Management
         Route::get('/customers', [AdminController::class, 'customers'])->name('customers');
         Route::get('/customers/{id}', [AdminController::class, 'showCustomer'])->name('customers.show');
-        Route::get('/customers/{id}/edit', [AdminController::class, 'editCustomer'])->name('customers.edit'); 
+        Route::get('/customers/{id}/edit', [AdminController::class, 'editCustomer'])->name('customers.edit');
         Route::put('/customers/{id}', [AdminController::class, 'updateCustomer'])->name('customers.update');
         Route::delete('/customers/{id}', [AdminController::class, 'deleteCustomer'])->name('customers.delete');
 
@@ -166,7 +195,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/catalog', [AdminController::class, 'catalog'])->name('catalog');
         Route::get('/catalog/products', [AdminController::class, 'products'])->name('catalog.products');
         Route::get('/catalog/categories', [AdminController::class, 'categories'])->name('catalog.categories');
-        
+
          // ======== INVENTORY MANAGEMENT ========
         Route::get('/inventory', [AdminController::class, 'inventory'])->name('inventory');
         Route::get('/inventory/low-stock', [AdminController::class, 'lowStock'])->name('inventory.low-stock');

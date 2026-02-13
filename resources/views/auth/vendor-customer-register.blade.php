@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Vendora - Vendor Registration</title>
+    <title>Vendora - Become a Vendor | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -35,6 +35,7 @@
             --radius-md: 12px;
             --radius-lg: 16px;
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 30px rgba(184, 142, 63, 0.15);
         }
 
         * {
@@ -79,6 +80,11 @@
             gap: 8px;
             letter-spacing: -0.5px;
             text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .logo:hover {
+            opacity: 0.9;
         }
 
         .logo i {
@@ -108,6 +114,17 @@
             cursor: pointer;
             color: var(--text-dark);
             display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .hamburger:hover {
+            background-color: rgba(0,0,0,0.05);
         }
 
         /* Main Content */
@@ -118,6 +135,7 @@
             align-items: flex-start;
             padding: 60px 20px;
             background: linear-gradient(180deg, var(--bg-body) 0%, #EFEFEF 100%);
+            position: relative;
         }
 
         .registration-card {
@@ -130,6 +148,23 @@
             display: flex;
             flex-direction: column;
             gap: 40px;
+            transition: box-shadow 0.3s;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .registration-card:hover {
+            box-shadow: var(--shadow-hover);
         }
 
         .card-header h1 {
@@ -152,6 +187,18 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .alert-success {
@@ -191,7 +238,7 @@
             height: 2px;
             background-color: var(--primary-color);
             z-index: 1;
-            transition: width 0.3s ease;
+            transition: width 0.5s ease;
         }
 
         .step-item {
@@ -223,6 +270,7 @@
             border-color: var(--primary-color);
             color: var(--primary-color);
             background-color: #FFF8E1;
+            transform: scale(1.1);
         }
 
         .step-item.completed .step-circle {
@@ -281,8 +329,13 @@
             font-size: 16px;
             color: var(--text-dark);
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: all 0.2s ease;
             width: 100%;
+            background-color: var(--bg-card);
+        }
+
+        .form-input:hover, .form-select:hover, .form-textarea:hover {
+            border-color: var(--primary-color);
         }
 
         .form-input:focus, .form-select:focus, .form-textarea:focus {
@@ -292,6 +345,7 @@
 
         .form-input.error, .form-select.error, .form-textarea.error {
             border-color: var(--error-color);
+            background-color: #FFF5F5;
         }
 
         .error-message {
@@ -301,6 +355,13 @@
             align-items: center;
             gap: 4px;
             margin-top: 4px;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
         .form-textarea {
@@ -322,6 +383,7 @@
         .file-upload-area:hover {
             border-color: var(--primary-color);
             background-color: #FFFDF5;
+            transform: translateY(-2px);
         }
 
         .file-upload-area.has-file {
@@ -333,6 +395,11 @@
             font-size: 32px;
             color: var(--primary-color);
             margin-bottom: 8px;
+            transition: transform 0.2s;
+        }
+
+        .file-upload-area:hover .upload-icon {
+            transform: scale(1.1);
         }
 
         .upload-text {
@@ -353,6 +420,7 @@
             background-color: #f5f5f5;
             border-radius: var(--radius-sm);
             font-size: 14px;
+            animation: fadeIn 0.3s ease;
         }
 
         .file-preview.active {
@@ -380,6 +448,26 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .btn:active::after {
+            width: 200px;
+            height: 200px;
         }
 
         .btn-secondary {
@@ -391,6 +479,7 @@
         .btn-secondary:hover {
             border-color: var(--text-dark);
             color: var(--text-dark);
+            background-color: #f5f5f5;
         }
 
         .btn-primary {
@@ -400,13 +489,29 @@
 
         .btn-primary:hover {
             background-color: var(--primary-hover);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(184, 142, 63, 0.3);
         }
 
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Visual Decor */
@@ -414,6 +519,7 @@
             position: fixed;
             z-index: -1;
             opacity: 0.4;
+            pointer-events: none;
         }
 
         .shape-1 {
@@ -423,6 +529,7 @@
             height: 300px;
             border-radius: 50%;
             background: radial-gradient(circle, rgba(184,142,63,0.2) 0%, rgba(255,255,255,0) 70%);
+            animation: float 8s ease-in-out infinite;
         }
 
         .shape-2 {
@@ -432,6 +539,26 @@
             height: 400px;
             border-radius: 50%;
             background: radial-gradient(circle, rgba(184,142,63,0.15) 0%, rgba(255,255,255,0) 70%);
+            animation: float 12s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Ethiopian Flag Colors Accent */
+        .ethiopia-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #078930 0%, #FCDD09 50%, #DA121A 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
         }
 
         /* Accessibility Focus */
@@ -440,7 +567,36 @@
             outline-offset: 2px;
         }
 
-        /* ========== RESPONSIVE ENHANCEMENTS ========== */
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--text-dark);
+            color: #fff;
+            text-align: center;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Responsive */
         @media screen and (max-width: 1280px) {
             .navbar { padding: 24px 60px; }
             .registration-card { max-width: 750px; padding: 40px; }
@@ -465,7 +621,7 @@
             .logo i { font-size: 28px; }
             .nav-actions { gap: 16px; }
             .login-link { font-size: 15px; }
-            .hamburger { display: block; }
+            .hamburger { display: flex; }
 
             .main-container { padding: 40px 16px; }
             .registration-card { padding: 32px 24px; gap: 32px; }
@@ -575,6 +731,9 @@
         <a href="{{ route('home') }}" class="logo">
             <i class="ri-store-3-fill"></i>
             Vendora
+            <span class="ethiopia-badge">
+                <i class="ri-map-pin-line"></i> Jimma, Ethiopia
+            </span>
         </a>
         <div class="nav-actions">
             <a href="{{ route('login') }}" class="login-link">Already a vendor? Log in</a>
@@ -588,20 +747,20 @@
     <main class="main-container">
         <div class="registration-card">
             <div class="card-header">
-                <h1>Join the Marketplace</h1>
-                <p>Start selling your unique products to millions of customers. Complete the steps below to register your vendor account.</p>
+                <h1>Join the Jimma Marketplace</h1>
+                <p>Start selling your unique products to customers in Jimma and across Ethiopia. Complete the steps below to register your vendor account.</p>
             </div>
 
             <!-- Session Status Messages -->
             @if(session('success'))
-                <div class="alert alert-success">
+                <div class="alert alert-success" id="successAlert">
                     <i class="ri-checkbox-circle-line"></i>
                     {{ session('success') }}
                 </div>
             @endif
 
             @if(session('error'))
-                <div class="alert alert-error">
+                <div class="alert alert-error" id="errorAlert">
                     <i class="ri-error-warning-line"></i>
                     {{ session('error') }}
                 </div>
@@ -660,7 +819,10 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="fullname" class="form-label">Full Name <span class="required">*</span></label>
-                            <input type="text" id="fullname" name="fullname" class="form-input @error('fullname') error @enderror" placeholder="John Doe" value="{{ old('fullname') }}">
+                            <div class="input-wrapper tooltip">
+                                <span class="tooltip-text">Enter your full name as it appears on ID</span>
+                                <input type="text" id="fullname" name="fullname" class="form-input @error('fullname') error @enderror" placeholder="e.g. Abebe Kebede" value="{{ old('fullname') }}" required>
+                            </div>
                             @error('fullname')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
@@ -669,7 +831,10 @@
                         </div>
                         <div class="form-group">
                             <label for="email" class="form-label">Email Address <span class="required">*</span></label>
-                            <input type="email" id="email" name="email" class="form-input @error('email') error @enderror" placeholder="you@example.com" value="{{ old('email') }}">
+                            <div class="input-wrapper tooltip">
+                                <span class="tooltip-text">We'll send verification to this email</span>
+                                <input type="email" id="email" name="email" class="form-input @error('email') error @enderror" placeholder="name@example.com" value="{{ old('email') }}" required>
+                            </div>
                             @error('email')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
@@ -681,19 +846,33 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="password" class="form-label">Password <span class="required">*</span></label>
-                            <input type="password" id="password" name="password" class="form-input @error('password') error @enderror" placeholder="••••••••">
+                            <div class="input-wrapper">
+                                <input type="password" id="password" name="password" class="form-input @error('password') error @enderror" placeholder="••••••••" required minlength="8">
+                                <i class="ri-eye-off-line toggle-password" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #999;" onclick="togglePassword(this)"></i>
+                            </div>
                             @error('password')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
                             @enderror
+                            <div class="password-strength" style="margin-top: 8px;">
+                                <div style="display: flex; gap: 4px;">
+                                    <div class="strength-bar" style="height: 4px; flex: 1; background-color: #e0e0e0; border-radius: 2px;"></div>
+                                    <div class="strength-bar" style="height: 4px; flex: 1; background-color: #e0e0e0; border-radius: 2px;"></div>
+                                    <div class="strength-bar" style="height: 4px; flex: 1; background-color: #e0e0e0; border-radius: 2px;"></div>
+                                    <div class="strength-bar" style="height: 4px; flex: 1; background-color: #e0e0e0; border-radius: 2px;"></div>
+                                </div>
+                                <span class="strength-text" style="font-size: 12px; color: var(--text-light); margin-top: 4px; display: block;">Enter a strong password</span>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="password_confirmation" class="form-label">Confirm Password <span class="required">*</span></label>
-                            <input type="password" id="password_confirmation" name="password_confirmation" class="form-input" placeholder="••••••••">
+                            <div class="input-wrapper">
+                                <input type="password" id="password_confirmation" name="password_confirmation" class="form-input" placeholder="••••••••" required>
+                            </div>
                         </div>
                     </div>
-                    
+
                     <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
                         <button type="button" class="btn btn-primary" onclick="validateAndNext(1)">
                             Continue to Business Info <i class="ri-arrow-right-line"></i>
@@ -706,7 +885,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="businessName" class="form-label">Business Name <span class="required">*</span></label>
-                            <input type="text" id="businessName" name="business_name" class="form-input @error('business_name') error @enderror" placeholder="e.g. Artisan Crafts Co." value="{{ old('business_name') }}">
+                            <input type="text" id="businessName" name="business_name" class="form-input @error('business_name') error @enderror" placeholder="e.g. Abebe's Handicrafts" value="{{ old('business_name') }}" required>
                             @error('business_name')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
@@ -715,16 +894,16 @@
                         </div>
                         <div class="form-group">
                             <label for="category" class="form-label">Primary Category <span class="required">*</span></label>
-                            <select id="category" name="category" class="form-select @error('category') error @enderror">
+                            <select id="category" name="category" class="form-select @error('category') error @enderror" required>
                                 <option value="">Select a category</option>
-                                <option value="fashion" {{ old('category') == 'fashion' ? 'selected' : '' }}>Fashion & Apparel</option>
-                                <option value="home" {{ old('category') == 'home' ? 'selected' : '' }}>Home & Living</option>
-                                <option value="electronics" {{ old('category') == 'electronics' ? 'selected' : '' }}>Electronics</option>
-                                <option value="art" {{ old('category') == 'art' ? 'selected' : '' }}>Art & Collectibles</option>
-                                <option value="food" {{ old('category') == 'food' ? 'selected' : '' }}>Food & Beverages</option>
-                                <option value="beauty" {{ old('category') == 'beauty' ? 'selected' : '' }}>Beauty & Personal Care</option>
-                                <option value="photography" {{ old('category') == 'photography' ? 'selected' : '' }}>Photography</option>
-                                <option value="handmade" {{ old('category') == 'handmade' ? 'selected' : '' }}>Handmade Crafts</option>
+                                <option value="coffee" {{ old('category') == 'coffee' ? 'selected' : '' }}>☕ Coffee & Tea</option>
+                                <option value="handicrafts" {{ old('category') == 'handicrafts' ? 'selected' : '' }}>🎨 Traditional Handicrafts</option>
+                                <option value="textiles" {{ old('category') == 'textiles' ? 'selected' : '' }}>🧵 Textiles & Habesha Kemis</option>
+                                <option value="food" {{ old('category') == 'food' ? 'selected' : '' }}>🍲 Ethiopian Food & Spices</option>
+                                <option value="jewelry" {{ old('category') == 'jewelry' ? 'selected' : '' }}>💍 Traditional Jewelry</option>
+                                <option value="art" {{ old('category') == 'art' ? 'selected' : '' }}>🎨 Art & Paintings</option>
+                                <option value="electronics" {{ old('category') == 'electronics' ? 'selected' : '' }}>📱 Electronics & Repair</option>
+                                <option value="services" {{ old('category') == 'services' ? 'selected' : '' }}>🛠️ Local Services</option>
                             </select>
                             @error('category')
                                 <div class="error-message">
@@ -736,13 +915,13 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="taxId" class="form-label">Tax ID / VAT Number</label>
+                            <label for="taxId" class="form-label">Business License / Tax ID</label>
                             <input type="text" id="taxId" name="tax_id" class="form-input" placeholder="Optional for registration" value="{{ old('tax_id') }}">
                         </div>
                         <div class="form-group">
-                            <label for="website" class="form-label">Website URL</label>
-                            <input type="url" id="website" name="website" class="form-input @error('website') error @enderror" placeholder="https://example.com" value="{{ old('website') }}">
-                            @error('website')
+                            <label for="phone" class="form-label">Phone Number <span class="required">*</span></label>
+                            <input type="tel" id="phone" name="phone" class="form-input @error('phone') error @enderror" placeholder="e.g. 0911 123 456" value="{{ old('phone') }}" required>
+                            @error('phone')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
@@ -750,80 +929,57 @@
                         </div>
                     </div>
 
-                    <!-- Business Address -->
+                    <!-- Business Address - Ethiopian Focus -->
                     <div class="form-group">
                         <label class="form-label">Business Address <span class="required">*</span></label>
                         <div class="form-row" style="margin-bottom: 16px;">
-                            <input type="text" name="address_line1" class="form-input @error('address_line1') error @enderror" placeholder="Street Address" style="flex: 2;" value="{{ old('address_line1') }}">
-                            <input type="text" name="address_line2" class="form-input" placeholder="Apt / Suite" style="flex: 1;" value="{{ old('address_line2') }}">
+                            <input type="text" name="address_line1" class="form-input @error('address_line1') error @enderror" placeholder="Street / Kebele" style="flex: 2;" value="{{ old('address_line1') }}" required>
+                            <input type="text" name="address_line2" class="form-input" placeholder="Landmark (Optional)" style="flex: 1;" value="{{ old('address_line2') }}">
                         </div>
                         @error('address_line1')
                             <div class="error-message" style="margin-top: -8px; margin-bottom: 16px;">
                                 <i class="ri-error-warning-fill"></i> {{ $message }}
                             </div>
                         @enderror
+
                         <div class="form-row">
                             <div class="form-group">
-                                <input type="text" name="city" class="form-input @error('city') error @enderror" placeholder="City" value="{{ old('city') }}">
+                                <label for="city" class="form-label">City <span class="required">*</span></label>
+                                <select name="city" id="city" class="form-select @error('city') error @enderror" required>
+                                    <option value="">Select City</option>
+                                    <option value="Jimma" {{ old('city') == 'Jimma' ? 'selected' : '' }} selected>🏙️ Jimma</option>
+                                    <option value="Addis Ababa" {{ old('city') == 'Addis Ababa' ? 'selected' : '' }}>Addis Ababa</option>
+                                    <option value="Bahir Dar" {{ old('city') == 'Bahir Dar' ? 'selected' : '' }}>Bahir Dar</option>
+                                    <option value="Gondar" {{ old('city') == 'Gondar' ? 'selected' : '' }}>Gondar</option>
+                                    <option value="Hawassa" {{ old('city') == 'Hawassa' ? 'selected' : '' }}>Hawassa</option>
+                                    <option value="Dire Dawa" {{ old('city') == 'Dire Dawa' ? 'selected' : '' }}>Dire Dawa</option>
+                                    <option value="Mekelle" {{ old('city') == 'Mekelle' ? 'selected' : '' }}>Mekelle</option>
+                                    <option value="Adama" {{ old('city') == 'Adama' ? 'selected' : '' }}>Adama</option>
+                                    <option value="Harar" {{ old('city') == 'Harar' ? 'selected' : '' }}>Harar</option>
+                                    <option value="Other" {{ old('city') == 'Other' ? 'selected' : '' }}>Other</option>
+                                </select>
                                 @error('city')
                                     <div class="error-message">
                                         <i class="ri-error-warning-fill"></i> {{ $message }}
                                     </div>
                                 @enderror
                             </div>
+
                             <div class="form-group">
-                                <select name="state" class="form-select @error('state') error @enderror">
-                                    <option value="">State / Province</option>
-                                    <option value="AL" {{ old('state') == 'AL' ? 'selected' : '' }}>Alabama</option>
-                                    <option value="AK" {{ old('state') == 'AK' ? 'selected' : '' }}>Alaska</option>
-                                    <option value="AZ" {{ old('state') == 'AZ' ? 'selected' : '' }}>Arizona</option>
-                                    <option value="AR" {{ old('state') == 'AR' ? 'selected' : '' }}>Arkansas</option>
-                                    <option value="CA" {{ old('state') == 'CA' ? 'selected' : '' }}>California</option>
-                                    <option value="CO" {{ old('state') == 'CO' ? 'selected' : '' }}>Colorado</option>
-                                    <option value="CT" {{ old('state') == 'CT' ? 'selected' : '' }}>Connecticut</option>
-                                    <option value="DE" {{ old('state') == 'DE' ? 'selected' : '' }}>Delaware</option>
-                                    <option value="FL" {{ old('state') == 'FL' ? 'selected' : '' }}>Florida</option>
-                                    <option value="GA" {{ old('state') == 'GA' ? 'selected' : '' }}>Georgia</option>
-                                    <option value="HI" {{ old('state') == 'HI' ? 'selected' : '' }}>Hawaii</option>
-                                    <option value="ID" {{ old('state') == 'ID' ? 'selected' : '' }}>Idaho</option>
-                                    <option value="IL" {{ old('state') == 'IL' ? 'selected' : '' }}>Illinois</option>
-                                    <option value="IN" {{ old('state') == 'IN' ? 'selected' : '' }}>Indiana</option>
-                                    <option value="IA" {{ old('state') == 'IA' ? 'selected' : '' }}>Iowa</option>
-                                    <option value="KS" {{ old('state') == 'KS' ? 'selected' : '' }}>Kansas</option>
-                                    <option value="KY" {{ old('state') == 'KY' ? 'selected' : '' }}>Kentucky</option>
-                                    <option value="LA" {{ old('state') == 'LA' ? 'selected' : '' }}>Louisiana</option>
-                                    <option value="ME" {{ old('state') == 'ME' ? 'selected' : '' }}>Maine</option>
-                                    <option value="MD" {{ old('state') == 'MD' ? 'selected' : '' }}>Maryland</option>
-                                    <option value="MA" {{ old('state') == 'MA' ? 'selected' : '' }}>Massachusetts</option>
-                                    <option value="MI" {{ old('state') == 'MI' ? 'selected' : '' }}>Michigan</option>
-                                    <option value="MN" {{ old('state') == 'MN' ? 'selected' : '' }}>Minnesota</option>
-                                    <option value="MS" {{ old('state') == 'MS' ? 'selected' : '' }}>Mississippi</option>
-                                    <option value="MO" {{ old('state') == 'MO' ? 'selected' : '' }}>Missouri</option>
-                                    <option value="MT" {{ old('state') == 'MT' ? 'selected' : '' }}>Montana</option>
-                                    <option value="NE" {{ old('state') == 'NE' ? 'selected' : '' }}>Nebraska</option>
-                                    <option value="NV" {{ old('state') == 'NV' ? 'selected' : '' }}>Nevada</option>
-                                    <option value="NH" {{ old('state') == 'NH' ? 'selected' : '' }}>New Hampshire</option>
-                                    <option value="NJ" {{ old('state') == 'NJ' ? 'selected' : '' }}>New Jersey</option>
-                                    <option value="NM" {{ old('state') == 'NM' ? 'selected' : '' }}>New Mexico</option>
-                                    <option value="NY" {{ old('state') == 'NY' ? 'selected' : '' }}>New York</option>
-                                    <option value="NC" {{ old('state') == 'NC' ? 'selected' : '' }}>North Carolina</option>
-                                    <option value="ND" {{ old('state') == 'ND' ? 'selected' : '' }}>North Dakota</option>
-                                    <option value="OH" {{ old('state') == 'OH' ? 'selected' : '' }}>Ohio</option>
-                                    <option value="OK" {{ old('state') == 'OK' ? 'selected' : '' }}>Oklahoma</option>
-                                    <option value="OR" {{ old('state') == 'OR' ? 'selected' : '' }}>Oregon</option>
-                                    <option value="PA" {{ old('state') == 'PA' ? 'selected' : '' }}>Pennsylvania</option>
-                                    <option value="RI" {{ old('state') == 'RI' ? 'selected' : '' }}>Rhode Island</option>
-                                    <option value="SC" {{ old('state') == 'SC' ? 'selected' : '' }}>South Carolina</option>
-                                    <option value="SD" {{ old('state') == 'SD' ? 'selected' : '' }}>South Dakota</option>
-                                    <option value="TN" {{ old('state') == 'TN' ? 'selected' : '' }}>Tennessee</option>
-                                    <option value="TX" {{ old('state') == 'TX' ? 'selected' : '' }}>Texas</option>
-                                    <option value="UT" {{ old('state') == 'UT' ? 'selected' : '' }}>Utah</option>
-                                    <option value="VT" {{ old('state') == 'VT' ? 'selected' : '' }}>Vermont</option>
-                                    <option value="VA" {{ old('state') == 'VA' ? 'selected' : '' }}>Virginia</option>
-                                    <option value="WA" {{ old('state') == 'WA' ? 'selected' : '' }}>Washington</option>
-                                    <option value="WV" {{ old('state') == 'WV' ? 'selected' : '' }}>West Virginia</option>
-                                    <option value="WI" {{ old('state') == 'WI' ? 'selected' : '' }}>Wisconsin</option>
-                                    <option value="WY" {{ old('state') == 'WY' ? 'selected' : '' }}>Wyoming</option>
+                                <label for="state" class="form-label">Region / State <span class="required">*</span></label>
+                                <select name="state" id="state" class="form-select @error('state') error @enderror" required>
+                                    <option value="">Select Region</option>
+                                    <option value="Oromia" {{ old('state') == 'Oromia' ? 'selected' : '' }} selected>🌍 Oromia (Jimma)</option>
+                                    <option value="Addis Ababa" {{ old('state') == 'Addis Ababa' ? 'selected' : '' }}>Addis Ababa</option>
+                                    <option value="Amhara" {{ old('state') == 'Amhara' ? 'selected' : '' }}>Amhara</option>
+                                    <option value="Tigray" {{ old('state') == 'Tigray' ? 'selected' : '' }}>Tigray</option>
+                                    <option value="Sidama" {{ old('state') == 'Sidama' ? 'selected' : '' }}>Sidama</option>
+                                    <option value="SNNPR" {{ old('state') == 'SNNPR' ? 'selected' : '' }}>SNNPR</option>
+                                    <option value="Somali" {{ old('state') == 'Somali' ? 'selected' : '' }}>Somali</option>
+                                    <option value="Afar" {{ old('state') == 'Afar' ? 'selected' : '' }}>Afar</option>
+                                    <option value="Benishangul-Gumuz" {{ old('state') == 'Benishangul-Gumuz' ? 'selected' : '' }}>Benishangul-Gumuz</option>
+                                    <option value="Gambela" {{ old('state') == 'Gambela' ? 'selected' : '' }}>Gambela</option>
+                                    <option value="Harari" {{ old('state') == 'Harari' ? 'selected' : '' }}>Harari</option>
                                 </select>
                                 @error('state')
                                     <div class="error-message">
@@ -831,13 +987,11 @@
                                     </div>
                                 @enderror
                             </div>
+
                             <div class="form-group">
-                                <input type="text" name="zip_code" class="form-input @error('zip_code') error @enderror" placeholder="Zip Code" value="{{ old('zip_code') }}">
-                                @error('zip_code')
-                                    <div class="error-message">
-                                        <i class="ri-error-warning-fill"></i> {{ $message }}
-                                    </div>
-                                @enderror
+                                <label for="zip_code" class="form-label">Postal Code</label>
+                                <input type="text" name="zip_code" id="zip_code" class="form-input" placeholder="e.g. 1000" value="{{ old('zip_code') }}">
+                                <small style="font-size: 11px; color: var(--text-light);">Optional for Jimma</small>
                             </div>
                         </div>
                     </div>
@@ -845,7 +999,7 @@
                     <!-- Description -->
                     <div class="form-group">
                         <label for="description" class="form-label">Shop Description <span class="required">*</span></label>
-                        <textarea id="description" name="description" class="form-textarea @error('description') error @enderror" placeholder="Tell us about your brand and what makes your products unique..." maxlength="500">{{ old('description') }}</textarea>
+                        <textarea id="description" name="description" class="form-textarea @error('description') error @enderror" placeholder="Tell us about your business, what makes your products unique, and your experience serving the Jimma community..." maxlength="500" required>{{ old('description') }}</textarea>
                         <div class="char-counter" style="display: flex; justify-content: flex-end; margin-top: 4px; font-size: 12px; color: var(--text-light);">
                             <span id="charCount">0</span>/500 characters
                         </div>
@@ -872,7 +1026,7 @@
                             </div>
                         @enderror
                     </div>
-                    
+
                     <div style="display: flex; justify-content: space-between; margin-top: 16px;">
                         <button type="button" class="btn btn-secondary" onclick="changeStep(1)">
                             <i class="ri-arrow-left-line"></i> Back to Account
@@ -883,47 +1037,47 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Email Verification - FIXED VERSION -->
+                <!-- Step 3: Email Verification -->
                 <div id="step3" style="display: {{ session('registration_step', 1) == 3 ? 'block' : 'none' }};">
                     <div style="text-align: center; padding: 20px 20px 40px;">
-                        <i class="ri-mail-check-line" style="font-size: 64px; color: var(--primary-color); margin-bottom: 20px;"></i>
+                        <i class="ri-mail-check-line" style="font-size: 64px; color: var(--primary-color); margin-bottom: 20px; animation: pulse 2s infinite;"></i>
                         <h3 style="margin-bottom: 16px; font-size: 24px;">Verify Your Email</h3>
-                        
+
                         @if(session('success'))
                             <div class="alert alert-success" style="margin-bottom: 24px;">
                                 <i class="ri-checkbox-circle-line"></i>
                                 {{ session('success') }}
                             </div>
                         @endif
-                        
+
                         @if(Auth::check())
                             <p style="color: var(--text-light); margin-bottom: 24px; line-height: 1.6;">
-                                We've sent a verification link to <strong>{{ Auth::user()->email }}</strong>.<br>
-                                Please check your inbox and click the link to verify your account.
+                                እንኳን ደህና መጡ! We've sent a verification link to <strong>{{ Auth::user()->email }}</strong>.<br>
+                                Please check your inbox and click the link to verify your account and start selling in Jimma.
                             </p>
-                            
+
                             <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                                <form method="POST" action="{{ route('verification.send') }}">
+                                <form method="POST" action="{{ route('verification.send') }}" id="resendForm">
                                     @csrf
-                                    <button type="submit" class="btn btn-primary" style="margin: 0;">
+                                    <button type="submit" class="btn btn-primary" style="margin: 0;" id="resendBtn">
                                         <i class="ri-mail-send-line"></i> Resend Verification Email
                                     </button>
                                 </form>
-                                
+
                                 <a href="{{ route('vendor.dashboard') }}" class="btn btn-secondary" style="text-decoration: none;">
                                     <i class="ri-dashboard-line"></i> Go to Dashboard
                                 </a>
                             </div>
                         @else
                             <p style="color: var(--text-light); margin-bottom: 24px; line-height: 1.6;">
-                                Your account has been created successfully! Please log in to verify your email.
+                                Your account has been created successfully! Please log in to verify your email and start selling in Jimma.
                             </p>
-                            
+
                             <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
                                 <a href="{{ route('login') }}" class="btn btn-primary" style="text-decoration: none;">
                                     <i class="ri-login-box-line"></i> Log In
                                 </a>
-                                
+
                                 <a href="{{ route('home') }}" class="btn btn-secondary" style="text-decoration: none;">
                                     <i class="ri-home-line"></i> Return Home
                                 </a>
@@ -981,6 +1135,67 @@
             }).catch(error => console.log('Step persistence error:', error));
         }
 
+        // Password visibility toggle
+        function togglePassword(element) {
+            const input = element.previousElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                element.classList.remove('ri-eye-off-line');
+                element.classList.add('ri-eye-line');
+            } else {
+                input.type = 'password';
+                element.classList.remove('ri-eye-line');
+                element.classList.add('ri-eye-off-line');
+            }
+        }
+
+        // Password strength checker
+        document.getElementById('password')?.addEventListener('input', function() {
+            const password = this.value;
+            const strengthBars = document.querySelectorAll('.strength-bar');
+            const strengthText = document.querySelector('.strength-text');
+
+            let strength = 0;
+
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+
+            const colors = ['#e0e0e0', '#ff4444', '#ffaa00', '#00cc66', '#00aa44'];
+            const texts = ['Enter a password', 'Weak', 'Fair', 'Good', 'Strong'];
+
+            strengthBars.forEach((bar, index) => {
+                bar.style.backgroundColor = index < strength ? colors[strength] : '#e0e0e0';
+            });
+
+            strengthText.textContent = texts[strength];
+            strengthText.style.color = colors[strength] || 'var(--text-light)';
+        });
+
+        // City selection auto-sets region
+        document.getElementById('city')?.addEventListener('change', function() {
+            const city = this.value;
+            const stateSelect = document.getElementById('state');
+
+            // Auto-select region based on city
+            if (city === 'Jimma') {
+                stateSelect.value = 'Oromia';
+            } else if (city === 'Addis Ababa') {
+                stateSelect.value = 'Addis Ababa';
+            } else if (city === 'Bahir Dar' || city === 'Gondar') {
+                stateSelect.value = 'Amhara';
+            } else if (city === 'Mekelle') {
+                stateSelect.value = 'Tigray';
+            } else if (city === 'Hawassa') {
+                stateSelect.value = 'Sidama';
+            } else if (city === 'Dire Dawa') {
+                stateSelect.value = 'Dire Dawa';
+            } else if (city === 'Harar') {
+                stateSelect.value = 'Harari';
+            }
+        });
+
         // Validate current step before proceeding
         function validateAndNext(currentStep) {
             if (currentStep === 1) {
@@ -1014,10 +1229,10 @@
             } else if (currentStep === 2) {
                 const businessName = document.getElementById('businessName');
                 const category = document.getElementById('category');
+                const phone = document.getElementById('phone');
                 const address1 = document.querySelector('input[name="address_line1"]');
-                const city = document.querySelector('input[name="city"]');
-                const state = document.querySelector('select[name="state"]');
-                const zipCode = document.querySelector('input[name="zip_code"]');
+                const city = document.getElementById('city');
+                const state = document.getElementById('state');
                 const description = document.getElementById('description');
 
                 let isValid = true;
@@ -1029,17 +1244,17 @@
                 } else if (!category.value) {
                     errorMessage = 'Please select a category';
                     isValid = false;
+                } else if (!phone.value.trim()) {
+                    errorMessage = 'Please enter your phone number';
+                    isValid = false;
                 } else if (!address1.value.trim()) {
                     errorMessage = 'Please enter your street address';
                     isValid = false;
-                } else if (!city.value.trim()) {
-                    errorMessage = 'Please enter your city';
+                } else if (!city.value) {
+                    errorMessage = 'Please select your city';
                     isValid = false;
                 } else if (!state.value) {
-                    errorMessage = 'Please select your state';
-                    isValid = false;
-                } else if (!zipCode.value.trim()) {
-                    errorMessage = 'Please enter your zip code';
+                    errorMessage = 'Please select your region';
                     isValid = false;
                 } else if (!description.value.trim()) {
                     errorMessage = 'Please enter a shop description';
@@ -1047,7 +1262,13 @@
                 }
 
                 if (isValid) {
-                    // Submit form to create vendor account
+                    // Show loading state
+                    const submitBtn = document.querySelector('button[onclick="validateAndNext(2)"]');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<span class="spinner"></span> Creating Account...';
+                    submitBtn.disabled = true;
+
+                    // Submit form
                     document.getElementById('registrationForm').submit();
                 } else {
                     alert(errorMessage);
@@ -1142,10 +1363,8 @@
         }
 
         // Hamburger menu (mobile)
-        document.querySelector('.hamburger')?.addEventListener('click', function() {
-            // Toggle mobile menu (you can implement this later)
-            console.log('Mobile menu clicked');
-            alert('Mobile menu would open here. Navigation links are hidden on mobile by CSS.');
+        document.getElementById('menuToggle')?.addEventListener('click', function() {
+            alert('Mobile menu would open here. In production, this would show navigation links.');
         });
 
         // Auto-dismiss alerts after 5 seconds
@@ -1157,6 +1376,37 @@
                     alert.style.opacity = '0';
                     setTimeout(() => alert.remove(), 500);
                 }, 5000);
+            });
+        });
+
+        // Prevent double submission
+        document.getElementById('registrationForm')?.addEventListener('submit', function(e) {
+            const submitBtn = document.querySelector('button[type="button"][onclick="validateAndNext(2)"]');
+            if (submitBtn && submitBtn.disabled) {
+                e.preventDefault();
+            }
+        });
+
+        // Resend verification cooldown
+        document.getElementById('resendForm')?.addEventListener('submit', function(e) {
+            const btn = document.getElementById('resendBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Sending...';
+
+            // Re-enable after 60 seconds
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-mail-send-line"></i> Resend Verification Email';
+            }, 60000);
+        });
+
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
             });
         });
     </script>

@@ -199,29 +199,29 @@ public function index(Request $request)
         ]);
     }
 
-    /**
-     * Handle admin login request.
-     */
-    public function store(AdminLoginRequest $request)
-    {
-        $validated = $request->validated();
+  /**
+ * Handle admin login request.
+ */
+public function store(AdminLoginRequest $request)
+{
+    $validated = $request->validated();
 
-        $result = $this->adminService->login(
-            $validated['email'],
-            $validated['password'],
-            $request->boolean('remember')
-        );
+    $result = $this->adminService->login(
+        $validated['email'],
+        $validated['password'],
+        $request->boolean('remember')
+    );
 
-        if ($result === 1) {
-            return redirect()->route('admin.dashboard')
-                ->with('success', 'Welcome back! Successfully logged in.');
-        }
-
-        return back()
-            ->withErrors(['password' => 'The provided credentials are incorrect.'])
-            ->withInput($request->only('email', 'remember'))
-            ->with('error', 'Login failed. Please check your credentials.');
+    if ($result === 1) {
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'Welcome back! Successfully logged in.');
     }
+
+    return back()
+        ->withErrors(['password' => 'The provided credentials are incorrect.'])
+        ->withInput($request->only('email', 'remember'))
+        ->with('error', 'Login failed. Please check your credentials.');
+}
 
     /**
      * Logout admin.
@@ -355,7 +355,7 @@ public function customers(Request $request)
     }
 
     $customers = $query->orderBy('created_at', 'desc')->paginate(15);
-    
+
     $customerStats = [
         'total' => User::where('role', 'customer')->count(),
         'active' => User::where('role', 'customer')->where('is_active', true)->count(),
@@ -391,7 +391,7 @@ public function customers(Request $request)
 public function editCustomer($id)
 {
     $customer = User::where('role', 'customer')->findOrFail($id);
-    
+
     return view('admin.customers.edit', compact('customer'));
 }
 
@@ -610,9 +610,9 @@ public function catalog()
     $activeVendorsCount = User::where('role', 'vendor')->where('is_active', true)->count();
 
     return view('admin.catalog.index', compact(
-        'totalProducts', 
-        'totalCategories', 
-        'outOfStock', 
+        'totalProducts',
+        'totalCategories',
+        'outOfStock',
         'recentProducts',
         'activeVendorsCount'
     ));
@@ -626,14 +626,14 @@ public function inventory(Request $request)
 {
     $search = $request->get('search');
     $stockStatus = $request->get('stock_status');
-    
+
     $query = Product::with(['vendor', 'category']);
-    
+
     if ($search) {
         $query->where('name', 'like', "%{$search}%")
               ->orWhere('sku', 'like', "%{$search}%");
     }
-    
+
     if ($stockStatus === 'low') {
         $query->where('stock', '>', 0)
               ->where('stock', '<', 10);
@@ -642,9 +642,9 @@ public function inventory(Request $request)
     } elseif ($stockStatus === 'in') {
         $query->where('stock', '>', 10);
     }
-    
+
     $products = $query->orderBy('stock', 'asc')->paginate(15);
-    
+
     $stats = [
         'total_products' => Product::count(),
         'in_stock' => Product::where('stock', '>', 10)->count(),
@@ -652,7 +652,7 @@ public function inventory(Request $request)
         'out_of_stock' => Product::where('stock', '<=', 0)->count(),
         'total_value' => Product::sum(DB::raw('price * stock')),
     ];
-    
+
     return view('admin.inventory.index', compact('products', 'stats', 'search', 'stockStatus'));
 }
 
@@ -666,7 +666,7 @@ public function lowStock()
         ->where('stock', '<', 10)
         ->orderBy('stock', 'asc')
         ->paginate(15);
-        
+
     return view('admin.inventory.low-stock', compact('products'));
 }
 
@@ -678,11 +678,11 @@ public function restock(Request $request, $id)
     $request->validate([
         'quantity' => 'required|integer|min:1',
     ]);
-    
+
     $product = Product::findOrFail($id);
     $product->stock += $request->quantity;
     $product->save();
-    
+
     return redirect()->back()->with('success', "Product restocked with {$request->quantity} units.");
 }
 
@@ -1297,48 +1297,48 @@ public function getDashboardStats()
             ->withInput($request->only('email'));
     }
 
-    /**
-     * Show admin settings page
-     */
-    public function settings()
-    {
-        $admin = $this->adminService->getCurrentAdmin();
+  /**
+ * Show admin settings page
+ */
+public function settings()
+{
+    $admin = $this->adminService->getCurrentAdmin();
 
-        if (!$admin) {
-            return redirect()->route('admin.login')
-                ->with('error', 'Please login to access settings.');
-        }
-
-        return view('admin.settings', compact('admin'));
+    if (!$admin) {
+        return redirect()->route('admin.login')
+            ->with('error', 'Please login to access settings.');
     }
 
-    /**
-     * Update admin settings
-     */
-    public function updateSettings(Request $request)
-    {
-        $admin = $this->adminService->getCurrentAdmin();
+    return view('admin.settings.index', compact('admin'));
+}
 
-        if (!$admin) {
-            return redirect()->route('admin.login')
-                ->with('error', 'Please login to update settings.');
-        }
+/**
+ * Update admin settings
+ */
+public function updateSettings(Request $request)
+{
+    $admin = $this->adminService->getCurrentAdmin();
 
-        $request->validate([
-            'theme' => 'nullable|in:light,dark',
-            'language' => 'nullable|in:en,es,fr',
-            'notifications' => 'nullable|boolean',
-        ]);
-
-        // Store settings in database or session
-        session([
-            'admin.theme' => $request->theme,
-            'admin.language' => $request->language,
-            'admin.notifications' => $request->boolean('notifications', true),
-        ]);
-
-        return back()->with('success', 'Settings updated successfully.');
+    if (!$admin) {
+        return redirect()->route('admin.login')
+            ->with('error', 'Please login to update settings.');
     }
+
+    $request->validate([
+        'theme' => 'nullable|in:light,dark',
+        'language' => 'nullable|in:en,es,fr',
+        'notifications' => 'nullable|boolean',
+    ]);
+
+    // Store settings in database or session
+    session([
+        'admin.theme' => $request->theme,
+        'admin.language' => $request->language,
+        'admin.notifications' => $request->boolean('notifications', true),
+    ]);
+
+    return back()->with('success', 'Settings updated successfully.');
+}
 
     /**
      * ========================================================================
