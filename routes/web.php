@@ -25,62 +25,43 @@ Route::get('/', function () {
 })->name('home');
 
 // =========================================================================
-// VENDOR & CUSTOMER AUTHENTICATION
+// STATIC PAGES
+// =========================================================================
+Route::view('/privacy-policy', 'pages.privacy-policy')->name('privacy.policy');
+Route::view('/terms-of-service', 'pages.terms-of-service')->name('terms.service');
+Route::view('/about', 'pages.about')->name('about');
+Route::view('/contact', 'pages.contact')->name('contact');
+
+// =========================================================================
+// PUBLIC VENDOR SEARCH & PROFILES
 // =========================================================================
 
-// Guest only routes (redirect if authenticated)
+// Vendor search and listing
+Route::get('/search', [VendorCustomerController::class, 'search'])->name('search.results');
+Route::get('/vendors/search', [VendorCustomerController::class, 'searchVendors'])->name('vendors.search');
+Route::get('/vendors/{id}', [VendorCustomerController::class, 'showVendor'])->name('vendor.show');
+
+// AJAX endpoint for getting vendor details
+Route::get('/vendors/{id}/details', [VendorCustomerController::class, 'getVendor'])->name('vendors.get');
+
+// =========================================================================
+// AUTHENTICATION ROUTES (Guest only)
+// =========================================================================
+
 Route::middleware('guest')->group(function () {
     // Login
     Route::get('/login', [VendorCustomerController::class, 'index'])->name('login');
     Route::post('/login', [VendorCustomerController::class, 'store'])->name('login.authenticate');
 
-    // Registration
+    // Vendor Registration (Multi-step)
     Route::get('/register', [VendorCustomerController::class, 'create'])->name('register');
     Route::post('/register', [VendorCustomerController::class, 'register'])->name('vendor.register');
-});
 
-// Authenticated routes (both vendors and customers)
-Route::middleware('auth')->group(function () {
-    // Logout
-    Route::post('/logout', [VendorCustomerController::class, 'logout'])->name('logout');
+    // Customer Registration
+    Route::get('/register/customer', [VendorCustomerController::class, 'showCustomerRegister'])->name('register.customer');
+    Route::post('/register/customer', [VendorCustomerController::class, 'registerCustomer'])->name('customer.register');
 
-    // Multi-step form persistence
-    Route::post('/vendor/registration/step', [VendorCustomerController::class, 'saveStep'])->name('vendor.registration.step');
-
-    // Profile routes (users can only access their own profile)
-    Route::get('/profile/{id}', [VendorCustomerController::class, 'show'])->name('profile.show');
-    Route::get('/profile/{id}/edit', [VendorCustomerController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/{id}', [VendorCustomerController::class, 'update'])->name('profile.update');
-    Route::delete('/profile/{id}', [VendorCustomerController::class, 'destroy'])->name('profile.destroy');
-});
-
-// =========================================================================
-// EMAIL VERIFICATION ROUTES (MustVerifyEmail)
-// =========================================================================
-
-Route::middleware(['auth'])->group(function () {
-    Route::get('/email/verify', function () {
-        return view('auth.verify-email');
-    })->name('verification.notice');
-
-    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-        $request->fulfill();
-        return redirect()->route('home')->with('success', 'Email verified successfully!');
-    })->middleware(['signed'])->name('verification.verify');
-
-    Route::post('/email/verification-notification', function (Request $request) {
-        $request->user()->sendEmailVerificationNotification();
-        return back()->with('success', 'Verification link sent!');
-    })->middleware(['throttle:6,1'])->name('verification.send');
-});
-
-
-
-// =========================================================================
-// PASSWORD RESET ROUTES
-// =========================================================================
-Route::middleware('guest')->group(function () {
-    // Password Reset Request
+    // Password Reset
     Route::get('/forgot-password', function () {
         return view('auth.forgot-password');
     })->name('password.request');
@@ -88,7 +69,6 @@ Route::middleware('guest')->group(function () {
     Route::post('/forgot-password', [VendorCustomerController::class, 'sendResetLinkEmail'])
         ->name('password.email');
 
-    // Password Reset
     Route::get('/reset-password/{token}', function (string $token) {
         return view('auth.reset-password', ['token' => $token]);
     })->name('password.reset');
@@ -96,15 +76,56 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [VendorCustomerController::class, 'resetPassword'])
         ->name('password.update');
 });
-// =========================================================================
-// STATIC PAGES
-// =========================================================================
-Route::view('/privacy-policy', 'pages.privacy-policy')->name('privacy.policy');
-Route::view('/terms-of-service', 'pages.terms-of-service')->name('terms.service');
-
 
 // =========================================================================
-// VENDOR & CUSTOMER DASHBOARDS (Verified only)
+// AUTHENTICATED ROUTES (Common for all users)
+// =========================================================================
+
+Route::middleware('auth')->group(function () {
+    // Logout
+    Route::post('/logout', [VendorCustomerController::class, 'logout'])->name('logout');
+
+    // Multi-step form persistence (for vendors)
+    Route::post('/vendor/registration/step', [VendorCustomerController::class, 'saveStep'])->name('vendor.registration.step');
+
+    // Profile routes (users can only access their own profile)
+    Route::get('/profile/{id}', [VendorCustomerController::class, 'show'])->name('profile.show');
+    Route::get('/profile/{id}/edit', [VendorCustomerController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/{id}', [VendorCustomerController::class, 'update'])->name('profile.update');
+    Route::delete('/profile/{id}', [VendorCustomerController::class, 'destroy'])->name('profile.destroy');
+
+    // Follow/Unfollow vendors
+    Route::post('/vendor/{id}/follow', [VendorCustomerController::class, 'follow'])->name('vendor.follow');
+    Route::post('/vendor/{id}/unfollow', [VendorCustomerController::class, 'unfollow'])->name('vendor.unfollow');
+});
+
+// =========================================================================
+// EMAIL VERIFICATION ROUTES (MustVerifyEmail)
+// =========================================================================
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/email/verify', [VendorCustomerController::class, 'verificationNotice'])
+        ->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+
+        // Redirect based on user role after verification
+        $user = Auth::user();
+        if ($user->role === 'vendor') {
+            return redirect()->route('vendor.dashboard')->with('success', 'Email verified successfully!');
+        } elseif ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard')->with('success', 'Email verified successfully!');
+        }
+        return redirect()->route('customer.dashboard')->with('success', 'Email verified successfully!');
+    })->middleware(['signed'])->name('verification.verify');
+
+    Route::post('/email/verification-notification', [VendorCustomerController::class, 'resendVerification'])
+        ->middleware(['throttle:6,1'])->name('verification.send');
+});
+
+// =========================================================================
+// DASHBOARD ROUTES (Verified only, role-specific)
 // =========================================================================
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -118,7 +139,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('customer.dashboard')
         ->middleware('role:customer');
 
-    // Vendor specific routes
+    // Vendor specific settings
     Route::prefix('vendor')->name('vendor.')->middleware('role:vendor')->group(function () {
         Route::post('/settings', [VendorCustomerController::class, 'updateSettings'])->name('settings.update');
         Route::post('/password', [VendorCustomerController::class, 'updatePassword'])->name('password.update');
@@ -126,40 +147,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // =========================================================================
-// PUBLIC VENDOR SEARCH & PROFILES
-// =========================================================================
-
-// Vendor search and listing
-Route::get('/search', [VendorCustomerController::class, 'search'])->name('search.results');
-Route::get('/vendors/search', [VendorCustomerController::class, 'searchVendors'])->name('vendors.search');
-Route::get('/vendors/{id}', [VendorCustomerController::class, 'showVendor'])->name('vendor.show');
-
-// Follow/Unfollow (requires authentication)
-Route::middleware('auth')->group(function () {
-    Route::post('/vendor/{id}/follow', [VendorCustomerController::class, 'follow'])->name('vendor.follow');
-    Route::post('/vendor/{id}/unfollow', [VendorCustomerController::class, 'unfollow'])->name('vendor.unfollow');
-});
-
-// AJAX endpoint for getting vendor details
-Route::get('/vendors/{id}/details', [VendorCustomerController::class, 'getVendor'])->name('vendors.get');
-
-// =========================================================================
 // ADMIN ROUTES
 // =========================================================================
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
-    // Guest admin routes
+    // Guest admin routes (login only)
     Route::middleware('guest')->group(function () {
-
-
-    // Guest admin routes (no middleware needed here - controller handles it)
-    Route::get('/login', [AdminController::class, 'create'])->name('login');
-    Route::post('/login', [AdminController::class, 'store'])->name('login.submit');
-
+        Route::get('/login', [AdminController::class, 'create'])->name('login');
+        Route::post('/login', [AdminController::class, 'store'])->name('login.submit');
     });
 
-    // Protected admin routes - WITHOUT middleware first
+    // Protected admin routes
     Route::middleware(['auth'])->group(function () {
 
         // Logout
@@ -169,39 +168,38 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
         Route::get('/search', [AdminController::class, 'search'])->name('search');
 
-        // ======== MANAGEMENT ROUTES ========
-
-        // Orders Management
+        // ======== ORDERS MANAGEMENT ========
         Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
         Route::get('/orders/{id}', [AdminController::class, 'showOrder'])->name('orders.show');
         Route::put('/orders/{id}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.status');
 
-        // Customers Management
+        // ======== CUSTOMERS MANAGEMENT ========
         Route::get('/customers', [AdminController::class, 'customers'])->name('customers');
         Route::get('/customers/{id}', [AdminController::class, 'showCustomer'])->name('customers.show');
         Route::get('/customers/{id}/edit', [AdminController::class, 'editCustomer'])->name('customers.edit');
         Route::put('/customers/{id}', [AdminController::class, 'updateCustomer'])->name('customers.update');
         Route::delete('/customers/{id}', [AdminController::class, 'deleteCustomer'])->name('customers.delete');
 
-        // Vendors Management
+        // ======== VENDORS MANAGEMENT ========
         Route::get('/vendors', [AdminController::class, 'vendors'])->name('vendors');
         Route::get('/vendors/{id}', [AdminController::class, 'showVendor'])->name('vendors.show');
+        Route::get('/vendors/{id}/edit', [AdminController::class, 'editVendor'])->name('vendors.edit'); 
         Route::put('/vendors/{id}', [AdminController::class, 'updateVendor'])->name('vendors.update');
         Route::delete('/vendors/{id}', [AdminController::class, 'deleteVendor'])->name('vendors.delete');
         Route::post('/vendors/{id}/verify', [AdminController::class, 'verifyVendor'])->name('vendors.verify');
         Route::post('/vendors/{id}/status', [AdminController::class, 'changeVendorStatus'])->name('vendors.status');
 
-        // Catalog Management
+        // ======== CATALOG MANAGEMENT ========
         Route::get('/catalog', [AdminController::class, 'catalog'])->name('catalog');
         Route::get('/catalog/products', [AdminController::class, 'products'])->name('catalog.products');
         Route::get('/catalog/categories', [AdminController::class, 'categories'])->name('catalog.categories');
 
-         // ======== INVENTORY MANAGEMENT ========
+        // ======== INVENTORY MANAGEMENT ========
         Route::get('/inventory', [AdminController::class, 'inventory'])->name('inventory');
         Route::get('/inventory/low-stock', [AdminController::class, 'lowStock'])->name('inventory.low-stock');
         Route::post('/inventory/{product}/restock', [AdminController::class, 'restock'])->name('inventory.restock');
 
-        // Promotions Management
+        // ======== PROMOTIONS MANAGEMENT ========
         Route::get('/promotions', [AdminController::class, 'promotions'])->name('promotions');
         Route::get('/promotions/create', [AdminController::class, 'createPromotion'])->name('promotions.create');
         Route::post('/promotions', [AdminController::class, 'storePromotion'])->name('promotions.store');
@@ -210,16 +208,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/promotions/{id}', [AdminController::class, 'deletePromotion'])->name('promotions.delete');
 
         // ======== ADMIN PROFILE & SETTINGS ========
-
-        // Admin Profile
         Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
         Route::post('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
-
-        // Password Management
         Route::get('/password', [AdminController::class, 'editPassword'])->name('password.edit');
         Route::post('/password', [AdminController::class, 'updatePassword'])->name('password.update');
-
-        // Settings
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
 
@@ -266,18 +258,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/verify', [AdminController::class, 'verify'])->name('verify');
 
         // ======== AJAX ENDPOINTS ========
-       // ======== AJAX ENDPOINTS ========
         Route::prefix('ajax')->name('ajax.')->group(function () {
-        Route::get('/admins-search', [AdminController::class, 'searchAdmins'])->name('admins.search');
-        Route::get('/vendors-search', [AdminController::class, 'searchVendors'])->name('vendors.search');
-        Route::get('/customers-search', [AdminController::class, 'searchCustomers'])->name('customers.search');
-        Route::get('/orders-search', [AdminController::class, 'searchOrders'])->name('orders.search');
-        Route::get('/stats', [AdminController::class, 'getStats'])->name('stats');
-        Route::get('/dashboard-stats', [AdminController::class, 'getDashboardStats'])->name('dashboard.stats');
-        Route::get('/chart-data', [AdminController::class, 'getChartDataAjax'])->name('chart.data'); // ← FIXED
-        });
+            Route::get('/admins-search', [AdminController::class, 'searchAdmins'])->name('admins.search');
+            Route::get('/vendors-search', [AdminController::class, 'searchVendors'])->name('vendors.search');
+            Route::get('/customers-search', [AdminController::class, 'searchCustomers'])->name('customers.search');
+            Route::get('/orders-search', [AdminController::class, 'searchOrders'])->name('orders.search');
+            Route::get('/stats', [AdminController::class, 'getStats'])->name('stats');
+            Route::get('/dashboard-stats', [AdminController::class, 'getDashboardStats'])->name('dashboard.stats');
+            Route::get('/chart-data', [AdminController::class, 'getChartDataAjax'])->name('chart.data');
         });
     });
+});
 
 // =========================================================================
 // FALLBACK ROUTE (404 handling)

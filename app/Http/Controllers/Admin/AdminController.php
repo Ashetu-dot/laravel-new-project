@@ -533,6 +533,16 @@ public function editCustomer($id)
     }
 
     /**
+ * Show the form for editing the specified vendor.
+ */
+public function editVendor($id)
+{
+    $vendor = User::where('role', 'vendor')->findOrFail($id);
+
+    return view('admin.vendors.edit', compact('vendor'));
+}
+
+    /**
      * Delete vendor account.
      */
     public function deleteVendor($id)

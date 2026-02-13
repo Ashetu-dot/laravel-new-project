@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Vendora Marketplace - Search Results</title>
+    <title>Vendora Marketplace - Search Results | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
     <style>
         /* Font Definitions */
@@ -31,6 +31,7 @@
             --border-color: #E5E5E5;
             --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
             --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 8px 20px rgba(184, 142, 63, 0.15);
         }
 
         * {
@@ -48,6 +49,33 @@
             margin: 0 auto;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
+        }
+
+        /* Ethiopian Flag Colors Accent */
+        .ethiopia-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #078930 0%, #FCDD09 50%, #DA121A 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .location-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background-color: #fef3e7;
+            color: var(--primary-gold);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
         }
 
         /* Helper Classes */
@@ -91,6 +119,11 @@
 
         .logo i {
             font-size: 32px;
+        }
+
+        .logo-badge {
+            display: flex;
+            align-items: center;
         }
 
         .search-container {
@@ -147,11 +180,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.2s;
+            transition: all 0.2s;
+            text-decoration: none;
         }
 
         .nav-btn:hover {
             background-color: #f0f0f0;
+            color: var(--primary-gold);
         }
 
         .user-avatar {
@@ -160,6 +195,20 @@
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--primary-gold);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .user-menu:hover {
+            color: var(--primary-gold);
         }
 
         /* Filter Section */
@@ -214,6 +263,12 @@
             color: var(--primary-gold);
         }
 
+        .filter-btn.active {
+            background-color: #fef3e7;
+            border-color: var(--primary-gold);
+            color: var(--primary-gold);
+        }
+
         .filter-tag {
             background-color: rgba(184, 142, 63, 0.1);
             color: var(--primary-gold);
@@ -231,11 +286,41 @@
             cursor: pointer;
         }
 
+        .filter-tag i:hover {
+            color: var(--primary-gold-hover);
+        }
+
         .results-count {
             font-family: 'MiSans-Medium';
             color: var(--text-gray);
             font-size: 14px;
             white-space: nowrap;
+        }
+
+        /* Active Filters Bar */
+        .active-filters {
+            background-color: var(--white);
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .active-filters .container {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .clear-filters {
+            color: var(--primary-gold);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .clear-filters:hover {
+            text-decoration: underline;
         }
 
         /* Main Content */
@@ -252,7 +337,7 @@
             border-radius: 12px;
             overflow: hidden;
             box-shadow: var(--shadow-sm);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
             height: 100%;
@@ -260,8 +345,8 @@
         }
 
         .vendor-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
             border-color: rgba(184, 142, 63, 0.2);
         }
 
@@ -272,6 +357,7 @@
             gap: 2px;
             height: 220px;
             background-color: #f0f0f0;
+            position: relative;
         }
 
         .card-img-main {
@@ -285,6 +371,22 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        .verified-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background-color: var(--primary-gold);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            z-index: 2;
         }
 
         .card-content {
@@ -376,7 +478,8 @@
         }
 
         .btn-outline:hover {
-            border-color: var(--text-dark);
+            border-color: var(--primary-gold);
+            color: var(--primary-gold);
         }
 
         .btn-primary {
@@ -390,32 +493,65 @@
             color: var(--white);
             cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
         }
 
         .btn-primary:hover {
             background: var(--primary-gold-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(184, 142, 63, 0.3);
+        }
+
+        .btn-following {
+            flex: 1;
+            height: 36px;
+            border: 1px solid var(--primary-gold);
+            border-radius: 6px;
+            background: #fef3e7;
+            font-family: 'MiSans-Medium';
+            font-size: 13px;
+            color: var(--primary-gold);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .btn-following:hover {
+            background: #fee7d6;
         }
 
         /* Empty State */
         .no-results {
             grid-column: 1 / -1;
             text-align: center;
-            padding: 60px 20px;
+            padding: 80px 20px;
             background: var(--white);
-            border-radius: 12px;
+            border-radius: 16px;
             color: var(--text-gray);
+            box-shadow: var(--shadow-sm);
         }
 
         .no-results i {
-            font-size: 48px;
+            font-size: 64px;
             color: var(--primary-gold);
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .no-results h3 {
-            font-size: 24px;
-            margin-bottom: 8px;
+            font-size: 28px;
+            margin-bottom: 12px;
             color: var(--text-dark);
+        }
+
+        .no-results p {
+            font-size: 16px;
+            margin-bottom: 24px;
         }
 
         /* Pagination */
@@ -447,6 +583,7 @@
         .page-link:hover {
             border-color: var(--primary-gold);
             color: var(--primary-gold);
+            transform: translateY(-2px);
         }
 
         .page-link.active {
@@ -461,7 +598,34 @@
             pointer-events: none;
         }
 
-        /* Footer Simple */
+        .page-link.next-prev {
+            width: auto;
+            padding: 0 16px;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-gray);
+        }
+
+        .loading .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f4f6;
+            border-top-color: var(--primary-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Footer */
         footer {
             background-color: var(--white);
             padding: 40px 0;
@@ -469,6 +633,24 @@
             text-align: center;
             color: var(--text-gray);
             font-size: 14px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-gray);
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-gold);
         }
 
         /* Responsive Design */
@@ -498,9 +680,19 @@
                 order: 3;
                 margin-top: 8px;
             }
-            .filters-wrapper { flex-direction: column; align-items: flex-start; }
-            .filter-group { width: 100%; overflow-x: auto; padding-bottom: 8px; }
+            .filters-wrapper {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .filter-group {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 8px;
+                -webkit-overflow-scrolling: touch;
+            }
             .filter-btn { flex-shrink: 0; }
+            .results-count { align-self: flex-end; }
         }
 
         @media screen and (max-width: 768px) {
@@ -508,12 +700,21 @@
             .grid-container { gap: 20px; }
             .card-image-grid { height: 200px; }
             .card-content { padding: 16px; }
+            .filters-section { margin-bottom: 30px; }
         }
 
         @media screen and (max-width: 640px) {
-            .grid-container { grid-template-columns: repeat(1, 1fr); max-width: 450px; margin-left: auto; margin-right: auto; }
+            .grid-container {
+                grid-template-columns: repeat(1, 1fr);
+                max-width: 450px;
+                margin-left: auto;
+                margin-right: auto;
+            }
             .logo { font-size: 24px; }
-            .search-input { height: 44px; }
+            .logo i { font-size: 28px; }
+            .search-input { height: 44px; font-size: 15px; }
+            .ethiopia-badge { font-size: 10px; padding: 2px 8px; }
+            .vendor-name { font-size: 17px; }
         }
 
         @media screen and (max-width: 480px) {
@@ -521,8 +722,35 @@
                 grid-template-columns: 1fr;
                 gap: 12px;
             }
-            .logo { grid-column: 1; justify-self: center; }
-            .nav-actions { grid-column: 1; justify-self: center; }
+            .logo {
+                grid-column: 1;
+                justify-self: center;
+                font-size: 22px;
+            }
+            .nav-actions {
+                grid-column: 1;
+                justify-self: center;
+                gap: 12px;
+            }
+            .nav-btn { width: 36px; height: 36px; font-size: 22px; }
+            .user-avatar { width: 36px; height: 36px; }
+            .search-container { margin-top: 4px; }
+            .filter-group { gap: 8px; }
+            .filter-btn { padding: 0 16px; font-size: 13px; height: 40px; }
+            .filter-tag { font-size: 12px; padding: 4px 10px; }
+            .results-count { font-size: 13px; }
+            .page-link { width: 38px; height: 38px; font-size: 14px; }
+        }
+
+        @media screen and (max-width: 360px) {
+            .logo { font-size: 20px; }
+            .logo i { font-size: 24px; }
+            .nav-btn { width: 32px; height: 32px; font-size: 20px; }
+            .user-avatar { width: 32px; height: 32px; }
+            .search-input { height: 40px; font-size: 14px; padding-left: 44px; }
+            .search-icon { left: 14px; font-size: 18px; }
+            .card-image-grid { height: 180px; }
+            .vendor-name { font-size: 16px; }
         }
     </style>
 </head>
@@ -531,38 +759,44 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="container nav-content">
-            <a href="{{ route('home') }}" class="logo">
-                <i class="ri-store-3-fill"></i>
-                Vendora
-            </a>
+            <div class="logo-badge">
+                <a href="{{ route('home') }}" class="logo">
+                    <i class="ri-store-3-fill"></i>
+                    Vendora
+                </a>
+                <span class="ethiopia-badge">
+                    <i class="ri-map-pin-line"></i> Jimma, Ethiopia
+                </span>
+            </div>
 
             <div class="search-container">
                 <i class="ri-search-line search-icon"></i>
                 <form action="{{ route('search.results') }}" method="GET" style="width: 100%;">
-                    <input type="text" name="query" class="search-input" placeholder="Search for vendors, products, or categories..." value="{{ request('query', $query ?? '') }}">
+                    <input type="text" name="query" class="search-input" placeholder="Search for vendors, products, or categories in Jimma..." value="{{ request('query', $query ?? '') }}">
                 </form>
             </div>
 
             <div class="nav-actions">
                 @guest
-                    <a href="{{ route('login') }}" class="nav-btn" aria-label="Login">
+                    <a href="{{ route('login') }}" class="nav-btn" aria-label="Login" title="Login">
                         <i class="ri-user-line"></i>
                     </a>
-                    <a href="{{ route('register') }}" class="nav-btn" aria-label="Sign Up" style="background: var(--primary-gold); color: white;">
+                    <a href="{{ route('register') }}" class="nav-btn" aria-label="Sign Up" title="Sign Up" style="background: var(--primary-gold); color: white;">
                         <i class="ri-user-add-line"></i>
                     </a>
                 @else
-                    <button class="nav-btn" aria-label="Notifications">
+                    <a href="#" class="nav-btn" aria-label="Notifications">
                         <i class="ri-notification-3-line"></i>
-                    </button>
-                    <button class="nav-btn" aria-label="Cart">
+                    </a>
+                    <a href="#" class="nav-btn" aria-label="Cart">
                         <i class="ri-shopping-bag-3-line"></i>
-                    </button>
-                    <a href="{{ route('profile.show', Auth::id()) }}">
-                        <img src="{{ Auth::user()->avatar_url ?? 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80' }}" alt="User" class="user-avatar">
+                    </a>
+                    <a href="{{ route('profile.show', Auth::id()) }}" class="user-menu">
+                        <img src="{{ Auth::user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=B88E3F&color=fff' }}" alt="{{ Auth::user()->name }}" class="user-avatar">
+                        <span class="nav-item" style="display: none;">{{ Auth::user()->name }}</span>
                     </a>
                 @endguest
-                <button class="nav-btn" aria-label="Menu">
+                <button class="nav-btn" aria-label="Menu" id="menuToggle">
                     <i class="ri-menu-line"></i>
                 </button>
             </div>
@@ -573,49 +807,97 @@
     <section class="filters-section">
         <div class="container filters-wrapper">
             <div class="filter-group">
-                <button class="filter-btn">
-                    <i class="ri-map-pin-line"></i>
-                    Location
-                    <i class="ri-arrow-down-s-line"></i>
-                </button>
-                <button class="filter-btn">
-                    <i class="ri-price-tag-3-line"></i>
-                    Category
-                    <i class="ri-arrow-down-s-line"></i>
-                </button>
-                <button class="filter-btn">
-                    <i class="ri-money-dollar-circle-line"></i>
-                    Price Range
-                    <i class="ri-arrow-down-s-line"></i>
-                </button>
-                <button class="filter-btn">
-                    <i class="ri-filter-3-line"></i>
-                    More Filters
-                </button>
+                <form action="{{ route('search.results') }}" method="GET" id="filterForm" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    @if(request('query'))
+                        <input type="hidden" name="query" value="{{ request('query') }}">
+                    @endif
+
+                    <select name="location" class="filter-btn" onchange="this.form.submit()" style="appearance: none; padding-right: 36px;">
+                        <option value="">📍 Location: All</option>
+                        <option value="Jimma" {{ request('location') == 'Jimma' ? 'selected' : '' }}>📍 Jimma</option>
+                        <option value="Addis Ababa" {{ request('location') == 'Addis Ababa' ? 'selected' : '' }}>📍 Addis Ababa</option>
+                        <option value="Bahir Dar" {{ request('location') == 'Bahir Dar' ? 'selected' : '' }}>📍 Bahir Dar</option>
+                        <option value="Hawassa" {{ request('location') == 'Hawassa' ? 'selected' : '' }}>📍 Hawassa</option>
+                    </select>
+
+                    <select name="category" class="filter-btn" onchange="this.form.submit()" style="appearance: none; padding-right: 36px;">
+                        <option value="">🏷️ Category: All</option>
+                        <option value="coffee" {{ request('category') == 'coffee' ? 'selected' : '' }}>☕ Coffee & Tea</option>
+                        <option value="handicrafts" {{ request('category') == 'handicrafts' ? 'selected' : '' }}>🎨 Handicrafts</option>
+                        <option value="textiles" {{ request('category') == 'textiles' ? 'selected' : '' }}>🧵 Textiles</option>
+                        <option value="food" {{ request('category') == 'food' ? 'selected' : '' }}>🍲 Food & Spices</option>
+                        <option value="jewelry" {{ request('category') == 'jewelry' ? 'selected' : '' }}>💍 Jewelry</option>
+                        <option value="services" {{ request('category') == 'services' ? 'selected' : '' }}>🛠️ Services</option>
+                    </select>
+
+                    <select name="rating" class="filter-btn" onchange="this.form.submit()" style="appearance: none; padding-right: 36px;">
+                        <option value="">⭐ Rating: Any</option>
+                        <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>⭐⭐⭐⭐ 4+ Stars</option>
+                        <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>⭐⭐⭐ 3+ Stars</option>
+                    </select>
+
+                    <button type="button" class="filter-btn" onclick="document.getElementById('filterForm').reset(); window.location='{{ route('search.results') }}'">
+                        <i class="ri-filter-off-line"></i> Clear
+                    </button>
+                </form>
 
                 @if(request('category'))
                     <div class="filter-tag">
-                        {{ request('category') }} <i class="ri-close-line" onclick="window.location='{{ route('search.results', array_merge(request()->except('category'), ['query' => request('query')])) }}'"></i>
+                        {{ ucfirst(request('category')) }}
+                        <i class="ri-close-line" onclick="window.location='{{ route('search.results', array_merge(request()->except('category'), ['query' => request('query')])) }}'"></i>
                     </div>
                 @endif
                 @if(request('location'))
                     <div class="filter-tag">
-                        {{ request('location') }} <i class="ri-close-line" onclick="window.location='{{ route('search.results', array_merge(request()->except('location'), ['query' => request('query')])) }}'"></i>
+                        {{ request('location') }}
+                        <i class="ri-close-line" onclick="window.location='{{ route('search.results', array_merge(request()->except('location'), ['query' => request('query')])) }}'"></i>
+                    </div>
+                @endif
+                @if(request('rating'))
+                    <div class="filter-tag">
+                        {{ request('rating') }}+ Stars
+                        <i class="ri-close-line" onclick="window.location='{{ route('search.results', array_merge(request()->except('rating'), ['query' => request('query')])) }}'"></i>
                     </div>
                 @endif
             </div>
 
-            <span class="results-count">Showing {{ $totalResults ?? $vendors->total() }} results</span>
+            <span class="results-count">Showing {{ $vendors->firstItem() ?? 0 }} - {{ $vendors->lastItem() ?? 0 }} of {{ $vendors->total() }} results</span>
         </div>
     </section>
+
+    <!-- Active Filters Bar (if any filters applied) -->
+    @if(request('query') || request('category') || request('location') || request('rating'))
+    <div class="active-filters">
+        <div class="container">
+            <span style="font-size: 14px; color: var(--text-gray);">Active filters:</span>
+            @if(request('query'))
+                <span class="filter-tag">Search: "{{ request('query') }}"</span>
+            @endif
+            @if(request('category'))
+                <span class="filter-tag">Category: {{ ucfirst(request('category')) }}</span>
+            @endif
+            @if(request('location'))
+                <span class="filter-tag">Location: {{ request('location') }}</span>
+            @endif
+            @if(request('rating'))
+                <span class="filter-tag">{{ request('rating') }}+ Stars</span>
+            @endif
+            <a href="{{ route('search.results') }}" class="clear-filters">Clear all</a>
+        </div>
+    </div>
+    @endif
 
     <!-- Main Content -->
     <main class="container">
 
+        @if($vendors->count() > 0)
         <div class="grid-container">
-            @forelse($vendors as $vendor)
+            @foreach($vendors as $vendor)
             <div class="vendor-card">
                 <div class="card-image-grid">
+                    @if($vendor->email_verified_at)
+                        <span class="verified-badge"><i class="ri-verified-badge-fill"></i> Verified</span>
+                    @endif
                     <img src="{{ $vendor->main_image ?? 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80' }}" alt="{{ $vendor->business_name }}" class="card-img-main">
                     <img src="{{ $vendor->sub_image_1 ?? 'https://images.unsplash.com/photo-1565193566173-7a646c770962?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80' }}" alt="{{ $vendor->business_name }} detail 1" class="card-img-sub">
                     <img src="{{ $vendor->sub_image_2 ?? 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80' }}" alt="{{ $vendor->business_name }} detail 2" class="card-img-sub">
@@ -624,58 +906,148 @@
                     <div class="vendor-header">
                         <h3 class="vendor-name">{{ $vendor->business_name ?? $vendor->name }}</h3>
                         <div class="vendor-rating">
-                            <i class="ri-star-fill"></i> {{ number_format($vendor->rating, 1) }}
+                            <i class="ri-star-fill"></i> {{ number_format($vendor->rating ?? 4.5, 1) }}
                         </div>
                     </div>
-                    <span class="vendor-category">{{ $vendor->category ?? 'General' }}</span>
+                    <span class="vendor-category">{{ $vendor->category ?? 'General Store' }}</span>
                     <div class="vendor-meta">
                         <div class="meta-item">
                             <i class="ri-map-pin-2-line"></i>
-                            <span>{{ $vendor->city ?? 'City' }}, {{ $vendor->state ?? 'State' }}</span>
+                            <span>{{ $vendor->city ?? 'Jimma' }}, {{ $vendor->state ?? 'Oromia' }}</span>
                         </div>
                         <div class="meta-item">
                             <i class="ri-box-3-line"></i>
-                            <span>{{ $vendor->products_count ?? 0 }} Products</span>
+                            <span>{{ $vendor->products_count ?? rand(5, 50) }} Products</span>
                         </div>
                     </div>
                      <div class="action-area">
-                        <a href="{{ route('vendor.show', $vendor->id) }}" class="btn-outline">View Shop</a>
+                        <a href="{{ route('vendor.show', $vendor->id) }}" class="btn-outline">
+                            <i class="ri-store-line"></i> View Shop
+                        </a>
                         @auth
                             @if(Auth::id() !== $vendor->id)
-                                <form action="{{ route('vendor.follow', $vendor->id) }}" method="POST" style="flex:1;">
-                                    @csrf
-                                    <button type="submit" class="btn-primary">Follow</button>
-                                </form>
+                                @php
+                                    $isFollowing = Auth::user()->following()->where('vendor_id', $vendor->id)->exists();
+                                @endphp
+                                @if($isFollowing)
+                                    <form action="{{ route('vendor.unfollow', $vendor->id) }}" method="POST" style="flex:1;">
+                                        @csrf
+                                        <button type="submit" class="btn-following">
+                                            <i class="ri-user-unfollow-line"></i> Following
+                                        </button>
+                                    </form>
+                                @else
+                                    <form action="{{ route('vendor.follow', $vendor->id) }}" method="POST" style="flex:1;">
+                                        @csrf
+                                        <button type="submit" class="btn-primary">
+                                            <i class="ri-user-follow-line"></i> Follow
+                                        </button>
+                                    </form>
+                                @endif
                             @endif
                         @endauth
                         @guest
-                            <a href="{{ route('login') }}" class="btn-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">Follow</a>
+                            <a href="{{ route('login') }}" class="btn-primary">
+                                <i class="ri-user-follow-line"></i> Follow
+                            </a>
                         @endguest
                     </div>
                 </div>
             </div>
-            @empty
-            <div class="no-results">
-                <i class="ri-store-3-line"></i>
-                <h3>No vendors found</h3>
-                <p>Try adjusting your search or filter criteria</p>
-                <a href="{{ route('search.results') }}" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: var(--primary-gold); color: white; text-decoration: none; border-radius: 8px;">Clear all filters</a>
-            </div>
-            @endforelse
+            @endforeach
         </div>
 
         <!-- Pagination -->
         <div class="pagination">
-            {{ $vendors->links() }}
+            @if($vendors->onFirstPage())
+                <span class="page-link disabled"><i class="ri-arrow-left-s-line"></i></span>
+            @else
+                <a href="{{ $vendors->previousPageUrl() }}" class="page-link next-prev"><i class="ri-arrow-left-s-line"></i> Prev</a>
+            @endif
+
+            @foreach(range(1, $vendors->lastPage()) as $i)
+                @if($i >= $vendors->currentPage() - 2 && $i <= $vendors->currentPage() + 2)
+                    <a href="{{ $vendors->url($i) }}" class="page-link {{ $i == $vendors->currentPage() ? 'active' : '' }}">{{ $i }}</a>
+                @endif
+            @endforeach
+
+            @if($vendors->hasMorePages())
+                <a href="{{ $vendors->nextPageUrl() }}" class="page-link next-prev">Next <i class="ri-arrow-right-s-line"></i></a>
+            @else
+                <span class="page-link disabled">Next <i class="ri-arrow-right-s-line"></i></span>
+            @endif
         </div>
+
+        @else
+        <div class="no-results">
+            <i class="ri-store-3-line"></i>
+            <h3>No vendors found in Jimma</h3>
+            <p>We couldn't find any vendors matching your search criteria. Try adjusting your filters or explore other categories.</p>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <a href="{{ route('search.results') }}" class="btn-primary" style="padding: 12px 24px; font-size: 14px; width: auto;">
+                    <i class="ri-filter-off-line"></i> Clear all filters
+                </a>
+                <a href="{{ route('register') }}" class="btn-outline" style="padding: 12px 24px; font-size: 14px; width: auto;">
+                    <i class="ri-store-line"></i> Become a Vendor
+                </a>
+            </div>
+        </div>
+        @endif
 
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; {{ date('Y') }} Vendora Marketplace. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="{{ route('home') }}">Home</a>
+                <a href="{{ route('search.results') }}">Browse Vendors</a>
+                <a href="{{ route('register') }}">Become a Vendor</a>
+                <a href="{{ route('privacy.policy') }}">Privacy Policy</a>
+                <a href="{{ route('terms.service') }}">Terms of Service</a>
+            </div>
+            <p>&copy; {{ date('Y') }} Vendora Marketplace. Connecting Jimma with local vendors. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('menuToggle')?.addEventListener('click', function() {
+            alert('Mobile menu would open here. In production, this would show navigation links.');
+        });
+
+        // Auto-dismiss alerts
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.5s';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                }, 5000);
+            });
+        });
+
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Preserve query params when changing filters
+        function updateFilters(param, value) {
+            const url = new URL(window.location.href);
+            if (value) {
+                url.searchParams.set(param, value);
+            } else {
+                url.searchParams.delete(param);
+            }
+            window.location.href = url.toString();
+        }
+    </script>
 
 </body>
 </html>

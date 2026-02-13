@@ -117,7 +117,6 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            display: none;
             align-items: center;
             justify-content: center;
             transition: background-color 0.2s;
@@ -125,6 +124,44 @@
 
         .hamburger:hover {
             background-color: rgba(0,0,0,0.05);
+        }
+
+        /* Role Switch */
+        .role-switch {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            padding: 4px;
+            background-color: #f5f5f5;
+            border-radius: 40px;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .role-btn.active {
+            background-color: var(--bg-card);
+            color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .role-btn:hover {
+            color: var(--primary-color);
         }
 
         /* Main Content */
@@ -165,6 +202,10 @@
 
         .registration-card:hover {
             box-shadow: var(--shadow-hover);
+        }
+
+        .card-header {
+            text-align: center;
         }
 
         .card-header h1 {
@@ -561,6 +602,24 @@
             margin-left: 8px;
         }
 
+        /* Login Prompt */
+        .login-prompt {
+            text-align: center;
+            margin-top: 24px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .login-prompt a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-prompt a:hover {
+            text-decoration: underline;
+        }
+
         /* Accessibility Focus */
         *:focus-visible {
             outline: 2px solid var(--primary-color);
@@ -736,7 +795,7 @@
             </span>
         </a>
         <div class="nav-actions">
-            <a href="{{ route('login') }}" class="login-link">Already a vendor? Log in</a>
+            <a href="{{ route('login') }}" class="login-link">Already have an account?</a>
             <div class="hamburger" aria-label="Menu" role="button" tabindex="0" id="menuToggle">
                 <i class="ri-menu-line"></i>
             </div>
@@ -746,8 +805,18 @@
     <!-- Main Content -->
     <main class="main-container">
         <div class="registration-card">
+            <!-- Role Switch -->
+            <div class="role-switch">
+                <a href="{{ route('register.customer') }}" class="role-btn">
+                    <i class="ri-user-line"></i> Customer
+                </a>
+                <a href="{{ route('register') }}" class="role-btn active">
+                    <i class="ri-store-line"></i> Vendor
+                </a>
+            </div>
+
             <div class="card-header">
-                <h1>Join the Jimma Marketplace</h1>
+                <h1>Become a Vendor in Jimma</h1>
                 <p>Start selling your unique products to customers in Jimma and across Ethiopia. Complete the steps below to register your vendor account.</p>
             </div>
 
@@ -1086,6 +1155,11 @@
                     </div>
                 </div>
             </form>
+
+            <!-- Login Prompt -->
+            <div class="login-prompt">
+                Already have a vendor account? <a href="{{ route('login') }}">Sign in</a>
+            </div>
         </div>
     </main>
 

@@ -21,7 +21,7 @@ class VendorCustomerController extends Controller
     }
 
     /**
-     * Show the registration form.
+     * Show the vendor registration form.
      */
     public function create()
     {
@@ -34,13 +34,65 @@ class VendorCustomerController extends Controller
     }
 
     /**
-     * Save current step for multi-step form.
+     * Show the customer registration form.
+     */
+    public function showCustomerRegister()
+    {
+        return view('auth.customer-register');
+    }
+
+    /**
+     * Save current step for multi-step vendor form.
      */
     public function saveStep(Request $request)
     {
         $request->validate(['step' => 'required|integer|between:1,3']);
         Session::put('registration_step', $request->step);
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Handle customer registration.
+     */
+    public function registerCustomer(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'city' => ['required', 'string', 'max:100'],
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ]);
+
+        try {
+            // Create the user account with customer role
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
+                'city' => $validated['city'],
+                'password' => Hash::make($validated['password']),
+                'role' => 'customer',
+                'is_active' => true,
+                'country' => 'Ethiopia',
+                'products_count' => 0,
+                'rating' => 0,
+                'total_reviews' => 0,
+            ]);
+
+            // Send email verification notification
+            $user->sendEmailVerificationNotification();
+
+            // Log the user in
+            Auth::login($user);
+
+            return redirect()->route('customer.dashboard')
+                ->with('success', 'Account created successfully! Please verify your email.');
+
+        } catch (\Exception $e) {
+            return back()->withInput()
+                ->with('error', 'Registration failed. Please try again.');
+        }
     }
 
     /**
@@ -62,6 +114,7 @@ class VendorCustomerController extends Controller
                 'category' => ['required', 'string', 'max:100'],
                 'tax_id' => ['nullable', 'string', 'max:100'],
                 'website' => ['nullable', 'url', 'max:255'],
+                'phone' => ['nullable', 'string', 'max:20'],
                 'address_line1' => ['required', 'string', 'max:255'],
                 'address_line2' => ['nullable', 'string', 'max:255'],
                 'city' => ['required', 'string', 'max:100'],
@@ -82,6 +135,7 @@ class VendorCustomerController extends Controller
                 $user = User::create([
                     'name' => $validated['fullname'],
                     'email' => $validated['email'],
+                    'phone' => $validated['phone'] ?? null,
                     'password' => Hash::make($validated['password']),
                     'role' => 'vendor',
                     'business_name' => $validated['business_name'],
@@ -99,7 +153,7 @@ class VendorCustomerController extends Controller
                     'rating' => 0,
                     'total_reviews' => 0,
                     'is_active' => true,
-                    'country' => 'USA',
+                    'country' => 'Ethiopia',
                 ]);
 
                 // Log the user in
@@ -128,6 +182,55 @@ class VendorCustomerController extends Controller
         // If this is a new registration, just show step 2
         Session::put('registration_step', 2);
         return redirect()->route('register')->with('step', 2);
+    }
+
+    /**
+     * Handle login request.
+     */
+    public function store(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        $remember = $request->has('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
+            $request->session()->regenerate();
+
+            $user = Auth::user();
+
+            // Check if email is verified
+            if (is_null($user->email_verified_at)) {
+                Auth::logout();
+                return redirect()->route('verification.notice')
+                    ->with('error', 'Please verify your email before logging in.');
+            }
+
+            // Redirect based on user role
+            if ($user->role === 'vendor') {
+                return redirect()->intended(route('vendor.dashboard'));
+            } elseif ($user->role === 'admin') {
+                return redirect()->intended(route('admin.dashboard'));
+            }
+            return redirect()->intended(route('customer.dashboard'));
+        }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
+    }
+
+    /**
+     * Handle logout.
+     */
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('home');
     }
 
     /**
@@ -214,7 +317,7 @@ class VendorCustomerController extends Controller
             return back()->with('info', 'You are already following ' . $vendor->business_name);
         }
 
-        $user->following()->attach($vendor->id);
+        $user->following()->attach($vendor->id, ['created_at' => now(), 'updated_at' => now()]);
 
         return back()->with('success', 'Now following ' . $vendor->business_name);
     }
@@ -234,47 +337,6 @@ class VendorCustomerController extends Controller
         $user->following()->detach($vendor->id);
 
         return back()->with('success', 'Unfollowed ' . $vendor->business_name);
-    }
-
-    /**
-     * Handle login request.
-     */
-    public function store(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-
-        $remember = $request->has('remember');
-
-        if (Auth::attempt($credentials, $remember)) {
-            $request->session()->regenerate();
-
-            $user = Auth::user();
-
-            if ($user->role === 'vendor') {
-                return redirect()->intended(route('vendor.dashboard'));
-            } elseif ($user->role === 'admin') {
-                return redirect()->intended(route('admin.dashboard'));
-            }
-            return redirect()->intended(route('customer.dashboard'));
-        }
-
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
-    }
-
-    /**
-     * Handle logout.
-     */
-    public function logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return redirect()->route('home');
     }
 
     /**
@@ -362,6 +424,10 @@ class VendorCustomerController extends Controller
             Storage::disk('public')->delete($user->avatar);
         }
 
+        // Remove followers/following relationships
+        $user->followers()->detach();
+        $user->following()->detach();
+
         Auth::logout();
         $user->delete();
 
@@ -390,7 +456,10 @@ class VendorCustomerController extends Controller
             ->limit(5)
             ->get();
 
-        return view('vendor.dashboard', compact('vendor', 'followersCount', 'productsCount', 'recentFollowers'));
+        // Get recent orders (if any)
+        $recentOrders = []; // Placeholder - implement when Order model is ready
+
+        return view('vendor.dashboard', compact('vendor', 'followersCount', 'productsCount', 'recentFollowers', 'recentOrders'));
     }
 
     /**
@@ -408,7 +477,10 @@ class VendorCustomerController extends Controller
             ->orderBy('followers.created_at', 'desc')
             ->paginate(10);
 
-        return view('customer.dashboard', compact('user', 'following'));
+        // Get recent orders (if any)
+        $recentOrders = []; // Placeholder - implement when Order model is ready
+
+        return view('customer.dashboard', compact('user', 'following', 'recentOrders'));
     }
 
     /**
@@ -516,5 +588,27 @@ class VendorCustomerController extends Controller
             'rating' => $vendor->rating,
             'description' => $vendor->description,
         ]);
+    }
+
+    /**
+     * Show email verification notice.
+     */
+    public function verificationNotice()
+    {
+        return view('auth.verify-email');
+    }
+
+    /**
+     * Resend verification email.
+     */
+    public function resendVerification(Request $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->route('home')->with('success', 'Email already verified.');
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('success', 'Verification link sent!');
     }
 }
