@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rules\Password;
+use App\Models\Category;
+use App\Models\Notification;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\Message;
 use App\Models\User;
 
 class VendorCustomerController extends Controller
@@ -437,30 +442,106 @@ class VendorCustomerController extends Controller
         return redirect()->route('home')->with('success', 'Your account has been deleted.');
     }
 
-    /**
-     * Vendor dashboard.
-     */
-    public function vendorDashboard()
-    {
-        $user = Auth::user();
-
-        if (!$user || $user->role !== 'vendor') {
-            abort(403);
-        }
-
-        $vendor = $user;
-        $followersCount = $vendor->followers()->count();
-        $productsCount = $vendor->products_count ?? 0;
-        $recentFollowers = $vendor->followers()
-            ->orderBy('followers.created_at', 'desc')
-            ->limit(5)
-            ->get();
-
-        // Get recent orders (if any)
-        $recentOrders = []; // Placeholder - implement when Order model is ready
-
-        return view('vendor.dashboard', compact('vendor', 'followersCount', 'productsCount', 'recentFollowers', 'recentOrders'));
+   /**
+ * Show vendor dashboard with real data.
+ */
+public function vendorDashboard()
+{
+    $user = Auth::user();
+    
+    // Get followers count
+    $followersCount = $user->followers()->count();
+    
+    // Get products count
+    $productsCount = Product::where('vendor_id', $user->id)->count();
+    
+    // Get store views (you'll need a store_views table or column)
+    $storeViews = $user->store_views ?? 0;
+    
+    // Get order statistics
+    $vendorProductIds = Product::where('vendor_id', $user->id)->pluck('id');
+    
+    $totalOrders = Order::whereHas('items', function($q) use ($vendorProductIds) {
+        $q->whereIn('product_id', $vendorProductIds);
+    })->count();
+    
+    $pendingOrders = Order::whereHas('items', function($q) use ($vendorProductIds) {
+        $q->whereIn('product_id', $vendorProductIds);
+    })->where('status', 'pending')->count();
+    
+    $processingOrders = Order::whereHas('items', function($q) use ($vendorProductIds) {
+        $q->whereIn('product_id', $vendorProductIds);
+    })->where('status', 'processing')->count();
+    
+    $completedOrders = Order::whereHas('items', function($q) use ($vendorProductIds) {
+        $q->whereIn('product_id', $vendorProductIds);
+    })->whereIn('status', ['completed', 'delivered'])->count();
+    
+    $totalRevenue = Order::whereHas('items', function($q) use ($vendorProductIds) {
+        $q->whereIn('product_id', $vendorProductIds);
+    })->whereIn('status', ['completed', 'delivered'])->sum('total_amount');
+    
+    // Get recent orders (last 5)
+    $recentOrders = Order::whereHas('items.product', function($q) use ($user) {
+        $q->where('vendor_id', $user->id);
+    })->with(['user', 'items.product'])
+      ->orderBy('created_at', 'desc')
+      ->paginate(10);
+      
+    
+    // FIXED: Get recent followers - use the pivot table column name
+    $recentFollowers = $user->followers()
+        ->orderBy('followers.created_at', 'desc') // Changed from 'follower_user.created_at'
+        ->take(5)
+        ->get();
+    
+    // Get unread counts
+    try {
+        $unreadNotificationsCount = Notification::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+    } catch (\Exception $e) {
+        $unreadNotificationsCount = 0;
     }
+    
+    try {
+        $unreadMessagesCount = Message::where('receiver_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+    } catch (\Exception $e) {
+        $unreadMessagesCount = 0;
+    }
+    
+    // Get categories for the add product modal
+    try {
+        $categories = Category::where('vendor_id', $user->id)
+            ->orWhere('is_global', true)
+            ->get();
+    } catch (\Exception $e) {
+        $categories = Category::all();
+    }
+    
+    // Average rating (you'll need a reviews table)
+    $averageRating = 4.8; // Placeholder
+    
+    return view('vendor.dashboard', compact(
+        'user',
+        'followersCount',
+        'productsCount',
+        'storeViews',
+        'totalOrders',
+        'pendingOrders',
+        'processingOrders',
+        'completedOrders',
+        'totalRevenue',
+        'recentOrders',
+        'recentFollowers',
+        'unreadNotificationsCount',
+        'unreadMessagesCount',
+        'categories',
+        'averageRating'
+    ));
+}
 
     /**
      * Customer dashboard.

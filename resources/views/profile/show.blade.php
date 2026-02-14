@@ -599,16 +599,16 @@
                     <a href="{{ route('vendor.show', $user->id) }}" class="nav-item">
                         <i class="ri-store-line"></i> My Store
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ route('vendor.orders.index') }}" class="nav-item">
                         <i class="ri-shopping-bag-3-line"></i> Orders
                     </a>
                 </div>
                 <div class="nav-group">
                     <div class="nav-label">PRODUCTS</div>
-                    <a href="#" class="nav-item">
+                    <a href="{{ route('vendor.products.create') }}" class="nav-item">
                         <i class="ri-add-circle-line"></i> Add Product
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="{{ route('vendor.products.index') }}" class="nav-item">
                         <i class="ri-list-check"></i> Manage Products
                     </a>
                 </div>

@@ -9,22 +9,21 @@ class OrderItem extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'order_id',
         'product_id',
-        'vendor_id',
         'quantity',
         'price',
-        'total',
+        'total'
+    ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'total' => 'decimal:2'
     ];
 
     /**
-     * Get the order that owns the item.
+     * Get the order that owns the order item.
      */
     public function order()
     {
@@ -32,18 +31,10 @@ class OrderItem extends Model
     }
 
     /**
-     * Get the product for this item.
+     * Get the product that owns the order item.
      */
     public function product()
     {
         return $this->belongsTo(Product::class);
-    }
-
-    /**
-     * Get the vendor for this item.
-     */
-    public function vendor()
-    {
-        return $this->belongsTo(User::class, 'vendor_id');
     }
 }

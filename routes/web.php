@@ -5,6 +5,12 @@ use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\VendorCustomerController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\VendorController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -138,12 +144,71 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/customer/dashboard', [VendorCustomerController::class, 'customerDashboard'])
         ->name('customer.dashboard')
         ->middleware('role:customer');
+});
 
-    // Vendor specific settings
-    Route::prefix('vendor')->name('vendor.')->middleware('role:vendor')->group(function () {
-        Route::post('/settings', [VendorCustomerController::class, 'updateSettings'])->name('settings.update');
-        Route::post('/password', [VendorCustomerController::class, 'updatePassword'])->name('password.update');
-    });
+// =========================================================================
+// COMPLETE VENDOR ROUTES
+// =========================================================================
+Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('vendor.')->group(function () {
+    
+    // ======== VENDOR DASHBOARD & STORE ========
+    Route::get('/dashboard', [VendorCustomerController::class, 'vendorDashboard'])->name('dashboard');
+    Route::get('/store/{id}', [VendorCustomerController::class, 'showVendor'])->name('store'); // FIXES YOUR ERROR
+    
+    // ======== ORDERS MANAGEMENT ========
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+    Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+    
+    Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export');
+    Route::get('/orders-list', [OrderController::class, 'getOrders'])->name('orders.list');
+    
+    // ======== PRODUCTS MANAGEMENT ========
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
+    Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
+    
+    // Product status updates
+    Route::patch('/products/{id}/activate', [ProductController::class, 'activate'])->name('products.activate');
+    Route::patch('/products/{id}/deactivate', [ProductController::class, 'deactivate'])->name('products.deactivate');
+    Route::post('/products/{id}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggle-status');
+    
+    // Bulk product actions
+    Route::post('/products/bulk-delete', [ProductController::class, 'bulkDelete'])->name('products.bulk-delete');
+    Route::patch('/products/bulk-activate', [ProductController::class, 'bulkActivate'])->name('products.bulk-activate');
+    Route::patch('/products/bulk-deactivate', [ProductController::class, 'bulkDeactivate'])->name('products.bulk-deactivate');
+    
+    // AJAX endpoints for products
+    Route::get('/products-list', [ProductController::class, 'getVendorProducts'])->name('products.list');
+    
+    // ======== CATEGORIES MANAGEMENT ========
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    Route::get('/categories-list', [CategoryController::class, 'getCategories'])->name('categories.list');
+    
+    // ======== ANALYTICS ========
+    Route::get('/sales-report', [VendorController::class, 'salesReport'])->name('sales-report');
+    Route::get('/store-views', [VendorController::class, 'storeViews'])->name('store-views');
+    Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+    Route::post('/reviews/{id}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+    Route::get('/reviews-stats', [ReviewController::class, 'getStats'])->name('reviews.stats');
+    
+    // ======== SETTINGS ========
+    Route::get('/profile', [VendorCustomerController::class, 'show'])->name('profile');
+    Route::get('/settings', [VendorCustomerController::class, 'edit'])->name('settings');
+    Route::post('/settings', [VendorCustomerController::class, 'updateSettings'])->name('settings.update');
+    Route::post('/password', [VendorCustomerController::class, 'updatePassword'])->name('password.update');
+    
+    // ======== NOTIFICATIONS & MESSAGES ========
+    Route::get('/notifications', [VendorController::class, 'notifications'])->name('notifications');
+    Route::get('/messages', [VendorController::class, 'messages'])->name('messages');
 });
 
 // =========================================================================
@@ -183,7 +248,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // ======== VENDORS MANAGEMENT ========
         Route::get('/vendors', [AdminController::class, 'vendors'])->name('vendors');
         Route::get('/vendors/{id}', [AdminController::class, 'showVendor'])->name('vendors.show');
-        Route::get('/vendors/{id}/edit', [AdminController::class, 'editVendor'])->name('vendors.edit'); 
+        Route::get('/vendors/{id}/edit', [AdminController::class, 'editVendor'])->name('vendors.edit');
         Route::put('/vendors/{id}', [AdminController::class, 'updateVendor'])->name('vendors.update');
         Route::delete('/vendors/{id}', [AdminController::class, 'deleteVendor'])->name('vendors.delete');
         Route::post('/vendors/{id}/verify', [AdminController::class, 'verifyVendor'])->name('vendors.verify');
