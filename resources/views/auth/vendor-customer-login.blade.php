@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Vendora - Customer & Vendor Login</title>
+    <title>Vendora - Customer & Vendor Login | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         @font-face {
             font-family: 'Inter';
@@ -31,8 +32,8 @@
             --white: #ffffff;
             --error-color: #D32F2F;
             --success-color: #388E3C;
-            --border-color: #E0E0E0;
             --card-shadow: 0 10px 40px rgba(0,0,0,0.05);
+            --border-color: #E0E0E0;
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
@@ -77,7 +78,7 @@
             align-items: center;
             gap: 8px;
         }
-
+        
         .logo-icon {
             color: var(--primary-gold);
             font-size: 32px;
@@ -99,26 +100,52 @@
             background-color: rgba(0,0,0,0.05);
         }
 
+        /* Ethiopia Badge */
+        .ethiopia-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #078930 0%, #FCDD09 50%, #DA121A 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
         /* Main Content */
         .main-container {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 60px 20px;
+            padding: 40px 20px;
         }
 
         .login-card {
             background: var(--white);
             width: 100%;
-            max-width: 520px;
-            padding: 60px;
+            max-width: 480px;
+            padding: 48px;
             border-radius: var(--radius-lg);
             box-shadow: var(--card-shadow);
             position: relative;
             overflow: hidden;
+            animation: slideUp 0.5s ease;
         }
 
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         /* Decorative element */
         .login-card::before {
             content: '';
@@ -132,30 +159,72 @@
 
         .card-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
         .card-header h1 {
-            font-family: 'Inter-Bold', sans-serif;
-            font-size: 32px;
-            margin-bottom: 12px;
+            font-size: 28px;
+            margin-bottom: 8px;
             color: var(--text-dark);
+            font-weight: 700;
         }
 
         .card-header p {
             color: var(--text-gray);
-            font-size: 16px;
+            font-size: 15px;
             line-height: 1.5;
+        }
+
+        /* Role Switch Tabs */
+        .role-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            padding: 4px;
+            background: #f5f5f5;
+            border-radius: 50px;
+        }
+
+        .role-tab {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .role-tab i {
+            font-size: 18px;
+        }
+
+        .role-tab.active {
+            background: var(--white);
+            color: var(--primary-gold);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .role-tab:hover:not(.active) {
+            color: var(--primary-gold);
         }
 
         /* Alert Messages */
         .alert {
-            padding: 16px;
+            padding: 14px 16px;
             border-radius: var(--radius-sm);
             margin-bottom: 24px;
             display: flex;
             align-items: center;
             gap: 12px;
+            font-size: 14px;
             animation: slideDown 0.3s ease;
         }
 
@@ -190,7 +259,7 @@
         .form-label {
             display: block;
             margin-bottom: 8px;
-            font-family: 'Inter-Bold', sans-serif;
+            font-weight: 600;
             font-size: 14px;
             color: var(--text-dark);
         }
@@ -208,7 +277,7 @@
             font-size: 20px;
             transition: color 0.2s;
         }
-
+        
         .toggle-password {
             position: absolute;
             right: 16px;
@@ -218,7 +287,6 @@
             cursor: pointer;
             font-size: 20px;
             transition: color 0.2s;
-            z-index: 10;
         }
 
         .toggle-password:hover {
@@ -230,7 +298,7 @@
             padding: 16px 48px 16px 50px;
             font-size: 16px;
             border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius-md);
             background-color: #FAFAFA;
             color: var(--text-dark);
             font-family: 'Inter', sans-serif;
@@ -243,7 +311,7 @@
             background-color: var(--white);
             box-shadow: 0 0 0 4px rgba(184, 142, 63, 0.1);
         }
-
+        
         .form-control.error {
             border-color: var(--error-color);
         }
@@ -265,7 +333,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 32px;
+            margin: 24px 0 28px;
             font-size: 14px;
             flex-wrap: wrap;
             gap: 12px;
@@ -279,12 +347,12 @@
             color: var(--text-gray);
             user-select: none;
         }
-
+        
         .custom-checkbox {
             width: 20px;
             height: 20px;
             border: 2px solid #D1D1D1;
-            border-radius: 4px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -300,7 +368,7 @@
             background-color: var(--primary-gold);
             border-color: var(--primary-gold);
         }
-
+        
         input[type="checkbox"]:checked + .custom-checkbox::after {
             content: "\EB7B";
             font-family: 'remixicon';
@@ -313,7 +381,7 @@
             text-decoration: none;
             transition: color 0.2s;
         }
-
+        
         .forgot-link:hover {
             color: var(--primary-gold);
             text-decoration: underline;
@@ -325,9 +393,9 @@
             background: linear-gradient(135deg, var(--primary-gold) 0%, #ca9e4b 100%);
             color: var(--white);
             border: none;
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius-md);
             font-size: 18px;
-            font-family: 'Inter-Bold', sans-serif;
+            font-weight: 700;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 4px 15px rgba(184, 142, 63, 0.3);
@@ -337,95 +405,25 @@
             gap: 8px;
         }
 
-        .btn-submit:hover {
+        .btn-submit:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(184, 142, 63, 0.4);
         }
-
-        .btn-submit:active {
+        
+        .btn-submit:active:not(:disabled) {
             transform: translateY(0);
         }
 
         .btn-submit:disabled {
             opacity: 0.7;
             cursor: not-allowed;
-            transform: none;
         }
 
-        .signup-prompt {
-            text-align: center;
-            margin-top: 24px;
-            color: var(--text-gray);
-            font-size: 15px;
-        }
-
-        .signup-link {
-            color: var(--primary-gold);
-            font-family: 'Inter-Bold', sans-serif;
-            text-decoration: none;
-            margin-left: 4px;
-        }
-
-        .signup-link:hover {
-            text-decoration: underline;
-        }
-
-        .role-switch {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-            padding: 4px;
-            background-color: #f5f5f5;
-            border-radius: 40px;
-        }
-
-        .role-btn {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            background: none;
-            border-radius: 40px;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-gray);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .role-btn.active {
-            background-color: var(--white);
-            color: var(--primary-gold);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .role-btn:hover {
-            color: var(--primary-gold);
-        }
-
-        /* Footer */
-        .footer-minimal {
-            text-align: center;
-            padding: 30px;
-            color: #999;
-            font-size: 12px;
-        }
-
-        .footer-minimal a {
-            color: #999;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .footer-minimal a:hover {
-            color: var(--primary-gold);
-        }
-
-        /* Loading Spinner */
         .spinner {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             border-top-color: white;
             animation: spin 0.8s linear infinite;
@@ -435,103 +433,341 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Responsive */
+        .signup-prompt {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-gray);
+            font-size: 15px;
+        }
+
+        .signup-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 12px;
+        }
+
+        .signup-link {
+            color: var(--primary-gold);
+            text-decoration: none;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 30px;
+            transition: all 0.2s;
+        }
+
+        .signup-link:hover {
+            background: #fef3e7;
+            transform: translateY(-1px);
+        }
+
+        .signup-link i {
+            font-size: 16px;
+        }
+
+        /* Footer minimal */
+        .footer-minimal {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #999;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-gold);
+        }
+
+        /* Responsive Design */
         @media screen and (max-width: 1280px) {
-            .navbar { padding: 24px 40px; }
-            .login-card { max-width: 500px; padding: 50px; }
+            .navbar { padding: 20px 40px; }
         }
 
         @media screen and (max-width: 1024px) {
-            .navbar { padding: 20px 32px; }
-            .logo { font-size: 26px; }
-            .logo-icon { font-size: 30px; }
-            .login-card { max-width: 480px; padding: 48px; }
-            .card-header h1 { font-size: 30px; }
+            .navbar { padding: 18px 30px; }
+            .logo { font-size: 24px; }
+            .logo-icon { font-size: 28px; }
         }
 
         @media screen and (max-width: 900px) {
-            .navbar { padding: 18px 28px; }
+            .navbar { padding: 16px 28px; }
             .login-card { padding: 40px; }
-            .form-control { padding: 14px 44px 14px 46px; }
+            .card-header h1 { font-size: 26px; }
         }
 
         @media screen and (max-width: 768px) {
-            .navbar { padding: 16px 24px; }
-            .logo { font-size: 24px; gap: 6px; }
-            .logo-icon { font-size: 28px; }
-            .menu-btn { display: block; }
+            .navbar { 
+                padding: 14px 20px; 
+            }
+            
+            .menu-btn { 
+                display: block; 
+            }
 
-            .main-container { padding: 40px 20px; }
-            .login-card { padding: 40px 32px; border-radius: 20px; max-width: 460px; }
-            .card-header h1 { font-size: 28px; }
-            .card-header p { font-size: 15px; }
-            .form-control { font-size: 15px; }
-            .btn-submit { font-size: 17px; padding: 15px; }
+            .main-container { 
+                padding: 30px 16px; 
+            }
+            
+            .login-card { 
+                padding: 32px 24px; 
+                max-width: 100%;
+            }
+            
+            .card-header h1 { 
+                font-size: 24px; 
+            }
+            
+            .role-tab {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+            
+            .form-control { 
+                padding: 14px 44px 14px 46px; 
+                font-size: 15px; 
+            }
+            
+            .btn-submit { 
+                font-size: 16px; 
+                padding: 14px; 
+            }
+            
+            .signup-links {
+                flex-direction: column;
+                gap: 8px;
+                align-items: center;
+            }
+            
+            .signup-link {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
         @media screen and (max-width: 640px) {
-            .navbar { padding: 14px 20px; }
+            .navbar { padding: 12px 16px; }
             .logo { font-size: 22px; }
             .logo-icon { font-size: 26px; }
-            .menu-btn { font-size: 22px; padding: 6px; }
-
-            .main-container { padding: 30px 16px; }
-            .login-card { padding: 32px 24px; border-radius: 20px; }
-            .card-header h1 { font-size: 26px; }
-            .card-header p { font-size: 14px; }
-            .form-label { font-size: 13px; }
-            .form-control { padding: 14px 40px 14px 44px; font-size: 14px; }
-            .input-icon { font-size: 18px; left: 14px; }
-            .toggle-password { font-size: 18px; right: 14px; }
-            .form-actions { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 28px; }
-            .checkbox-wrapper { font-size: 14px; }
-            .forgot-link { font-size: 14px; }
-            .btn-submit { padding: 14px; font-size: 16px; border-radius: 10px; }
-            .signup-prompt { font-size: 14px; margin-top: 20px; }
-            .footer-minimal { padding: 24px 20px; font-size: 11px; }
+            
+            .login-card { 
+                padding: 28px 20px; 
+            }
+            
+            .card-header h1 { 
+                font-size: 22px; 
+            }
+            
+            .card-header p { 
+                font-size: 14px; 
+            }
+            
+            .form-label { 
+                font-size: 13px; 
+            }
+            
+            .form-control { 
+                padding: 14px 40px 14px 44px; 
+                font-size: 14px; 
+            }
+            
+            .input-icon { 
+                font-size: 18px; 
+                left: 14px; 
+            }
+            
+            .toggle-password { 
+                font-size: 18px; 
+                right: 14px; 
+            }
+            
+            .form-actions { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 12px; 
+                margin-bottom: 24px; 
+            }
+            
+            .btn-submit { 
+                padding: 14px; 
+                font-size: 15px; 
+            }
         }
 
         @media screen and (max-width: 480px) {
-            .navbar { padding: 12px 16px; }
-            .logo { font-size: 20px; gap: 4px; }
-            .logo-icon { font-size: 24px; }
-            .menu-btn { font-size: 20px; padding: 4px; }
+            .navbar { 
+                padding: 10px 14px; 
+            }
+            
+            .logo { 
+                font-size: 20px; 
+                gap: 4px; 
+            }
+            
+            .logo-icon { 
+                font-size: 24px; 
+            }
+            
+            .menu-btn { 
+                font-size: 22px; 
+                padding: 6px; 
+            }
 
-            .main-container { padding: 24px 12px; }
-            .login-card { padding: 28px 20px; border-radius: 18px; box-shadow: 0 8px 30px rgba(0,0,0,0.05); }
-            .login-card::before { height: 5px; }
-            .card-header { margin-bottom: 30px; }
-            .card-header h1 { font-size: 24px; }
-            .card-header p { font-size: 13px; }
-            .form-group { margin-bottom: 20px; }
-            .form-label { font-size: 12px; margin-bottom: 6px; }
-            .form-control { padding: 12px 36px 12px 42px; font-size: 14px; border-radius: 10px; }
-            .input-icon { font-size: 16px; left: 12px; }
-            .toggle-password { font-size: 16px; right: 12px; }
-            .custom-checkbox { width: 18px; height: 18px; }
-            input[type="checkbox"]:checked + .custom-checkbox::after { font-size: 12px; }
-            .btn-submit { padding: 13px; font-size: 15px; border-radius: 10px; box-shadow: 0 4px 12px rgba(184, 142, 63, 0.3); }
-            .signup-prompt { font-size: 13px; margin-top: 18px; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
-            .footer-minimal { padding: 20px 16px; font-size: 10px; }
+            .main-container { 
+                padding: 20px 12px; 
+            }
+            
+            .login-card { 
+                padding: 24px 16px; 
+                border-radius: 16px; 
+            }
+            
+            .login-card::before { 
+                height: 5px; 
+            }
+            
+            .card-header { 
+                margin-bottom: 24px; 
+            }
+            
+            .card-header h1 { 
+                font-size: 20px; 
+            }
+            
+            .card-header p { 
+                font-size: 13px; 
+            }
+            
+            .role-tabs {
+                gap: 8px;
+                margin-bottom: 24px;
+            }
+            
+            .role-tab {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            
+            .role-tab i {
+                font-size: 16px;
+            }
+            
+            .form-group { 
+                margin-bottom: 20px; 
+            }
+            
+            .form-label { 
+                font-size: 12px; 
+                margin-bottom: 6px; 
+            }
+            
+            .form-control { 
+                padding: 12px 36px 12px 42px; 
+                font-size: 14px; 
+                border-radius: 10px; 
+            }
+            
+            .input-icon { 
+                font-size: 16px; 
+                left: 12px; 
+            }
+            
+            .toggle-password { 
+                font-size: 16px; 
+                right: 12px; 
+            }
+            
+            .custom-checkbox { 
+                width: 18px; 
+                height: 18px; 
+            }
+            
+            input[type="checkbox"]:checked + .custom-checkbox::after { 
+                font-size: 12px; 
+            }
+            
+            .btn-submit { 
+                padding: 13px; 
+                font-size: 15px; 
+                border-radius: 10px; 
+            }
+            
+            .signup-prompt { 
+                font-size: 13px; 
+                margin-top: 20px; 
+            }
+            
+            .footer-minimal { 
+                padding: 20px; 
+                font-size: 11px; 
+            }
+            
+            .footer-links {
+                gap: 16px;
+            }
         }
 
         @media screen and (max-width: 360px) {
-            .navbar { padding: 10px 12px; }
-            .logo { font-size: 18px; }
-            .logo-icon { font-size: 22px; }
+            .navbar { 
+                padding: 8px 12px; 
+            }
+            
+            .logo { 
+                font-size: 18px; 
+            }
+            
+            .logo-icon { 
+                font-size: 22px; 
+            }
 
-            .login-card { padding: 24px 16px; }
-            .card-header h1 { font-size: 22px; }
-            .card-header p { font-size: 12px; }
-            .form-control { padding: 10px 32px 10px 38px; font-size: 13px; }
-            .btn-submit { padding: 12px; font-size: 14px; }
-            .footer-minimal { padding: 16px 12px; font-size: 9px; }
-        }
-
-        /* Accessibility */
-        .menu-btn:focus-visible, .btn-submit:focus-visible, .form-control:focus-visible {
-            outline: 2px solid var(--primary-gold);
-            outline-offset: 2px;
+            .login-card { 
+                padding: 20px 14px; 
+            }
+            
+            .card-header h1 { 
+                font-size: 18px; 
+            }
+            
+            .card-header p { 
+                font-size: 12px; 
+            }
+            
+            .role-tab {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+            
+            .form-control { 
+                padding: 10px 32px 10px 38px; 
+                font-size: 13px; 
+            }
+            
+            .btn-submit { 
+                padding: 12px; 
+                font-size: 14px; 
+            }
+            
+            .footer-minimal { 
+                padding: 16px; 
+                font-size: 10px; 
+            }
         }
     </style>
 </head>
@@ -541,6 +777,9 @@
         <a href="{{ route('home') }}" class="logo">
             <i class="ri-store-3-fill logo-icon"></i>
             Vendora
+            <span class="ethiopia-badge">
+                <i class="ri-map-pin-line"></i> Jimma
+            </span>
         </a>
         <button class="menu-btn" aria-label="Menu" id="menuBtn">
             <i class="ri-menu-line"></i>
@@ -550,52 +789,62 @@
     <div class="main-container">
         <div class="login-card">
             <div class="card-header">
-                <h1>Welcome Back</h1>
-                <p>Sign in to your Vendora account</p>
+                <h1 id="welcomeTitle">Welcome Back</h1>
+                <p id="welcomeSubtitle">Sign in to continue to your account</p>
             </div>
 
             <!-- Session Status Messages -->
             @if(session('success'))
-                <div class="alert alert-success" id="successAlert">
+                <div class="alert alert-success">
                     <i class="ri-checkbox-circle-line"></i>
                     {{ session('success') }}
                 </div>
             @endif
 
             @if(session('error'))
-                <div class="alert alert-error" id="errorAlert">
+                <div class="alert alert-error">
                     <i class="ri-error-warning-line"></i>
                     {{ session('error') }}
                 </div>
             @endif
 
-            <!-- Role Selection -->
-            <div class="role-switch" id="roleSwitch">
-                <button type="button" class="role-btn active" data-role="customer" onclick="setRole('customer')">
+            @if($errors->any())
+                <div class="alert alert-error">
+                    <i class="ri-error-warning-line"></i>
+                    @foreach($errors->all() as $error)
+                        {{ $error }}<br>
+                    @endforeach
+                </div>
+            @endif
+
+            <!-- Role Selection Tabs -->
+            <div class="role-tabs" id="roleTabs">
+                <button type="button" class="role-tab active" data-role="customer" onclick="setRole('customer')">
                     <i class="ri-user-line"></i> Customer
                 </button>
-                <button type="button" class="role-btn" data-role="vendor" onclick="setRole('vendor')">
+                <button type="button" class="role-tab" data-role="vendor" onclick="setRole('vendor')">
                     <i class="ri-store-line"></i> Vendor
                 </button>
             </div>
 
-            <form action="{{ route('login.authenticate') }}" method="POST" id="loginForm">
+            <!-- Login Form -->
+            <form method="POST" action="{{ route('login.authenticate') }}" id="loginForm">
                 @csrf
                 <input type="hidden" name="role" id="selectedRole" value="customer">
 
+                <!-- Email Field -->
                 <div class="form-group">
-                    <label for="email" class="form-label">Email Address</label>
+                    <label for="email" class="form-label" id="emailLabel">Email Address</label>
                     <div class="input-wrapper">
-                        <i class="ri-mail-line input-icon"></i>
-                        <input type="email"
-                               id="email"
-                               name="email"
-                               class="form-control @error('email') error @enderror"
-                               placeholder="name@example.com"
-                               value="{{ old('email') }}"
-                               required
-                               autofocus
-                               autocomplete="email">
+                        <i class="ri-mail-line input-icon" id="emailIcon"></i>
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               class="form-control @error('email') error @enderror" 
+                               placeholder="Enter your email" 
+                               value="{{ old('email') }}" 
+                               required 
+                               autofocus>
                     </div>
                     @error('email')
                         <div class="error-message">
@@ -604,18 +853,18 @@
                     @enderror
                 </div>
 
+                <!-- Password Field -->
                 <div class="form-group">
                     <label for="password" class="form-label">Password</label>
                     <div class="input-wrapper">
                         <i class="ri-lock-2-line input-icon"></i>
-                        <input type="password"
-                               id="password"
-                               name="password"
-                               class="form-control @error('password') error @enderror"
-                               placeholder="••••••••"
-                               required
-                               autocomplete="current-password">
-                        <i class="ri-eye-off-line toggle-password" onclick="togglePasswordVisibility(this)" id="togglePassword"></i>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               class="form-control @error('password') error @enderror" 
+                               placeholder="Enter your password" 
+                               required>
+                        <i class="ri-eye-off-line toggle-password" onclick="togglePassword(this)"></i>
                     </div>
                     @error('password')
                         <div class="error-message">
@@ -624,36 +873,83 @@
                     @enderror
                 </div>
 
+                <!-- Remember Me & Forgot Password -->
                 <div class="form-actions">
                     <label class="checkbox-wrapper">
                         <input type="checkbox" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
                         <span class="custom-checkbox"></span>
-                        Remember me
+                        <span>Remember me</span>
                     </label>
                     <a href="{{ route('password.request') }}" class="forgot-link">Forgot password?</a>
                 </div>
 
+                <!-- Submit Button -->
                 <button type="submit" class="btn-submit" id="submitBtn">
                     <span>Sign In</span>
                 </button>
 
+                <!-- Sign Up Links -->
                 <div class="signup-prompt">
-                    Don't have an account?
-                    <a href="{{ route('register') }}" class="signup-link">Create account</a>
+                    <span>Don't have an account?</span>
+                    <div class="signup-links">
+                        <a href="{{ route('register.customer') }}" class="signup-link">
+                            <i class="ri-user-line"></i> Join as Customer
+                        </a>
+                        <a href="{{ route('register') }}" class="signup-link">
+                            <i class="ri-store-line"></i> Join as Vendor
+                        </a>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
-
+    
     <div class="footer-minimal">
-        &copy; {{ date('Y') }} Vendora Inc. All rights reserved. •
-        <a href="{{ route('privacy.policy') }}">Privacy Policy</a> •
-        <a href="{{ route('terms.service') }}">Terms of Service</a>
+        <div>&copy; {{ date('Y') }} Vendora Inc. All rights reserved. Made with ❤️ in Jimma, Ethiopia</div>
+        <div class="footer-links">
+            <a href="{{ route('privacy.policy') }}">Privacy Policy</a>
+            <a href="{{ route('terms.service') }}">Terms of Service</a>
+            <a href="{{ route('contact') }}">Contact Us</a>
+        </div>
     </div>
 
     <script>
+        // CSRF Token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        // Role selection function
+        function setRole(role) {
+            // Update hidden input
+            document.getElementById('selectedRole').value = role;
+            
+            // Update active tab
+            document.querySelectorAll('.role-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.role === role) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // Update welcome text based on role
+            const title = document.getElementById('welcomeTitle');
+            const subtitle = document.getElementById('welcomeSubtitle');
+            
+            if (role === 'vendor') {
+                title.textContent = 'Welcome Vendor!';
+                subtitle.textContent = 'Sign in to manage your store';
+                document.getElementById('email').placeholder = 'Enter your business email';
+            } else {
+                title.textContent = 'Welcome Back!';
+                subtitle.textContent = 'Sign in to continue to your account';
+                document.getElementById('email').placeholder = 'Enter your email';
+            }
+
+            // Save to localStorage
+            localStorage.setItem('lastLoginRole', role);
+        }
+
         // Password visibility toggle
-        function togglePasswordVisibility(element) {
+        function togglePassword(element) {
             const input = document.getElementById('password');
             if (input.type === 'password') {
                 input.type = 'text';
@@ -666,58 +962,26 @@
             }
         }
 
-        // Role selection
-        function setRole(role) {
-            document.getElementById('selectedRole').value = role;
-
-            // Update active state
-            document.querySelectorAll('.role-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.role === role) {
-                    btn.classList.add('active');
-                }
-            });
-
-            // Update form placeholder text based on role
-            const emailInput = document.getElementById('email');
-            if (role === 'vendor') {
-                emailInput.placeholder = 'vendor@example.com';
-            } else {
-                emailInput.placeholder = 'name@example.com';
-            }
-        }
-
         // Form submission with loading state
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const submitBtn = document.getElementById('submitBtn');
-            const originalText = submitBtn.innerHTML;
-
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Signing in...';
-
-            // Form will submit normally, but button shows loading state
-            // Remove disabled after 5 seconds in case of error
-            setTimeout(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            }, 5000);
         });
 
         // Auto-hide alerts after 5 seconds
-        document.addEventListener('DOMContentLoaded', function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                setTimeout(() => {
-                    alert.style.transition = 'opacity 0.5s';
-                    alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 500);
-                }, 5000);
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
             });
-        });
+        }, 5000);
 
-        // Mobile menu (you can expand this later)
+        // Mobile menu
         document.getElementById('menuBtn')?.addEventListener('click', function() {
-            alert('Mobile menu would open here. In a real app, this would show navigation links.');
+            // In a real app, this would toggle a mobile menu
+            console.log('Mobile menu clicked');
         });
 
         // Input focus effects
@@ -731,7 +995,7 @@
             });
         });
 
-        // Prevent form double-submission
+        // Prevent double submission
         let submitted = false;
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             if (submitted) {
@@ -741,14 +1005,17 @@
             submitted = true;
         });
 
-        // Add demo credentials for testing (remove in production)
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            console.log('Demo credentials:');
-            console.log('Customer: customer@example.com / password');
-            console.log('Vendor: vendor@example.com / password');
-            console.log('Admin: admin@vendora.com / password');
+        // Load last selected role from localStorage
+        const lastRole = localStorage.getItem('lastLoginRole');
+        if (lastRole) {
+            setRole(lastRole);
+        } else {
+            setRole('customer');
         }
-    </script>
 
+        // Console welcome message
+        console.log('Welcome to Vendora Login Portal');
+        console.log('Please select your role and enter your credentials');
+    </script>
 </body>
 </html>

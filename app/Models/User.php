@@ -134,6 +134,21 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'admin';
     }
 
+
+
+    /**
+ * The categories that belong to the vendor.
+ */
+public function categories()
+{
+    return $this->belongsToMany(Category::class, 'category_vendor', 'user_id', 'category_id');
+}
+
+
+
+
+
+
     /**
      * Get the avatar URL with fallback.
      */

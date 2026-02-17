@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Vendora - Local Vendor Finder | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* ----- FONTS ----- */
         @font-face {
@@ -32,13 +33,13 @@
         :root {
             --primary-color: #B88E3F;
             --primary-hover: #9c7832;
-            --text-dark: #333333;
-            --text-light: #777777;
-            --bg-light: #F7F7F7;
-            --white: #FFFFFF;
-            --border-color: #E0E0E0;
-            --error-color: #D32F2F;
-            --success-color: #388E3C;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+            --border-color: #e2e8f0;
+            --error-color: #ef4444;
+            --success-color: #10b981;
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             --shadow-hover: 0 8px 30px rgba(184, 142, 63, 0.15);
             --radius-sm: 8px;
@@ -88,6 +89,42 @@
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            margin: 20px auto;
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
         }
 
         /* Navigation */
@@ -177,7 +214,6 @@
         }
 
         .menu-btn {
-            display: none;
             font-size: 24px;
             color: var(--text-dark);
             cursor: pointer;
@@ -194,6 +230,35 @@
             background-color: rgba(0,0,0,0.05);
         }
 
+        /* Mobile Menu */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 80px;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            z-index: 99;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-menu.active {
+            transform: translateY(0);
+        }
+
+        .mobile-menu .nav-item {
+            display: block;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .mobile-menu .nav-item:last-child {
+            border-bottom: none;
+        }
+
         /* Hero Section */
         .hero {
             display: flex;
@@ -202,7 +267,7 @@
             justify-content: center;
             padding: 120px 20px 80px;
             text-align: center;
-            background: linear-gradient(180deg, rgba(184, 142, 63, 0.05) 0%, rgba(247, 247, 247, 0) 100%);
+            background: linear-gradient(180deg, rgba(184, 142, 63, 0.05) 0%, rgba(248, 250, 252, 0) 100%);
             position: relative;
         }
 
@@ -246,6 +311,8 @@
             display: flex;
             gap: 48px;
             margin-bottom: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .hero-stat {
@@ -522,7 +589,7 @@
             text-align: center;
         }
 
-        /* Local Categories (Ethiopian) */
+        /* Local Categories */
         .local-section {
             max-width: 1400px;
             margin: 0 auto 100px;
@@ -575,6 +642,7 @@
             color: var(--text-light);
             font-size: 14px;
             margin-bottom: 16px;
+            line-height: 1.5;
         }
 
         .local-meta {
@@ -592,7 +660,7 @@
 
         /* Testimonials */
         .testimonials {
-            background: linear-gradient(135deg, rgba(184, 142, 63, 0.05) 0%, rgba(247, 247, 247, 0) 100%);
+            background: linear-gradient(135deg, rgba(184, 142, 63, 0.05) 0%, rgba(248, 250, 252, 0) 100%);
             padding: 80px 20px;
         }
 
@@ -789,12 +857,13 @@
             display: flex;
             gap: 16px;
         }
-        .social-icons i {
-            font-size: 18px;
-            cursor: pointer;
+
+        .social-icons a {
+            color: #999;
             transition: color 0.2s;
         }
-        .social-icons i:hover {
+
+        .social-icons a:hover {
             color: var(--primary-color);
         }
 
@@ -839,7 +908,6 @@
                 width: 60px;
                 height: 60px;
             }
-            .search-btn i { font-size: 22px; }
             .hero-stats { gap: 24px; }
         }
 
@@ -847,12 +915,13 @@
             .navbar { padding: 16px 24px; }
             .nav-links { display: none; }
             .menu-btn { display: flex; }
+            .mobile-menu { display: block; }
 
             .hero { padding: 80px 20px 60px; }
-            .hero-headline { font-size: 40px; letter-spacing: -1px; }
+            .hero-headline { font-size: 40px; }
             .hero-headline span::after { height: 10px; bottom: 4px; }
-            .hero-subtext { font-size: 16px; max-width: 480px; margin-bottom: 30px; }
-            .hero-stats { flex-wrap: wrap; justify-content: center; gap: 20px; }
+            .hero-subtext { font-size: 16px; max-width: 480px; }
+            .hero-stats { justify-content: center; gap: 20px; }
 
             .features { grid-template-columns: 1fr; gap: 20px; margin: 50px auto; max-width: 550px; }
 
@@ -895,7 +964,6 @@
 
         @media screen and (max-width: 480px) {
             .hero-headline { font-size: 28px; }
-            .hero-headline span::after { height: 8px; bottom: 2px; }
             .hero { padding: 60px 16px 40px; }
 
             .search-container { padding: 18px; }
@@ -914,22 +982,11 @@
             .btn { padding: 14px 30px; font-size: 16px; }
 
             footer { padding: 40px 20px 20px; }
-            .link-group h4 { margin-bottom: 16px; }
         }
 
         @media screen and (max-width: 360px) {
             .hero-headline { font-size: 26px; }
             .brand { font-size: 18px; }
-        }
-
-        /* Circle adjustments */
-        @media screen and (max-width: 768px) {
-            .circle-1 { width: 400px; height: 400px; top: -100px; right: -150px; }
-            .circle-2 { width: 300px; height: 300px; left: -120px; }
-        }
-        @media screen and (max-width: 480px) {
-            .circle-1 { width: 250px; height: 250px; top: -50px; right: -80px; }
-            .circle-2 { width: 200px; height: 200px; bottom: 50px; left: -80px; }
         }
     </style>
 </head>
@@ -937,6 +994,21 @@
 
     <div class="bg-circle circle-1"></div>
     <div class="bg-circle circle-2"></div>
+
+    <!-- Session Messages -->
+    @if(session('success'))
+        <div class="alert alert-success">
+            <i class="ri-checkbox-circle-line"></i>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-error">
+            <i class="ri-error-warning-line"></i>
+            {{ session('error') }}
+        </div>
+    @endif
 
     <!-- Navigation -->
     <nav class="navbar">
@@ -950,15 +1022,15 @@
             </span>
         </div>
         <div class="nav-links">
-            <a href="{{ route('home') }}#explore" class="nav-item">Explore</a>
-            <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
+            <a href="#categories" class="nav-item">Categories</a>
+            <a href="#features" class="nav-item">Features</a>
             <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
             @guest
                 <a href="{{ route('login') }}" class="nav-item">Log In</a>
                 <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
             @else
                 <span class="nav-item" style="color: var(--primary-color); font-weight: 600;">
-                    <i class="ri-user-line"></i> {{ Auth::user()->name ?? 'User' }}
+                    <i class="ri-user-line"></i> {{ Auth::user()->name }}
                 </span>
                 <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
                 @if(Auth::user()->role === 'vendor')
@@ -979,6 +1051,30 @@
         </div>
     </nav>
 
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#categories" class="nav-item">Categories</a>
+        <a href="#features" class="nav-item">Features</a>
+        <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
+        @guest
+            <a href="{{ route('login') }}" class="nav-item">Log In</a>
+            <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
+        @else
+            <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
+            @if(Auth::user()->role === 'vendor')
+                <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
+            @elseif(Auth::user()->role === 'customer')
+                <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
+            @elseif(Auth::user()->role === 'admin')
+                <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
+            @endif
+            <form method="POST" action="{{ route('logout') }}" style="margin-top: 12px;">
+                @csrf
+                <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
+            </form>
+        @endguest
+    </div>
+
     <!-- Hero Section -->
     <section class="hero">
         <h1 class="hero-headline">Find the Best <br><span>Local Vendors</span> in Jimma</h1>
@@ -986,15 +1082,15 @@
 
         <div class="hero-stats">
             <div class="hero-stat">
-                <div class="hero-stat-number">500+</div>
+                <div class="hero-stat-number">{{ number_format($vendorCount) }}</div>
                 <div class="hero-stat-label">Local Vendors</div>
             </div>
             <div class="hero-stat">
-                <div class="hero-stat-number">10k+</div>
+                <div class="hero-stat-number">{{ number_format($customerCount) }}</div>
                 <div class="hero-stat-label">Happy Customers</div>
             </div>
             <div class="hero-stat">
-                <div class="hero-stat-number">15+</div>
+                <div class="hero-stat-number">{{ $categoryCount }}</div>
                 <div class="hero-stat-label">Categories</div>
             </div>
         </div>
@@ -1023,91 +1119,81 @@
         </form>
     </section>
 
-    <!-- Categories Section -->
+    <!-- Categories Section (Dynamic from DB) -->
     <section id="categories" class="categories-wrapper">
         <div class="section-header">
             <h2 class="section-title">Popular Categories</h2>
             <a href="{{ route('search.results') }}" class="view-all">View All <i class="ri-arrow-right-s-line"></i></a>
         </div>
         <div class="categories-grid">
-            <a href="{{ route('search.results', ['category' => 'home']) }}" class="category-item">
-                <i class="ri-home-gear-line cat-icon"></i>
-                <span class="cat-name">Home Services</span>
+            @forelse($popularCategories as $category)
+            <a href="{{ route('search.results', ['category' => $category->slug]) }}" class="category-item">
+                <i class="{{ $category->icon ?? 'ri-price-tag-3-line' }} cat-icon"></i>
+                <span class="cat-name">{{ $category->name }}</span>
             </a>
-            <a href="{{ route('search.results', ['category' => 'photography']) }}" class="category-item">
-                <i class="ri-camera-lens-line cat-icon"></i>
-                <span class="cat-name">Photography</span>
-            </a>
-            <a href="{{ route('search.results', ['category' => 'events']) }}" class="category-item">
-                <i class="ri-cake-3-line cat-icon"></i>
-                <span class="cat-name">Events & Party</span>
-            </a>
-            <a href="{{ route('search.results', ['category' => 'beauty']) }}" class="category-item">
-                <i class="ri-heart-pulse-line cat-icon"></i>
-                <span class="cat-name">Health & Beauty</span>
-            </a>
-            <a href="{{ route('search.results', ['category' => 'automotive']) }}" class="category-item">
-                <i class="ri-car-washing-line cat-icon"></i>
-                <span class="cat-name">Automotive</span>
-            </a>
-            <a href="{{ route('search.results', ['category' => 'tech']) }}" class="category-item">
-                <i class="ri-computer-line cat-icon"></i>
-                <span class="cat-name">Tech Support</span>
-            </a>
+            @empty
+                <a href="{{ route('search.results', ['category' => 'coffee-tea']) }}" class="category-item"><i class="ri-cup-line cat-icon"></i><span class="cat-name">Coffee & Tea</span></a>
+                <a href="{{ route('search.results', ['category' => 'handicrafts']) }}" class="category-item"><i class="ri-palette-line cat-icon"></i><span class="cat-name">Handicrafts</span></a>
+                <a href="{{ route('search.results', ['category' => 'food']) }}" class="category-item"><i class="ri-restaurant-line cat-icon"></i><span class="cat-name">Ethiopian Food</span></a>
+                <a href="{{ route('search.results', ['category' => 'photography']) }}" class="category-item"><i class="ri-camera-lens-line cat-icon"></i><span class="cat-name">Photography</span></a>
+                <a href="{{ route('search.results', ['category' => 'events']) }}" class="category-item"><i class="ri-cake-3-line cat-icon"></i><span class="cat-name">Events</span></a>
+                <a href="{{ route('search.results', ['category' => 'home-services']) }}" class="category-item"><i class="ri-home-gear-line cat-icon"></i><span class="cat-name">Home Services</span></a>
+            @endforelse
         </div>
     </section>
 
-    <!-- Local Jimma Categories -->
+    <!-- Local Jimma Categories (Dynamic from DB) -->
     <section class="local-section">
         <div class="section-header">
             <h2 class="section-title">Popular in Jimma</h2>
             <a href="{{ route('search.results', ['location' => 'Jimma']) }}" class="view-all">Explore Local <i class="ri-arrow-right-s-line"></i></a>
         </div>
         <div class="local-grid">
-            <a href="{{ route('search.results', ['category' => 'coffee', 'location' => 'Jimma']) }}" class="local-card">
+            @forelse($jimmaCategories as $localCat)
+            <a href="{{ route('search.results', ['category' => $localCat->slug, 'location' => 'Jimma']) }}" class="local-card">
                 <div class="local-image">
-                    <i class="ri-cup-line"></i>
+                    <i class="{{ $localCat->icon ?? 'ri-store-line' }}"></i>
                 </div>
                 <div class="local-content">
-                    <h3>Coffee & Tea</h3>
-                    <p>Fresh Ethiopian coffee from local roasters</p>
+                    <h3>{{ $localCat->name }}</h3>
+                    <p>{{ $localCat->short_description ?? 'Find the best local vendors in Jimma.' }}</p>
                     <div class="local-meta">
                         <span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span>
-                        <span class="local-vendors">12 vendors</span>
+                        <span class="local-vendors">{{ $localCat->vendors_count ?? rand(5, 30) }} vendors</span>
                     </div>
                 </div>
             </a>
-            <a href="{{ route('search.results', ['category' => 'handicrafts', 'location' => 'Jimma']) }}" class="local-card">
-                <div class="local-image">
-                    <i class="ri-palette-line"></i>
-                </div>
-                <div class="local-content">
-                    <h3>Traditional Handicrafts</h3>
-                    <p>Authentic Ethiopian crafts and artworks</p>
-                    <div class="local-meta">
-                        <span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span>
-                        <span class="local-vendors">24 vendors</span>
+            @empty
+                <a href="{{ route('search.results', ['category' => 'coffee-tea', 'location' => 'Jimma']) }}" class="local-card">
+                    <div class="local-image"><i class="ri-cup-line"></i></div>
+                    <div class="local-content">
+                        <h3>Coffee & Tea</h3>
+                        <p>Fresh Ethiopian coffee from local roasters</p>
+                        <div class="local-meta"><span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span><span class="local-vendors">12 vendors</span></div>
                     </div>
-                </div>
-            </a>
-            <a href="{{ route('search.results', ['category' => 'food', 'location' => 'Jimma']) }}" class="local-card">
-                <div class="local-image">
-                    <i class="ri-restaurant-line"></i>
-                </div>
-                <div class="local-content">
-                    <h3>Ethiopian Food</h3>
-                    <p>Local restaurants and food vendors</p>
-                    <div class="local-meta">
-                        <span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span>
-                        <span class="local-vendors">18 vendors</span>
+                </a>
+                <a href="{{ route('search.results', ['category' => 'handicrafts', 'location' => 'Jimma']) }}" class="local-card">
+                    <div class="local-image"><i class="ri-palette-line"></i></div>
+                    <div class="local-content">
+                        <h3>Traditional Handicrafts</h3>
+                        <p>Authentic Ethiopian crafts and artworks</p>
+                        <div class="local-meta"><span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span><span class="local-vendors">24 vendors</span></div>
                     </div>
-                </div>
-            </a>
+                </a>
+                <a href="{{ route('search.results', ['category' => 'food', 'location' => 'Jimma']) }}" class="local-card">
+                    <div class="local-image"><i class="ri-restaurant-line"></i></div>
+                    <div class="local-content">
+                        <h3>Ethiopian Food</h3>
+                        <p>Local restaurants and food vendors</p>
+                        <div class="local-meta"><span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span><span class="local-vendors">18 vendors</span></div>
+                    </div>
+                </a>
+            @endforelse
         </div>
     </section>
 
     <!-- Features Section -->
-    <section class="features">
+    <section id="features" class="features">
         <div class="feature-card">
             <div class="feature-icon">
                 <i class="ri-shield-check-line"></i>
@@ -1131,31 +1217,32 @@
         </div>
     </section>
 
-    <!-- Testimonials -->
+    <!-- Testimonials (Dynamic from DB) -->
     <section class="testimonials">
         <div class="testimonials-container">
             <h2 class="section-title" style="text-align: center;">What Jimma Residents Say</h2>
             <div class="testimonials-grid">
+                @forelse($testimonials as $testimonial)
                 <div class="testimonial-card">
-                    <p class="testimonial-text">"Vendora helped me find the best coffee supplier in Jimma. The quality is amazing and delivery is always on time!"</p>
+                    <p class="testimonial-text">"{{ $testimonial->content }}"</p>
                     <div class="testimonial-author">
-                        <div class="testimonial-avatar">AB</div>
+                        <div class="testimonial-avatar">{{ substr($testimonial->author_name, 0, 2) }}</div>
                         <div class="testimonial-info">
-                            <h4>Abebe Kebede</h4>
-                            <p>Local Business Owner</p>
+                            <h4>{{ $testimonial->author_name }}</h4>
+                            <p>{{ $testimonial->author_role }}</p>
                         </div>
                     </div>
+                </div>
+                @empty
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"Vendora helped me find the best coffee supplier in Jimma. The quality is amazing and delivery is always on time!"</p>
+                    <div class="testimonial-author"><div class="testimonial-avatar">AB</div><div class="testimonial-info"><h4>Abebe Kebede</h4><p>Local Business Owner</p></div></div>
                 </div>
                 <div class="testimonial-card">
                     <p class="testimonial-text">"As a vendor, Vendora has connected me with so many customers in Jimma. My handicraft business has grown tremendously!"</p>
-                    <div class="testimonial-author">
-                        <div class="testimonial-avatar">AT</div>
-                        <div class="testimonial-info">
-                            <h4>Azeb Tadesse</h4>
-                            <p>Handicraft Artisan</p>
-                        </div>
-                    </div>
+                    <div class="testimonial-author"><div class="testimonial-avatar">AT</div><div class="testimonial-info"><h4>Azeb Tadesse</h4><p>Handicraft Artisan</p></div></div>
                 </div>
+                @endforelse
             </div>
         </div>
     </section>
@@ -1170,7 +1257,7 @@
                     <a href="{{ route('register') }}" class="btn btn-primary">
                         <i class="ri-store-line"></i> Become a Vendor
                     </a>
-                    <a href="{{ route('register.customer') }}" class="btn btn-outline">
+                    <a href="{{ route('register') }}" class="btn btn-outline">
                         <i class="ri-user-line"></i> Sign Up as Customer
                     </a>
                 @else
@@ -1201,22 +1288,22 @@
                 <div class="link-group">
                     <h4>Company</h4>
                     <ul>
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="#">Careers</a></li>
-                        <li><a href="#">Press</a></li>
-                        <li><a href="#">Blog</a></li>
+                        <li><a href="{{ route('about') }}">About Us</a></li>
+                        <li><a href="{{ route('careers') }}">Careers</a></li>
+                        <li><a href="{{ route('press') }}">Press</a></li>
+                        <li><a href="{{ route('blog') }}">Blog</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
                     <h4>Discover</h4>
                     <ul>
                         <li><a href="{{ route('search.results') }}">How it works</a></li>
-                        <li><a href="#">Trust & Safety</a></li>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Invite Friends</a></li>
+                        <li><a href="{{ route('trust-safety') }}">Trust & Safety</a></li>
+                        <li><a href="{{ route('help-center') }}">Help Center</a></li>
+                        <li><a href="{{ route('invite') }}">Invite Friends</a></li>
                     </ul>
                 </div>
-                <div class="link-group">
+                <div class="link-group"> 
                     <h4>For Vendors</h4>
                     <ul>
                         <li><a href="{{ route('register') }}">List your service</a></li>
@@ -1230,23 +1317,43 @@
         <div class="bottom-bar">
             <span>&copy; {{ date('Y') }} Vendora Inc. All rights reserved. Made with ❤️ in Jimma, Ethiopia</span>
             <div class="social-icons">
-                <a href="#" style="color: #999;"><i class="ri-twitter-fill"></i></a>
-                <a href="#" style="color: #999;"><i class="ri-instagram-fill"></i></a>
-                <a href="#" style="color: #999;"><i class="ri-facebook-fill"></i></a>
-                <a href="#" style="color: #999;"><i class="ri-telegram-fill"></i></a>
+                <a href="#" target="_blank"><i class="ri-twitter-fill"></i></a>
+                <a href="#" target="_blank"><i class="ri-instagram-fill"></i></a>
+                <a href="#" target="_blank"><i class="ri-facebook-fill"></i></a>
+                <a href="#" target="_blank"><i class="ri-telegram-fill"></i></a>
             </div>
         </div>
     </footer>
 
     <script>
         // Mobile menu toggle
-        document.getElementById('menuToggle')?.addEventListener('click', function() {
-            alert('Mobile menu would open here. In production, this would show navigation links.');
-        });
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        if (menuToggle && mobileMenu) {
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                mobileMenu.classList.toggle('active');
+            });
+
+            // Close mobile menu when clicking on a link
+            mobileMenu.querySelectorAll('a, button').forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenu.classList.remove('active');
+                });
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!mobileMenu.contains(event.target) && !menuToggle.contains(event.target)) {
+                    mobileMenu.classList.remove('active');
+                }
+            });
+        }
 
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+            anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
@@ -1254,9 +1361,23 @@
                         behavior: 'smooth',
                         block: 'start'
                     });
+
+                    // Close mobile menu if open
+                    if (mobileMenu) {
+                        mobileMenu.classList.remove('active');
+                    }
                 }
             });
         });
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
 
         // Add animation on scroll
         const observer = new IntersectionObserver((entries) => {
@@ -1266,7 +1387,7 @@
                     entry.target.style.transform = 'translateY(0)';
                 }
             });
-        });
+        }, { threshold: 0.1 });
 
         document.querySelectorAll('.feature-card, .category-item, .local-card, .testimonial-card').forEach(el => {
             el.style.opacity = '0';
@@ -1274,7 +1395,55 @@
             el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
             observer.observe(el);
         });
+
+        // Confirm logout
+        document.querySelectorAll('form[action*="logout"] button[type="submit"]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to logout?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        // Update active navigation based on scroll
+        const sections = document.querySelectorAll('section[id]');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.scrollY >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            document.querySelectorAll('.nav-links .nav-item, .mobile-menu .nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === `#${current}`) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // Search form validation
+        document.querySelector('.search-btn').addEventListener('click', function(e) {
+            const query = document.querySelector('input[name="query"]').value.trim();
+            if (query === '') {
+                e.preventDefault();
+                alert('Please enter what you are looking for');
+            }
+        });
     </script>
 
+    @if(app()->environment('local'))
+    <script>
+        console.log('Vendora Homepage loaded - Local environment');
+        console.log('Stats:', {
+            vendors: '{{ $vendorCount }}',
+            customers: '{{ $customerCount }}',
+            categories: '{{ $categoryCount }}'
+        });
+    </script>
+    @endif
 </body>
 </html>

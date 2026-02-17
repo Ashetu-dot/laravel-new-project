@@ -18,8 +18,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             
-            // ROLE & STATUS - REMOVE 'after' from CREATE TABLE
-            $table->string('role')->default('customer');
+            // ROLE & STATUS
+            $table->string('role')->default('customer'); // customer, vendor, admin
             $table->boolean('is_active')->default(true);
             $table->timestamp('last_login_at')->nullable();
             
@@ -40,7 +40,12 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->string('state')->nullable();
             $table->string('zip_code')->nullable();
-            $table->string('country')->default('USA');
+            $table->string('country')->default('Ethiopia'); // Changed from USA to Ethiopia
+            
+            // ADDITIONAL LOCATION FIELDS (for better search)
+            $table->string('location')->nullable(); // Full location string
+            $table->decimal('latitude', 10, 8)->nullable(); // For geolocation
+            $table->decimal('longitude', 11, 8)->nullable(); // For geolocation
             
             // MEDIA & BRANDING
             $table->string('avatar')->nullable();
@@ -52,6 +57,32 @@ return new class extends Migration
             $table->integer('products_count')->default(0);
             $table->decimal('rating', 3, 2)->default(0);
             $table->integer('total_reviews')->default(0);
+            
+            // STORE VIEWS (for vendor dashboard)
+            $table->integer('store_views')->default(0);
+            
+            // SOCIAL MEDIA LINKS
+            $table->string('facebook_url')->nullable();
+            $table->string('instagram_url')->nullable();
+            $table->string('telegram_url')->nullable();
+            $table->string('twitter_url')->nullable();
+            
+            // BUSINESS HOURS (JSON field for flexibility)
+            $table->json('business_hours')->nullable();
+            
+            // PAYMENT INFORMATION
+            $table->string('bank_name')->nullable();
+            $table->string('bank_account')->nullable();
+            $table->string('mobile_money_number')->nullable(); // For Ethiopia: Telebirr, M-Pesa etc.
+            
+            // INDEXES FOR BETTER PERFORMANCE
+            $table->index(['role', 'is_active']);
+            $table->index('city');
+            $table->index('state');
+            $table->index('country');
+            $table->index('category');
+            $table->index('rating');
+            $table->index('created_at');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

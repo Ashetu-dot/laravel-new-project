@@ -5,33 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Vendora Marketplace - Search Results | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* Font Definitions */
         @font-face {
-            font-family: 'MiSans-Regular';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Regular.ttf') format('truetype');
+            font-family: 'Inter';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Regular.otf') format('opentype');
+            font-weight: 400;
         }
         @font-face {
-            font-family: 'MiSans-Medium';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Medium.ttf') format('truetype');
+            font-family: 'Inter';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Medium.otf') format('opentype');
+            font-weight: 500;
         }
         @font-face {
-            font-family: 'MiSans-Bold';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/MiSans-Bold.ttf') format('truetype');
+            font-family: 'Inter-Bold';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Bold.otf') format('opentype');
+            font-weight: 700;
         }
 
         :root {
             --primary-gold: #B88E3F;
-            --primary-gold-hover: #9c7835;
-            --bg-color: #F7F7F7;
-            --white: #FFFFFF;
-            --text-dark: #333333;
-            --text-gray: #777777;
-            --text-light: #999999;
-            --border-color: #E5E5E5;
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --shadow-hover: 0 8px 20px rgba(184, 142, 63, 0.15);
+            --primary-hover: #9c7832;
+            --bg-color: #f8fafc;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --text-light: #94a3b8;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --shadow-hover: 0 20px 40px rgba(184, 142, 63, 0.15);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --error: #ef4444;
+            --success: #10b981;
         }
 
         * {
@@ -41,7 +51,7 @@
         }
 
         body {
-            font-family: 'MiSans-Regular', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-dark);
             width: 100%;
@@ -60,10 +70,11 @@
             padding: 4px 12px;
             background: linear-gradient(135deg, #078930 0%, #FCDD09 50%, #DA121A 100%);
             color: white;
-            border-radius: 20px;
+            border-radius: 30px;
             font-size: 12px;
             font-weight: 600;
             margin-left: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .location-badge {
@@ -72,10 +83,46 @@
             gap: 4px;
             background-color: #fef3e7;
             color: var(--primary-gold);
-            padding: 4px 8px;
-            border-radius: 20px;
+            padding: 4px 10px;
+            border-radius: 30px;
             font-size: 11px;
             font-weight: 600;
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            margin: 20px auto;
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
         }
 
         /* Helper Classes */
@@ -86,13 +133,19 @@
             padding: 0 40px;
         }
 
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+        }
+
         /* Navigation */
         .navbar {
             background-color: var(--white);
             min-height: 80px;
             display: flex;
             align-items: center;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -107,7 +160,7 @@
         }
 
         .logo {
-            font-family: 'MiSans-Bold';
+            font-family: 'Inter-Bold', sans-serif;
             font-size: 28px;
             color: var(--primary-gold);
             text-decoration: none;
@@ -124,6 +177,7 @@
         .logo-badge {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .search-container {
@@ -136,12 +190,12 @@
             width: 100%;
             height: 48px;
             border: 1px solid var(--border-color);
-            border-radius: 24px;
+            border-radius: 50px;
             padding: 0 20px 0 50px;
-            font-family: 'MiSans-Regular';
+            font-family: 'Inter', sans-serif;
             font-size: 16px;
             color: var(--text-dark);
-            background-color: #F9F9F9;
+            background-color: #f8fafc;
             transition: all 0.3s ease;
         }
 
@@ -149,7 +203,7 @@
             outline: none;
             border-color: var(--primary-gold);
             background-color: var(--white);
-            box-shadow: 0 0 0 3px rgba(184, 142, 63, 0.1);
+            box-shadow: 0 0 0 4px rgba(184, 142, 63, 0.1);
         }
 
         .search-icon {
@@ -157,22 +211,22 @@
             left: 18px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-gray);
+            color: var(--text-light);
             font-size: 20px;
         }
 
         .nav-actions {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             flex-shrink: 0;
         }
 
         .nav-btn {
             background: none;
             border: none;
-            font-size: 24px;
-            color: var(--text-dark);
+            font-size: 22px;
+            color: var(--text-gray);
             cursor: pointer;
             width: 40px;
             height: 40px;
@@ -182,11 +236,28 @@
             justify-content: center;
             transition: all 0.2s;
             text-decoration: none;
+            position: relative;
         }
 
         .nav-btn:hover {
-            background-color: #f0f0f0;
+            background-color: #f1f5f9;
             color: var(--primary-gold);
+        }
+
+        .badge-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--error);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .user-avatar {
@@ -205,9 +276,13 @@
             color: var(--text-dark);
             font-size: 14px;
             font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 30px;
+            transition: all 0.2s;
         }
 
         .user-menu:hover {
+            background-color: #f1f5f9;
             color: var(--primary-gold);
         }
 
@@ -237,10 +312,11 @@
             height: 44px;
             padding: 0 20px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 40px;
             background-color: var(--white);
-            color: var(--text-dark);
-            font-family: 'MiSans-Medium';
+            color: var(--text-gray);
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
             font-size: 14px;
             cursor: pointer;
             display: flex;
@@ -256,7 +332,7 @@
         }
 
         .filter-btn i {
-            color: var(--text-gray);
+            color: var(--text-light);
         }
 
         .filter-btn:hover i {
@@ -270,30 +346,31 @@
         }
 
         .filter-tag {
-            background-color: rgba(184, 142, 63, 0.1);
+            background-color: #fef3e7;
             color: var(--primary-gold);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 13px;
             display: flex;
             align-items: center;
             gap: 6px;
-            font-family: 'MiSans-Medium';
+            font-weight: 500;
             white-space: nowrap;
         }
 
         .filter-tag i {
             cursor: pointer;
+            font-size: 16px;
         }
 
         .filter-tag i:hover {
-            color: var(--primary-gold-hover);
+            color: var(--primary-hover);
         }
 
         .results-count {
-            font-family: 'MiSans-Medium';
             color: var(--text-gray);
             font-size: 14px;
+            font-weight: 500;
             white-space: nowrap;
         }
 
@@ -327,14 +404,14 @@
         .grid-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 32px;
-            margin-bottom: 60px;
+            gap: 30px;
+            margin: 40px 0 60px;
         }
 
         /* Vendor Card */
         .vendor-card {
             background-color: var(--white);
-            border-radius: 12px;
+            border-radius: var(--radius-lg);
             overflow: hidden;
             box-shadow: var(--shadow-sm);
             transition: all 0.3s ease;
@@ -355,8 +432,8 @@
             grid-template-columns: 2fr 1fr;
             grid-template-rows: 1fr 1fr;
             gap: 2px;
-            height: 220px;
-            background-color: #f0f0f0;
+            height: 200px;
+            background-color: #f1f5f9;
             position: relative;
         }
 
@@ -379,14 +456,15 @@
             left: 12px;
             background-color: var(--primary-gold);
             color: white;
-            padding: 4px 8px;
-            border-radius: 20px;
+            padding: 4px 10px;
+            border-radius: 30px;
             font-size: 11px;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 4px;
             z-index: 2;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .card-content {
@@ -405,10 +483,9 @@
         }
 
         .vendor-name {
-            font-family: 'MiSans-Bold';
+            font-weight: 600;
             font-size: 18px;
             color: var(--text-dark);
-            margin-bottom: 4px;
             line-height: 1.4;
         }
 
@@ -416,11 +493,11 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            background-color: #FFF8E7;
+            background-color: #fef3e7;
             padding: 4px 8px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 12px;
-            font-family: 'MiSans-Bold';
+            font-weight: 600;
             color: var(--primary-gold);
             flex-shrink: 0;
         }
@@ -438,7 +515,7 @@
             gap: 16px;
             margin-top: auto;
             padding-top: 16px;
-            border-top: 1px solid #f0f0f0;
+            border-top: 1px solid #f1f5f9;
             color: var(--text-gray);
             font-size: 13px;
             flex-wrap: wrap;
@@ -452,6 +529,7 @@
 
         .meta-item i {
             color: var(--primary-gold);
+            font-size: 14px;
         }
 
         .action-area {
@@ -462,11 +540,11 @@
 
         .btn-outline {
             flex: 1;
-            height: 36px;
+            height: 40px;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: var(--radius-sm);
             background: transparent;
-            font-family: 'MiSans-Medium';
+            font-weight: 500;
             font-size: 13px;
             color: var(--text-dark);
             cursor: pointer;
@@ -475,6 +553,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
         }
 
         .btn-outline:hover {
@@ -484,34 +563,35 @@
 
         .btn-primary {
             flex: 1;
-            height: 36px;
+            height: 40px;
             border: none;
-            border-radius: 6px;
+            border-radius: var(--radius-sm);
             background: var(--primary-gold);
-            font-family: 'MiSans-Medium';
+            font-weight: 500;
             font-size: 13px;
-            color: var(--white);
+            color: white;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
             text-decoration: none;
         }
 
         .btn-primary:hover {
-            background: var(--primary-gold-hover);
+            background: var(--primary-hover);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(184, 142, 63, 0.3);
         }
 
         .btn-following {
             flex: 1;
-            height: 36px;
+            height: 40px;
             border: 1px solid var(--primary-gold);
-            border-radius: 6px;
+            border-radius: var(--radius-sm);
             background: #fef3e7;
-            font-family: 'MiSans-Medium';
+            font-weight: 500;
             font-size: 13px;
             color: var(--primary-gold);
             cursor: pointer;
@@ -519,6 +599,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
             text-decoration: none;
         }
 
@@ -532,8 +613,7 @@
             text-align: center;
             padding: 80px 20px;
             background: var(--white);
-            border-radius: 16px;
-            color: var(--text-gray);
+            border-radius: var(--radius-lg);
             box-shadow: var(--shadow-sm);
         }
 
@@ -547,11 +627,16 @@
             font-size: 28px;
             margin-bottom: 12px;
             color: var(--text-dark);
+            font-weight: 600;
         }
 
         .no-results p {
             font-size: 16px;
+            color: var(--text-gray);
             margin-bottom: 24px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         /* Pagination */
@@ -559,70 +644,46 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             margin: 60px 0 80px;
             flex-wrap: wrap;
         }
 
-        .page-link {
-            width: 44px;
+        .pagination .page-link {
+            min-width: 44px;
             height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             background-color: var(--white);
             color: var(--text-dark);
-            font-family: 'MiSans-Medium';
-            font-size: 16px;
+            font-weight: 500;
+            font-size: 15px;
             text-decoration: none;
             transition: all 0.2s;
             border: 1px solid var(--border-color);
         }
 
-        .page-link:hover {
+        .pagination .page-link:hover {
             border-color: var(--primary-gold);
             color: var(--primary-gold);
-            transform: translateY(-2px);
         }
 
-        .page-link.active {
+        .pagination .page-link.active {
             background-color: var(--primary-gold);
-            color: var(--white);
+            color: white;
             border-color: var(--primary-gold);
         }
 
-        .page-link.disabled {
+        .pagination .page-link.disabled {
             opacity: 0.5;
             cursor: not-allowed;
             pointer-events: none;
         }
 
-        .page-link.next-prev {
-            width: auto;
+        .pagination .page-link.next-prev {
             padding: 0 16px;
-        }
-
-        /* Loading State */
-        .loading {
-            text-align: center;
-            padding: 60px;
-            color: var(--text-gray);
-        }
-
-        .loading .spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 3px solid #f3f4f6;
-            border-top-color: var(--primary-gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 16px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
         }
 
         /* Footer */
@@ -638,35 +699,55 @@
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 24px;
-            margin-bottom: 16px;
+            gap: 30px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
 
         .footer-links a {
             color: var(--text-gray);
             text-decoration: none;
-            font-size: 13px;
+            font-size: 14px;
+            transition: color 0.2s;
         }
 
         .footer-links a:hover {
             color: var(--primary-gold);
         }
 
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f1f5f9;
+            border-top-color: var(--primary-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Responsive Design */
         @media screen and (max-width: 1400px) {
-            .container { padding: 0 32px; }
-            .grid-container { grid-template-columns: repeat(3, 1fr); gap: 28px; }
+            .grid-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 24px;
+            }
+        }
+
+        @media screen and (max-width: 1200px) {
+            .container { padding: 0 30px; }
         }
 
         @media screen and (max-width: 1024px) {
-            .container { padding: 0 24px; }
-            .grid-container { grid-template-columns: repeat(3, 1fr); gap: 24px; }
             .search-container { max-width: 400px; }
+            .search-input { font-size: 15px; }
         }
 
         @media screen and (max-width: 900px) {
-            .grid-container { grid-template-columns: repeat(2, 1fr); }
             .nav-content {
                 display: grid;
                 grid-template-columns: auto 1fr;
@@ -683,12 +764,12 @@
             .filters-wrapper {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 12px;
+                gap: 16px;
             }
             .filter-group {
                 width: 100%;
                 overflow-x: auto;
-                padding-bottom: 8px;
+                padding-bottom: 12px;
                 -webkit-overflow-scrolling: touch;
             }
             .filter-btn { flex-shrink: 0; }
@@ -696,24 +777,48 @@
         }
 
         @media screen and (max-width: 768px) {
-            .container { padding: 0 20px; }
-            .grid-container { gap: 20px; }
-            .card-image-grid { height: 200px; }
-            .card-content { padding: 16px; }
-            .filters-section { margin-bottom: 30px; }
+            .navbar { min-height: 70px; }
+            .logo { font-size: 24px; }
+            .logo i { font-size: 28px; }
+            .ethiopia-badge { font-size: 10px; padding: 2px 8px; }
+            
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            .card-image-grid { height: 180px; }
+            .vendor-name { font-size: 16px; }
+            
+            .pagination .page-link {
+                min-width: 38px;
+                height: 38px;
+                font-size: 14px;
+            }
         }
 
         @media screen and (max-width: 640px) {
+            .container { padding: 0 20px; }
+            
             .grid-container {
-                grid-template-columns: repeat(1, 1fr);
-                max-width: 450px;
+                grid-template-columns: 1fr;
+                max-width: 400px;
                 margin-left: auto;
                 margin-right: auto;
             }
-            .logo { font-size: 24px; }
-            .logo i { font-size: 28px; }
+            
             .search-input { height: 44px; font-size: 15px; }
-            .ethiopia-badge { font-size: 10px; padding: 2px 8px; }
+            .search-icon { font-size: 18px; left: 16px; }
+            
+            .filter-btn { 
+                height: 40px; 
+                padding: 0 16px; 
+                font-size: 13px; 
+            }
+            
+            .filter-tag { font-size: 12px; padding: 4px 12px; }
+            .results-count { font-size: 13px; }
+            
             .vendor-name { font-size: 17px; }
         }
 
@@ -730,26 +835,25 @@
             .nav-actions {
                 grid-column: 1;
                 justify-self: center;
-                gap: 12px;
+                gap: 8px;
             }
-            .nav-btn { width: 36px; height: 36px; font-size: 22px; }
+            .nav-btn { width: 36px; height: 36px; font-size: 20px; }
             .user-avatar { width: 36px; height: 36px; }
-            .search-container { margin-top: 4px; }
-            .filter-group { gap: 8px; }
-            .filter-btn { padding: 0 16px; font-size: 13px; height: 40px; }
-            .filter-tag { font-size: 12px; padding: 4px 10px; }
-            .results-count { font-size: 13px; }
-            .page-link { width: 38px; height: 38px; font-size: 14px; }
+            
+            .card-image-grid { height: 170px; }
+            
+            .footer-links { gap: 20px; }
+            .footer-links a { font-size: 13px; }
         }
 
         @media screen and (max-width: 360px) {
             .logo { font-size: 20px; }
             .logo i { font-size: 24px; }
-            .nav-btn { width: 32px; height: 32px; font-size: 20px; }
+            .nav-btn { width: 32px; height: 32px; font-size: 18px; }
             .user-avatar { width: 32px; height: 32px; }
-            .search-input { height: 40px; font-size: 14px; padding-left: 44px; }
-            .search-icon { left: 14px; font-size: 18px; }
-            .card-image-grid { height: 180px; }
+            .search-input { height: 40px; font-size: 14px; padding-left: 42px; }
+            .search-icon { left: 14px; font-size: 16px; }
+            .card-image-grid { height: 160px; }
             .vendor-name { font-size: 16px; }
         }
     </style>
@@ -772,7 +876,7 @@
             <div class="search-container">
                 <i class="ri-search-line search-icon"></i>
                 <form action="{{ route('search.results') }}" method="GET" style="width: 100%;">
-                    <input type="text" name="query" class="search-input" placeholder="Search for vendors, products, or categories in Jimma..." value="{{ request('query', $query ?? '') }}">
+                    <input type="text" name="query" class="search-input" placeholder="Search for vendors, products, or categories in Jimma..." value="{{ request('query') }}">
                 </form>
             </div>
 
@@ -785,23 +889,50 @@
                         <i class="ri-user-add-line"></i>
                     </a>
                 @else
-                    <a href="#" class="nav-btn" aria-label="Notifications">
+                    <a href="{{ route('customer.notifications') }}" class="nav-btn" aria-label="Notifications">
                         <i class="ri-notification-3-line"></i>
+                        @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
+                            <span class="badge-count">{{ $unreadNotificationsCount }}</span>
+                        @endif
                     </a>
-                    <a href="#" class="nav-btn" aria-label="Cart">
+                    <a href="{{ route('customer.cart.index') }}" class="nav-btn" aria-label="Cart">
                         <i class="ri-shopping-bag-3-line"></i>
+                        @if(isset($cartCount) && $cartCount > 0)
+                            <span class="badge-count">{{ $cartCount }}</span>
+                        @endif
                     </a>
                     <a href="{{ route('profile.show', Auth::id()) }}" class="user-menu">
-                        <img src="{{ Auth::user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=B88E3F&color=fff' }}" alt="{{ Auth::user()->name }}" class="user-avatar">
-                        <span class="nav-item" style="display: none;">{{ Auth::user()->name }}</span>
+                        @php
+                            $avatarUrl = Auth::user()->avatar 
+                                ? Storage::url(Auth::user()->avatar) 
+                                : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=B88E3F&color=fff&size=200';
+                        @endphp
+                        <img src="{{ $avatarUrl }}" alt="{{ Auth::user()->name }}" class="user-avatar" loading="lazy">
+                        <span>{{ Auth::user()->name }}</span>
                     </a>
                 @endguest
-                <button class="nav-btn" aria-label="Menu" id="menuToggle">
-                    <i class="ri-menu-line"></i>
-                </button>
             </div>
         </div>
     </nav>
+
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="container" style="margin-top: 20px;">
+            <div class="alert alert-success">
+                <i class="ri-checkbox-circle-line"></i>
+                {{ session('success') }}
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="container" style="margin-top: 20px;">
+            <div class="alert alert-error">
+                <i class="ri-error-warning-line"></i>
+                {{ session('error') }}
+            </div>
+        </div>
+    @endif
 
     <!-- Filters -->
     <section class="filters-section">
@@ -812,31 +943,41 @@
                         <input type="hidden" name="query" value="{{ request('query') }}">
                     @endif
 
-                    <select name="location" class="filter-btn" onchange="this.form.submit()" style="appearance: none; padding-right: 36px;">
-                        <option value="">📍 Location: All</option>
+                    <select name="location" class="filter-btn" onchange="this.form.submit()">
+                        <option value="">📍 All Ethiopia</option>
                         <option value="Jimma" {{ request('location') == 'Jimma' ? 'selected' : '' }}>📍 Jimma</option>
                         <option value="Addis Ababa" {{ request('location') == 'Addis Ababa' ? 'selected' : '' }}>📍 Addis Ababa</option>
                         <option value="Bahir Dar" {{ request('location') == 'Bahir Dar' ? 'selected' : '' }}>📍 Bahir Dar</option>
                         <option value="Hawassa" {{ request('location') == 'Hawassa' ? 'selected' : '' }}>📍 Hawassa</option>
+                        <option value="Dire Dawa" {{ request('location') == 'Dire Dawa' ? 'selected' : '' }}>📍 Dire Dawa</option>
+                        <option value="Mekelle" {{ request('location') == 'Mekelle' ? 'selected' : '' }}>📍 Mekelle</option>
+                        <option value="Gondar" {{ request('location') == 'Gondar' ? 'selected' : '' }}>📍 Gondar</option>
                     </select>
 
-                    <select name="category" class="filter-btn" onchange="this.form.submit()" style="appearance: none; padding-right: 36px;">
-                        <option value="">🏷️ Category: All</option>
+                    <select name="category" class="filter-btn" onchange="this.form.submit()">
+                        <option value="">🏷️ All Categories</option>
                         <option value="coffee" {{ request('category') == 'coffee' ? 'selected' : '' }}>☕ Coffee & Tea</option>
                         <option value="handicrafts" {{ request('category') == 'handicrafts' ? 'selected' : '' }}>🎨 Handicrafts</option>
                         <option value="textiles" {{ request('category') == 'textiles' ? 'selected' : '' }}>🧵 Textiles</option>
                         <option value="food" {{ request('category') == 'food' ? 'selected' : '' }}>🍲 Food & Spices</option>
                         <option value="jewelry" {{ request('category') == 'jewelry' ? 'selected' : '' }}>💍 Jewelry</option>
+                        <option value="electronics" {{ request('category') == 'electronics' ? 'selected' : '' }}>📱 Electronics</option>
                         <option value="services" {{ request('category') == 'services' ? 'selected' : '' }}>🛠️ Services</option>
                     </select>
 
-                    <select name="rating" class="filter-btn" onchange="this.form.submit()" style="appearance: none; padding-right: 36px;">
-                        <option value="">⭐ Rating: Any</option>
+                    <select name="rating" class="filter-btn" onchange="this.form.submit()">
+                        <option value="">⭐ Any Rating</option>
                         <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>⭐⭐⭐⭐ 4+ Stars</option>
                         <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>⭐⭐⭐ 3+ Stars</option>
                     </select>
 
-                    <button type="button" class="filter-btn" onclick="document.getElementById('filterForm').reset(); window.location='{{ route('search.results') }}'">
+                    <select name="sort" class="filter-btn" onchange="this.form.submit()">
+                        <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>🔄 Newest First</option>
+                        <option value="rating" {{ request('sort') == 'rating' ? 'selected' : '' }}>⭐ Top Rated</option>
+                        <option value="products" {{ request('sort') == 'products' ? 'selected' : '' }}>📦 Most Products</option>
+                    </select>
+
+                    <button type="button" class="filter-btn" onclick="clearAllFilters()">
                         <i class="ri-filter-off-line"></i> Clear
                     </button>
                 </form>
@@ -844,43 +985,58 @@
                 @if(request('category'))
                     <div class="filter-tag">
                         {{ ucfirst(request('category')) }}
-                        <i class="ri-close-line" onclick="window.location='{{ route('search.results', array_merge(request()->except('category'), ['query' => request('query')])) }}'"></i>
+                        <i class="ri-close-line" onclick="removeFilter('category')"></i>
                     </div>
                 @endif
                 @if(request('location'))
                     <div class="filter-tag">
                         {{ request('location') }}
-                        <i class="ri-close-line" onclick="window.location='{{ route('search.results', array_merge(request()->except('location'), ['query' => request('query')])) }}'"></i>
+                        <i class="ri-close-line" onclick="removeFilter('location')"></i>
                     </div>
                 @endif
                 @if(request('rating'))
                     <div class="filter-tag">
                         {{ request('rating') }}+ Stars
-                        <i class="ri-close-line" onclick="window.location='{{ route('search.results', array_merge(request()->except('rating'), ['query' => request('query')])) }}'"></i>
+                        <i class="ri-close-line" onclick="removeFilter('rating')"></i>
+                    </div>
+                @endif
+                @if(request('sort') && request('sort') != 'newest')
+                    <div class="filter-tag">
+                        Sort: {{ ucfirst(request('sort')) }}
+                        <i class="ri-close-line" onclick="removeFilter('sort')"></i>
                     </div>
                 @endif
             </div>
 
-            <span class="results-count">Showing {{ $vendors->firstItem() ?? 0 }} - {{ $vendors->lastItem() ?? 0 }} of {{ $vendors->total() }} results</span>
+            <span class="results-count">
+                @if($vendors->total() > 0)
+                    Showing {{ $vendors->firstItem() }} - {{ $vendors->lastItem() }} of {{ $vendors->total() }} vendors
+                @else
+                    No vendors found
+                @endif
+            </span>
         </div>
     </section>
 
-    <!-- Active Filters Bar (if any filters applied) -->
-    @if(request('query') || request('category') || request('location') || request('rating'))
+    <!-- Active Filters Bar -->
+    @if(request()->anyFilled(['query', 'category', 'location', 'rating', 'sort']))
     <div class="active-filters">
         <div class="container">
             <span style="font-size: 14px; color: var(--text-gray);">Active filters:</span>
             @if(request('query'))
-                <span class="filter-tag">Search: "{{ request('query') }}"</span>
+                <span class="filter-tag">"{{ request('query') }}"</span>
             @endif
             @if(request('category'))
-                <span class="filter-tag">Category: {{ ucfirst(request('category')) }}</span>
+                <span class="filter-tag">{{ ucfirst(request('category')) }}</span>
             @endif
             @if(request('location'))
-                <span class="filter-tag">Location: {{ request('location') }}</span>
+                <span class="filter-tag">{{ request('location') }}</span>
             @endif
             @if(request('rating'))
                 <span class="filter-tag">{{ request('rating') }}+ Stars</span>
+            @endif
+            @if(request('sort') && request('sort') != 'newest')
+                <span class="filter-tag">Sort: {{ ucfirst(request('sort')) }}</span>
             @endif
             <a href="{{ route('search.results') }}" class="clear-filters">Clear all</a>
         </div>
@@ -898,9 +1054,40 @@
                     @if($vendor->email_verified_at)
                         <span class="verified-badge"><i class="ri-verified-badge-fill"></i> Verified</span>
                     @endif
-                    <img src="{{ $vendor->main_image ?? 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80' }}" alt="{{ $vendor->business_name }}" class="card-img-main">
-                    <img src="{{ $vendor->sub_image_1 ?? 'https://images.unsplash.com/photo-1565193566173-7a646c770962?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80' }}" alt="{{ $vendor->business_name }} detail 1" class="card-img-sub">
-                    <img src="{{ $vendor->sub_image_2 ?? 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80' }}" alt="{{ $vendor->business_name }} detail 2" class="card-img-sub">
+                    @php
+                        $mainImage = $vendor->main_image 
+                            ? (filter_var($vendor->main_image, FILTER_VALIDATE_URL) 
+                                ? $vendor->main_image 
+                                : Storage::url($vendor->main_image))
+                            : 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80';
+                        
+                        $subImage1 = $vendor->sub_image_1 
+                            ? (filter_var($vendor->sub_image_1, FILTER_VALIDATE_URL) 
+                                ? $vendor->sub_image_1 
+                                : Storage::url($vendor->sub_image_1))
+                            : 'https://images.unsplash.com/photo-1565193566173-7a646c770962?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80';
+                            
+                        $subImage2 = $vendor->sub_image_2 
+                            ? (filter_var($vendor->sub_image_2, FILTER_VALIDATE_URL) 
+                                ? $vendor->sub_image_2 
+                                : Storage::url($vendor->sub_image_2))
+                            : 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80';
+                    @endphp
+                    <img src="{{ $mainImage }}" 
+                         alt="{{ $vendor->business_name }}" 
+                         class="card-img-main"
+                         loading="lazy"
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/400x300?text=No+Image';">
+                    <img src="{{ $subImage1 }}" 
+                         alt="{{ $vendor->business_name }}" 
+                         class="card-img-sub"
+                         loading="lazy"
+                         onerror="this.style.display='none'">
+                    <img src="{{ $subImage2 }}" 
+                         alt="{{ $vendor->business_name }}" 
+                         class="card-img-sub"
+                         loading="lazy"
+                         onerror="this.style.display='none'">
                 </div>
                 <div class="card-content">
                     <div class="vendor-header">
@@ -917,7 +1104,11 @@
                         </div>
                         <div class="meta-item">
                             <i class="ri-box-3-line"></i>
-                            <span>{{ $vendor->products_count ?? rand(5, 50) }} Products</span>
+                            <span>{{ $vendor->products_count ?? 0 }} Products</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="ri-user-follow-line"></i>
+                            <span>{{ $vendor->followers_count ?? 0 }} Followers</span>
                         </div>
                     </div>
                      <div class="action-area">
@@ -958,6 +1149,7 @@
         </div>
 
         <!-- Pagination -->
+        @if($vendors->hasPages())
         <div class="pagination">
             @if($vendors->onFirstPage())
                 <span class="page-link disabled"><i class="ri-arrow-left-s-line"></i></span>
@@ -965,11 +1157,28 @@
                 <a href="{{ $vendors->previousPageUrl() }}" class="page-link next-prev"><i class="ri-arrow-left-s-line"></i> Prev</a>
             @endif
 
-            @foreach(range(1, $vendors->lastPage()) as $i)
-                @if($i >= $vendors->currentPage() - 2 && $i <= $vendors->currentPage() + 2)
-                    <a href="{{ $vendors->url($i) }}" class="page-link {{ $i == $vendors->currentPage() ? 'active' : '' }}">{{ $i }}</a>
+            @php
+                $start = max(1, $vendors->currentPage() - 2);
+                $end = min($vendors->lastPage(), $vendors->currentPage() + 2);
+            @endphp
+
+            @if($start > 1)
+                <a href="{{ $vendors->url(1) }}" class="page-link">1</a>
+                @if($start > 2)
+                    <span class="page-link disabled">...</span>
                 @endif
-            @endforeach
+            @endif
+
+            @for($i = $start; $i <= $end; $i++)
+                <a href="{{ $vendors->url($i) }}" class="page-link {{ $i == $vendors->currentPage() ? 'active' : '' }}">{{ $i }}</a>
+            @endfor
+
+            @if($end < $vendors->lastPage())
+                @if($end < $vendors->lastPage() - 1)
+                    <span class="page-link disabled">...</span>
+                @endif
+                <a href="{{ $vendors->url($vendors->lastPage()) }}" class="page-link">{{ $vendors->lastPage() }}</a>
+            @endif
 
             @if($vendors->hasMorePages())
                 <a href="{{ $vendors->nextPageUrl() }}" class="page-link next-prev">Next <i class="ri-arrow-right-s-line"></i></a>
@@ -977,11 +1186,12 @@
                 <span class="page-link disabled">Next <i class="ri-arrow-right-s-line"></i></span>
             @endif
         </div>
+        @endif
 
         @else
         <div class="no-results">
             <i class="ri-store-3-line"></i>
-            <h3>No vendors found in Jimma</h3>
+            <h3>No vendors found</h3>
             <p>We couldn't find any vendors matching your search criteria. Try adjusting your filters or explore other categories.</p>
             <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
                 <a href="{{ route('search.results') }}" class="btn-primary" style="padding: 12px 24px; font-size: 14px; width: auto;">
@@ -1004,48 +1214,63 @@
                 <a href="{{ route('register') }}">Become a Vendor</a>
                 <a href="{{ route('privacy.policy') }}">Privacy Policy</a>
                 <a href="{{ route('terms.service') }}">Terms of Service</a>
+                <a href="{{ route('contact') }}">Contact Us</a>
             </div>
             <p>&copy; {{ date('Y') }} Vendora Marketplace. Connecting Jimma with local vendors. All rights reserved.</p>
         </div>
     </footer>
 
     <script>
-        // Mobile menu toggle
-        document.getElementById('menuToggle')?.addEventListener('click', function() {
-            alert('Mobile menu would open here. In production, this would show navigation links.');
-        });
+        // CSRF Token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
         // Auto-dismiss alerts
-        document.addEventListener('DOMContentLoaded', function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                setTimeout(() => {
-                    alert.style.transition = 'opacity 0.5s';
-                    alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 500);
-                }, 5000);
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
             });
-        });
+        }, 5000);
 
-        // Add smooth scrolling
+        // Remove single filter
+        function removeFilter(filterName) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete(filterName);
+            window.location.href = url.toString();
+        }
+
+        // Clear all filters
+        function clearAllFilters() {
+            window.location.href = '{{ route("search.results") }}';
+        }
+
+        // Smooth scrolling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
             });
         });
 
-        // Preserve query params when changing filters
-        function updateFilters(param, value) {
-            const url = new URL(window.location.href);
-            if (value) {
-                url.searchParams.set(param, value);
-            } else {
-                url.searchParams.delete(param);
-            }
-            window.location.href = url.toString();
+        // Confirm logout (if logout button exists)
+        document.querySelectorAll('form[action*="logout"] button[type="submit"]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to logout?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        // Add to console for debugging
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('Search Results Page Loaded');
+            console.log('Total Results:', {{ $vendors->total() }});
         }
     </script>
 
