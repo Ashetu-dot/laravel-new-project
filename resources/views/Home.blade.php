@@ -1297,7 +1297,7 @@
                 <div class="link-group">
                     <h4>Discover</h4>
                     <ul>
-                        <li><a href="{{ route('search.results') }}">How it works</a></li>
+                        <li><a href="{{ route('how-it-works') }}">How it works</a></li>
                         <li><a href="{{ route('trust-safety') }}">Trust & Safety</a></li>
                         <li><a href="{{ route('help-center') }}">Help Center</a></li>
                         <li><a href="{{ route('invite') }}">Invite Friends</a></li>
@@ -1306,10 +1306,10 @@
                 <div class="link-group"> 
                     <h4>For Vendors</h4>
                     <ul>
-                        <li><a href="{{ route('register') }}">List your service</a></li>
-                        <li><a href="#">Vendor Resources</a></li>
-                        <li><a href="#">Success Stories</a></li>
-                        <li><a href="#">Community</a></li>
+                        <li><a href="{{ route('list-service') }}">List your service</a></li>
+                        <li><a href="{{ route('vendor-resources') }}">Vendor Resources</a></li>
+                        <li><a href="{{ route('success-stories') }}">Success Stories</a></li>
+                        <li><a href="{{ route('community') }}">Community</a></li>
                     </ul>
                 </div>
             </div>

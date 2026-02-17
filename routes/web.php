@@ -71,6 +71,24 @@ Route::get('/help-center/article/{slug}', [VendorCustomerController::class, 'hel
 Route::get('/invite', [VendorCustomerController::class, 'invite'])->name('invite');
 Route::post('/invite/send', [VendorCustomerController::class, 'sendInvite'])->name('invite.send');
 
+// How it works
+Route::get('/how-it-works', [VendorCustomerController::class, 'howItWorks'])->name('how-it-works');
+
+//feature
+Route::get('/features', [VendorCustomerController::class, 'features'])->name('features');
+
+//list-service
+Route::get('/list-service', [VendorCustomerController::class, 'listService'])->name('list-service');
+
+//vendor-resources
+Route::get('/vendor-resources', [VendorCustomerController::class, 'vendorResources'])->name('vendor-resources');
+
+//success stories
+Route::get('/success-stories', [VendorCustomerController::class, 'successStories'])->name('success-stories');
+
+//Community
+Route::get('/community', [VendorCustomerController::class, 'community'])->name('community');
+
 Route::view('/contact', 'pages.contact')->name('contact');
 
 // =========================================================================
@@ -194,12 +212,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // COMPLETE VENDOR ROUTES
 // =========================================================================
 Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('vendor.')->group(function () {
-    
+
     // ======== VENDOR DASHBOARD & STORE ========
     Route::get('/dashboard', [VendorCustomerController::class, 'vendorDashboard'])->name('dashboard');
     Route::get('/store/{id}', [VendorCustomerController::class, 'showVendor'])->name('store');
     Route::get('/store', [VendorCustomerController::class, 'showVendor'])->name('store.index');
-    
+
     // ======== ORDERS MANAGEMENT ========
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
@@ -208,7 +226,7 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export');
     Route::get('/orders-list', [OrderController::class, 'getOrders'])->name('orders.list');
     Route::get('/orders-stats', [OrderController::class, 'getStats'])->name('orders.stats');
-    
+
     // ======== PRODUCTS MANAGEMENT ========
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
@@ -217,50 +235,50 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
-    
+
     // Product status updates
     Route::patch('/products/{id}/activate', [ProductController::class, 'activate'])->name('products.activate');
     Route::patch('/products/{id}/deactivate', [ProductController::class, 'deactivate'])->name('products.deactivate');
     Route::post('/products/{id}/toggle-status', [ProductController::class, 'toggleStatus'])->name('products.toggle-status');
-    
+
     // Bulk product actions
     Route::post('/products/bulk-delete', [ProductController::class, 'bulkDelete'])->name('products.bulk-delete');
     Route::patch('/products/bulk-activate', [ProductController::class, 'bulkActivate'])->name('products.bulk-activate');
     Route::patch('/products/bulk-deactivate', [ProductController::class, 'bulkDeactivate'])->name('products.bulk-deactivate');
-    
+
     // AJAX endpoints for products
     Route::get('/products-list', [ProductController::class, 'getVendorProducts'])->name('products.list');
     Route::get('/products-stats', [ProductController::class, 'getStats'])->name('products.stats');
-    
+
     // ======== CATEGORIES MANAGEMENT ========
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     Route::get('/categories-list', [CategoryController::class, 'getCategories'])->name('categories.list');
-    
+
     // ======== ANALYTICS ========
     Route::get('/sales-report', [VendorController::class, 'salesReport'])->name('sales-report');
     Route::get('/store-views', [VendorController::class, 'storeViews'])->name('store-views');
-    
+
     // ======== REVIEWS MANAGEMENT ========
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
     Route::post('/reviews/{id}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
     Route::get('/reviews-stats', [ReviewController::class, 'getStats'])->name('reviews.stats');
-    
+
     // ======== SETTINGS ========
     Route::get('/profile', [VendorCustomerController::class, 'show'])->name('profile');
     Route::get('/settings', [VendorCustomerController::class, 'edit'])->name('settings');
     Route::post('/settings', [VendorCustomerController::class, 'updateSettings'])->name('settings.update');
     Route::post('/password', [VendorCustomerController::class, 'updatePassword'])->name('password.update');
-    
+
     // ======== NOTIFICATIONS ========
     Route::get('/notifications', [VendorController::class, 'notifications'])->name('notifications');
     Route::post('/notifications/{id}/read', [VendorController::class, 'markNotificationAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [VendorController::class, 'markAllNotificationsAsRead'])->name('notifications.read-all');
     Route::get('/unread-counts', [VendorController::class, 'getUnreadCounts'])->name('unread-counts');
-    
+
     // ======== MESSAGES ========
     Route::get('/messages', [VendorController::class, 'messages'])->name('messages');
     Route::get('/messages/conversation/{userId}', [VendorController::class, 'getConversation'])->name('messages.conversation');
@@ -272,15 +290,15 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
 // COMPLETE CUSTOMER ROUTES
 // =========================================================================
 Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
-    
+
     // ======== CUSTOMER DASHBOARD ========
     Route::get('/dashboard', [VendorCustomerController::class, 'customerDashboard'])->name('dashboard');
-    
+
     // ======== WISHLIST MANAGEMENT ========
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/add/{product}', [WishlistController::class, 'add'])->name('wishlist.add');
     Route::delete('/wishlist/remove/{product}', [WishlistController::class, 'remove'])->name('wishlist.remove');
-    
+
     // ======== FOLLOWING MANAGEMENT ========
     Route::get('/following', [VendorCustomerController::class, 'following'])->name('following');
 
@@ -307,24 +325,24 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::get('/orders/{id}/track', [OrderController::class, 'customerOrderTrack'])->name('orders.track');
     Route::post('/orders/{id}/reorder', [OrderController::class, 'customerReorder'])->name('orders.reorder');
     Route::get('/orders-stats', [OrderController::class, 'getCustomerOrderStats'])->name('orders.stats');
-    
+
     // ======== CUSTOMER PROFILE ========
     Route::get('/profile', [VendorCustomerController::class, 'show'])->name('profile');
     Route::get('/profile/edit', [VendorCustomerController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [VendorCustomerController::class, 'update'])->name('profile.update');
-    
+
     // ======== CUSTOMER SETTINGS ========
     Route::get('/settings', [VendorCustomerController::class, 'edit'])->name('settings');
     Route::post('/settings', [VendorCustomerController::class, 'updateSettings'])->name('settings.update');
     Route::post('/password', [VendorCustomerController::class, 'updatePassword'])->name('password.update');
-    
+
     // ======== CUSTOMER NOTIFICATIONS ========
     Route::get('/notifications', [NotificationController::class, 'customerNotifications'])->name('notifications');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
     Route::get('/notifications/recent', [NotificationController::class, 'getRecent'])->name('notifications.recent');
     Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
-    
+
     // ======== CUSTOMER MESSAGES ========
     Route::get('/messages', [MessageController::class, 'customerMessages'])->name('messages');
     Route::post('/messages/send', [MessageController::class, 'send'])->name('messages.send');
@@ -481,25 +499,25 @@ Route::prefix('api')->name('api.')->group(function () {
     Route::get('/products/{id}', [ProductController::class, 'apiProduct'])->name('product');
     Route::get('/categories', [CategoryController::class, 'apiCategories'])->name('categories');
     Route::get('/search', [VendorCustomerController::class, 'apiSearch'])->name('search');
-    
+
     // Protected API endpoints
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', function (Request $request) {
             return $request->user();
         })->name('user');
-        
+
         // Customer API endpoints
         Route::get('/customer/wishlist', [WishlistController::class, 'apiIndex'])->name('customer.wishlist');
         Route::post('/customer/wishlist/add/{product}', [WishlistController::class, 'apiAdd'])->name('customer.wishlist.add');
         Route::delete('/customer/wishlist/remove/{product}', [WishlistController::class, 'apiRemove'])->name('customer.wishlist.remove');
-        
+
         // Cart API endpoints
         Route::get('/cart', [CartController::class, 'apiIndex'])->name('cart');
         Route::post('/cart/add/{product}', [CartController::class, 'apiAdd'])->name('cart.add');
         Route::put('/cart/update/{cart}', [CartController::class, 'apiUpdate'])->name('cart.update');
         Route::delete('/cart/remove/{cart}', [CartController::class, 'apiRemove'])->name('cart.remove');
         Route::delete('/cart/clear', [CartController::class, 'apiClear'])->name('cart.clear');
-        
+
         // Orders API endpoints
         Route::get('/orders', [OrderController::class, 'apiOrders'])->name('orders');
         Route::get('/orders/{id}', [OrderController::class, 'apiOrder'])->name('order');

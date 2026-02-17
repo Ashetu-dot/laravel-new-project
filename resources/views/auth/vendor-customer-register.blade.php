@@ -19,6 +19,8 @@
             --border-color: #e2e8f0;
             --error-color: #ef4444;
             --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
@@ -116,6 +118,44 @@
 
         .hamburger:hover {
             background-color: rgba(0,0,0,0.05);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            z-index: 999;
+            transform: translateY(-150%);
+            transition: transform 0.3s ease;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .mobile-menu.active {
+            transform: translateY(0);
+        }
+
+        .mobile-menu a {
+            display: block;
+            padding: 15px 0;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 500;
+        }
+
+        .mobile-menu a:last-child {
+            border-bottom: none;
+        }
+
+        .mobile-menu a:hover {
+            color: var(--primary-gold);
+            padding-left: 10px;
         }
 
         /* Main Content */
@@ -246,6 +286,12 @@
             background-color: #fee2e2;
             color: #991b1b;
             border: 1px solid #fecaca;
+        }
+
+        .alert-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
         }
 
         /* Progress Steps */
@@ -396,6 +442,13 @@
             background-color: #fef2f2;
         }
 
+        .form-input.valid,
+        .form-select.valid,
+        .form-textarea.valid {
+            border-color: var(--success-color);
+            background-color: #f0fdf4;
+        }
+
         .error-message {
             font-size: 12px;
             color: var(--error-color);
@@ -405,9 +458,78 @@
             margin-top: 4px;
         }
 
+        .success-message {
+            font-size: 12px;
+            color: var(--success-color);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
         .form-textarea {
             resize: vertical;
             min-height: 120px;
+        }
+
+        /* Email Validation Indicators */
+        .email-validation {
+            margin-top: 8px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            background-color: #f8fafc;
+            border: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .email-validation.show {
+            display: block;
+        }
+
+        .validation-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: var(--text-light);
+        }
+
+        .validation-item i {
+            font-size: 14px;
+        }
+
+        .validation-item.valid {
+            color: var(--success-color);
+        }
+
+        .validation-item.invalid {
+            color: var(--error-color);
+        }
+
+        .email-suggestion {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background-color: #fef3e7;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            border-left: 3px solid var(--primary-gold);
+            display: none;
+        }
+
+        .email-suggestion.show {
+            display: block;
+        }
+
+        .suggestion-link {
+            color: var(--primary-gold);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .suggestion-link:hover {
+            text-decoration: underline;
         }
 
         /* Password Strength */
@@ -553,7 +675,7 @@
         }
 
         .char-counter.warning {
-            color: #f59e0b;
+            color: var(--warning-color);
         }
 
         .char-counter.error {
@@ -701,6 +823,7 @@
             .nav-actions { gap: 16px; }
             .login-link { font-size: 14px; }
             .hamburger { display: flex; }
+            .mobile-menu { display: block; }
 
             .main-container { padding: 30px 16px; }
             .registration-card { padding: 24px; }
@@ -799,6 +922,15 @@
         </div>
     </nav>
 
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="{{ route('home') }}">Home</a>
+        <a href="{{ route('home') }}#categories">Categories</a>
+        <a href="{{ route('home') }}#features">Features</a>
+        <a href="{{ route('about') }}">About Us</a>
+        <a href="{{ route('login') }}">Log In</a>
+    </div>
+
     <!-- Main Content -->
     <main class="main-container">
         <div class="registration-card">
@@ -834,6 +966,13 @@
                 <div class="alert alert-error" id="errorAlert">
                     <i class="ri-error-warning-line"></i>
                     {{ session('error') }}
+                </div>
+            @endif
+
+            @if(session('info'))
+                <div class="alert alert-info" id="infoAlert">
+                    <i class="ri-information-line"></i>
+                    {{ session('info') }}
                 </div>
             @endif
 
@@ -876,13 +1015,32 @@
                             <label for="email" class="form-label">
                                 Email Address <span class="required">*</span>
                             </label>
-                            <input type="email" 
-                                   id="email" 
-                                   name="email" 
-                                   class="form-input @error('email') error @enderror" 
-                                   placeholder="name@example.com" 
-                                   value="{{ old('email') }}" 
-                                   required>
+                            <div class="input-wrapper">
+                                <input type="email" 
+                                       id="email" 
+                                       name="email" 
+                                       class="form-input @error('email') error @enderror" 
+                                       placeholder="name@example.com" 
+                                       value="{{ old('email') }}" 
+                                       required
+                                       oninput="validateEmail(this)">
+                                <i class="ri-check-line" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--success-color); display: none;" id="emailValidIcon"></i>
+                                <i class="ri-close-line" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--error-color); display: none;" id="emailInvalidIcon"></i>
+                            </div>
+                            <div class="email-validation" id="emailValidation">
+                                <div class="validation-item" id="emailFormat">
+                                    <i class="ri-close-line"></i> Valid email format
+                                </div>
+                                <div class="validation-item" id="emailDomain">
+                                    <i class="ri-close-line"></i> Valid domain (e.g., gmail.com, yahoo.com)
+                                </div>
+                                <div class="validation-item" id="emailNoSpaces">
+                                    <i class="ri-close-line"></i> No spaces allowed
+                                </div>
+                            </div>
+                            <div class="email-suggestion" id="emailSuggestion">
+                                Did you mean <a href="#" class="suggestion-link" id="suggestionLink"></a>?
+                            </div>
                             @error('email')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
@@ -944,7 +1102,8 @@
                                        class="form-input @error('password') error @enderror" 
                                        placeholder="••••••••" 
                                        required 
-                                       minlength="8">
+                                       minlength="8"
+                                       oninput="checkPasswordStrength(this)">
                                 <i class="ri-eye-off-line toggle-password" onclick="togglePassword(this)"></i>
                             </div>
                             <div class="password-strength">
@@ -972,7 +1131,11 @@
                                    name="password_confirmation" 
                                    class="form-input" 
                                    placeholder="••••••••" 
-                                   required>
+                                   required
+                                   oninput="validatePasswordMatch(this)">
+                            <div class="error-message" id="passwordMatchError" style="display: none;">
+                                <i class="ri-error-warning-fill"></i> Passwords do not match
+                            </div>
                         </div>
                     </div>
 
@@ -1054,13 +1217,32 @@
                                 <label for="email" class="form-label">
                                     Email Address <span class="required">*</span>
                                 </label>
-                                <input type="email" 
-                                       id="email" 
-                                       name="email" 
-                                       class="form-input @error('email') error @enderror" 
-                                       placeholder="name@example.com" 
-                                       value="{{ old('email') }}" 
-                                       required>
+                                <div class="input-wrapper">
+                                    <input type="email" 
+                                           id="email" 
+                                           name="email" 
+                                           class="form-input @error('email') error @enderror" 
+                                           placeholder="name@example.com" 
+                                           value="{{ old('email') }}" 
+                                           required
+                                           oninput="validateEmail(this)">
+                                    <i class="ri-check-line" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--success-color); display: none;" id="emailValidIcon"></i>
+                                    <i class="ri-close-line" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--error-color); display: none;" id="emailInvalidIcon"></i>
+                                </div>
+                                <div class="email-validation" id="emailValidation">
+                                    <div class="validation-item" id="emailFormat">
+                                        <i class="ri-close-line"></i> Valid email format
+                                    </div>
+                                    <div class="validation-item" id="emailDomain">
+                                        <i class="ri-close-line"></i> Valid domain (e.g., gmail.com, yahoo.com)
+                                    </div>
+                                    <div class="validation-item" id="emailNoSpaces">
+                                        <i class="ri-close-line"></i> No spaces allowed
+                                    </div>
+                                </div>
+                                <div class="email-suggestion" id="emailSuggestion">
+                                    Did you mean <a href="#" class="suggestion-link" id="suggestionLink"></a>?
+                                </div>
                                 @error('email')
                                     <div class="error-message">
                                         <i class="ri-error-warning-fill"></i> {{ $message }}
@@ -1081,7 +1263,8 @@
                                            class="form-input @error('password') error @enderror" 
                                            placeholder="••••••••" 
                                            required 
-                                           minlength="8">
+                                           minlength="8"
+                                           oninput="checkPasswordStrength(this)">
                                     <i class="ri-eye-off-line toggle-password" onclick="togglePassword(this)"></i>
                                 </div>
                                 <div class="password-strength">
@@ -1109,7 +1292,11 @@
                                        name="password_confirmation" 
                                        class="form-input" 
                                        placeholder="••••••••" 
-                                       required>
+                                       required
+                                       oninput="validatePasswordMatch(this)">
+                                <div class="error-message" id="passwordMatchError" style="display: none;">
+                                    <i class="ri-error-warning-fill"></i> Passwords do not match
+                                </div>
                             </div>
                         </div>
 
@@ -1365,6 +1552,214 @@
     </main>
 
     <script>
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        if (menuToggle && mobileMenu) {
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                mobileMenu.classList.toggle('active');
+                
+                // Change icon
+                const icon = this.querySelector('i');
+                if (mobileMenu.classList.contains('active')) {
+                    icon.className = 'ri-close-line';
+                } else {
+                    icon.className = 'ri-menu-line';
+                }
+            });
+
+            // Close mobile menu when clicking on a link
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenu.classList.remove('active');
+                    const icon = menuToggle.querySelector('i');
+                    if (icon) icon.className = 'ri-menu-line';
+                });
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!mobileMenu.contains(event.target) && !menuToggle.contains(event.target)) {
+                    mobileMenu.classList.remove('active');
+                    const icon = menuToggle.querySelector('i');
+                    if (icon) icon.className = 'ri-menu-line';
+                }
+            });
+        }
+
+        // Email validation function
+        function validateEmail(input) {
+            const email = input.value;
+            const validIcon = input.parentElement.querySelector('#emailValidIcon');
+            const invalidIcon = input.parentElement.querySelector('#emailInvalidIcon');
+            const validationBox = document.getElementById('emailValidation');
+            const formatItem = document.getElementById('emailFormat');
+            const domainItem = document.getElementById('emailDomain');
+            const noSpacesItem = document.getElementById('emailNoSpaces');
+            const suggestionBox = document.getElementById('emailSuggestion');
+            const suggestionLink = document.getElementById('suggestionLink');
+            
+            // Reset
+            input.classList.remove('valid', 'error');
+            if (validIcon) validIcon.style.display = 'none';
+            if (invalidIcon) invalidIcon.style.display = 'none';
+            if (validationBox) validationBox.classList.remove('show');
+            if (suggestionBox) suggestionBox.classList.remove('show');
+            
+            if (!email) return;
+            
+            // Show validation box
+            if (validationBox) validationBox.classList.add('show');
+            
+            // Check for spaces
+            const hasSpaces = email.includes(' ');
+            if (noSpacesItem) {
+                const icon = noSpacesItem.querySelector('i');
+                if (hasSpaces) {
+                    noSpacesItem.classList.add('invalid');
+                    noSpacesItem.classList.remove('valid');
+                    icon.className = 'ri-close-line';
+                } else {
+                    noSpacesItem.classList.add('valid');
+                    noSpacesItem.classList.remove('invalid');
+                    icon.className = 'ri-check-line';
+                }
+            }
+            
+            // Check email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const isValidFormat = emailRegex.test(email);
+            if (formatItem) {
+                const icon = formatItem.querySelector('i');
+                if (!isValidFormat) {
+                    formatItem.classList.add('invalid');
+                    formatItem.classList.remove('valid');
+                    icon.className = 'ri-close-line';
+                } else {
+                    formatItem.classList.add('valid');
+                    formatItem.classList.remove('invalid');
+                    icon.className = 'ri-check-line';
+                }
+            }
+            
+            // Check domain
+            let isValidDomain = true;
+            if (isValidFormat) {
+                const domain = email.split('@')[1];
+                const domainRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                isValidDomain = domainRegex.test(domain);
+                if (domainItem) {
+                    const icon = domainItem.querySelector('i');
+                    if (!isValidDomain) {
+                        domainItem.classList.add('invalid');
+                        domainItem.classList.remove('valid');
+                        icon.className = 'ri-close-line';
+                    } else {
+                        domainItem.classList.add('valid');
+                        domainItem.classList.remove('invalid');
+                        icon.className = 'ri-check-line';
+                    }
+                }
+            } else {
+                if (domainItem) {
+                    domainItem.classList.add('invalid');
+                    domainItem.classList.remove('valid');
+                    domainItem.querySelector('i').className = 'ri-close-line';
+                }
+            }
+            
+            // Check if all valid
+            const isValid = isValidFormat && isValidDomain && !hasSpaces;
+            
+            if (isValid) {
+                input.classList.add('valid');
+                if (validIcon) validIcon.style.display = 'block';
+                
+                // Suggest common typos
+                const [localPart, domain] = email.split('@');
+                const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'ethiotelecom.et'];
+                
+                if (domain && !commonDomains.includes(domain)) {
+                    // Check if it's a common typo
+                    const typoDomains = {
+                        'gmai.com': 'gmail.com',
+                        'gmal.com': 'gmail.com',
+                        'gmial.com': 'gmail.com',
+                        'yaho.com': 'yahoo.com',
+                        'yahooo.com': 'yahoo.com',
+                        'hotmial.com': 'hotmail.com',
+                        'hotmal.com': 'hotmail.com',
+                        'outloo.com': 'outlook.com',
+                        'outlok.com': 'outlook.com',
+                        'ethiotelecom.net': 'ethiotelecom.et'
+                    };
+                    
+                    if (typoDomains[domain]) {
+                        const correctedEmail = `${localPart}@${typoDomains[domain]}`;
+                        suggestionLink.textContent = correctedEmail;
+                        suggestionBox.classList.add('show');
+                        
+                        suggestionLink.onclick = function(e) {
+                            e.preventDefault();
+                            input.value = correctedEmail;
+                            validateEmail(input);
+                        };
+                    }
+                }
+            } else {
+                input.classList.add('error');
+                if (invalidIcon) invalidIcon.style.display = 'block';
+            }
+        }
+
+        // Password strength checker
+        function checkPasswordStrength(input) {
+            const password = input.value;
+            const container = input.closest('.form-group');
+            if (!container) return;
+
+            const strengthBars = container.querySelectorAll('.strength-bar');
+            const strengthText = container.querySelector('.strength-text');
+
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+
+            const colors = ['#e2e8f0', '#ef4444', '#f59e0b', '#10b981', '#10b981'];
+            const texts = ['Enter a strong password', 'Weak', 'Fair', 'Good', 'Strong'];
+
+            strengthBars.forEach((bar, index) => {
+                bar.style.backgroundColor = index < strength ? colors[strength] : '#e2e8f0';
+            });
+
+            if (strengthText) {
+                strengthText.textContent = texts[strength];
+                strengthText.style.color = colors[strength] || '#64748b';
+            }
+        }
+
+        // Password match validation
+        function validatePasswordMatch(input) {
+            const password = document.getElementById('password');
+            const confirmPassword = input;
+            const errorElement = document.getElementById('passwordMatchError');
+            
+            if (password && confirmPassword) {
+                if (password.value !== confirmPassword.value) {
+                    confirmPassword.classList.add('error');
+                    errorElement.style.display = 'flex';
+                } else {
+                    confirmPassword.classList.remove('error');
+                    confirmPassword.classList.add('valid');
+                    errorElement.style.display = 'none';
+                }
+            }
+        }
+
         // Password visibility toggle
         function togglePassword(element) {
             const input = element.previousElementSibling;
@@ -1378,36 +1773,6 @@
                 element.classList.add('ri-eye-off-line');
             }
         }
-
-        // Password strength checker
-        document.querySelectorAll('input[type="password"]').forEach(passwordInput => {
-            passwordInput.addEventListener('input', function() {
-                const password = this.value;
-                const container = this.closest('.form-group');
-                if (!container) return;
-
-                const strengthBars = container.querySelectorAll('.strength-bar');
-                const strengthText = container.querySelector('.strength-text');
-
-                let strength = 0;
-                if (password.length >= 8) strength++;
-                if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
-                if (password.match(/[0-9]/)) strength++;
-                if (password.match(/[^a-zA-Z0-9]/)) strength++;
-
-                const colors = ['#e2e8f0', '#ef4444', '#f59e0b', '#10b981', '#10b981'];
-                const texts = ['Enter a strong password', 'Weak', 'Fair', 'Good', 'Strong'];
-
-                strengthBars.forEach((bar, index) => {
-                    bar.style.backgroundColor = index < strength ? colors[strength] : '#e2e8f0';
-                });
-
-                if (strengthText) {
-                    strengthText.textContent = texts[strength];
-                    strengthText.style.color = colors[strength] || '#64748b';
-                }
-            });
-        });
 
         // City and region sync
         const citySelect = document.getElementById('city');
@@ -1443,7 +1808,8 @@
 
             // Update progress
             const fillWidth = step === 1 ? '33%' : (step === 2 ? '66%' : '100%');
-            document.querySelector('.progress-line-fill').style.width = fillWidth;
+            const progressFill = document.querySelector('.progress-line-fill');
+            if (progressFill) progressFill.style.width = fillWidth;
 
             // Update step classes
             document.querySelectorAll('.step-item').forEach((item, index) => {
@@ -1525,34 +1891,38 @@
                 return;
             }
 
-            uploadText.textContent = `Selected: ${file.name}`;
-            fileUploadArea.classList.add('has-file');
+            if (uploadText) uploadText.textContent = `Selected: ${file.name}`;
+            if (fileUploadArea) fileUploadArea.classList.add('has-file');
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                filePreview.innerHTML = `
-                    <div class="preview-content">
-                        <img src="${e.target.result}" class="preview-image">
-                        <div class="preview-details">
-                            <div class="preview-name">${file.name}</div>
-                            <div class="preview-size">${(file.size / 1024).toFixed(1)} KB</div>
+                if (filePreview) {
+                    filePreview.innerHTML = `
+                        <div class="preview-content">
+                            <img src="${e.target.result}" class="preview-image">
+                            <div class="preview-details">
+                                <div class="preview-name">${file.name}</div>
+                                <div class="preview-size">${(file.size / 1024).toFixed(1)} KB</div>
+                            </div>
+                            <button type="button" class="preview-remove" onclick="removeFile()">
+                                <i class="ri-close-line"></i>
+                            </button>
                         </div>
-                        <button type="button" class="preview-remove" onclick="removeFile()">
-                            <i class="ri-close-line"></i>
-                        </button>
-                    </div>
-                `;
-                filePreview.classList.add('active');
+                    `;
+                    filePreview.classList.add('active');
+                }
             };
             reader.readAsDataURL(file);
         }
 
         function removeFile() {
-            fileInput.value = '';
-            uploadText.textContent = 'Click to upload or drag and drop';
-            fileUploadArea.classList.remove('has-file');
-            filePreview.innerHTML = '';
-            filePreview.classList.remove('active');
+            if (fileInput) fileInput.value = '';
+            if (uploadText) uploadText.textContent = 'Click to upload or drag and drop';
+            if (fileUploadArea) fileUploadArea.classList.remove('has-file');
+            if (filePreview) {
+                filePreview.innerHTML = '';
+                filePreview.classList.remove('active');
+            }
         }
 
         // Character counter for description
@@ -1621,11 +1991,6 @@
                 setTimeout(() => alert.remove(), 500);
             });
         }, 5000);
-
-        // Mobile menu
-        document.getElementById('menuToggle')?.addEventListener('click', function() {
-            alert('Mobile menu would open here. In production, this would show navigation links.');
-        });
     </script>
 
 </body>

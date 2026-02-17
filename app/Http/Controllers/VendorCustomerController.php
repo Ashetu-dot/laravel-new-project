@@ -853,6 +853,131 @@ public function sendInvite(Request $request)
 
 
 
+/**
+ * Display features page.
+ */
+public function features()
+{
+    return view('pages.features');
+}
+
+
+/**
+ * Display how it works page.
+ */
+public function howItWorks()
+{
+    // Get counts for statistics
+    $vendorCount = User::where('role', 'vendor')->where('is_active', true)->count();
+    $customerCount = User::where('role', 'customer')->where('is_active', true)->count();
+    
+    // Get booking count (you would need a bookings table)
+    // $bookingCount = Booking::count();
+    $bookingCount = 5000; // Example data
+    
+    // Get cities count
+    $cityCount = User::where('role', 'vendor')
+                    ->whereNotNull('city')
+                    ->distinct('city')
+                    ->count('city');
+    
+    return view('pages.how-it-works', compact(
+        'vendorCount',
+        'customerCount',
+        'bookingCount',
+        'cityCount'
+    ));
+}
+
+
+
+
+/**
+ * Display list service page.
+ */
+public function listService()
+{
+    // Get vendor counts by category
+    $categoryVendors = [
+        'food' => User::where('role', 'vendor')->where('category', 'like', '%food%')->count(),
+        'photography' => User::where('role', 'vendor')->where('category', 'like', '%photo%')->count(),
+        'home' => User::where('role', 'vendor')->where('category', 'like', '%home%')->count(),
+        'beauty' => User::where('role', 'vendor')->where('category', 'like', '%beauty%')->count(),
+        'automotive' => User::where('role', 'vendor')->where('category', 'like', '%auto%')->count(),
+        'events' => User::where('role', 'vendor')->where('category', 'like', '%event%')->count(),
+        'tech' => User::where('role', 'vendor')->where('category', 'like', '%tech%')->count(),
+        'handicrafts' => User::where('role', 'vendor')->where('category', 'like', '%handicraft%')->count(),
+    ];
+    
+    return view('pages.list-service', compact('categoryVendors'));
+}
+
+
+
+/**
+ * Display vendor resources page.
+ */
+public function vendorResources()
+{
+    // Get counts for community stats
+    $telegramMembers = 2500; // This could come from a config or database
+    $whatsappMembers = 1800;
+    
+    return view('pages.vendor-resources', compact('telegramMembers', 'whatsappMembers'));
+}
+
+/**
+ * Display success stories page.
+ */
+public function successStories()
+{
+    // Get vendor counts
+    $vendorCount = User::where('role', 'vendor')->where('is_active', true)->count();
+    
+    // Calculate average growth (this would come from actual data in a real app)
+    $avgGrowth = '150%';
+    
+    // Calculate total earnings (this would come from orders table)
+    $totalEarnings = '5M+';
+    
+    // Count happy customers
+    $happyCustomers = User::where('role', 'customer')->where('is_active', true)->count();
+    
+    return view('pages.success-stories', compact(
+        'vendorCount',
+        'avgGrowth',
+        'totalEarnings',
+        'happyCustomers'
+    ));
+}
+
+
+
+
+
+
+/**
+ * Display community page.
+ */
+public function community()
+{
+    // Get community stats
+    $totalMembers = User::count(); // Total users
+    $dailyPosts = 500; // This would come from a forum posts table
+    $monthlyEvents = 25; // This would come from an events table
+    $mentors = User::where('role', 'vendor')->where('is_active', true)->count() / 10; // Example calculation
+    
+    return view('pages.community', compact(
+        'totalMembers',
+        'dailyPosts',
+        'monthlyEvents',
+        'mentors'
+    ));
+}
+
+
+
+
 
 
 
