@@ -894,7 +894,7 @@
             </div>
 
             <div class="header-actions">
-                <a href="#" class="icon-btn">
+                <a href="" class="icon-btn">
                     <i class="ri-notification-3-line"></i>
                 </a>
                 <a href="#" class="icon-btn">

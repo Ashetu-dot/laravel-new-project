@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -43,6 +44,16 @@ class User extends Authenticatable implements MustVerifyEmail
         'total_reviews',
         'is_active',
         'last_login_at',
+        'store_views',
+        'location',
+        'latitude',
+        'longitude',
+        'facebook_url',
+        'instagram_url',
+        'telegram_url',
+        'twitter_url',
+        'business_hours',
+        'referral_code',
     ];
 
     /**
@@ -68,6 +79,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'products_count' => 'integer',
         'rating' => 'decimal:2',
         'total_reviews' => 'integer',
+        'store_views' => 'integer',
+        'business_hours' => 'array',
     ];
 
     /**
@@ -81,15 +94,40 @@ class User extends Authenticatable implements MustVerifyEmail
         'products_count' => 0,
         'rating' => 0,
         'total_reviews' => 0,
-        'country' => 'USA',
+        'country' => 'Ethiopia',
+        'store_views' => 0,
     ];
 
     /**
-     * Get the orders for the user.
+     * Get the products for the vendor.
+     */
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'vendor_id');
+    }
+
+    /**
+     * Get active products for the vendor.
+     */
+    public function activeProducts()
+    {
+        return $this->hasMany(Product::class, 'vendor_id')->where('is_active', true);
+    }
+
+    /**
+     * Get the orders for the user (as customer).
      */
     public function orders()
     {
         return $this->hasMany(Order::class, 'user_id');
+    }
+
+    /**
+     * Get the orders for the vendor (through products).
+     */
+    public function vendorOrders()
+    {
+        return $this->hasManyThrough(Order::class, Product::class, 'vendor_id', 'id', 'id', 'order_id');
     }
 
     /**
@@ -108,6 +146,71 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsToMany(User::class, 'followers', 'vendor_id', 'user_id')
                     ->withTimestamps();
+    }
+
+    /**
+     * The categories that belong to the vendor.
+     */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_vendor', 'user_id', 'category_id')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get the reviews received by this vendor.
+     */
+    public function receivedReviews()
+    {
+        return $this->hasMany(Review::class, 'vendor_id');
+    }
+
+    /**
+     * Get the reviews written by this user.
+     */
+    public function writtenReviews()
+    {
+        return $this->hasMany(Review::class, 'user_id');
+    }
+
+    /**
+     * Get the messages sent by the user.
+     */
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    /**
+     * Get the messages received by the user.
+     */
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    /**
+     * Get the notifications for the user.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'user_id');
+    }
+
+    /**
+     * Get unread notifications for the user.
+     */
+    public function unreadNotifications()
+    {
+        return $this->hasMany(Notification::class, 'user_id')->where('is_read', false);
+    }
+
+    /**
+     * Get unread messages for the user.
+     */
+    public function unreadMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id')->where('is_read', false);
     }
 
     /**
@@ -134,21 +237,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'admin';
     }
 
-
-
-    /**
- * The categories that belong to the vendor.
- */
-public function categories()
-{
-    return $this->belongsToMany(Category::class, 'category_vendor', 'user_id', 'category_id');
-}
-
-
-
-
-
-
     /**
      * Get the avatar URL with fallback.
      */
@@ -158,7 +246,17 @@ public function categories()
             return Storage::url($this->avatar);
         }
         
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->business_name ?? $this->name ?? 'User') . '&background=B88E3F&color=fff';
+        $name = $this->business_name ?? $this->name ?? 'User';
+        $initials = '';
+        $words = explode(' ', $name);
+        
+        foreach ($words as $word) {
+            if (!empty($word)) {
+                $initials .= strtoupper(substr($word, 0, 1));
+            }
+        }
+        
+        return 'https://ui-avatars.com/api/?name=' . urlencode($initials ?: 'U') . '&background=B88E3F&color=fff&size=200';
     }
 
     /**
@@ -179,6 +277,19 @@ public function categories()
         if ($this->country) $parts[] = $this->country;
         
         return implode(', ', $parts);
+    }
+
+    /**
+     * Get the location string.
+     */
+    public function getLocationStringAttribute(): string
+    {
+        $parts = [];
+        if ($this->city) $parts[] = $this->city;
+        if ($this->state) $parts[] = $this->state;
+        if ($this->country && $this->country !== 'Ethiopia') $parts[] = $this->country;
+        
+        return implode(', ', $parts) ?: 'Ethiopia';
     }
 
     /**
@@ -224,6 +335,14 @@ public function categories()
     }
 
     /**
+     * Scope a query to only include admins.
+     */
+    public function scopeAdmins($query)
+    {
+        return $query->where('role', 'admin');
+    }
+
+    /**
      * Scope a query to only include active users.
      */
     public function scopeActive($query)
@@ -244,10 +363,16 @@ public function categories()
      */
     public function scopeByLocation($query, string $city, string $state = null)
     {
-        $query->where('city', 'like', "%{$city}%");
+        $query->where(function($q) use ($city) {
+            $q->where('city', 'like', "%{$city}%")
+              ->orWhere('location', 'like', "%{$city}%");
+        });
         
         if ($state) {
-            $query->where('state', 'like', "%{$state}%");
+            $query->where(function($q) use ($state) {
+                $q->where('state', 'like', "%{$state}%")
+                  ->orWhere('location', 'like', "%{$state}%");
+            });
         }
         
         return $query;
@@ -262,6 +387,36 @@ public function categories()
     }
 
     /**
+     * Scope a query to search vendors by name or description.
+     */
+    public function scopeSearch($query, string $term)
+    {
+        return $query->where(function($q) use ($term) {
+            $q->where('business_name', 'like', "%{$term}%")
+              ->orWhere('description', 'like', "%{$term}%")
+              ->orWhere('category', 'like', "%{$term}%")
+              ->orWhere('city', 'like', "%{$term}%")
+              ->orWhere('state', 'like', "%{$term}%");
+        });
+    }
+
+    /**
+     * Scope a query to order by rating.
+     */
+    public function scopePopular($query)
+    {
+        return $query->orderBy('rating', 'desc')->orderBy('total_reviews', 'desc');
+    }
+
+    /**
+     * Scope a query to order by newest.
+     */
+    public function scopeNewest($query)
+    {
+        return $query->orderBy('created_at', 'desc');
+    }
+
+    /**
      * Get the vendor's rating as stars HTML.
      */
     public function getRatingStarsAttribute(): string
@@ -273,18 +428,26 @@ public function categories()
         $html = '';
         
         for ($i = 0; $i < $fullStars; $i++) {
-            $html .= '<i class="ri-star-fill" style="color: #B88E3F;"></i>';
+            $html .= '<i class="ri-star-fill" style="color: #f59e0b;"></i>';
         }
         
         if ($halfStar) {
-            $html .= '<i class="ri-star-half-fill" style="color: #B88E3F;"></i>';
+            $html .= '<i class="ri-star-half-fill" style="color: #f59e0b;"></i>';
         }
         
         for ($i = 0; $i < $emptyStars; $i++) {
-            $html .= '<i class="ri-star-line" style="color: #B88E3F;"></i>';
+            $html .= '<i class="ri-star-line" style="color: #f59e0b;"></i>';
         }
         
         return $html;
+    }
+
+    /**
+     * Get the rating as a simple star count.
+     */
+    public function getRatingDisplayAttribute(): string
+    {
+        return number_format($this->rating, 1) . ' (' . $this->total_reviews . ' ' . Str::plural('review', $this->total_reviews) . ')';
     }
 
     /**
@@ -293,6 +456,14 @@ public function categories()
     public function routeNotificationForMail(): string
     {
         return $this->email;
+    }
+
+    /**
+     * Route notifications for SMS (if using).
+     */
+    public function routeNotificationForSms()
+    {
+        return $this->phone;
     }
 
     /**
@@ -318,5 +489,57 @@ public function categories()
     {
         $this->last_login_at = now();
         $this->save();
+    }
+
+    /**
+     * Increment store views.
+     */
+    public function incrementStoreViews(): void
+    {
+        $this->increment('store_views');
+    }
+
+    /**
+     * Check if user has a referral code.
+     */
+    public function hasReferralCode(): bool
+    {
+        return !is_null($this->referral_code);
+    }
+
+    /**
+     * Generate a unique referral code.
+     */
+    public function generateReferralCode(): string
+    {
+        $code = 'VENDORA' . strtoupper(substr(md5($this->id . time()), 0, 6));
+        $this->referral_code = $code;
+        $this->save();
+        
+        return $code;
+    }
+
+    /**
+     * Get referred users.
+     */
+    public function referrals()
+    {
+        // This would need a referrals table
+        return $this->hasMany(User::class, 'referred_by');
+    }
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Generate referral code for new vendors
+        static::created(function ($user) {
+            if ($user->isVendor() && !$user->referral_code) {
+                $user->generateReferralCode();
+            }
+        });
     }
 }
