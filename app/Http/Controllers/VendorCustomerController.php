@@ -23,6 +23,9 @@ use App\Models\User;
 use App\Models\Testimonial;
 use App\Models\Review;
 
+use App\Models\JobPosting;
+use App\Models\JobApplication;
+
 class VendorCustomerController extends Controller
 {
     /**
@@ -609,44 +612,106 @@ class VendorCustomerController extends Controller
         }
     }
 
-    /**
-     * Display careers page.
-     */
-    public function careers()
-    {
-        // You can fetch open positions from database if you have a jobs table
-        // For now, we'll use static data
-        return view('pages.careers');
-    }
 
-    /**
-     * Handle job application submission.
-     */
-    public function apply(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
-            'position' => 'required|string',
-            'cover_letter' => 'nullable|string',
-            'resume' => 'required|file|mimes:pdf,doc,docx|max:5120',
+/**
+ * Display careers page.
+ */
+public function careers()
+{
+    try {
+        // Fetch active positions from database
+        $positions = JobPosting::where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('pages.careers', compact('positions'));
+        
+    } catch (\Exception $e) {
+        Log::error('Careers page error: ' . $e->getMessage());
+        
+        // Return with empty collection - blade will show fallback content
+        $positions = collect([]);
+        return view('pages.careers', compact('positions'));
+    }
+}
+
+
+
+/**
+ * Handle job application submission.
+ */
+public function apply(Request $request)
+{
+    // Validate the request
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'phone' => 'required|string|max:20',
+        'position' => 'required|string',
+        'cover_letter' => 'nullable|string',
+        'resume' => 'required|file|mimes:pdf,doc,docx|max:5120',
+    ]);
+
+    try {
+        // Store the resume file
+        $resumePath = null;
+        if ($request->hasFile('resume')) {
+            $fileName = time() . '_' . $request->file('resume')->getClientOriginalName();
+            $resumePath = $request->file('resume')->storeAs('applications', $fileName, 'public');
+        }
+
+        // Get position title based on ID
+        $positionTitles = [
+            '1' => 'Senior Full Stack Developer',
+            '2' => 'Community Manager',
+            '3' => 'UI/UX Designer',
+            '4' => 'Sales & Partnerships Lead',
+            '5' => 'Open Application',
+        ];
+        
+        $positionTitle = $positionTitles[$validated['position']] ?? 'Unknown Position';
+
+        // Save to database
+        JobApplication::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'position_id' => $validated['position'],
+            'position_title' => $positionTitle,
+            'cover_letter' => $validated['cover_letter'],
+            'resume_path' => $resumePath,
+            'user_id' => Auth::id(),
+            'status' => 'pending',
         ]);
 
-        try {
-            // Store resume file
-            $resumePath = $request->file('resume')->store('applications', 'public');
-            
-            // Here you would save to database or send email
-            // For example: Application::create([...])
-            
-            return redirect()->route('careers')->with('success', 'Application submitted successfully! We will review your application and contact you soon.');
-            
-        } catch (\Exception $e) {
-            Log::error('Application submission failed: ' . $e->getMessage());
-            return back()->with('error', 'Failed to submit application. Please try again.');
-        }
+        Log::info('Job application saved to database', [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'position' => $positionTitle,
+        ]);
+
+        return redirect()->route('careers')
+            ->with('success', 'Application submitted successfully! We will review your application and contact you soon.');
+
+    } catch (\Exception $e) {
+        Log::error('Application submission failed: ' . $e->getMessage());
+        
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Failed to submit application. Please try again.');
     }
+}
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Display press page.

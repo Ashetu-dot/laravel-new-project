@@ -45,6 +45,8 @@ Route::view('/terms-of-service', 'pages.terms-of-service')->name('terms.service'
 Route::get('/about', [VendorCustomerController::class, 'about'])->name('about');
 
 // Careers
+// Route::get('/careers', [VendorCustomerController::class, 'careers'])->name('careers');
+// Route::post('/careers/apply', [VendorCustomerController::class, 'apply'])->name('careers.apply');
 Route::get('/careers', [VendorCustomerController::class, 'careers'])->name('careers');
 Route::post('/careers/apply', [VendorCustomerController::class, 'apply'])->name('careers.apply');
 
@@ -88,6 +90,11 @@ Route::get('/success-stories', [VendorCustomerController::class, 'successStories
 
 //Community
 Route::get('/community', [VendorCustomerController::class, 'community'])->name('community');
+
+
+// Route::get('/privacy-policy', [VendorCustomerController::class, 'privacyPolicy'])->name('privacy-policy');
+// Route::get('/terms-of-service', [VendorCustomerController::class, 'termsOfService'])->name('terms-of-service');
+Route::get('/cookie-policy', [VendorCustomerController::class, 'cookiePolicy'])->name('cookie-policy');
 
 Route::view('/contact', 'pages.contact')->name('contact');
 

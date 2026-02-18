@@ -1303,7 +1303,7 @@
                         <li><a href="{{ route('invite') }}">Invite Friends</a></li>
                     </ul>
                 </div>
-                <div class="link-group"> 
+                <div class="link-group">
                     <h4>For Vendors</h4>
                     <ul>
                         <li><a href="{{ route('list-service') }}">List your service</a></li>
@@ -1315,7 +1315,7 @@
             </div>
         </div>
         <div class="bottom-bar">
-            <span>&copy; {{ date('Y') }} Vendora Inc. All rights reserved. Made with ❤️ in Jimma, Ethiopia</span>
+            <span>&copy; {{ date('Y') }} Vendora. All rights reserved. Jimma, Ethiopia</span>
             <div class="social-icons">
                 <a href="#" target="_blank"><i class="ri-twitter-fill"></i></a>
                 <a href="#" target="_blank"><i class="ri-instagram-fill"></i></a>

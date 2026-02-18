@@ -10,22 +10,18 @@
         /* ----- FONTS ----- */
         @font-face {
             font-family: 'Inter';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Regular.otf') format('opentype');
             font-weight: 400;
         }
         @font-face {
             font-family: 'Inter';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Medium.otf') format('opentype');
             font-weight: 500;
         }
         @font-face {
             font-family: 'Inter';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Bold.otf') format('opentype');
             font-weight: 700;
         }
         @font-face {
             font-family: 'AlibabaSans';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/AlibabaSans-Bold.otf') format('opentype');
             font-weight: 700;
         }
 
@@ -84,18 +80,6 @@
             font-size: 12px;
             font-weight: 600;
             margin-left: 8px;
-        }
-
-        .location-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background-color: #fef3e7;
-            color: var(--primary-color);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
         }
 
         /* Alert Messages */
@@ -312,11 +296,7 @@
             padding: 0 20px;
         }
 
-        /* Why Join Us Section */
-        .why-join {
-            margin-bottom: 80px;
-        }
-
+        /* Section Title */
         .section-title {
             font-size: 32px;
             font-weight: 700;
@@ -325,19 +305,42 @@
             text-align: center;
         }
 
+        .section-title span {
+            color: var(--primary-color);
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title span::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background-color: rgba(184, 142, 63, 0.2);
+            z-index: -1;
+            border-radius: 4px;
+        }
+
+        /* Why Join Us Section */
+        .why-join {
+            margin-bottom: 80px;
+        }
+
         .benefits-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 30px;
+            gap: 25px;
         }
 
         .benefit-card {
             background: var(--white);
-            padding: 30px;
+            padding: 30px 20px;
             border-radius: var(--radius-lg);
             text-align: center;
             box-shadow: var(--shadow);
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.3s;
         }
 
         .benefit-card:hover {
@@ -386,8 +389,11 @@
             border-radius: var(--radius-lg);
             padding: 30px;
             box-shadow: var(--shadow);
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.3s;
             border: 1px solid transparent;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .position-card:hover {
@@ -401,6 +407,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .position-title {
@@ -416,6 +424,7 @@
             border-radius: 50px;
             font-size: 12px;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .position-location {
@@ -440,6 +449,7 @@
 
         .position-requirements {
             margin-bottom: 20px;
+            flex: 1;
         }
 
         .requirements-title {
@@ -472,6 +482,7 @@
             align-items: center;
             padding-top: 20px;
             border-top: 1px solid var(--border-color);
+            margin-top: auto;
         }
 
         .position-salary {
@@ -491,6 +502,8 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
+            border: none;
+            cursor: pointer;
         }
 
         .apply-btn:hover {
@@ -499,66 +512,16 @@
             box-shadow: 0 4px 12px rgba(184, 142, 63, 0.3);
         }
 
-        /* Life at Vendora */
-        .life-section {
-            margin-bottom: 80px;
-        }
-
-        .life-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-        }
-
-        .life-card {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            transition: transform 0.3s;
-        }
-
-        .life-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .life-image {
-            height: 200px;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 48px;
-        }
-
-        .life-content {
-            padding: 24px;
-        }
-
-        .life-content h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .life-content p {
-            color: var(--text-light);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
         /* Application Form */
         .application-section {
             background: linear-gradient(135deg, rgba(184, 142, 63, 0.05) 0%, rgba(248, 250, 252, 0) 100%);
             padding: 60px 20px;
             border-radius: var(--radius-lg);
-            margin-bottom: 60px;
+            margin-bottom: 80px;
         }
 
         .application-form {
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
             background: var(--white);
             padding: 40px;
@@ -567,10 +530,15 @@
         }
 
         .form-title {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             margin-bottom: 30px;
             text-align: center;
+            color: var(--text-dark);
+        }
+
+        .form-title span {
+            color: var(--primary-color);
         }
 
         .form-group {
@@ -585,6 +553,10 @@
             color: var(--text-dark);
         }
 
+        .form-label .required {
+            color: var(--error-color);
+        }
+
         .form-input,
         .form-select,
         .form-textarea {
@@ -592,7 +564,7 @@
             padding: 12px 16px;
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
-            font-size: 14px;
+            font-size: 15px;
             transition: all 0.3s;
             font-family: 'Inter', sans-serif;
         }
@@ -603,6 +575,13 @@
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(184, 142, 63, 0.1);
+        }
+
+        .form-input.error,
+        .form-select.error,
+        .form-textarea.error {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
         }
 
         .form-textarea {
@@ -617,21 +596,34 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
+            background: #fafafa;
         }
 
         .file-upload-area:hover {
             border-color: var(--primary-color);
             background: rgba(184, 142, 63, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .file-upload-area.has-file {
+            border-color: var(--success-color);
+            background: #f0fdf4;
+        }
+
+        .file-upload-area.error {
+            border-color: var(--error-color);
+            background: #fef2f2;
         }
 
         .file-upload-icon {
-            font-size: 32px;
+            font-size: 40px;
             color: var(--primary-color);
             margin-bottom: 10px;
         }
 
         .file-upload-text {
             font-weight: 500;
+            color: var(--text-dark);
             margin-bottom: 4px;
         }
 
@@ -647,19 +639,20 @@
         .file-preview {
             display: none;
             margin-top: 15px;
-            padding: 12px;
+            padding: 15px;
             background: var(--bg-light);
             border-radius: var(--radius-md);
-            align-items: center;
-            gap: 12px;
+            border: 1px solid var(--border-color);
         }
 
         .file-preview.active {
             display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .file-preview i {
-            font-size: 24px;
+            font-size: 30px;
             color: var(--primary-color);
         }
 
@@ -668,20 +661,36 @@
         }
 
         .file-preview-name {
-            font-weight: 500;
-            font-size: 13px;
+            font-weight: 600;
+            font-size: 14px;
             margin-bottom: 2px;
         }
 
         .file-preview-size {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--text-light);
         }
 
         .file-preview-remove {
             color: var(--error-color);
             cursor: pointer;
-            font-size: 18px;
+            font-size: 20px;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .file-preview-remove:hover {
+            background: #fee2e2;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 12px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .submit-btn {
@@ -689,13 +698,17 @@
             background: var(--primary-color);
             color: white;
             border: none;
-            padding: 14px;
+            padding: 15px;
             border-radius: 50px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .submit-btn:hover {
@@ -704,9 +717,28 @@
             box-shadow: 0 4px 12px rgba(184, 142, 63, 0.3);
         }
 
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* FAQ Section */
         .faq-section {
-            margin-bottom: 80px;
+            margin-bottom: 60px;
         }
 
         .faq-grid {
@@ -717,23 +749,34 @@
         .faq-item {
             background: var(--white);
             border-radius: var(--radius-md);
-            margin-bottom: 16px;
+            margin-bottom: 15px;
             box-shadow: var(--shadow);
             overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .faq-item:hover {
+            box-shadow: var(--shadow-hover);
         }
 
         .faq-question {
-            padding: 20px;
+            padding: 20px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
             font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .faq-question:hover {
+            background: rgba(184, 142, 63, 0.02);
         }
 
         .faq-question i {
             color: var(--primary-color);
             transition: transform 0.3s;
+            font-size: 20px;
         }
 
         .faq-question.active i {
@@ -741,7 +784,7 @@
         }
 
         .faq-answer {
-            padding: 0 20px 20px;
+            padding: 0 25px 20px;
             color: var(--text-light);
             font-size: 14px;
             line-height: 1.7;
@@ -761,9 +804,15 @@
         }
 
         .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             margin-bottom: 60px;
+        }
+
+        .footer-brand {
+            max-width: 300px;
         }
 
         .footer-brand h2 {
@@ -778,9 +827,9 @@
 
         .footer-text {
             color: var(--text-light);
-            max-width: 300px;
             font-size: 14px;
             line-height: 1.6;
+            margin-bottom: 16px;
         }
 
         .footer-links {
@@ -815,6 +864,8 @@
         }
 
         .bottom-bar {
+            max-width: 1200px;
+            margin: 0 auto;
             border-top: 1px solid #EEEEEE;
             padding-top: 30px;
             display: flex;
@@ -831,6 +882,7 @@
 
         .social-icons a {
             color: #999;
+            font-size: 18px;
             transition: color 0.2s;
         }
 
@@ -841,21 +893,28 @@
         /* Responsive */
         @media screen and (max-width: 1280px) {
             .navbar { padding: 20px 40px; }
-            footer { padding: 50px 40px 30px; }
+            .footer-content { padding: 0 40px; }
+            .bottom-bar { padding: 30px 40px 0; }
         }
 
         @media screen and (max-width: 1024px) {
             .navbar { padding: 18px 30px; }
             .brand { font-size: 22px; }
             .nav-links { gap: 30px; }
-            .benefits-grid { grid-template-columns: repeat(2, 1fr); }
-            .positions-grid { grid-template-columns: 1fr; }
-            .life-grid { grid-template-columns: repeat(2, 1fr); }
+
+            .benefits-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
             .footer-links { gap: 50px; }
         }
 
         @media screen and (max-width: 900px) {
             .page-header h1 { font-size: 40px; }
+
+            .positions-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media screen and (max-width: 768px) {
@@ -867,25 +926,61 @@
             .page-header { padding: 60px 20px; }
             .page-header h1 { font-size: 36px; }
 
-            .benefits-grid { grid-template-columns: 1fr; }
-            .life-grid { grid-template-columns: 1fr; }
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
 
-            .footer-content { flex-direction: column; gap: 40px; }
-            .footer-links { flex-wrap: wrap; gap: 30px 60px; }
-            footer { padding: 40px 30px 30px; }
+            .application-form {
+                padding: 30px 20px;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 40px;
+                padding: 0 30px;
+            }
+
+            .footer-links {
+                flex-wrap: wrap;
+                gap: 30px 60px;
+            }
+
+            .bottom-bar {
+                flex-direction: column;
+                gap: 16px;
+                align-items: center;
+                text-align: center;
+                padding: 30px 30px 0;
+            }
+
+            footer {
+                padding: 40px 0 30px;
+            }
         }
 
         @media screen and (max-width: 640px) {
             .navbar { padding: 14px 20px; }
             .brand { font-size: 20px; }
+            .brand i { font-size: 24px; }
 
             .page-header h1 { font-size: 32px; }
             .section-title { font-size: 28px; }
 
-            .application-form { padding: 30px 20px; }
+            .position-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
 
-            .footer-links { flex-direction: column; gap: 30px; }
-            .bottom-bar { flex-direction: column; gap: 16px; align-items: flex-start; }
+            .position-footer {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 30px;
+            }
         }
     </style>
 </head>
@@ -923,9 +1018,8 @@
         <div class="nav-links">
             <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
             <a href="{{ route('home') }}#features" class="nav-item">Features</a>
-            <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
-            <a href="{{ route('about') }}" class="nav-item">About Us</a>
-            <a href="{{ route('careers') }}" class="nav-item active">Careers</a>
+            <a href="{{ route('list-service') }}" class="nav-item">For Vendors</a>
+            
             @guest
                 <a href="{{ route('login') }}" class="nav-item">Log In</a>
                 <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
@@ -956,9 +1050,8 @@
     <div class="mobile-menu" id="mobileMenu">
         <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
         <a href="{{ route('home') }}#features" class="nav-item">Features</a>
-        <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
-        <a href="{{ route('about') }}" class="nav-item">About Us</a>
-        <a href="{{ route('careers') }}" class="nav-item active">Careers</a>
+        <a href="{{ route('list-service') }}" class="nav-item">For Vendors</a>
+        
         @guest
             <a href="{{ route('login') }}" class="nav-item">Log In</a>
             <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
@@ -988,7 +1081,7 @@
         <div class="container">
             <!-- Why Join Us Section -->
             <section class="why-join">
-                <h2 class="section-title">Why Join Vendora?</h2>
+                <h2 class="section-title">Why Join <span>Vendora</span>?</h2>
                 <div class="benefits-grid">
                     <div class="benefit-card">
                         <div class="benefit-icon">
@@ -1023,210 +1116,248 @@
 
             <!-- Open Positions -->
             <section class="positions-section">
-                <h2 class="section-title">Open Positions</h2>
+                <h2 class="section-title">Open <span>Positions</span></h2>
                 <div class="positions-grid">
-                    <!-- Position 1 -->
-                    <div class="position-card">
-                        <div class="position-header">
-                            <h3 class="position-title">Senior Full Stack Developer</h3>
-                            <span class="position-type">Full-time</span>
-                        </div>
-                        <div class="position-location">
-                            <i class="ri-map-pin-line"></i>
-                            <span>Jimma / Remote</span>
-                        </div>
-                        <p class="position-description">
-                            We're looking for an experienced Full Stack Developer to help build and scale our platform. You'll work on both frontend and backend, creating seamless experiences for vendors and customers.
-                        </p>
-                        <div class="position-requirements">
-                            <div class="requirements-title">Requirements:</div>
-                            <ul class="requirements-list">
-                                <li><i class="ri-check-line"></i> 4+ years of experience with Laravel/PHP</li>
-                                <li><i class="ri-check-line"></i> Strong JavaScript/Vue.js skills</li>
-                                <li><i class="ri-check-line"></i> Experience with MySQL and database design</li>
-                                <li><i class="ri-check-line"></i> Familiarity with REST APIs and microservices</li>
-                            </ul>
-                        </div>
-                        <div class="position-footer">
-                            <span class="position-salary">Competitive Salary</span>
-                            <a href="#application-form" class="apply-btn" onclick="document.getElementById('position_id').value='1'">
-                                Apply Now <i class="ri-arrow-right-line"></i>
-                            </a>
-                        </div>
-                    </div>
+                    @php
+                        // Check if positions exist and is iterable
+                        $hasPositions = isset($positions) && $positions instanceof \Illuminate\Support\Collection && $positions->count() > 0;
+                    @endphp
 
-                    <!-- Position 2 -->
-                    <div class="position-card">
-                        <div class="position-header">
-                            <h3 class="position-title">Community Manager</h3>
-                            <span class="position-type">Full-time</span>
+                    @if($hasPositions)
+                        @foreach($positions as $position)
+                        <div class="position-card" data-position-id="{{ $position->id }}">
+                            <div class="position-header">
+                                <h3 class="position-title">{{ $position->title }}</h3>
+                                <span class="position-type">{{ $position->type }}</span>
+                            </div>
+                            <div class="position-location">
+                                <i class="ri-map-pin-line"></i>
+                                <span>{{ $position->location }}</span>
+                            </div>
+                            <p class="position-description">{{ $position->description }}</p>
+                            <div class="position-requirements">
+                                <div class="requirements-title">Requirements:</div>
+                                <ul class="requirements-list">
+                                    @php
+                                        // Handle requirements that might be JSON or array
+                                        $requirements = is_string($position->requirements) 
+                                            ? json_decode($position->requirements, true) 
+                                            : (is_array($position->requirements) ? $position->requirements : []);
+                                    @endphp
+                                    @foreach($requirements as $requirement)
+                                    <li><i class="ri-check-line"></i> {{ $requirement }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                            <div class="position-footer">
+                                <span class="position-salary">{{ $position->salary }}</span>
+                                <button class="apply-btn" onclick="setPosition({{ $position->id }}, '{{ $position->title }}', '{{ $position->type }}')">
+                                    Apply Now <i class="ri-arrow-right-line"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="position-location">
-                            <i class="ri-map-pin-line"></i>
-                            <span>Jimma (On-site)</span>
+                        @endforeach
+                    @else
+                        <!-- Fallback positions if database is empty -->
+                        <div class="position-card" data-position-id="1">
+                            <div class="position-header">
+                                <h3 class="position-title">Senior Full Stack Developer</h3>
+                                <span class="position-type">Full-time</span>
+                            </div>
+                            <div class="position-location">
+                                <i class="ri-map-pin-line"></i>
+                                <span>Jimma / Remote</span>
+                            </div>
+                            <p class="position-description">
+                                We're looking for an experienced Full Stack Developer to help build and scale our platform. You'll work on both frontend and backend, creating seamless experiences for vendors and customers.
+                            </p>
+                            <div class="position-requirements">
+                                <div class="requirements-title">Requirements:</div>
+                                <ul class="requirements-list">
+                                    <li><i class="ri-check-line"></i> 4+ years of experience with Laravel/PHP</li>
+                                    <li><i class="ri-check-line"></i> Strong JavaScript/Vue.js skills</li>
+                                    <li><i class="ri-check-line"></i> Experience with MySQL and database design</li>
+                                    <li><i class="ri-check-line"></i> Familiarity with REST APIs and microservices</li>
+                                </ul>
+                            </div>
+                            <div class="position-footer">
+                                <span class="position-salary">Competitive Salary</span>
+                                <button class="apply-btn" onclick="setPosition(1, 'Senior Full Stack Developer', 'Full-time')">
+                                    Apply Now <i class="ri-arrow-right-line"></i>
+                                </button>
+                            </div>
                         </div>
-                        <p class="position-description">
-                            Join our team to build and nurture relationships with vendors and customers in Jimma and beyond. You'll be the face of Vendora in the community.
-                        </p>
-                        <div class="position-requirements">
-                            <div class="requirements-title">Requirements:</div>
-                            <ul class="requirements-list">
-                                <li><i class="ri-check-line"></i> 2+ years in community management or similar</li>
-                                <li><i class="ri-check-line"></i> Excellent communication in Amharic and English</li>
-                                <li><i class="ri-check-line"></i> Experience with social media management</li>
-                                <li><i class="ri-check-line"></i> Passion for local business development</li>
-                            </ul>
-                        </div>
-                        <div class="position-footer">
-                            <span class="position-salary">Competitive Salary</span>
-                            <a href="#application-form" class="apply-btn" onclick="document.getElementById('position_id').value='2'">
-                                Apply Now <i class="ri-arrow-right-line"></i>
-                            </a>
-                        </div>
-                    </div>
 
-                    <!-- Position 3 -->
-                    <div class="position-card">
-                        <div class="position-header">
-                            <h3 class="position-title">UI/UX Designer</h3>
-                            <span class="position-type">Full-time</span>
+                        <div class="position-card" data-position-id="2">
+                            <div class="position-header">
+                                <h3 class="position-title">Community Manager</h3>
+                                <span class="position-type">Full-time</span>
+                            </div>
+                            <div class="position-location">
+                                <i class="ri-map-pin-line"></i>
+                                <span>Jimma (On-site)</span>
+                            </div>
+                            <p class="position-description">
+                                Join our team to build and nurture relationships with vendors and customers in Jimma and beyond. You'll be the face of Vendora in the community.
+                            </p>
+                            <div class="position-requirements">
+                                <div class="requirements-title">Requirements:</div>
+                                <ul class="requirements-list">
+                                    <li><i class="ri-check-line"></i> 2+ years in community management or similar</li>
+                                    <li><i class="ri-check-line"></i> Excellent communication in Amharic and English</li>
+                                    <li><i class="ri-check-line"></i> Experience with social media management</li>
+                                    <li><i class="ri-check-line"></i> Passion for local business development</li>
+                                </ul>
+                            </div>
+                            <div class="position-footer">
+                                <span class="position-salary">Competitive Salary</span>
+                                <button class="apply-btn" onclick="setPosition(2, 'Community Manager', 'Full-time')">
+                                    Apply Now <i class="ri-arrow-right-line"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="position-location">
-                            <i class="ri-map-pin-line"></i>
-                            <span>Jimma / Remote</span>
-                        </div>
-                        <p class="position-description">
-                            Design beautiful, intuitive experiences for our users. You'll work on both vendor and customer interfaces, making our platform easy and enjoyable to use.
-                        </p>
-                        <div class="position-requirements">
-                            <div class="requirements-title">Requirements:</div>
-                            <ul class="requirements-list">
-                                <li><i class="ri-check-line"></i> 3+ years of UI/UX design experience</li>
-                                <li><i class="ri-check-line"></i> Proficiency in Figma, Adobe XD</li>
-                                <li><i class="ri-check-line"></i> Portfolio demonstrating user-centered design</li>
-                                <li><i class="ri-check-line"></i> Experience with mobile-first design</li>
-                            </ul>
-                        </div>
-                        <div class="position-footer">
-                            <span class="position-salary">Competitive Salary</span>
-                            <a href="#application-form" class="apply-btn" onclick="document.getElementById('position_id').value='3'">
-                                Apply Now <i class="ri-arrow-right-line"></i>
-                            </a>
-                        </div>
-                    </div>
 
-                    <!-- Position 4 -->
-                    <div class="position-card">
-                        <div class="position-header">
-                            <h3 class="position-title">Sales & Partnerships Lead</h3>
-                            <span class="position-type">Full-time</span>
+                        <div class="position-card" data-position-id="3">
+                            <div class="position-header">
+                                <h3 class="position-title">UI/UX Designer</h3>
+                                <span class="position-type">Full-time</span>
+                            </div>
+                            <div class="position-location">
+                                <i class="ri-map-pin-line"></i>
+                                <span>Jimma / Remote</span>
+                            </div>
+                            <p class="position-description">
+                                Design beautiful, intuitive experiences for our users. You'll work on both vendor and customer interfaces, making our platform easy and enjoyable to use.
+                            </p>
+                            <div class="position-requirements">
+                                <div class="requirements-title">Requirements:</div>
+                                <ul class="requirements-list">
+                                    <li><i class="ri-check-line"></i> 3+ years of UI/UX design experience</li>
+                                    <li><i class="ri-check-line"></i> Proficiency in Figma, Adobe XD</li>
+                                    <li><i class="ri-check-line"></i> Portfolio demonstrating user-centered design</li>
+                                    <li><i class="ri-check-line"></i> Experience with mobile-first design</li>
+                                </ul>
+                            </div>
+                            <div class="position-footer">
+                                <span class="position-salary">Competitive Salary</span>
+                                <button class="apply-btn" onclick="setPosition(3, 'UI/UX Designer', 'Full-time')">
+                                    Apply Now <i class="ri-arrow-right-line"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="position-location">
-                            <i class="ri-map-pin-line"></i>
-                            <span>Jimma (On-site)</span>
-                        </div>
-                        <p class="position-description">
-                            Drive our growth by building relationships with vendors and strategic partners across Ethiopia. You'll be key to expanding our vendor network.
-                        </p>
-                        <div class="position-requirements">
-                            <div class="requirements-title">Requirements:</div>
-                            <ul class="requirements-list">
-                                <li><i class="ri-check-line"></i> 3+ years in sales or business development</li>
-                                <li><i class="ri-check-line"></i> Strong network in Ethiopian business community</li>
-                                <li><i class="ri-check-line"></i> Excellent negotiation and communication skills</li>
-                                <li><i class="ri-check-line"></i> Fluent in Amharic and English</li>
-                            </ul>
-                        </div>
-                        <div class="position-footer">
-                            <span class="position-salary">Competitive + Commission</span>
-                            <a href="#application-form" class="apply-btn" onclick="document.getElementById('position_id').value='4'">
-                                Apply Now <i class="ri-arrow-right-line"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
-            <!-- Life at Vendora -->
-            <section class="life-section">
-                <h2 class="section-title">Life at Vendora</h2>
-                <div class="life-grid">
-                    <div class="life-card">
-                        <div class="life-image">
-                            <i class="ri-group-line"></i>
+                        <div class="position-card" data-position-id="4">
+                            <div class="position-header">
+                                <h3 class="position-title">Sales & Partnerships Lead</h3>
+                                <span class="position-type">Full-time</span>
+                            </div>
+                            <div class="position-location">
+                                <i class="ri-map-pin-line"></i>
+                                <span>Jimma (On-site)</span>
+                            </div>
+                            <p class="position-description">
+                                Drive our growth by building relationships with vendors and strategic partners across Ethiopia. You'll be key to expanding our vendor network.
+                            </p>
+                            <div class="position-requirements">
+                                <div class="requirements-title">Requirements:</div>
+                                <ul class="requirements-list">
+                                    <li><i class="ri-check-line"></i> 3+ years in sales or business development</li>
+                                    <li><i class="ri-check-line"></i> Strong network in Ethiopian business community</li>
+                                    <li><i class="ri-check-line"></i> Excellent negotiation and communication skills</li>
+                                    <li><i class="ri-check-line"></i> Fluent in Amharic and English</li>
+                                </ul>
+                            </div>
+                            <div class="position-footer">
+                                <span class="position-salary">Competitive + Commission</span>
+                                <button class="apply-btn" onclick="setPosition(4, 'Sales & Partnerships Lead', 'Full-time')">
+                                    Apply Now <i class="ri-arrow-right-line"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="life-content">
-                            <h3>Collaborative Culture</h3>
-                            <p>We work together, learn together, and celebrate our wins as a team. Regular team-building events and workshops.</p>
-                        </div>
-                    </div>
-                    <div class="life-card">
-                        <div class="life-image">
-                            <i class="ri-cake-line"></i>
-                        </div>
-                        <div class="life-content">
-                            <h3>Celebrations & Traditions</h3>
-                            <p>We honor Ethiopian traditions and celebrate holidays together, from Timkat to Enkutatash.</p>
-                        </div>
-                    </div>
-                    <div class="life-card">
-                        <div class="life-image">
-                            <i class="ri-coffee-line"></i>
-                        </div>
-                        <div class="life-content">
-                            <h3>Coffee Ceremonies</h3>
-                            <p>Our office features traditional coffee ceremonies, bringing our team together around Ethiopia's favorite beverage.</p>
-                        </div>
-                    </div>
+                    @endif
                 </div>
             </section>
 
             <!-- Application Form -->
             <section id="application-form" class="application-section">
                 <div class="application-form">
-                    <h2 class="form-title">Apply Now</h2>
-                    
-                    <form action="{{ route('careers.apply') }}" method="POST" enctype="multipart/form-data">
+                    <h2 class="form-title"><span>Apply</span> Now</h2>
+
+                    @if($errors->any())
+                        <div class="alert alert-error" style="margin-bottom: 20px;">
+                            <i class="ri-error-warning-line"></i>
+                            <ul style="margin-left: 20px;">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <form action="{{ route('careers.apply') }}" method="POST" enctype="multipart/form-data" id="applicationForm">
                         @csrf
-                        <input type="hidden" name="position_id" id="position_id" value="">
+                        <input type="hidden" name="position_id" id="position_id" value="{{ old('position_id') }}">
+                        <input type="hidden" name="position_title" id="position_title" value="">
+                        <input type="hidden" name="position_type" id="position_type" value="">
 
                         <div class="form-group">
-                            <label class="form-label">Full Name *</label>
-                            <input type="text" name="name" class="form-input" required>
+                            <label class="form-label">Full Name <span class="required">*</span></label>
+                            <input type="text" name="name" class="form-input @error('name') error @enderror" value="{{ old('name') }}" required>
+                            @error('name')
+                                <div class="error-message"><i class="ri-error-warning-line"></i> {{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Email Address *</label>
-                            <input type="email" name="email" class="form-input" required>
+                            <label class="form-label">Email Address <span class="required">*</span></label>
+                            <input type="email" name="email" class="form-input @error('email') error @enderror" value="{{ old('email') }}" required>
+                            @error('email')
+                                <div class="error-message"><i class="ri-error-warning-line"></i> {{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Phone Number *</label>
-                            <input type="tel" name="phone" class="form-input" placeholder="+251 91 234 5678" required>
+                            <label class="form-label">Phone Number <span class="required">*</span></label>
+                            <input type="tel" name="phone" class="form-input @error('phone') error @enderror" value="{{ old('phone') }}" placeholder="+251 91 234 5678" required>
+                            @error('phone')
+                                <div class="error-message"><i class="ri-error-warning-line"></i> {{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Position Applying For *</label>
-                            <select name="position" class="form-select" required>
+                            <label class="form-label">Position Applying For <span class="required">*</span></label>
+                            <select name="position" class="form-select @error('position') error @enderror" id="position_select" required>
                                 <option value="">Select a position</option>
-                                <option value="1">Senior Full Stack Developer</option>
-                                <option value="2">Community Manager</option>
-                                <option value="3">UI/UX Designer</option>
-                                <option value="4">Sales & Partnerships Lead</option>
-                                <option value="5">Open Application</option>
+                                @if($hasPositions)
+                                    @foreach($positions as $position)
+                                        <option value="{{ $position->id }}" {{ old('position') == $position->id ? 'selected' : '' }} data-type="{{ $position->type }}">{{ $position->title }}</option>
+                                    @endforeach
+                                @else
+                                    <option value="1" {{ old('position') == '1' ? 'selected' : '' }} data-type="Full-time">Senior Full Stack Developer</option>
+                                    <option value="2" {{ old('position') == '2' ? 'selected' : '' }} data-type="Full-time">Community Manager</option>
+                                    <option value="3" {{ old('position') == '3' ? 'selected' : '' }} data-type="Full-time">UI/UX Designer</option>
+                                    <option value="4" {{ old('position') == '4' ? 'selected' : '' }} data-type="Full-time">Sales & Partnerships Lead</option>
+                                    <option value="5" {{ old('position') == '5' ? 'selected' : '' }} data-type="Open">Open Application</option>
+                                @endif
                             </select>
+                            @error('position')
+                                <div class="error-message"><i class="ri-error-warning-line"></i> {{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Cover Letter</label>
-                            <textarea name="cover_letter" class="form-textarea" placeholder="Tell us why you're interested in joining Vendora..."></textarea>
+                            <textarea name="cover_letter" class="form-textarea @error('cover_letter') error @enderror" placeholder="Tell us why you're interested in joining Vendora...">{{ old('cover_letter') }}</textarea>
+                            @error('cover_letter')
+                                <div class="error-message"><i class="ri-error-warning-line"></i> {{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Resume/CV *</label>
-                            <div class="file-upload-area" onclick="document.getElementById('resume').click()">
+                            <label class="form-label">Resume/CV <span class="required">*</span></label>
+                            <div class="file-upload-area @error('resume') error @enderror" id="fileUploadArea" onclick="document.getElementById('resume').click()">
                                 <i class="ri-upload-cloud-2-line file-upload-icon"></i>
-                                <div class="file-upload-text">Click to upload or drag and drop</div>
+                                <div class="file-upload-text" id="uploadText">Click to upload or drag and drop</div>
                                 <div class="file-upload-hint">PDF, DOC, DOCX (Max 5MB)</div>
                                 <input type="file" id="resume" name="resume" class="file-input" accept=".pdf,.doc,.docx" required>
                             </div>
@@ -1238,9 +1369,12 @@
                                 </div>
                                 <i class="ri-close-line file-preview-remove" onclick="clearFile()"></i>
                             </div>
+                            @error('resume')
+                                <div class="error-message"><i class="ri-error-warning-line"></i> {{ $message }}</div>
+                            @enderror
                         </div>
 
-                        <button type="submit" class="submit-btn">
+                        <button type="submit" class="submit-btn" id="submitBtn">
                             <i class="ri-send-plane-line"></i>
                             Submit Application
                         </button>
@@ -1250,7 +1384,7 @@
 
             <!-- FAQ Section -->
             <section class="faq-section">
-                <h2 class="section-title">Frequently Asked Questions</h2>
+                <h2 class="section-title">Frequently Asked <span>Questions</span></h2>
                 <div class="faq-grid">
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFAQ(this)">
@@ -1258,7 +1392,7 @@
                             <i class="ri-arrow-down-s-line"></i>
                         </div>
                         <div class="faq-answer">
-                            Our typical hiring process includes: 1) Application review, 2) Initial phone screening, 3) Technical/interview, 4) Final interview with leadership, 5) Offer and onboarding.
+                            Our typical hiring process includes: 1) Application review, 2) Initial phone screening, 3) Technical/panel interview, 4) Final interview with leadership, 5) Offer and onboarding.
                         </div>
                     </div>
 
@@ -1302,11 +1436,9 @@
             <div class="footer-brand">
                 <h2><i class="ri-store-2-fill"></i> Vendora</h2>
                 <p class="footer-text">Connecting you with the best local professionals in Jimma and across Ethiopia. Simple, fast, and reliable.</p>
-                <div style="margin-top: 16px;">
-                    <span class="ethiopia-badge">
-                        <i class="ri-map-pin-line"></i> Jimma, Ethiopia
-                    </span>
-                </div>
+                <span class="ethiopia-badge">
+                    <i class="ri-map-pin-line"></i> Jimma, Ethiopia
+                </span>
             </div>
             <div class="footer-links">
                 <div class="link-group">
@@ -1314,32 +1446,32 @@
                     <ul>
                         <li><a href="{{ route('about') }}">About Us</a></li>
                         <li><a href="{{ route('careers') }}">Careers</a></li>
-                        <li><a href="#">Press</a></li>
-                        <li><a href="#">Blog</a></li>
+                        <li><a href="{{ route('press') }}">Press</a></li>
+                        <li><a href="{{ route('blog') }}">Blog</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
                     <h4>Discover</h4>
                     <ul>
-                        <li><a href="{{ route('search.results') }}">How it works</a></li>
-                        <li><a href="#">Trust & Safety</a></li>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Invite Friends</a></li>
+                        <li><a href="{{ route('how-it-works') }}">How it works</a></li>
+                        <li><a href="{{ route('trust-safety') }}">Trust & Safety</a></li>
+                        <li><a href="{{ route('help-center') }}">Help Center</a></li>
+                        <li><a href="{{ route('invite') }}">Invite Friends</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
                     <h4>For Vendors</h4>
                     <ul>
-                        <li><a href="{{ route('register') }}">List your service</a></li>
-                        <li><a href="#">Vendor Resources</a></li>
-                        <li><a href="#">Success Stories</a></li>
-                        <li><a href="#">Community</a></li>
+                        <li><a href="{{ route('list-service') }}">List your service</a></li>
+                        <li><a href="{{ route('vendor-resources') }}">Vendor Resources</a></li>
+                        <li><a href="{{ route('success-stories') }}">Success Stories</a></li>
+                        <li><a href="{{ route('community') }}">Community</a></li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="bottom-bar">
-            <span>&copy; {{ date('Y') }} Vendora Inc. All rights reserved. Made with ❤️ in Jimma, Ethiopia</span>
+            <span>&copy; {{ date('Y') }} Vendora. All rights reserved. Jimma, Ethiopia</span>
             <div class="social-icons">
                 <a href="#" target="_blank"><i class="ri-twitter-fill"></i></a>
                 <a href="#" target="_blank"><i class="ri-instagram-fill"></i></a>
@@ -1358,7 +1490,7 @@
             menuToggle.addEventListener('click', function(e) {
                 e.stopPropagation();
                 mobileMenu.classList.toggle('active');
-                
+
                 // Change icon
                 const icon = this.querySelector('i');
                 if (mobileMenu.classList.contains('active')) {
@@ -1387,6 +1519,28 @@
             });
         }
 
+        // Set position from buttons
+        function setPosition(id, title, type) {
+            document.getElementById('position_id').value = id;
+            document.getElementById('position_title').value = title;
+            document.getElementById('position_type').value = type;
+            document.getElementById('position_select').value = id;
+
+            // Smooth scroll to application form
+            document.getElementById('application-form').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        // Update position select when dropdown changes
+        document.getElementById('position_select')?.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            document.getElementById('position_id').value = this.value;
+            document.getElementById('position_title').value = selectedOption.text;
+            document.getElementById('position_type').value = selectedOption.dataset.type || '';
+        });
+
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
@@ -1409,18 +1563,46 @@
         });
 
         // File upload preview
-        document.getElementById('resume').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                document.getElementById('fileName').textContent = file.name;
-                document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
-                document.getElementById('filePreview').classList.add('active');
-            }
-        });
+        const fileInput = document.getElementById('resume');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const uploadText = document.getElementById('uploadText');
+        const filePreview = document.getElementById('filePreview');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validate file type
+                    const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                    if (!validTypes.includes(file.type)) {
+                        alert('Please upload a PDF or Word document');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Validate file size (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('File size must be less than 5MB');
+                        this.value = '';
+                        return;
+                    }
+
+                    fileName.textContent = file.name;
+                    fileSize.textContent = (file.size / 1024).toFixed(2) + ' KB';
+                    filePreview.classList.add('active');
+                    fileUploadArea.classList.add('has-file');
+                    uploadText.textContent = 'File selected: ' + file.name;
+                }
+            });
+        }
 
         function clearFile() {
-            document.getElementById('resume').value = '';
-            document.getElementById('filePreview').classList.remove('active');
+            if (fileInput) fileInput.value = '';
+            if (filePreview) filePreview.classList.remove('active');
+            if (fileUploadArea) fileUploadArea.classList.remove('has-file');
+            if (uploadText) uploadText.textContent = 'Click to upload or drag and drop';
         }
 
         // FAQ toggle
@@ -1448,20 +1630,37 @@
             });
         });
 
-        // Set selected position from URL hash
-        if (window.location.hash === '#application-form') {
-            const hashParams = new URLSearchParams(window.location.search);
-            const position = hashParams.get('position');
-            if (position) {
-                document.getElementById('position_id').value = position;
-            }
+        // Form submission loading state
+        const applicationForm = document.getElementById('applicationForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (applicationForm) {
+            applicationForm.addEventListener('submit', function(e) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner"></span> Submitting...';
+            });
         }
+
+        // Preserve old input values on form error
+        @if(old('position_id'))
+            document.getElementById('position_id').value = '{{ old('position_id') }}';
+            document.getElementById('position_select').value = '{{ old('position') }}';
+            
+            // Set position title from select
+            const select = document.getElementById('position_select');
+            const selectedOption = select.options[select.selectedIndex];
+            if (selectedOption) {
+                document.getElementById('position_title').value = selectedOption.text;
+                document.getElementById('position_type').value = selectedOption.dataset.type || '';
+            }
+        @endif
     </script>
 
-    @if(app()->environment('local'))
+    {{--  @if(app()->environment('local'))
     <script>
         console.log('Careers page loaded - Local environment');
+        console.log('Positions loaded:', {{ isset($positions) && $positions instanceof \Illuminate\Support\Collection ? $positions->count() : 0 }});
     </script>
-    @endif
+    @endif  --}}
 </body>
 </html>

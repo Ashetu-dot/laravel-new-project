@@ -627,15 +627,15 @@
             .nav-links {
                 display: none;
             }
-            
+
             .mobile-menu-btn {
                 display: flex !important;
             }
-            
+
             .about-header h1 {
                 font-size: 36px;
             }
-            
+
             .values-grid {
                 grid-template-columns: 1fr;
             }
@@ -844,7 +844,7 @@
                 <p>To become Ethiopia's most trusted marketplace for local vendors, fostering economic growth and community connections across all major cities. We envision a future where finding quality local services is just a click away, and where every Ethiopian has access to reliable, vetted professionals for their every need.</p>
             </div>
 
-            <!-- Story Card -->
+            {{--  <!-- Story Card -->
             <div class="card">
                 <h2>
                     <i class="ri-history-line"></i>
@@ -873,7 +873,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>  --}}
 
             <!-- Values Card -->
             <div class="card">
@@ -1041,17 +1041,16 @@
                 <ul>
                     <li><a href="{{ route('home') }}#categories">Categories</a></li>
                     <li><a href="{{ route('home') }}#features">Features</a></li>
-                    <li><a href="{{ route('register') }}">For Vendors</a></li>
                     <li><a href="{{ route('about') }}">About Us</a></li>
                 </ul>
             </div>
             <div class="footer-section">
                 <h4>Support</h4>
                 <ul>
-                    <li><a href="#">Help Center</a></li>
-                    <li><a href="#">FAQs</a></li>
+
                     <li><a href="#">Contact Us</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
+                    <a href="{{ route('help-center') }}">Help Center</a>
+                    <li><a href="{{ route('privacy.policy') }}">Privacy Policy</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -1070,7 +1069,7 @@
                 <a href="#" target="_blank"><i class="ri-facebook-fill"></i></a>
                 <a href="#" target="_blank"><i class="ri-telegram-fill"></i></a>
             </div>
-            <p style="margin-top: 16px;">&copy; {{ date('Y') }} Vendora Inc. All rights reserved. Made with ❤️ in Jimma, Ethiopia</p>
+            <p style="margin-top: 16px;">&copy; {{ date('Y') }} Vendora. All rights reserved. Jimma, Ethiopia</p>
         </div>
     </footer>
 
@@ -1086,7 +1085,7 @@
                     e.preventDefault();
                     e.stopPropagation();
                     mobileMenu.classList.toggle('active');
-                    
+
                     // Change icon based on menu state
                     const icon = this.querySelector('i');
                     if (mobileMenu.classList.contains('active')) {
@@ -1130,14 +1129,14 @@
                     e.preventDefault();
                     const targetId = this.getAttribute('href');
                     if (targetId === '#') return;
-                    
+
                     const target = document.querySelector(targetId);
                     if (target) {
-                        target.scrollIntoView({ 
+                        target.scrollIntoView({
                             behavior: 'smooth',
                             block: 'start'
                         });
-                        
+
                         // Close mobile menu if open
                         if (mobileMenu && mobileMenu.classList.contains('active')) {
                             mobileMenu.classList.remove('active');
