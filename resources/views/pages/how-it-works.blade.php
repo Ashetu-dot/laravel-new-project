@@ -1046,16 +1046,16 @@
             <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
             <a href="{{ route('home') }}#features" class="nav-item">Features</a>
             <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
-            <a href="{{ route('about') }}" class="nav-item">About Us</a>
-            <a href="{{ route('how-it-works') }}" class="nav-item active">How It Works</a>
+            {{--  <a href="{{ route('about') }}" class="nav-item">About Us</a>
+            <a href="{{ route('how-it-works') }}" class="nav-item active">How It Works</a>  --}}
             @guest
                 <a href="{{ route('login') }}" class="nav-item">Log In</a>
                 <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
             @else
-                <span class="nav-item" style="color: var(--primary-color); font-weight: 600;">
+                {{--  <span class="nav-item" style="color: var(--primary-color); font-weight: 600;">
                     <i class="ri-user-line"></i> {{ Auth::user()->name }}
                 </span>
-                <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
+                <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>  --}}
                 @if(Auth::user()->role === 'vendor')
                     <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
                 @elseif(Auth::user()->role === 'customer')
@@ -1079,13 +1079,13 @@
         <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
         <a href="{{ route('home') }}#features" class="nav-item">Features</a>
         <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
-        <a href="{{ route('about') }}" class="nav-item">About Us</a>
-        <a href="{{ route('how-it-works') }}" class="nav-item active">How It Works</a>
+        {{--  <a href="{{ route('about') }}" class="nav-item">About Us</a>
+        <a href="{{ route('how-it-works') }}" class="nav-item active">How It Works</a>  --}}
         @guest
             <a href="{{ route('login') }}" class="nav-item">Log In</a>
             <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
         @else
-            <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
+            {{--  <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>  --}}
             @if(Auth::user()->role === 'vendor')
                 <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
             @elseif(Auth::user()->role === 'customer')
@@ -1466,7 +1466,7 @@
             </div>
         </div>
         <div class="bottom-bar">
-            <span>&copy; {{ date('Y') }} Vendora Inc. All rights reserved. Made with ❤️ in Jimma, Ethiopia</span>
+            <span>&copy; {{ date('Y') }} Vendora. All rights reserved. Jimma, Ethiopia</span>
             <div class="social-icons">
                 <a href="#" target="_blank"><i class="ri-twitter-fill"></i></a>
                 <a href="#" target="_blank"><i class="ri-instagram-fill"></i></a>
@@ -1566,20 +1566,9 @@
             });
         }, 5000);
 
-        // Confirm logout
-        document.querySelectorAll('form[action*="logout"] button[type="submit"]').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+
     </script>
 
-    @if(app()->environment('local'))
-    <script>
-        console.log('How It Works page loaded - Local environment');
-    </script>
-    @endif
+
 </body>
 </html>

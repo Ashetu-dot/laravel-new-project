@@ -6,10 +6,13 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Notification;
 use App\Models\Message;
+use App\Models\User;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
@@ -20,7 +23,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+
         // Get unread notifications count with error handling
         try {
             $unreadNotificationsCount = Notification::where('user_id', $user->id)
@@ -30,7 +33,7 @@ class ProductController extends Controller
             $unreadNotificationsCount = 0;
             Log::warning('Notifications table might not exist: ' . $e->getMessage());
         }
-        
+
         // Get unread messages count with error handling
         try {
             $unreadMessagesCount = Message::where('receiver_id', $user->id)
@@ -40,14 +43,14 @@ class ProductController extends Controller
             $unreadMessagesCount = 0;
             Log::warning('Messages table might not exist: ' . $e->getMessage());
         }
-        
+
         // Get categories for filter dropdown with error handling
         try {
             // Try to get vendor-specific and global categories
             $categories = Category::where('vendor_id', $user->id)
                 ->orWhere('is_global', true)
                 ->get();
-                
+
             // If no categories found, try to get all categories
             if ($categories->isEmpty()) {
                 $categories = Category::all();
@@ -64,10 +67,10 @@ class ProductController extends Controller
             $categories = collect([]);
             Log::error('Error fetching categories: ' . $e->getMessage());
         }
-        
+
         // Build query with filters
         $query = Product::where('vendor_id', $user->id);
-        
+
         // Search filter
         if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
@@ -77,7 +80,7 @@ class ProductController extends Controller
                   ->orWhere('sku', 'like', "%{$search}%");
             });
         }
-        
+
         // Category filter - check if category_id column exists
         if ($request->has('category') && !empty($request->category)) {
             try {
@@ -90,7 +93,7 @@ class ProductController extends Controller
                 }
             }
         }
-        
+
         // Status filter - check if is_active column exists
         if ($request->has('status') && !empty($request->status)) {
             try {
@@ -118,7 +121,7 @@ class ProductController extends Controller
                 }
             }
         }
-        
+
         // Sorting
         switch($request->get('sort', 'newest')) {
             case 'oldest':
@@ -140,18 +143,18 @@ class ProductController extends Controller
                 $query->orderBy('created_at', 'desc');
                 break;
         }
-        
+
         // Paginate results
         $products = $query->paginate(12)->withQueryString();
-        
+
         return view('vendor.products.index', compact(
-            'products', 
-            'categories', 
-            'unreadNotificationsCount', 
+            'products',
+            'categories',
+            'unreadNotificationsCount',
             'unreadMessagesCount'
         ));
     }
-    
+
 
     /**
      * Show the form for creating a new product.
@@ -159,14 +162,14 @@ class ProductController extends Controller
     public function create()
     {
         $user = Auth::user();
-        
+
         // Get categories for dropdown with multiple fallback levels
         try {
             // Try to get vendor-specific and global categories
             $categories = Category::where('vendor_id', $user->id)
                 ->orWhere('is_global', true)
                 ->get();
-                
+
             // If no categories found, try to get all categories
             if ($categories->isEmpty()) {
                 $categories = Category::all();
@@ -184,7 +187,7 @@ class ProductController extends Controller
             $categories = collect([]);
             Log::error('Error in create method: ' . $e->getMessage());
         }
-        
+
         // Get unread counts for header with error handling
         try {
             $unreadNotificationsCount = Notification::where('user_id', $user->id)
@@ -193,7 +196,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             $unreadNotificationsCount = 0;
         }
-        
+
         try {
             $unreadMessagesCount = Message::where('receiver_id', $user->id)
                 ->where('is_read', false)
@@ -201,10 +204,10 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             $unreadMessagesCount = 0;
         }
-        
+
         return view('vendor.products.create', compact(
-            'categories', 
-            'unreadNotificationsCount', 
+            'categories',
+            'unreadNotificationsCount',
             'unreadMessagesCount'
         ));
     }
@@ -312,14 +315,14 @@ class ProductController extends Controller
             $product = Product::create($productData);
         } catch (\Exception $e) {
             Log::error('Product creation failed: ' . $e->getMessage());
-            
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to create product: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return redirect()->back()
                 ->with('error', 'Failed to create product: ' . $e->getMessage())
                 ->withInput();
@@ -349,12 +352,12 @@ class ProductController extends Controller
     }
 
     /**
-     * Display the specified product.
+     * Display the specified product for vendor.
      */
     public function show(string $id)
     {
         $product = Product::where('vendor_id', Auth::id())->findOrFail($id);
-        
+
         // Get unread counts for header
         $user = Auth::user();
         try {
@@ -364,7 +367,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             $unreadNotificationsCount = 0;
         }
-        
+
         try {
             $unreadMessagesCount = Message::where('receiver_id', $user->id)
                 ->where('is_read', false)
@@ -372,12 +375,198 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             $unreadMessagesCount = 0;
         }
-        
+
         return view('vendor.products.show', compact(
-            'product', 
-            'unreadNotificationsCount', 
+            'product',
+            'unreadNotificationsCount',
             'unreadMessagesCount'
         ));
+    }
+
+    /**
+     * ======================================================
+     * PUBLIC METHODS (for customers)
+     * ======================================================
+     */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Display product for public (customers) - FIXED VERSION
+     */
+    public function publicShow($id)
+    {
+        try {
+            // Find the product with vendor information
+            $product = Product::where('is_active', true)
+                ->with('vendor')
+                ->findOrFail($id);
+
+            // Get reviews for this product using DB facade to avoid model issues
+            $reviews = DB::table('reviews')
+                ->where('product_id', $product->id)
+                ->where('is_approved', true)
+                ->orderBy('created_at', 'desc')
+                ->limit(10)
+                ->get();
+
+            // Get user names for reviews
+            foreach ($reviews as $review) {
+                $user = DB::table('users')->find($review->user_id);
+                $review->user_name = $user ? $user->name : 'Anonymous';
+                $review->user_avatar = $user ? strtoupper(substr($user->name, 0, 2)) : 'AN';
+                $review->date = $review->created_at ? \Carbon\Carbon::parse($review->created_at)->format('F j, Y') : 'N/A';
+            }
+
+            // Calculate average rating
+            $averageRating = $reviews->avg('rating') ?? 0;
+            $reviewCount = $reviews->count();
+
+            // Get related products (same category, different products)
+            $relatedProducts = Product::where('category', $product->category)
+                ->where('id', '!=', $product->id)
+                ->where('is_active', true)
+                ->inRandomOrder()
+                ->limit(4)
+                ->get();
+
+            return view('products.show', compact(
+                'product',
+                'reviews',
+                'averageRating',
+                'reviewCount',
+                'relatedProducts'
+            ));
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::error('Product not found: ' . $e->getMessage());
+            return redirect()->route('home')->with('error', 'Product not found.');
+
+        } catch (\Exception $e) {
+            Log::error('Public product show error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            return redirect()->route('home')->with('error', 'An error occurred while loading the product.');
+        }
+    }
+
+    /**
+     * Display all products for public
+     */
+    public function publicIndex(Request $request)
+    {
+        try {
+            $query = Product::where('is_active', true)->with('vendor');
+
+            // Search
+            if ($request->has('search') && $request->search != '') {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            }
+
+            // Category filter
+            if ($request->has('category') && $request->category != '') {
+                $query->where('category', $request->category);
+            }
+
+            // Price range
+            if ($request->has('min_price') && $request->min_price != '') {
+                $query->where('price', '>=', $request->min_price);
+            }
+            if ($request->has('max_price') && $request->max_price != '') {
+                $query->where('price', '<=', $request->max_price);
+            }
+
+            // Sort
+            $sort = $request->get('sort', 'newest');
+            switch($sort) {
+                case 'newest':
+                    $query->orderBy('created_at', 'desc');
+                    break;
+                case 'price_low':
+                    $query->orderBy('price', 'asc');
+                    break;
+                case 'price_high':
+                    $query->orderBy('price', 'desc');
+                    break;
+                case 'rating':
+                    $query->orderBy('rating', 'desc');
+                    break;
+                default:
+                    $query->orderBy('created_at', 'desc');
+            }
+
+            $products = $query->paginate(12);
+
+            // Get categories for filter
+            $categories = Product::where('is_active', true)
+                ->select('category')
+                ->distinct()
+                ->whereNotNull('category')
+                ->pluck('category');
+
+            return view('products.index', compact('products', 'categories'));
+
+        } catch (\Exception $e) {
+            Log::error('Public product index error: ' . $e->getMessage());
+            return redirect()->route('home')->with('error', 'Failed to load products.');
+        }
+    }
+
+    /**
+     * Display products by category
+     */
+    public function byCategory($category, Request $request)
+    {
+        try {
+            $products = Product::where('is_active', true)
+                ->where('category', $category)
+                ->with('vendor')
+                ->orderBy('created_at', 'desc')
+                ->paginate(12);
+
+            return view('products.category', compact('products', 'category'));
+
+        } catch (\Exception $e) {
+            Log::error('Products by category error: ' . $e->getMessage());
+            return redirect()->route('home')->with('error', 'Failed to load products.');
+        }
+    }
+
+    /**
+     * Display all products for a specific vendor.
+     */
+    public function vendorProducts($vendorId)
+    {
+        try {
+            $vendor = User::where('role', 'vendor')
+                ->where('is_active', true)
+                ->findOrFail($vendorId);
+
+            $products = Product::where('vendor_id', $vendorId)
+                ->where('is_active', true)
+                ->orderBy('created_at', 'desc')
+                ->paginate(12);
+
+            return view('vendor.products-list', compact('vendor', 'products'));
+
+        } catch (\Exception $e) {
+            Log::error('Vendor products error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to load products.');
+        }
     }
 
     /**
@@ -386,15 +575,15 @@ class ProductController extends Controller
     public function edit(string $id)
     {
         $product = Product::where('vendor_id', Auth::id())->findOrFail($id);
-        
+
         $user = Auth::user();
-        
+
         // Get categories for dropdown
         try {
             $categories = Category::where('vendor_id', $user->id)
                 ->orWhere('is_global', true)
                 ->get();
-                
+
             if ($categories->isEmpty()) {
                 $categories = Category::all();
             }
@@ -405,7 +594,7 @@ class ProductController extends Controller
                 $categories = collect([]);
             }
         }
-        
+
         // Get unread counts for header
         try {
             $unreadNotificationsCount = Notification::where('user_id', $user->id)
@@ -414,7 +603,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             $unreadNotificationsCount = 0;
         }
-        
+
         try {
             $unreadMessagesCount = Message::where('receiver_id', $user->id)
                 ->where('is_read', false)
@@ -422,11 +611,11 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             $unreadMessagesCount = 0;
         }
-        
+
         return view('vendor.products.edit', compact(
-            'product', 
-            'categories', 
-            'unreadNotificationsCount', 
+            'product',
+            'categories',
+            'unreadNotificationsCount',
             'unreadMessagesCount'
         ));
     }
@@ -589,7 +778,7 @@ class ProductController extends Controller
     public function activate(string $id)
     {
         $product = Product::where('vendor_id', Auth::id())->findOrFail($id);
-        
+
         try {
             try {
                 $product->is_active = true;
@@ -611,7 +800,7 @@ class ProductController extends Controller
     public function deactivate(string $id)
     {
         $product = Product::where('vendor_id', Auth::id())->findOrFail($id);
-        
+
         try {
             try {
                 $product->is_active = false;
@@ -749,7 +938,7 @@ class ProductController extends Controller
     public function toggleStatus(string $id)
     {
         $product = Product::where('vendor_id', Auth::id())->findOrFail($id);
-        
+
         try {
             try {
                 $product->is_active = !$product->is_active;
@@ -761,14 +950,14 @@ class ProductController extends Controller
             $product->save();
         } catch (\Exception $e) {
             Log::error('Toggle status failed: ' . $e->getMessage());
-            
+
             if (request()->expectsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to toggle product status'
                 ], 500);
             }
-            
+
             return redirect()->back()->with('error', 'Failed to toggle product status');
         }
 
@@ -803,6 +992,70 @@ class ProductController extends Controller
                 'success' => false,
                 'message' => 'Failed to fetch products'
             ], 500);
+        }
+    }
+
+    /**
+     * Get product stats for vendor dashboard
+     */
+    public function getStats()
+    {
+        try {
+            $user = Auth::user();
+
+            $totalProducts = Product::where('vendor_id', $user->id)->count();
+            $activeProducts = Product::where('vendor_id', $user->id)->where('is_active', true)->count();
+            $inactiveProducts = $totalProducts - $activeProducts;
+
+            $outOfStock = Product::where('vendor_id', $user->id)
+                ->where('stock', '<=', 0)
+                ->count();
+
+            $lowStock = Product::where('vendor_id', $user->id)
+                ->where('stock', '>', 0)
+                ->where('stock', '<=', 5)
+                ->count();
+
+            return response()->json([
+                'success' => true,
+                'total' => $totalProducts,
+                'active' => $activeProducts,
+                'inactive' => $inactiveProducts,
+                'out_of_stock' => $outOfStock,
+                'low_stock' => $lowStock,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Product stats error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to get stats'
+            ], 500);
+        }
+    }
+
+    // API Methods
+    public function apiProducts(Request $request)
+    {
+        try {
+            $products = Product::where('is_active', true)
+                ->with('vendor')
+                ->paginate(20);
+            return response()->json($products);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch products'], 500);
+        }
+    }
+
+    public function apiProduct($id)
+    {
+        try {
+            $product = Product::where('is_active', true)
+                ->with('vendor')
+                ->findOrFail($id);
+            return response()->json($product);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Product not found'], 404);
         }
     }
 }

@@ -37,13 +37,13 @@ class AdminController extends Controller
     public static function middleware(): array
     {
         return [
-            // Apply auth middleware to all methods except create and store
-            'auth' => ['except' => ['create', 'store']],
+            // Apply auth:admin middleware to all methods except create and store
+            'auth:admin' => ['except' => ['create', 'store']],
 
-            // Custom role check using closure
+            // Custom role check using closure - now using admin guard
             function ($request, $next) {
                 if (!in_array($request->route()->getName(), ['admin.login', 'admin.login.submit'])) {
-                    if (!Auth::check() || Auth::user()->role !== 'admin') {
+                    if (!Auth::guard('admin')->check()) {
                         abort(403, 'Unauthorized access. Admin only.');
                     }
                 }
@@ -51,6 +51,7 @@ class AdminController extends Controller
             },
         ];
     }
+
     /**
      * ========================================================================
      * DASHBOARD & STATISTICS
@@ -58,76 +59,77 @@ class AdminController extends Controller
      */
 
     /**
- * Display admin dashboard.
- */
-public function index(Request $request)
-{
-    $period = $request->get('period', 7);
+     * Display admin dashboard.
+     */
+    public function index(Request $request)
+    {
+        $period = $request->get('period', 7);
 
-    $stats = $this->adminService->getDashboardStats();
-    $recentActivities = $this->adminService->getRecentActivities();
-    $chartData = $this->getChartData($period);
+        $stats = $this->adminService->getDashboardStats();
+        $recentActivities = $this->adminService->getRecentActivities();
+        $chartData = $this->getChartData($period);
 
-    // Additional dashboard data
-    $pendingOrdersCount = Order::where('status', 'pending')->count();
-    $pendingVendorsCount = User::where('role', 'vendor')->whereNull('email_verified_at')->count();
+        // Additional dashboard data
+        $pendingOrdersCount = Order::where('status', 'pending')->count();
+        $pendingVendorsCount = User::where('role', 'vendor')->whereNull('email_verified_at')->count();
 
-    // FIX: Comment out notifications until table is created
-    // $unreadNotificationsCount = Auth::user()->unreadNotifications->count();
-    $unreadNotificationsCount = 0; // Temporary placeholder
+        // FIX: Comment out notifications until table is created
+        // $unreadNotificationsCount = Auth::guard('admin')->user()->unreadNotifications->count();
+        $unreadNotificationsCount = 0; // Temporary placeholder
 
-    $recentOrders = Order::with('user')->latest()->paginate(10);
+        $recentOrders = Order::with('user')->latest()->paginate(10);
 
-    // FIX: Comment out notifications query
-    // $recentNotifications = Auth::user()->notifications()->latest()->limit(5)->get();
-    $recentNotifications = collect([]); // Empty collection
+        // FIX: Comment out notifications query
+        // $recentNotifications = Auth::guard('admin')->user()->notifications()->latest()->limit(5)->get();
+        $recentNotifications = collect([]); // Empty collection
 
-    // Get counts for KPI cards
-    $totalRevenue = Order::where('status', 'completed')->sum('total_amount') ?? 0;
-    $activeVendorsCount = User::where('role', 'vendor')->where('is_active', true)->count();
-    $totalCustomersCount = User::where('role', 'customer')->count();
+        // Get counts for KPI cards
+        $totalRevenue = Order::where('status', 'completed')->sum('total_amount') ?? 0;
+        $activeVendorsCount = User::where('role', 'vendor')->where('is_active', true)->count();
+        $totalCustomersCount = User::where('role', 'customer')->count();
 
-    // Calculate growth percentages (mock for now - implement real logic later)
-    $revenueGrowth = 12.5;
-    $vendorGrowth = 5.2;
-    $orderChange = -2.1;
-    $customerGrowth = 8.4;
+        // Calculate growth percentages (mock for now - implement real logic later)
+        $revenueGrowth = 12.5;
+        $vendorGrowth = 5.2;
+        $orderChange = -2.1;
+        $customerGrowth = 8.4;
 
-    // Today's stats
-    $productViewsToday = 45200;
-    $completedOrdersToday = Order::where('status', 'completed')
-        ->whereDate('created_at', today())
-        ->count() ?: 892;
-    $newReviewsToday = 128;
-    $refundRequests = Order::where('status', 'refund_requested')->count() ?: 12;
+        // Today's stats
+        $productViewsToday = 45200;
+        $completedOrdersToday = Order::where('status', 'completed')
+            ->whereDate('created_at', today())
+            ->count() ?: 892;
+        $newReviewsToday = 128;
+        $refundRequests = Order::where('status', 'refund_requested')->count() ?: 12;
 
-    // Greeting based on time
-    $greeting = $this->getGreeting();
+        // Greeting based on time
+        $greeting = $this->getGreeting();
 
-    return view('admin.dashboard', compact(
-        'stats',
-        'recentActivities',
-        'chartData',
-        'period',
-        'pendingOrdersCount',
-        'pendingVendorsCount',
-        'unreadNotificationsCount',
-        'recentOrders',
-        'recentNotifications',
-        'totalRevenue',
-        'activeVendorsCount',
-        'totalCustomersCount',
-        'revenueGrowth',
-        'vendorGrowth',
-        'orderChange',
-        'customerGrowth',
-        'productViewsToday',
-        'completedOrdersToday',
-        'newReviewsToday',
-        'refundRequests',
-        'greeting'
-    ));
-}
+        return view('admin.dashboard', compact(
+            'stats',
+            'recentActivities',
+            'chartData',
+            'period',
+            'pendingOrdersCount',
+            'pendingVendorsCount',
+            'unreadNotificationsCount',
+            'recentOrders',
+            'recentNotifications',
+            'totalRevenue',
+            'activeVendorsCount',
+            'totalCustomersCount',
+            'revenueGrowth',
+            'vendorGrowth',
+            'orderChange',
+            'customerGrowth',
+            'productViewsToday',
+            'completedOrdersToday',
+            'newReviewsToday',
+            'refundRequests',
+            'greeting'
+        ));
+    }
+
     /**
      * Get greeting based on time of day.
      */
@@ -199,7 +201,32 @@ public function index(Request $request)
         ]);
     }
 
-  /**
+    // /**
+    //  * Handle admin login request.
+    //  */
+    // public function store(AdminLoginRequest $request)
+    // {
+    //     $validated = $request->validated();
+
+    //     $result = $this->adminService->login(
+    //         $validated['email'],
+    //         $validated['password'],
+    //         $request->boolean('remember')
+    //     );
+
+    //     if ($result === 1) {
+    //         return redirect()->route('admin.dashboard')
+    //             ->with('success', 'Welcome back! Successfully logged in.');
+    //     }
+
+    //     return back()
+    //         ->withErrors(['email' => 'The provided credentials are incorrect.'])
+    //         ->withInput($request->only('email', 'remember'));
+    // }
+
+
+
+/**
  * Handle admin login request.
  */
 public function store(AdminLoginRequest $request)
@@ -213,15 +240,18 @@ public function store(AdminLoginRequest $request)
     );
 
     if ($result === 1) {
-        return redirect()->route('admin.dashboard')
+        // Use intended() instead of route() to respect the intended URL
+        return redirect()->intended(route('admin.dashboard'))
             ->with('success', 'Welcome back! Successfully logged in.');
     }
 
     return back()
-        ->withErrors(['password' => 'The provided credentials are incorrect.'])
-        ->withInput($request->only('email', 'remember'))
-        ->with('error', 'Login failed. Please check your credentials.');
+        ->withErrors(['email' => 'The provided credentials are incorrect.'])
+        ->withInput($request->only('email', 'remember'));
 }
+
+
+
 
     /**
      * Logout admin.
@@ -318,7 +348,7 @@ public function store(AdminLoginRequest $request)
         if (class_exists('Activity')) {
             activity()
                 ->performedOn($order)
-                ->causedBy(Auth::user())
+                ->causedBy(Auth::guard('admin')->user())
                 ->log("Order status changed from {$oldStatus} to {$request->status}");
         }
 
@@ -332,41 +362,42 @@ public function store(AdminLoginRequest $request)
      * ========================================================================
      */
 
- /**
- * Display a listing of customers.
- */
-public function customers(Request $request)
-{
-    $search = $request->get('search');
-    $status = $request->get('status');
+    /**
+     * Display a listing of customers.
+     */
+    public function customers(Request $request)
+    {
+        $search = $request->get('search');
+        $status = $request->get('status');
 
-    $query = User::where('role', 'customer');
+        $query = User::where('role', 'customer');
 
-    if ($search) {
-        $query->where(function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%")
-              ->orWhere('phone', 'like', "%{$search}%");
-        });
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        if ($status !== null) {
+            $query->where('is_active', $status === 'active' ? 1 : 0);
+        }
+
+        $customers = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        $customerStats = [
+            'total' => User::where('role', 'customer')->count(),
+            'active' => User::where('role', 'customer')->where('is_active', true)->count(),
+            'inactive' => User::where('role', 'customer')->where('is_active', false)->count(),
+            'new_this_month' => User::where('role', 'customer')
+                ->whereMonth('created_at', now()->month)
+                ->count(),
+        ];
+
+        return view('admin.customers.index', compact('customers', 'customerStats', 'search', 'status'));
     }
 
-    if ($status !== null) {
-        $query->where('is_active', $status === 'active' ? 1 : 0);
-    }
-
-    $customers = $query->orderBy('created_at', 'desc')->paginate(15);
-
-    $customerStats = [
-        'total' => User::where('role', 'customer')->count(),
-        'active' => User::where('role', 'customer')->where('is_active', true)->count(),
-        'inactive' => User::where('role', 'customer')->where('is_active', false)->count(),
-        'new_this_month' => User::where('role', 'customer')
-            ->whereMonth('created_at', now()->month)
-            ->count(),
-    ];
-
-    return view('admin.customers.index', compact('customers', 'customerStats', 'search', 'status'));
-}
     /**
      * Display the specified customer.
      */
@@ -386,14 +417,14 @@ public function customers(Request $request)
     }
 
     /**
- * Show the form for editing the specified customer.
- */
-public function editCustomer($id)
-{
-    $customer = User::where('role', 'customer')->findOrFail($id);
+     * Show the form for editing the specified customer.
+     */
+    public function editCustomer($id)
+    {
+        $customer = User::where('role', 'customer')->findOrFail($id);
 
-    return view('admin.customers.edit', compact('customer'));
-}
+        return view('admin.customers.edit', compact('customer'));
+    }
 
     /**
      * Update customer information.
@@ -533,14 +564,14 @@ public function editCustomer($id)
     }
 
     /**
- * Show the form for editing the specified vendor.
- */
-public function editVendor($id)
-{
-    $vendor = User::where('role', 'vendor')->findOrFail($id);
+     * Show the form for editing the specified vendor.
+     */
+    public function editVendor($id)
+    {
+        $vendor = User::where('role', 'vendor')->findOrFail($id);
 
-    return view('admin.vendors.edit', compact('vendor'));
-}
+        return view('admin.vendors.edit', compact('vendor'));
+    }
 
     /**
      * Delete vendor account.
@@ -608,93 +639,89 @@ public function editVendor($id)
     /**
      * Display catalog overview.
      */
-   /**
- * Display catalog overview.
- */
-public function catalog()
-{
-    $totalProducts = Product::count();
-    $totalCategories = Category::count();
-    $outOfStock = Product::where('stock', '<=', 0)->count();
-    $recentProducts = Product::with(['vendor', 'category'])->latest()->limit(10)->get();
-    $activeVendorsCount = User::where('role', 'vendor')->where('is_active', true)->count();
+    public function catalog()
+    {
+        $totalProducts = Product::count();
+        $totalCategories = Category::count();
+        $outOfStock = Product::where('stock', '<=', 0)->count();
+        $recentProducts = Product::with(['vendor', 'category'])->latest()->limit(10)->get();
+        $activeVendorsCount = User::where('role', 'vendor')->where('is_active', true)->count();
 
-    return view('admin.catalog.index', compact(
-        'totalProducts',
-        'totalCategories',
-        'outOfStock',
-        'recentProducts',
-        'activeVendorsCount'
-    ));
-}
-
-
-/**
- * Display inventory management page.
- */
-public function inventory(Request $request)
-{
-    $search = $request->get('search');
-    $stockStatus = $request->get('stock_status');
-
-    $query = Product::with(['vendor', 'category']);
-
-    if ($search) {
-        $query->where('name', 'like', "%{$search}%")
-              ->orWhere('sku', 'like', "%{$search}%");
+        return view('admin.catalog.index', compact(
+            'totalProducts',
+            'totalCategories',
+            'outOfStock',
+            'recentProducts',
+            'activeVendorsCount'
+        ));
     }
 
-    if ($stockStatus === 'low') {
-        $query->where('stock', '>', 0)
-              ->where('stock', '<', 10);
-    } elseif ($stockStatus === 'out') {
-        $query->where('stock', '<=', 0);
-    } elseif ($stockStatus === 'in') {
-        $query->where('stock', '>', 10);
+    /**
+     * Display inventory management page.
+     */
+    public function inventory(Request $request)
+    {
+        $search = $request->get('search');
+        $stockStatus = $request->get('stock_status');
+
+        $query = Product::with(['vendor', 'category']);
+
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%");
+        }
+
+        if ($stockStatus === 'low') {
+            $query->where('stock', '>', 0)
+                  ->where('stock', '<', 10);
+        } elseif ($stockStatus === 'out') {
+            $query->where('stock', '<=', 0);
+        } elseif ($stockStatus === 'in') {
+            $query->where('stock', '>', 10);
+        }
+
+        $products = $query->orderBy('stock', 'asc')->paginate(15);
+
+        $stats = [
+            'total_products' => Product::count(),
+            'in_stock' => Product::where('stock', '>', 10)->count(),
+            'low_stock' => Product::where('stock', '>', 0)->where('stock', '<', 10)->count(),
+            'out_of_stock' => Product::where('stock', '<=', 0)->count(),
+            'total_value' => Product::sum(DB::raw('price * stock')),
+        ];
+
+        return view('admin.inventory.index', compact('products', 'stats', 'search', 'stockStatus'));
     }
 
-    $products = $query->orderBy('stock', 'asc')->paginate(15);
+    /**
+     * Display low stock products.
+     */
+    public function lowStock()
+    {
+        $products = Product::with(['vendor', 'category'])
+            ->where('stock', '>', 0)
+            ->where('stock', '<', 10)
+            ->orderBy('stock', 'asc')
+            ->paginate(15);
 
-    $stats = [
-        'total_products' => Product::count(),
-        'in_stock' => Product::where('stock', '>', 10)->count(),
-        'low_stock' => Product::where('stock', '>', 0)->where('stock', '<', 10)->count(),
-        'out_of_stock' => Product::where('stock', '<=', 0)->count(),
-        'total_value' => Product::sum(DB::raw('price * stock')),
-    ];
+        return view('admin.inventory.low-stock', compact('products'));
+    }
 
-    return view('admin.inventory.index', compact('products', 'stats', 'search', 'stockStatus'));
-}
+    /**
+     * Restock a product.
+     */
+    public function restock(Request $request, $id)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
 
-/**
- * Display low stock products.
- */
-public function lowStock()
-{
-    $products = Product::with(['vendor', 'category'])
-        ->where('stock', '>', 0)
-        ->where('stock', '<', 10)
-        ->orderBy('stock', 'asc')
-        ->paginate(15);
+        $product = Product::findOrFail($id);
+        $product->stock += $request->quantity;
+        $product->save();
 
-    return view('admin.inventory.low-stock', compact('products'));
-}
-
-/**
- * Restock a product.
- */
-public function restock(Request $request, $id)
-{
-    $request->validate([
-        'quantity' => 'required|integer|min:1',
-    ]);
-
-    $product = Product::findOrFail($id);
-    $product->stock += $request->quantity;
-    $product->save();
-
-    return redirect()->back()->with('success', "Product restocked with {$request->quantity} units.");
-}
+        return redirect()->back()->with('success', "Product restocked with {$request->quantity} units.");
+    }
 
     /**
      * Display products listing.
@@ -912,7 +939,7 @@ public function restock(Request $request, $id)
      */
     public function notifications(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::guard('admin')->user();
         $notifications = $user->notifications()->paginate(20);
 
         return view('admin.notifications.index', compact('notifications'));
@@ -923,7 +950,7 @@ public function restock(Request $request, $id)
      */
     public function markNotificationAsRead($id)
     {
-        $user = Auth::user();
+        $user = Auth::guard('admin')->user();
         $notification = $user->notifications()->findOrFail($id);
         $notification->markAsRead();
 
@@ -935,7 +962,7 @@ public function restock(Request $request, $id)
      */
     public function markAllNotificationsAsRead()
     {
-        $user = Auth::user();
+        $user = Auth::guard('admin')->user();
         $user->unreadNotifications->markAsRead();
 
         return redirect()->back()->with('success', 'All notifications marked as read.');
@@ -1136,23 +1163,24 @@ public function restock(Request $request, $id)
             'data' => $stats
         ]);
     }
-/**
- * Get dashboard statistics for AJAX refresh.
- */
-public function getDashboardStats()
-{
-    $stats = [
-        'total_revenue' => Order::where('status', 'completed')->sum('total_amount') ?? 0,
-        'total_orders' => Order::count(),
-        'pending_orders' => Order::where('status', 'pending')->count(),
-        'total_vendors' => User::where('role', 'vendor')->count(),
-        'active_vendors' => User::where('role', 'vendor')->where('is_active', true)->count(),
-        'total_customers' => User::where('role', 'customer')->count(),
-        'total_products' => Product::count(),
-    ];
 
-    return response()->json($stats);
-}
+    /**
+     * Get dashboard statistics for AJAX refresh.
+     */
+    public function getDashboardStats()
+    {
+        $stats = [
+            'total_revenue' => Order::where('status', 'completed')->sum('total_amount') ?? 0,
+            'total_orders' => Order::count(),
+            'pending_orders' => Order::where('status', 'pending')->count(),
+            'total_vendors' => User::where('role', 'vendor')->count(),
+            'active_vendors' => User::where('role', 'vendor')->where('is_active', true)->count(),
+            'total_customers' => User::where('role', 'customer')->count(),
+            'total_products' => Product::count(),
+        ];
+
+        return response()->json($stats);
+    }
 
     /**
      * Get chart data for AJAX refresh (RENAMED to avoid conflict)
@@ -1307,48 +1335,48 @@ public function getDashboardStats()
             ->withInput($request->only('email'));
     }
 
-  /**
- * Show admin settings page
- */
-public function settings()
-{
-    $admin = $this->adminService->getCurrentAdmin();
+    /**
+     * Show admin settings page
+     */
+    public function settings()
+    {
+        $admin = $this->adminService->getCurrentAdmin();
 
-    if (!$admin) {
-        return redirect()->route('admin.login')
-            ->with('error', 'Please login to access settings.');
+        if (!$admin) {
+            return redirect()->route('admin.login')
+                ->with('error', 'Please login to access settings.');
+        }
+
+        return view('admin.settings.index', compact('admin'));
     }
 
-    return view('admin.settings.index', compact('admin'));
-}
+    /**
+     * Update admin settings
+     */
+    public function updateSettings(Request $request)
+    {
+        $admin = $this->adminService->getCurrentAdmin();
 
-/**
- * Update admin settings
- */
-public function updateSettings(Request $request)
-{
-    $admin = $this->adminService->getCurrentAdmin();
+        if (!$admin) {
+            return redirect()->route('admin.login')
+                ->with('error', 'Please login to update settings.');
+        }
 
-    if (!$admin) {
-        return redirect()->route('admin.login')
-            ->with('error', 'Please login to update settings.');
+        $request->validate([
+            'theme' => 'nullable|in:light,dark',
+            'language' => 'nullable|in:en,es,fr',
+            'notifications' => 'nullable|boolean',
+        ]);
+
+        // Store settings in database or session
+        session([
+            'admin.theme' => $request->theme,
+            'admin.language' => $request->language,
+            'admin.notifications' => $request->boolean('notifications', true),
+        ]);
+
+        return back()->with('success', 'Settings updated successfully.');
     }
-
-    $request->validate([
-        'theme' => 'nullable|in:light,dark',
-        'language' => 'nullable|in:en,es,fr',
-        'notifications' => 'nullable|boolean',
-    ]);
-
-    // Store settings in database or session
-    session([
-        'admin.theme' => $request->theme,
-        'admin.language' => $request->language,
-        'admin.notifications' => $request->boolean('notifications', true),
-    ]);
-
-    return back()->with('success', 'Settings updated successfully.');
-}
 
     /**
      * ========================================================================

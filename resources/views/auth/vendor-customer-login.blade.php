@@ -7,21 +7,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        @font-face {
-            font-family: 'Inter';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Regular.otf');
-            font-weight: 400;
-        }
-        @font-face {
-            font-family: 'Inter';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Medium.otf');
-            font-weight: 500;
-        }
-        @font-face {
-            font-family: 'Inter-Bold';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Bold.otf');
-            font-weight: 700;
-        }
+
 
         :root {
             --primary-gold: #B88E3F;
@@ -78,7 +64,7 @@
             align-items: center;
             gap: 8px;
         }
-        
+
         .logo-icon {
             color: var(--primary-gold);
             font-size: 32px;
@@ -145,7 +131,7 @@
                 transform: translateY(0);
             }
         }
-        
+
         /* Decorative element */
         .login-card::before {
             content: '';
@@ -277,7 +263,7 @@
             font-size: 20px;
             transition: color 0.2s;
         }
-        
+
         .toggle-password {
             position: absolute;
             right: 16px;
@@ -311,7 +297,7 @@
             background-color: var(--white);
             box-shadow: 0 0 0 4px rgba(184, 142, 63, 0.1);
         }
-        
+
         .form-control.error {
             border-color: var(--error-color);
         }
@@ -347,7 +333,7 @@
             color: var(--text-gray);
             user-select: none;
         }
-        
+
         .custom-checkbox {
             width: 20px;
             height: 20px;
@@ -368,7 +354,7 @@
             background-color: var(--primary-gold);
             border-color: var(--primary-gold);
         }
-        
+
         input[type="checkbox"]:checked + .custom-checkbox::after {
             content: "\EB7B";
             font-family: 'remixicon';
@@ -381,7 +367,7 @@
             text-decoration: none;
             transition: color 0.2s;
         }
-        
+
         .forgot-link:hover {
             color: var(--primary-gold);
             text-decoration: underline;
@@ -409,7 +395,7 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(184, 142, 63, 0.4);
         }
-        
+
         .btn-submit:active:not(:disabled) {
             transform: translateY(0);
         }
@@ -514,48 +500,48 @@
         }
 
         @media screen and (max-width: 768px) {
-            .navbar { 
-                padding: 14px 20px; 
-            }
-            
-            .menu-btn { 
-                display: block; 
+            .navbar {
+                padding: 14px 20px;
             }
 
-            .main-container { 
-                padding: 30px 16px; 
+            .menu-btn {
+                display: block;
             }
-            
-            .login-card { 
-                padding: 32px 24px; 
+
+            .main-container {
+                padding: 30px 16px;
+            }
+
+            .login-card {
+                padding: 32px 24px;
                 max-width: 100%;
             }
-            
-            .card-header h1 { 
-                font-size: 24px; 
+
+            .card-header h1 {
+                font-size: 24px;
             }
-            
+
             .role-tab {
                 padding: 12px 16px;
                 font-size: 14px;
             }
-            
-            .form-control { 
-                padding: 14px 44px 14px 46px; 
-                font-size: 15px; 
+
+            .form-control {
+                padding: 14px 44px 14px 46px;
+                font-size: 15px;
             }
-            
-            .btn-submit { 
-                font-size: 16px; 
-                padding: 14px; 
+
+            .btn-submit {
+                font-size: 16px;
+                padding: 14px;
             }
-            
+
             .signup-links {
                 flex-direction: column;
                 gap: 8px;
                 align-items: center;
             }
-            
+
             .signup-link {
                 width: 100%;
                 justify-content: center;
@@ -566,207 +552,207 @@
             .navbar { padding: 12px 16px; }
             .logo { font-size: 22px; }
             .logo-icon { font-size: 26px; }
-            
-            .login-card { 
-                padding: 28px 20px; 
+
+            .login-card {
+                padding: 28px 20px;
             }
-            
-            .card-header h1 { 
-                font-size: 22px; 
+
+            .card-header h1 {
+                font-size: 22px;
             }
-            
-            .card-header p { 
-                font-size: 14px; 
+
+            .card-header p {
+                font-size: 14px;
             }
-            
-            .form-label { 
-                font-size: 13px; 
+
+            .form-label {
+                font-size: 13px;
             }
-            
-            .form-control { 
-                padding: 14px 40px 14px 44px; 
-                font-size: 14px; 
+
+            .form-control {
+                padding: 14px 40px 14px 44px;
+                font-size: 14px;
             }
-            
-            .input-icon { 
-                font-size: 18px; 
-                left: 14px; 
+
+            .input-icon {
+                font-size: 18px;
+                left: 14px;
             }
-            
-            .toggle-password { 
-                font-size: 18px; 
-                right: 14px; 
+
+            .toggle-password {
+                font-size: 18px;
+                right: 14px;
             }
-            
-            .form-actions { 
-                flex-direction: column; 
-                align-items: flex-start; 
-                gap: 12px; 
-                margin-bottom: 24px; 
+
+            .form-actions {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                margin-bottom: 24px;
             }
-            
-            .btn-submit { 
-                padding: 14px; 
-                font-size: 15px; 
+
+            .btn-submit {
+                padding: 14px;
+                font-size: 15px;
             }
         }
 
         @media screen and (max-width: 480px) {
-            .navbar { 
-                padding: 10px 14px; 
-            }
-            
-            .logo { 
-                font-size: 20px; 
-                gap: 4px; 
-            }
-            
-            .logo-icon { 
-                font-size: 24px; 
-            }
-            
-            .menu-btn { 
-                font-size: 22px; 
-                padding: 6px; 
+            .navbar {
+                padding: 10px 14px;
             }
 
-            .main-container { 
-                padding: 20px 12px; 
+            .logo {
+                font-size: 20px;
+                gap: 4px;
             }
-            
-            .login-card { 
-                padding: 24px 16px; 
-                border-radius: 16px; 
+
+            .logo-icon {
+                font-size: 24px;
             }
-            
-            .login-card::before { 
-                height: 5px; 
+
+            .menu-btn {
+                font-size: 22px;
+                padding: 6px;
             }
-            
-            .card-header { 
-                margin-bottom: 24px; 
+
+            .main-container {
+                padding: 20px 12px;
             }
-            
-            .card-header h1 { 
-                font-size: 20px; 
+
+            .login-card {
+                padding: 24px 16px;
+                border-radius: 16px;
             }
-            
-            .card-header p { 
-                font-size: 13px; 
+
+            .login-card::before {
+                height: 5px;
             }
-            
+
+            .card-header {
+                margin-bottom: 24px;
+            }
+
+            .card-header h1 {
+                font-size: 20px;
+            }
+
+            .card-header p {
+                font-size: 13px;
+            }
+
             .role-tabs {
                 gap: 8px;
                 margin-bottom: 24px;
             }
-            
+
             .role-tab {
                 padding: 10px 12px;
                 font-size: 13px;
             }
-            
+
             .role-tab i {
                 font-size: 16px;
             }
-            
-            .form-group { 
-                margin-bottom: 20px; 
+
+            .form-group {
+                margin-bottom: 20px;
             }
-            
-            .form-label { 
-                font-size: 12px; 
-                margin-bottom: 6px; 
+
+            .form-label {
+                font-size: 12px;
+                margin-bottom: 6px;
             }
-            
-            .form-control { 
-                padding: 12px 36px 12px 42px; 
-                font-size: 14px; 
-                border-radius: 10px; 
+
+            .form-control {
+                padding: 12px 36px 12px 42px;
+                font-size: 14px;
+                border-radius: 10px;
             }
-            
-            .input-icon { 
-                font-size: 16px; 
-                left: 12px; 
+
+            .input-icon {
+                font-size: 16px;
+                left: 12px;
             }
-            
-            .toggle-password { 
-                font-size: 16px; 
-                right: 12px; 
+
+            .toggle-password {
+                font-size: 16px;
+                right: 12px;
             }
-            
-            .custom-checkbox { 
-                width: 18px; 
-                height: 18px; 
+
+            .custom-checkbox {
+                width: 18px;
+                height: 18px;
             }
-            
-            input[type="checkbox"]:checked + .custom-checkbox::after { 
-                font-size: 12px; 
+
+            input[type="checkbox"]:checked + .custom-checkbox::after {
+                font-size: 12px;
             }
-            
-            .btn-submit { 
-                padding: 13px; 
-                font-size: 15px; 
-                border-radius: 10px; 
+
+            .btn-submit {
+                padding: 13px;
+                font-size: 15px;
+                border-radius: 10px;
             }
-            
-            .signup-prompt { 
-                font-size: 13px; 
-                margin-top: 20px; 
+
+            .signup-prompt {
+                font-size: 13px;
+                margin-top: 20px;
             }
-            
-            .footer-minimal { 
-                padding: 20px; 
-                font-size: 11px; 
+
+            .footer-minimal {
+                padding: 20px;
+                font-size: 11px;
             }
-            
+
             .footer-links {
                 gap: 16px;
             }
         }
 
         @media screen and (max-width: 360px) {
-            .navbar { 
-                padding: 8px 12px; 
-            }
-            
-            .logo { 
-                font-size: 18px; 
-            }
-            
-            .logo-icon { 
-                font-size: 22px; 
+            .navbar {
+                padding: 8px 12px;
             }
 
-            .login-card { 
-                padding: 20px 14px; 
+            .logo {
+                font-size: 18px;
             }
-            
-            .card-header h1 { 
-                font-size: 18px; 
+
+            .logo-icon {
+                font-size: 22px;
             }
-            
-            .card-header p { 
-                font-size: 12px; 
+
+            .login-card {
+                padding: 20px 14px;
             }
-            
+
+            .card-header h1 {
+                font-size: 18px;
+            }
+
+            .card-header p {
+                font-size: 12px;
+            }
+
             .role-tab {
                 padding: 8px 10px;
                 font-size: 12px;
             }
-            
-            .form-control { 
-                padding: 10px 32px 10px 38px; 
-                font-size: 13px; 
+
+            .form-control {
+                padding: 10px 32px 10px 38px;
+                font-size: 13px;
             }
-            
-            .btn-submit { 
-                padding: 12px; 
-                font-size: 14px; 
+
+            .btn-submit {
+                padding: 12px;
+                font-size: 14px;
             }
-            
-            .footer-minimal { 
-                padding: 16px; 
-                font-size: 10px; 
+
+            .footer-minimal {
+                padding: 16px;
+                font-size: 10px;
             }
         }
     </style>
@@ -837,13 +823,13 @@
                     <label for="email" class="form-label" id="emailLabel">Email Address</label>
                     <div class="input-wrapper">
                         <i class="ri-mail-line input-icon" id="emailIcon"></i>
-                        <input type="email" 
-                               id="email" 
-                               name="email" 
-                               class="form-control @error('email') error @enderror" 
-                               placeholder="Enter your email" 
-                               value="{{ old('email') }}" 
-                               required 
+                        <input type="email"
+                               id="email"
+                               name="email"
+                               class="form-control @error('email') error @enderror"
+                               placeholder="Enter your email"
+                               value="{{ old('email') }}"
+                               required
                                autofocus>
                     </div>
                     @error('email')
@@ -858,11 +844,11 @@
                     <label for="password" class="form-label">Password</label>
                     <div class="input-wrapper">
                         <i class="ri-lock-2-line input-icon"></i>
-                        <input type="password" 
-                               id="password" 
-                               name="password" 
-                               class="form-control @error('password') error @enderror" 
-                               placeholder="Enter your password" 
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               class="form-control @error('password') error @enderror"
+                               placeholder="Enter your password"
                                required>
                         <i class="ri-eye-off-line toggle-password" onclick="togglePassword(this)"></i>
                     </div>
@@ -903,9 +889,9 @@
             </form>
         </div>
     </div>
-    
+
     <div class="footer-minimal">
-        <div>&copy; {{ date('Y') }} Vendora Inc. All rights reserved. Made with ❤️ in Jimma, Ethiopia</div>
+        <div>&copy; {{ date('Y') }} Vendora. All rights reserved. Jimma, Ethiopia</div>
         <div class="footer-links">
             <a href="{{ route('privacy.policy') }}">Privacy Policy</a>
             <a href="{{ route('terms.service') }}">Terms of Service</a>
@@ -921,7 +907,7 @@
         function setRole(role) {
             // Update hidden input
             document.getElementById('selectedRole').value = role;
-            
+
             // Update active tab
             document.querySelectorAll('.role-tab').forEach(tab => {
                 tab.classList.remove('active');
@@ -933,7 +919,7 @@
             // Update welcome text based on role
             const title = document.getElementById('welcomeTitle');
             const subtitle = document.getElementById('welcomeSubtitle');
-            
+
             if (role === 'vendor') {
                 title.textContent = 'Welcome Vendor!';
                 subtitle.textContent = 'Sign in to manage your store';
@@ -962,11 +948,23 @@
             }
         }
 
-        // Form submission with loading state
+        // Form submission with loading state - FIXED VERSION
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const submitBtn = document.getElementById('submitBtn');
+
+            // Don't disable if already disabled (prevents double submission)
+            if (submitBtn.disabled) {
+                e.preventDefault();
+                return;
+            }
+
+            // Disable button and show spinner
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Signing in...';
+
+            // The form will submit normally - no need to prevent default
+            // The button will remain disabled during form submission
+            // If the page redirects, the button state will be reset automatically
         });
 
         // Auto-hide alerts after 5 seconds
@@ -978,11 +976,7 @@
             });
         }, 5000);
 
-        // Mobile menu
-        document.getElementById('menuBtn')?.addEventListener('click', function() {
-            // In a real app, this would toggle a mobile menu
-            console.log('Mobile menu clicked');
-        });
+
 
         // Input focus effects
         document.querySelectorAll('.form-control').forEach(input => {
@@ -995,7 +989,7 @@
             });
         });
 
-        // Prevent double submission
+        // Prevent double submission with a flag - SIMPLIFIED
         let submitted = false;
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             if (submitted) {
@@ -1003,6 +997,11 @@
                 return;
             }
             submitted = true;
+
+            // Reset the flag after 5 seconds (in case of network issues)
+            setTimeout(() => {
+                submitted = false;
+            }, 5000);
         });
 
         // Load last selected role from localStorage
@@ -1013,9 +1012,18 @@
             setRole('customer');
         }
 
-        // Console welcome message
-        console.log('Welcome to Vendora Login Portal');
-        console.log('Please select your role and enter your credentials');
+        // Reset button state when page loads (in case of back navigation)
+        window.addEventListener('pageshow', function(event) {
+            // If the page is loaded from cache (like back button)
+            if (event.persisted) {
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Sign In</span>';
+                submitted = false;
+            }
+        });
+
+
     </script>
 </body>
 </html>

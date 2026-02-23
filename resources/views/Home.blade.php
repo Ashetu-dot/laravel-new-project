@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ session('locale', 'en') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -7,27 +7,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        /* ----- FONTS ----- */
-        @font-face {
-            font-family: 'Inter';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Regular.otf') format('opentype');
-            font-weight: 400;
-        }
-        @font-face {
-            font-family: 'Inter';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Medium.otf') format('opentype');
-            font-weight: 500;
-        }
-        @font-face {
-            font-family: 'Inter';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Bold.otf') format('opentype');
-            font-weight: 700;
-        }
-        @font-face {
-            font-family: 'AlibabaSans';
-            src: url('https://assets-persist.lovart.ai/agent-static-assets/AlibabaSans-Bold.otf') format('opentype');
-            font-weight: 700;
-        }
+        /* Import Ethiopic font */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;500;700&display=swap');
 
         /* ----- ROOT VARIABLES ----- */
         :root {
@@ -45,6 +26,31 @@
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
+            --bg-body: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --overlay-dark: rgba(0, 0, 0, 0.6);
+            --overlay-light: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Dark mode variables */
+        [data-theme="dark"] {
+            --primary-color: #B88E3F;
+            --primary-hover: #9c7832;
+            --text-dark: #f1f5f9;
+            --text-light: #cbd5e1;
+            --bg-light: #0f172a;
+            --white: #1e293b;
+            --border-color: #334155;
+            --error-color: #f87171;
+            --success-color: #4ade80;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 8px 30px rgba(184, 142, 63, 0.25);
+            --bg-body: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
         }
 
         * {
@@ -54,15 +60,22 @@
         }
 
         body {
-            font-family: 'Inter', 'NotoSansHans', sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
+            font-family: 'Inter', 'Noto Sans Ethiopic', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
             width: 100%;
             max-width: 1920px;
             margin: 0 auto;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             line-height: 1.5;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Language-specific adjustments */
+        [lang="am"], [lang="om"] {
+            font-family: 'Noto Sans Ethiopic', 'Inter', sans-serif;
+            line-height: 1.8;
         }
 
         /* Ethiopian Flag Colors Accent */
@@ -83,7 +96,7 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background-color: #fef3e7;
+            background-color: rgba(184, 142, 63, 0.1);
             color: var(--primary-color);
             padding: 4px 12px;
             border-radius: 20px;
@@ -102,6 +115,8 @@
             gap: 12px;
             font-size: 14px;
             animation: slideDown 0.3s ease;
+            position: relative;
+            z-index: 1000;
         }
 
         @keyframes slideDown {
@@ -121,10 +136,20 @@
             border: 1px solid #a7f3d0;
         }
 
+        [data-theme="dark"] .alert-success {
+            background-color: #065f46;
+            color: #d1fae5;
+        }
+
         .alert-error {
             background-color: #fee2e2;
             color: #991b1b;
             border: 1px solid #fecaca;
+        }
+
+        [data-theme="dark"] .alert-error {
+            background-color: #991b1b;
+            color: #fee2e2;
         }
 
         /* Navigation */
@@ -132,12 +157,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 24px 80px;
-            background-color: var(--white);
+            padding: 16px 80px;
+            background-color: var(--card-bg);
             box-shadow: 0 2px 10px rgba(0,0,0,0.03);
             position: sticky;
             top: 0;
             z-index: 100;
+            transition: background-color 0.3s ease;
         }
 
         .brand {
@@ -148,7 +174,6 @@
             font-size: 24px;
             color: var(--primary-color);
             letter-spacing: -0.5px;
-            font-family: 'AlibabaSans', sans-serif;
             text-decoration: none;
         }
 
@@ -159,6 +184,8 @@
         .brand-badge {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .nav-links {
@@ -168,12 +195,13 @@
         }
 
         .nav-item {
-            color: var(--text-dark);
+            color: var(--text-primary);
             text-decoration: none;
             font-weight: 500;
             font-size: 16px;
             transition: color 0.3s ease;
             position: relative;
+            cursor: pointer;
         }
 
         .nav-item:hover {
@@ -213,9 +241,218 @@
             display: none;
         }
 
+        /* Profile Dropdown */
+        .profile-container {
+            position: relative;
+        }
+
+        .profile-trigger {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 50px;
+            transition: background-color 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .profile-trigger:hover {
+            background-color: var(--bg-light);
+            border-color: var(--border-color);
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            object-fit: cover;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            width: 300px;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-hover);
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .profile-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dropdown-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .dropdown-user-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .dropdown-user-info p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .dropdown-menu {
+            padding: 10px 0;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: background-color 0.2s;
+            font-size: 14px;
+            border: none;
+            background: none;
+            width: 100%;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--bg-light);
+        }
+
+        .dropdown-item i {
+            font-size: 18px;
+            color: var(--primary-color);
+            width: 24px;
+        }
+
+        .dropdown-item.logout:hover {
+            color: var(--error-color);
+        }
+
+        .dropdown-item.logout:hover i {
+            color: var(--error-color);
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 8px 0;
+        }
+
+        /* Language Submenu */
+        .language-submenu {
+            padding-left: 46px;
+            margin: 5px 0;
+            display: none;
+        }
+
+        .language-submenu.show {
+            display: block;
+        }
+
+        .language-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: var(--text-primary);
+        }
+
+        .language-option:hover {
+            background-color: var(--bg-light);
+        }
+
+        .language-option.active {
+            background-color: rgba(184, 142, 63, 0.1);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .language-option i {
+            font-size: 16px;
+            color: var(--primary-color);
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: rotate(15deg);
+        }
+
         .menu-btn {
             font-size: 24px;
-            color: var(--text-dark);
+            color: var(--text-primary);
             cursor: pointer;
             width: 40px;
             height: 40px;
@@ -227,22 +464,25 @@
         }
 
         .menu-btn:hover {
-            background-color: rgba(0,0,0,0.05);
+            background-color: var(--bg-light);
         }
 
         /* Mobile Menu */
         .mobile-menu {
             display: none;
             position: fixed;
-            top: 80px;
+            top: 70px;
             left: 0;
             right: 0;
-            background: var(--white);
+            background: var(--card-bg);
             padding: 20px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
             z-index: 99;
-            transform: translateY(-100%);
+            transform: translateY(-150%);
             transition: transform 0.3s ease;
+            border-bottom: 1px solid var(--border-color);
+            max-height: calc(100vh - 70px);
+            overflow-y: auto;
         }
 
         .mobile-menu.active {
@@ -253,32 +493,133 @@
             display: block;
             padding: 12px 0;
             border-bottom: 1px solid var(--border-color);
+            font-weight: 500;
+            color: var(--text-primary);
+            text-decoration: none;
         }
 
         .mobile-menu .nav-item:last-child {
             border-bottom: none;
         }
 
-        /* Hero Section */
+        .mobile-menu .nav-item:hover {
+            color: var(--primary-color);
+            padding-left: 10px;
+        }
+
+        .mobile-menu .btn-signup-mobile {
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            border-radius: 50px;
+            margin-top: 10px;
+            padding: 12px;
+            display: block;
+            text-decoration: none;
+        }
+
+        .mobile-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .mobile-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .mobile-user-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            color: var(--text-primary);
+        }
+
+        .mobile-user-info p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .lang-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .lang-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Hero Section with Dynamic Background */
         .hero {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 120px 20px 80px;
             text-align: center;
-            background: linear-gradient(180deg, rgba(184, 142, 63, 0.05) 0%, rgba(248, 250, 252, 0) 100%);
-            position: relative;
+            min-height: 600px;
+            overflow: hidden;
+            color: white;
+        }
+
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 1s ease-in-out;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.5) 100%);
+            z-index: -1;
         }
 
         .hero-headline {
-            font-size: 64px;
+            font-size: clamp(32px, 8vw, 64px);
             line-height: 1.1;
             font-weight: 800;
             margin-bottom: 24px;
-            color: var(--text-dark);
             max-width: 900px;
             letter-spacing: -1.5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            color: white;
         }
 
         .hero-headline span {
@@ -294,22 +635,23 @@
             left: 0;
             width: 100%;
             height: 12px;
-            background-color: rgba(184, 142, 63, 0.2);
+            background-color: rgba(184, 142, 63, 0.3);
             z-index: -1;
             border-radius: 4px;
         }
 
         .hero-subtext {
-            font-size: 20px;
-            color: var(--text-light);
+            font-size: clamp(16px, 3vw, 20px);
+            color: rgba(255,255,255,0.9);
             margin-bottom: 40px;
             max-width: 600px;
             line-height: 1.6;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
         .hero-stats {
             display: flex;
-            gap: 48px;
+            gap: clamp(20px, 5vw, 48px);
             margin-bottom: 40px;
             flex-wrap: wrap;
             justify-content: center;
@@ -317,36 +659,44 @@
 
         .hero-stat {
             text-align: center;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255,255,255,0.2);
+            min-width: 150px;
         }
 
         .hero-stat-number {
-            font-size: 32px;
+            font-size: clamp(24px, 4vw, 32px);
             font-weight: 800;
             color: var(--primary-color);
         }
 
         .hero-stat-label {
             font-size: 14px;
-            color: var(--text-light);
+            color: rgba(255,255,255,0.9);
         }
 
         /* Search Container */
         .search-container {
-            background: var(--white);
+            background: var(--card-bg);
             padding: 16px;
             border-radius: 100px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
             width: 100%;
             max-width: 960px;
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            z-index: 10;
         }
 
         .search-container:hover {
             transform: translateY(-2px);
-            box-shadow: 0 25px 50px rgba(184, 142, 63, 0.15);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
         }
 
         .input-group {
@@ -354,7 +704,7 @@
             display: flex;
             align-items: center;
             padding: 0 24px;
-            border-right: 1px solid #E5E5E5;
+            border-right: 1px solid var(--border-color);
             position: relative;
         }
 
@@ -366,6 +716,7 @@
             font-size: 22px;
             color: var(--primary-color);
             margin-right: 16px;
+            flex-shrink: 0;
         }
 
         .input-content {
@@ -378,7 +729,7 @@
         .input-label {
             font-size: 12px;
             font-weight: 700;
-            color: var(--text-dark);
+            color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 4px;
@@ -388,19 +739,19 @@
             border: none;
             outline: none;
             font-size: 16px;
-            color: var(--text-light);
+            color: var(--text-primary);
             background: transparent;
             width: 100%;
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
         }
 
         .input-field::placeholder {
-            color: #AAAAAA;
+            color: #94a3b8;
         }
 
         .search-btn {
             background-color: var(--primary-color);
-            color: var(--white);
+            color: white;
             border: none;
             width: 64px;
             height: 64px;
@@ -426,7 +777,7 @@
         /* Features Section */
         .features {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 32px;
             max-width: 1200px;
             margin: 80px auto;
@@ -434,17 +785,18 @@
         }
 
         .feature-card {
-            background: var(--white);
+            background: var(--card-bg);
             padding: 40px 32px;
             border-radius: 24px;
             text-align: left;
             transition: all 0.3s ease;
-            border: 1px solid rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
+            height: 100%;
         }
 
         .feature-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-shadow: var(--shadow-hover);
         }
 
         .feature-icon {
@@ -469,20 +821,21 @@
             font-size: 20px;
             font-weight: 700;
             margin-bottom: 12px;
-            color: var(--text-dark);
+            color: var(--text-primary);
         }
 
         .feature-desc {
             font-size: 15px;
-            color: var(--text-light);
+            color: var(--text-secondary);
             line-height: 1.6;
         }
 
         /* Background Circles */
         .bg-circle {
-            position: absolute;
+            position: fixed;
             border-radius: 50%;
             z-index: -1;
+            pointer-events: none;
         }
 
         .circle-1 {
@@ -518,14 +871,16 @@
         .section-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
+            align-items: center;
             margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 20px;
         }
 
         .section-title {
-            font-size: 32px;
+            font-size: clamp(24px, 4vw, 32px);
             font-weight: 700;
-            color: var(--text-dark);
+            color: var(--text-primary);
         }
 
         .view-all {
@@ -544,7 +899,7 @@
 
         .categories-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 20px;
         }
 
@@ -553,26 +908,27 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: var(--white);
+            background: var(--card-bg);
             padding: 30px 10px;
             border-radius: 16px;
             cursor: pointer;
             transition: all 0.3s ease;
             border: 1px solid transparent;
             text-decoration: none;
-            color: var(--text-dark);
+            color: var(--text-primary);
+            text-align: center;
         }
 
         .category-item:hover {
             border-color: var(--primary-color);
-            background: #FFFDF8;
+            background: rgba(184, 142, 63, 0.05);
             transform: translateY(-4px);
             box-shadow: 0 10px 25px rgba(184, 142, 63, 0.1);
         }
 
         .cat-icon {
             font-size: 32px;
-            color: var(--text-dark);
+            color: var(--text-primary);
             margin-bottom: 12px;
             transition: color 0.3s, transform 0.3s;
         }
@@ -585,8 +941,7 @@
         .cat-name {
             font-size: 14px;
             font-weight: 600;
-            color: var(--text-dark);
-            text-align: center;
+            color: var(--text-primary);
         }
 
         /* Local Categories */
@@ -598,19 +953,22 @@
 
         .local-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 24px;
             margin-top: 40px;
         }
 
         .local-card {
-            background: var(--white);
+            background: var(--card-bg);
             border-radius: 16px;
             overflow: hidden;
             box-shadow: var(--shadow);
             transition: all 0.3s;
             text-decoration: none;
-            color: var(--text-dark);
+            color: var(--text-primary);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         .local-card:hover {
@@ -630,16 +988,18 @@
 
         .local-content {
             padding: 24px;
+            flex: 1;
         }
 
         .local-content h3 {
             font-size: 20px;
             font-weight: 700;
             margin-bottom: 8px;
+            color: var(--text-primary);
         }
 
         .local-content p {
-            color: var(--text-light);
+            color: var(--text-secondary);
             font-size: 14px;
             margin-bottom: 16px;
             line-height: 1.5;
@@ -651,6 +1011,8 @@
             align-items: center;
             padding-top: 16px;
             border-top: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .local-vendors {
@@ -660,7 +1022,7 @@
 
         /* Testimonials */
         .testimonials {
-            background: linear-gradient(135deg, rgba(184, 142, 63, 0.05) 0%, rgba(248, 250, 252, 0) 100%);
+            background: linear-gradient(135deg, rgba(184, 142, 63, 0.05) 0%, var(--bg-light) 100%);
             padding: 80px 20px;
         }
 
@@ -671,20 +1033,21 @@
 
         .testimonials-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 32px;
             margin-top: 48px;
         }
 
         .testimonial-card {
-            background: var(--white);
+            background: var(--card-bg);
             padding: 32px;
             border-radius: 16px;
             box-shadow: var(--shadow);
+            height: 100%;
         }
 
         .testimonial-text {
-            color: var(--text-light);
+            color: var(--text-secondary);
             font-style: italic;
             margin-bottom: 24px;
             line-height: 1.6;
@@ -706,15 +1069,17 @@
             justify-content: center;
             color: white;
             font-weight: 600;
+            flex-shrink: 0;
         }
 
         .testimonial-info h4 {
             font-weight: 600;
             margin-bottom: 4px;
+            color: var(--text-primary);
         }
 
         .testimonial-info p {
-            color: var(--text-light);
+            color: var(--text-secondary);
             font-size: 12px;
         }
 
@@ -732,13 +1097,13 @@
         }
 
         .cta-title {
-            font-size: 48px;
+            font-size: clamp(32px, 6vw, 48px);
             font-weight: 800;
             margin-bottom: 24px;
         }
 
         .cta-text {
-            font-size: 18px;
+            font-size: clamp(16px, 3vw, 18px);
             margin-bottom: 40px;
             opacity: 0.9;
         }
@@ -747,6 +1112,7 @@
             display: flex;
             gap: 20px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -759,6 +1125,8 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            border: none;
+            cursor: pointer;
         }
 
         .btn-primary {
@@ -774,6 +1142,7 @@
         .btn-outline {
             border: 2px solid white;
             color: white;
+            background: transparent;
         }
 
         .btn-outline:hover {
@@ -784,19 +1153,26 @@
 
         /* Footer */
         footer {
-            background-color: var(--white);
-            border-top: 1px solid #EEEEEE;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
             padding: 60px 80px 40px;
+            transition: background-color 0.3s ease;
         }
 
         .footer-content {
             display: flex;
             justify-content: space-between;
             margin-bottom: 60px;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+
+        .footer-brand {
+            flex: 1;
+            min-width: 250px;
         }
 
         .footer-brand h2 {
-            font-family: 'AlibabaSans', sans-serif;
             color: var(--primary-color);
             font-size: 24px;
             margin-bottom: 16px;
@@ -806,7 +1182,7 @@
         }
 
         .footer-text {
-            color: var(--text-light);
+            color: var(--text-secondary);
             max-width: 300px;
             font-size: 14px;
             line-height: 1.6;
@@ -815,13 +1191,14 @@
         .footer-links {
             display: flex;
             gap: 80px;
+            flex-wrap: wrap;
         }
 
         .link-group h4 {
             font-size: 16px;
             font-weight: 700;
             margin-bottom: 24px;
-            color: var(--text-dark);
+            color: var(--text-primary);
         }
 
         .link-group ul {
@@ -834,7 +1211,7 @@
 
         .link-group a {
             text-decoration: none;
-            color: var(--text-light);
+            color: var(--text-secondary);
             font-size: 14px;
             transition: color 0.2s;
         }
@@ -844,13 +1221,15 @@
         }
 
         .bottom-bar {
-            border-top: 1px solid #EEEEEE;
+            border-top: 1px solid var(--border-color);
             padding-top: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: #999;
+            color: var(--text-secondary);
             font-size: 13px;
+            flex-wrap: wrap;
+            gap: 20px;
         }
 
         .social-icons {
@@ -859,33 +1238,65 @@
         }
 
         .social-icons a {
-            color: #999;
+            color: var(--text-secondary);
             transition: color 0.2s;
+            font-size: 18px;
         }
 
         .social-icons a:hover {
             color: var(--primary-color);
         }
 
-        /* Responsive */
-        @media screen and (max-width: 1280px) {
-            .navbar { padding: 20px 40px; }
-            .hero-headline { font-size: 56px; }
-            .categories-wrapper, .local-section { padding: 0 30px; }
-            footer { padding: 50px 40px 30px; }
+        /* Badge for notifications */
+        .badge {
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
         }
 
+        /* Loading Spinner */
+        .ri-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notification Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive Design */
         @media screen and (max-width: 1024px) {
-            .navbar { padding: 18px 30px; }
-            .brand { font-size: 22px; }
+            .navbar { padding: 16px 40px; }
             .nav-links { gap: 30px; }
-            .hero-headline { font-size: 48px; max-width: 700px; }
-            .hero-subtext { font-size: 18px; }
-            .search-container { max-width: 800px; }
-            .features { gap: 24px; padding: 0 30px; }
-            .categories-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
-            .footer-links { gap: 50px; }
-            .local-grid { grid-template-columns: repeat(2, 1fr); }
+            .categories-wrapper, .local-section { padding: 0 30px; }
+            footer { padding: 50px 40px 30px; }
         }
 
         @media screen and (max-width: 900px) {
@@ -898,7 +1309,7 @@
             .input-group {
                 width: 100%;
                 border-right: none;
-                border-bottom: 1px solid #E5E5E5;
+                border-bottom: 1px solid var(--border-color);
                 padding: 12px 16px;
             }
             .input-group:last-of-type { border-bottom: none; }
@@ -908,7 +1319,6 @@
                 width: 60px;
                 height: 60px;
             }
-            .hero-stats { gap: 24px; }
         }
 
         @media screen and (max-width: 768px) {
@@ -917,98 +1327,327 @@
             .menu-btn { display: flex; }
             .mobile-menu { display: block; }
 
-            .hero { padding: 80px 20px 60px; }
-            .hero-headline { font-size: 40px; }
-            .hero-headline span::after { height: 10px; bottom: 4px; }
-            .hero-subtext { font-size: 16px; max-width: 480px; }
-            .hero-stats { justify-content: center; gap: 20px; }
+            .brand-badge {
+                flex-direction: column;
+                align-items: flex-start;
+            }
 
-            .features { grid-template-columns: 1fr; gap: 20px; margin: 50px auto; max-width: 550px; }
+            .ethiopia-badge {
+                margin-left: 0;
+            }
+
+            .hero { padding: 80px 20px 60px; }
+            .hero-stat {
+                padding: 15px 20px;
+                min-width: 120px;
+            }
+
+            .features { margin: 50px auto; }
 
             .categories-wrapper { padding: 0 24px; margin-bottom: 60px; }
-            .section-title { font-size: 28px; }
-            .categories-grid { grid-template-columns: repeat(2, 1fr); }
+            .local-section { padding: 0 24px; }
 
-            .local-grid { grid-template-columns: 1fr; }
-            .testimonials-grid { grid-template-columns: 1fr; }
-            .cta-title { font-size: 36px; }
-            .cta-buttons { flex-direction: column; align-items: center; }
-
-            .footer-content { flex-direction: column; gap: 40px; }
-            .footer-links { flex-wrap: wrap; gap: 30px 60px; }
+            .footer-content { flex-direction: column; }
+            .footer-links { gap: 40px; }
             .footer-brand .footer-text { max-width: 100%; }
-            footer { padding: 40px 30px 30px; }
-        }
-
-        @media screen and (max-width: 640px) {
-            .navbar { padding: 14px 20px; }
-            .brand { font-size: 20px; gap: 8px; }
-            .brand i { font-size: 24px; }
-
-            .hero-headline { font-size: 34px; }
-            .hero-subtext { font-size: 15px; }
-
-            .search-container { border-radius: 32px; padding: 20px; }
-            .input-group i { font-size: 20px; margin-right: 12px; }
-            .input-field { font-size: 15px; }
-
-            .categories-wrapper { padding: 0 20px; }
-            .section-header { flex-wrap: wrap; gap: 10px; }
-            .section-title { font-size: 26px; }
-
-            .feature-card { padding: 30px 24px; }
-
-            .footer-links { flex-direction: column; gap: 30px; }
-            .bottom-bar { flex-direction: column; gap: 16px; align-items: flex-start; }
         }
 
         @media screen and (max-width: 480px) {
-            .hero-headline { font-size: 28px; }
+            .navbar { padding: 12px 16px; }
+            .brand { font-size: 20px; }
+            .brand i { font-size: 24px; }
+
             .hero { padding: 60px 16px 40px; }
+            .hero-stat {
+                width: 100%;
+                max-width: 280px;
+            }
 
-            .search-container { padding: 18px; }
-            .input-group { padding: 8px 0px; }
-            .input-label { font-size: 11px; }
+            .search-container { padding: 16px; }
+            .input-group { padding: 8px 12px; }
+            .input-group i { font-size: 18px; margin-right: 10px; }
 
-            .section-title { font-size: 24px; }
-            .categories-grid { gap: 12px; }
+            .categories-wrapper, .local-section { padding: 0 16px; }
             .category-item { padding: 20px 8px; }
-            .cat-icon { font-size: 28px; }
 
-            .feature-icon { width: 48px; height: 48px; font-size: 22px; }
-            .feature-title { font-size: 18px; }
+            .feature-card { padding: 30px 20px; }
 
-            .cta-title { font-size: 28px; }
-            .btn { padding: 14px 30px; font-size: 16px; }
+            .cta-buttons .btn {
+                width: 100%;
+                justify-content: center;
+            }
 
             footer { padding: 40px 20px 20px; }
+            .bottom-bar {
+                flex-direction: column;
+                text-align: center;
+            }
         }
 
-        @media screen and (max-width: 360px) {
-            .hero-headline { font-size: 26px; }
-            .brand { font-size: 18px; }
-        }
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .mt-4 { margin-top: 16px; }
+        .mb-4 { margin-bottom: 16px; }
+        .w-100 { width: 100%; }
     </style>
 </head>
-<body>
+<body data-theme="{{ session('theme', 'light') }}" lang="{{ session('locale', 'en') }}">
 
+    <!-- Background Circles -->
     <div class="bg-circle circle-1"></div>
     <div class="bg-circle circle-2"></div>
 
     <!-- Session Messages -->
     @if(session('success'))
-        <div class="alert alert-success">
+        <div class="alert alert-success" id="successAlert">
             <i class="ri-checkbox-circle-line"></i>
-            {{ session('success') }}
+            <span>{{ session('success') }}</span>
         </div>
     @endif
 
     @if(session('error'))
-        <div class="alert alert-error">
+        <div class="alert alert-error" id="errorAlert">
             <i class="ri-error-warning-line"></i>
-            {{ session('error') }}
+            <span>{{ session('error') }}</span>
         </div>
     @endif
+
+    @php
+        $currentLang = session('locale', 'en');
+        $currentTheme = session('theme', 'light');
+
+        // Language translations
+        $translations = [
+            'en' => [
+                'categories' => 'Categories',
+                'features' => 'Features',
+                'for_vendors' => 'For Vendors',
+                'log_in' => 'Log In',
+                'sign_up' => 'Sign Up',
+                'hero_headline' => 'Find the Best <br><span>Local Vendors</span> in Jimma',
+                'hero_subtext' => 'Connect with top-rated local professionals for your events, home needs, and daily services. Trusted by thousands in your community.',
+                'local_vendors' => 'Local Vendors',
+                'happy_customers' => 'Happy Customers',
+                'categories_count' => 'Categories',
+                'search_what' => 'What',
+                'search_where' => 'Where',
+                'search_placeholder' => 'Plumbers, Bakers, Photographers...',
+                'location_placeholder' => 'Jimma, Ethiopia',
+                'popular_categories' => 'Popular Categories',
+                'view_all' => 'View All',
+                'popular_in_jimma' => 'Popular in Jimma',
+                'explore_local' => 'Explore Local',
+                'verified_vendors' => 'Verified Vendors',
+                'verified_desc' => 'Every vendor on our platform undergoes a strict verification process to ensure safety and quality for the Jimma community.',
+                'transparent_pricing' => 'Transparent Pricing',
+                'transparent_desc' => 'Get clear quotes upfront in Ethiopian Birr. No hidden fees or last-minute surprises when you book services.',
+                '247_support' => '24/7 Local Support',
+                'support_desc' => 'Our dedicated support team in Jimma is always available to help you with bookings and inquiries in Amharic and English.',
+                'what_residents_say' => 'What Jimma Residents Say',
+                'ready_to_start' => 'Ready to Start?',
+                'cta_text' => 'Join thousands of vendors and customers in Jimma and across Ethiopia.',
+                'become_vendor' => 'Become a Vendor',
+                'sign_up_customer' => 'Sign Up as Customer',
+                'go_to_dashboard' => 'Go to Dashboard',
+                'explore_vendors' => 'Explore Vendors',
+                'company' => 'Company',
+                'about_us' => 'About Us',
+                'careers' => 'Careers',
+                'press' => 'Press',
+                'blog' => 'Blog',
+                'discover' => 'Discover',
+                'how_it_works' => 'How it works',
+                'trust_safety' => 'Trust & Safety',
+                'help_center' => 'Help Center',
+                'invite_friends' => 'Invite Friends',
+                'for_vendors_title' => 'For Vendors',
+                'list_service' => 'List your service',
+                'vendor_resources' => 'Vendor Resources',
+                'success_stories' => 'Success Stories',
+                'community' => 'Community',
+                'rights_reserved' => 'All rights reserved',
+                'my_profile' => 'My Profile',
+                'settings' => 'Settings',
+                'messages' => 'Messages',
+                'notifications' => 'Notifications',
+                'logout' => 'Logout',
+                'dashboard' => 'Dashboard',
+                'my_products' => 'My Products',
+                'orders' => 'Orders',
+                'following' => 'Following',
+                'my_orders' => 'My Orders',
+                'admin_dashboard' => 'Admin Dashboard',
+                'manage_users' => 'Manage Users',
+                'manage_products' => 'Manage Products',
+                'language' => 'Language',
+                'english' => 'English',
+                'amharic' => 'Amharic',
+                'oromo' => 'Afan Oromo',
+                'dark_mode' => 'Dark Mode',
+                'light_mode' => 'Light Mode',
+                'theme_updated' => 'Theme updated successfully',
+                'language_updated' => 'Language updated successfully',
+                'search_error' => 'Please enter what you are looking for',
+
+            ],
+            'am' => [
+                'categories' => 'ምድቦች',
+                'features' => 'ገፅታዎች',
+                'for_vendors' => 'ለነጋዴዎች',
+                'log_in' => 'ግባ',
+                'sign_up' => 'ተመዝገብ',
+                'hero_headline' => 'በጅማ ውስጥ ምርጥ <br><span>የአካባቢ ነጋዴዎችን</span> ያግኙ',
+                'hero_subtext' => 'ለዝግጅቶችዎ፣ ለቤት ፍላጎቶችዎ እና ለዕለታዊ አገልግሎቶችዎ ከከፍተኛ ደረጃ የአካባቢ ባለሙያዎች ጋር ይገናኙ።',
+                'local_vendors' => 'የአካባቢ ነጋዴዎች',
+                'happy_customers' => 'ደስተኛ ደንበኞች',
+                'categories_count' => 'ምድቦች',
+                'search_what' => 'ምን',
+                'search_where' => 'የት',
+                'search_placeholder' => 'የቧንቧ ሰሪዎች፣ ዳቦ ጋጋሪዎች፣ ፎቶግራፍ አንሺዎች...',
+                'location_placeholder' => 'ጅማ፣ ኢትዮጵያ',
+                'popular_categories' => 'ታዋቂ ምድቦች',
+                'view_all' => 'ሁሉንም ይመልከቱ',
+                'popular_in_jimma' => 'በጅማ ታዋቂ',
+                'explore_local' => 'የአካባቢውን ይወቁ',
+                'verified_vendors' => 'የተረጋገጡ ነጋዴዎች',
+                'verified_desc' => 'በመድረካችን ላይ ያለ እያንዳንዱ ነጋዴ ለጅማ ማህበረሰብ ደህንነት እና ጥራት ለማረጋገጥ ጥብቅ የማረጋገጫ ሂደት ያካሂዳል።',
+                'transparent_pricing' => 'ግልጽ ዋጋ',
+                'transparent_desc' => 'በኢትዮጵያ ብር ግልጽ ዋጋዎችን አስቀድመው ያግኙ።',
+                '247_support' => '24/7 የአካባቢ ድጋፍ',
+                'support_desc' => 'በጅማ ያለው የእኛ የድጋፍ ቡድን በአማርኛ እና በእንግሊዝኛ ለመርዳት ሁልጊዜ ዝግጁ ነው።',
+                'what_residents_say' => 'የጅማ ነዋሪዎች ምን ይላሉ',
+                'ready_to_start' => 'ለመጀመር ዝግጁ ነዎት?',
+                'cta_text' => 'በጅማ እና በመላው ኢትዮጵያ ከሚገኙ በሺዎች ከሚቆጠሩ ነጋዴዎች እና ደንበኞች ጋር ይቀላቀሉ።',
+                'become_vendor' => 'ነጋዴ ይሁኑ',
+                'sign_up_customer' => 'እንደ ደንበኛ ይመዝገቡ',
+                'go_to_dashboard' => 'ወደ ዳሽቦርድ ይሂዱ',
+                'explore_vendors' => 'ነጋዴዎችን ይወቁ',
+                'company' => 'ኩባንያ',
+                'about_us' => 'ስለ እኛ',
+                'careers' => 'ስራዎች',
+                'press' => 'ፕሬስ',
+                'blog' => 'ብሎግ',
+                'discover' => 'ያግኙ',
+                'how_it_works' => 'እንዴት እንደሚሰራ',
+                'trust_safety' => 'እምነት እና ደህንነት',
+                'help_center' => 'የእርዳታ ማዕከል',
+                'invite_friends' => 'ጓደኞችን ይጋብዙ',
+                'for_vendors_title' => 'ለነጋዴዎች',
+                'list_service' => 'አገልግሎትዎን ይዘርዝሩ',
+                'vendor_resources' => 'የነጋዴ መርጃዎች',
+                'success_stories' => 'የስኬት ታሪኮች',
+                'community' => 'ማህበረሰብ',
+                'rights_reserved' => 'መብቱ በህግ የተጠበቀ ነው',
+                'my_profile' => 'የእኔ መገለጫ',
+                'settings' => 'ቅንብሮች',
+                'messages' => 'መልዕክቶች',
+                'notifications' => 'ማሳወቂያዎች',
+                'logout' => 'ውጣ',
+                'dashboard' => 'ዳሽቦርድ',
+                'my_products' => 'የእኔ ምርቶች',
+                'orders' => 'ትዕዛዞች',
+                'following' => 'የምከተላቸው',
+                'my_orders' => 'የእኔ ትዕዛዞች',
+                'admin_dashboard' => 'የአስተዳዳሪ ዳሽቦርድ',
+                'manage_users' => 'ተጠቃሚዎችን ያስተዳድሩ',
+                'manage_products' => 'ምርቶችን ያስተዳድሩ',
+                'language' => 'ቋንቋ',
+                'english' => 'እንግሊዝኛ',
+                'amharic' => 'አማርኛ',
+                'oromo' => 'አፋን ኦሮሞ',
+                'dark_mode' => 'ጨለማ ሁነታ',
+                'light_mode' => 'ብርሃን ሁነታ',
+                'theme_updated' => 'ገጽታ በተሳካ ሁኔታ ተዘምኗል',
+                'language_updated' => 'ቋንቋ በተሳካ ሁኔታ ተዘምኗል',
+                'search_error' => 'እባክዎ የሚፈልጉትን ያስገቡ',
+
+            ],
+            'om' => [
+                'categories' => 'Ramaddiiwwan',
+                'features' => 'Amaloota',
+                'for_vendors' => 'Gurgurtaaf',
+                'log_in' => 'Seeni',
+                'sign_up' => 'Galmaa\'i',
+                'hero_headline' => 'Jimmaa keessatti <br><span>Gurgurtota Naannoo</span> filatamaa barbaadi',
+                'hero_subtext' => 'Sababa keessaniif, fedhii mana keessaniif, tajaajila guyyaa guyyaa keessaniif ogeeyyii naannoo sadarkaa olaanaa qaban waliin hidhadhaa.',
+                'local_vendors' => 'Gurgurtota Naannoo',
+                'happy_customers' => 'Maamila Gammadoo',
+                'categories_count' => 'Ramaddiiwwan',
+                'search_what' => 'Maal',
+                'search_where' => 'Eessa',
+                'search_placeholder' => 'Ogeeyyii ujummoo, daabbooftota, warra suuraa kaasani...',
+                'location_placeholder' => 'Jimmaa, Itoophiyaa',
+                'popular_categories' => 'Ramaddiiwwan Beekamoo',
+                'view_all' => 'Hunda ilaali',
+                'popular_in_jimma' => 'Jimmaa keessatti beekamoo',
+                'explore_local' => 'Naannoo sakatta\'i',
+                'verified_vendors' => 'Gurgurtota Mirkanaa\'an',
+                'verified_desc' => 'Gurgurtoonni hundi tajaajila fi tajaajilaaf akkaataa mirkaneessaa cimaa keessa darbu.',
+                'transparent_pricing' => 'Gatii Ifa Ta\'e',
+                'transparent_desc' => 'Gatiin kee ifa ta\'e argadhu. Kaffaltiin dhokataa hin jiru.',
+                '247_support' => 'Deeggarsa Naannoo 24/7',
+                'support_desc' => 'Gareen deeggarsa keenya yeroo hundumaa dhiyeenya.',
+                'what_residents_say' => 'Jiraattonni Jimmaa maal jedhu',
+                'ready_to_start' => 'Jalqabuuf qophii dhaa?',
+                'cta_text' => 'Kumaamaan gurgurtoota fi maamila wajjin tajaajila.',
+                'become_vendor' => 'Gurgurtaa ta\'i',
+                'sign_up_customer' => 'Maamila ta\'i',
+                'go_to_dashboard' => 'Deeksii dhaqi',
+                'explore_vendors' => 'Gurgurtota barbaadi',
+                'company' => 'Kompanii',
+                'about_us' => 'Waa\'ee keenya',
+                'careers' => 'Hojiwwan',
+                'press' => 'Gaalee',
+                'blog' => 'Bilogii',
+                'discover' => 'Barbaadi',
+                'how_it_works' => 'Akkamitti hojjeta',
+                'trust_safety' => 'Amanaa fi Nageenya',
+                'help_center' => 'Gargaarsa Giddugala',
+                'invite_friends' => 'Hiriyoota waami',
+                'for_vendors_title' => 'Gurgurtootaaf',
+                'list_service' => 'Tajaajila kee galmeessi',
+                'vendor_resources' => 'Qabeenya Gurgurtaa',
+                'success_stories' => 'Seenaa Milkaa\'inaa',
+                'community' => 'Hawaasa',
+                'rights_reserved' => 'Mirgiwwan hundi eegaman',
+                'my_profile' => 'Koorniyaa koo',
+                'settings' => 'Sajoo',
+                'messages' => 'Ergaa',
+                'notifications' => 'Beeksisa',
+                'logout' => 'Ba\'i',
+                'dashboard' => 'Deeksii',
+                'my_products' => 'Oomishaalee koo',
+                'orders' => 'Ajaja',
+                'following' => 'Anaan hordofu',
+                'my_orders' => 'Ajaja koo',
+                'admin_dashboard' => 'Deeksii Bulchaa',
+                'manage_users' => 'Fayyadamtoota bulchi',
+                'manage_products' => 'Oomishaalee bulchi',
+                'language' => 'Afaan',
+                'english' => 'Ingiliffa',
+                'amharic' => 'Amaariffa',
+                'oromo' => 'Afaan Oromoo',
+                'dark_mode' => 'Haama Dukkanaa',
+                'light_mode' => 'Haama Ifaa',
+                'theme_updated' => 'Haalli milkaa\'inaan haaromfame',
+                'language_updated' => 'Afaan milkaa\'inaan haaromfame',
+                'search_error' => 'Maaloo waan barbaaddaa galchi',
+
+            ],
+        ];
+
+        $t = $translations[$currentLang] ?? $translations['en'];
+
+        // Background images array
+        $backgroundImages = [
+            'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?q=80&w=2071&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=2068&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?q=80&w=2083&auto=format&fit=crop',
+        ];
+        $randomImage = $backgroundImages[array_rand($backgroundImages)];
+    @endphp
 
     <!-- Navigation -->
     <nav class="navbar">
@@ -1021,31 +1660,177 @@
                 <i class="ri-map-pin-line"></i> Jimma, Ethiopia
             </span>
         </div>
+
         <div class="nav-links">
-            <a href="#categories" class="nav-item">Categories</a>
-            <a href="#features" class="nav-item">Features</a>
-            <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
+            <a href="#categories" class="nav-item">{{ $t['categories'] }}</a>
+            <a href="#features" class="nav-item">{{ $t['features'] }}</a>
+            <a href="{{ route('list-service') }}" class="nav-item">{{ $t['for_vendors'] }}</a>
+
             @guest
-                <a href="{{ route('login') }}" class="nav-item">Log In</a>
-                <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
+                <a href="{{ route('login') }}" class="nav-item">{{ $t['log_in'] }}</a>
+                <a href="{{ route('register') }}" class="nav-item btn-signup">{{ $t['sign_up'] }}</a>
             @else
-                <span class="nav-item" style="color: var(--primary-color); font-weight: 600;">
-                    <i class="ri-user-line"></i> {{ Auth::user()->name }}
-                </span>
-                <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
-                @if(Auth::user()->role === 'vendor')
-                    <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
-                @elseif(Auth::user()->role === 'customer')
-                    <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
-                @elseif(Auth::user()->role === 'admin')
-                    <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
-                @endif
-                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-                </form>
+                <div class="profile-container">
+                    <div class="profile-trigger" id="profileTrigger">
+                        <div class="profile-avatar">
+                            @if(Auth::user()->avatar)
+                                <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
+                            @else
+                                {{ strtoupper(substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2)) }}
+                            @endif
+                        </div>
+                        <span class="profile-name">{{ Auth::user()->business_name ?? Auth::user()->name }}</span>
+                        <i class="ri-arrow-down-s-line" id="dropdownArrow"></i>
+                    </div>
+
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="dropdown-header">
+                            <div class="dropdown-avatar">
+                                @if(Auth::user()->avatar)
+                                    <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                @else
+                                    {{ strtoupper(substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2)) }}
+                                @endif
+                            </div>
+                            <div class="dropdown-user-info">
+                                <h4>{{ Auth::user()->business_name ?? Auth::user()->name }}</h4>
+                                <p>{{ Auth::user()->email }}</p>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-menu">
+                            @if(Auth::user()->role === 'vendor')
+                                <a href="{{ route('vendor.dashboard') }}" class="dropdown-item">
+                                    <i class="ri-dashboard-line"></i> {{ $t['dashboard'] }}
+                                </a>
+                                <a href="{{ route('vendor.products.index') }}" class="dropdown-item">
+                                    <i class="ri-store-line"></i> {{ $t['my_products'] }}
+                                </a>
+                                <a href="{{ route('vendor.orders.index') }}" class="dropdown-item">
+                                    <i class="ri-shopping-bag-3-line"></i> {{ $t['orders'] }}
+                                </a>
+                            @elseif(Auth::user()->role === 'customer')
+                                <a href="{{ route('customer.dashboard') }}" class="dropdown-item">
+                                    <i class="ri-dashboard-line"></i> {{ $t['dashboard'] }}
+                                </a>
+                                <a href="{{ route('customer.following') }}" class="dropdown-item">
+                                    <i class="ri-heart-line"></i> {{ $t['following'] }}
+                                </a>
+                                <a href="{{ route('customer.orders') }}" class="dropdown-item">
+                                    <i class="ri-shopping-bag-3-line"></i> {{ $t['my_orders'] }}
+                                </a>
+                            @elseif(Auth::user()->role === 'admin')
+                                <a href="{{ route('admin.dashboard') }}" class="dropdown-item">
+                                    <i class="ri-dashboard-line"></i> {{ $t['admin_dashboard'] }}
+                                </a>
+                                <a href="{{ route('admin.users') }}" class="dropdown-item">
+                                    <i class="ri-user-settings-line"></i> {{ $t['manage_users'] }}
+                                </a>
+                                <a href="{{ route('admin.products') }}" class="dropdown-item">
+                                    <i class="ri-store-line"></i> {{ $t['manage_products'] }}
+                                </a>
+                            @endif
+
+                            <div class="dropdown-divider"></div>
+
+                            <a href="{{ route('profile.show', Auth::id()) }}" class="dropdown-item">
+                                <i class="ri-user-line"></i> {{ $t['my_profile'] }}
+                            </a>
+                            <a href="{{ route('profile.edit', Auth::id()) }}" class="dropdown-item">
+                                <i class="ri-settings-4-line"></i> {{ $t['settings'] }}
+                            </a>
+
+                            @if(method_exists(Auth::user(), 'unreadMessages') && Auth::user()->unreadMessages()->count() > 0)
+                            <a href="#" class="dropdown-item">
+                                <i class="ri-message-line"></i> {{ $t['messages'] }}
+                                <span class="badge">{{ Auth::user()->unreadMessages()->count() }}</span>
+                            </a>
+                            @endif
+
+                            {{--  @if(method_exists(Auth::user(), 'unreadNotifications') && Auth::user()->unreadNotifications()->count() > 0)
+                            <a href="{{ route('notifications') }}" class="dropdown-item">
+                                <i class="ri-notification-3-line"></i> {{ $t['notifications'] }}
+                                <span class="badge">{{ Auth::user()->unreadNotifications()->count() }}</span>
+                            </a>
+                            @endif  --}}
+
+
+
+
+                            @if(method_exists(Auth::user(), 'unreadNotifications') && Auth::user()->unreadNotifications()->count() > 0)
+    @if(Auth::user()->role === 'customer')
+        <a href="{{ route('customer.notifications') }}" class="dropdown-item">
+            <i class="ri-notification-3-line"></i> {{ $t['notifications'] }}
+            <span class="badge">{{ Auth::user()->unreadNotifications()->count() }}</span>
+        </a>
+    @elseif(Auth::user()->role === 'vendor')
+        <a href="{{ route('vendor.notifications') }}" class="dropdown-item">
+            <i class="ri-notification-3-line"></i> {{ $t['notifications'] }}
+            <span class="badge">{{ Auth::user()->unreadNotifications()->count() }}</span>
+        </a>
+    @elseif(Auth::user()->role === 'admin')
+        <a href="{{ route('admin.notifications') }}" class="dropdown-item">
+            <i class="ri-notification-3-line"></i> {{ $t['notifications'] }}
+            <span class="badge">{{ Auth::user()->unreadNotifications()->count() }}</span>
+        </a>
+    @else
+        <a href="{{ route('customer.notifications') }}" class="dropdown-item">
+            <i class="ri-notification-3-line"></i> {{ $t['notifications'] }}
+            <span class="badge">{{ Auth::user()->unreadNotifications()->count() }}</span>
+        </a>
+    @endif
+@endif
+
+
+
+
+
+
+
+
+                            <div class="dropdown-divider"></div>
+
+                            <!-- Language Submenu -->
+                            <div class="dropdown-item" id="languageToggle">
+                                <i class="ri-translate-2"></i>
+                                <span>{{ $t['language'] }}</span>
+                                <i class="ri-arrow-right-s-line" style="margin-left: auto;" id="languageArrow"></i>
+                            </div>
+                            <div class="language-submenu" id="languageSubmenu">
+                                <div class="language-option {{ $currentLang == 'en' ? 'active' : '' }}" onclick="switchLanguage('en')">
+                                    <i class="ri-radio-button-line"></i>
+                                    <span>{{ $t['english'] }}</span>
+                                </div>
+                                <div class="language-option {{ $currentLang == 'am' ? 'active' : '' }}" onclick="switchLanguage('am')">
+                                    <i class="ri-radio-button-line"></i>
+                                    <span>{{ $t['amharic'] }}</span>
+                                </div>
+                                <div class="language-option {{ $currentLang == 'om' ? 'active' : '' }}" onclick="switchLanguage('om')">
+                                    <i class="ri-radio-button-line"></i>
+                                    <span>{{ $t['oromo'] }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Theme Toggle -->
+                            <div class="dropdown-item" onclick="toggleTheme()">
+                                <i class="ri-{{ $currentTheme == 'dark' ? 'sun' : 'moon' }}-line"></i>
+                                <span id="themeText">{{ $currentTheme == 'dark' ? $t['light_mode'] : $t['dark_mode'] }}</span>
+                            </div>
+
+                            <div class="dropdown-divider"></div>
+
+                            <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                                @csrf
+                                <button type="submit" class="dropdown-item logout">
+                                    <i class="ri-logout-box-line"></i> {{ $t['logout'] }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             @endguest
         </div>
+
         <div class="menu-btn" id="menuToggle">
             <i class="ri-menu-line"></i>
         </div>
@@ -1053,113 +1838,177 @@
 
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
-        <a href="#categories" class="nav-item">Categories</a>
-        <a href="#features" class="nav-item">Features</a>
-        <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
+        <a href="#categories" class="nav-item">{{ $t['categories'] }}</a>
+        <a href="#features" class="nav-item">{{ $t['features'] }}</a>
+        <a href="{{ route('list-service') }}" class="nav-item">{{ $t['for_vendors'] }}</a>
+
+        <div style="padding: 15px 0; border-bottom: 1px solid var(--border-color);">
+            <div style="margin-bottom: 10px; font-weight: 600;">{{ $t['language'] }}:</div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="lang-btn {{ $currentLang == 'en' ? 'active' : '' }}" onclick="switchLanguage('en')">EN</button>
+                <button class="lang-btn {{ $currentLang == 'am' ? 'active' : '' }}" onclick="switchLanguage('am')">አማ</button>
+                <button class="lang-btn {{ $currentLang == 'om' ? 'active' : '' }}" onclick="switchLanguage('om')">OM</button>
+            </div>
+        </div>
+
+        <div style="padding: 15px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+            <span>{{ $currentTheme == 'dark' ? $t['light_mode'] : $t['dark_mode'] }}</span>
+            <button class="theme-toggle" onclick="toggleTheme()" style="position: static;">
+                <i class="ri-{{ $currentTheme == 'dark' ? 'sun' : 'moon' }}-line"></i>
+            </button>
+        </div>
+
         @guest
-            <a href="{{ route('login') }}" class="nav-item">Log In</a>
-            <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
+            <a href="{{ route('login') }}" class="nav-item">{{ $t['log_in'] }}</a>
+            <a href="{{ route('register') }}" class="nav-item btn-signup-mobile">{{ $t['sign_up'] }}</a>
         @else
-            <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
+            <div class="mobile-profile">
+                <div class="mobile-avatar">
+                    @if(Auth::user()->avatar)
+                        <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    @else
+                        {{ strtoupper(substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2)) }}
+                    @endif
+                </div>
+                <div class="mobile-user-info">
+                    <h4>{{ Auth::user()->business_name ?? Auth::user()->name }}</h4>
+                    <p>{{ Auth::user()->email }}</p>
+                </div>
+            </div>
+
             @if(Auth::user()->role === 'vendor')
-                <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
+                <a href="{{ route('vendor.dashboard') }}" class="nav-item">{{ $t['dashboard'] }}</a>
+                <a href="{{ route('vendor.products.index') }}" class="nav-item">{{ $t['my_products'] }}</a>
+                <a href="{{ route('vendor.orders.index') }}" class="nav-item">{{ $t['orders'] }}</a>
             @elseif(Auth::user()->role === 'customer')
-                <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
+                <a href="{{ route('customer.dashboard') }}" class="nav-item">{{ $t['dashboard'] }}</a>
+                <a href="{{ route('customer.following') }}" class="nav-item">{{ $t['following'] }}</a>
+                <a href="{{ route('customer.orders') }}" class="nav-item">{{ $t['my_orders'] }}</a>
             @elseif(Auth::user()->role === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
+                <a href="{{ route('admin.dashboard') }}" class="nav-item">{{ $t['admin_dashboard'] }}</a>
+                <a href="{{ route('admin.users') }}" class="nav-item">{{ $t['manage_users'] }}</a>
+                <a href="{{ route('admin.products') }}" class="nav-item">{{ $t['manage_products'] }}</a>
             @endif
-            <form method="POST" action="{{ route('logout') }}" style="margin-top: 12px;">
+
+            <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">{{ $t['my_profile'] }}</a>
+            <a href="{{ route('profile.edit', Auth::id()) }}" class="nav-item">{{ $t['settings'] }}</a>
+
+            <a href="#" class="nav-item">{{ $t['messages'] }}</a>
+            <a href="#" class="nav-item">{{ $t['notifications'] }}</a>
+
+            <form method="POST" action="{{ route('logout') }}" id="mobile-logout-form">
                 @csrf
-                <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
+                <button type="submit" class="nav-item" style="background: none; border: none; width: 100%; text-align: left; padding: 12px 0; color: var(--error-color);">
+                    <i class="ri-logout-box-line"></i> {{ $t['logout'] }}
+                </button>
             </form>
         @endguest
     </div>
 
     <!-- Hero Section -->
     <section class="hero">
-        <h1 class="hero-headline">Find the Best <br><span>Local Vendors</span> in Jimma</h1>
-        <p class="hero-subtext">Connect with top-rated local professionals for your events, home needs, and daily services. Trusted by thousands in your community.</p>
+        <div class="hero-background" style="background-image: url('{{ $randomImage }}');"></div>
+        <div class="hero-overlay"></div>
+        <h1 class="hero-headline">{!! $t['hero_headline'] !!}</h1>
+        <p class="hero-subtext">{{ $t['hero_subtext'] }}</p>
 
         <div class="hero-stats">
             <div class="hero-stat">
-                <div class="hero-stat-number">{{ number_format($vendorCount) }}</div>
-                <div class="hero-stat-label">Local Vendors</div>
+                <div class="hero-stat-number">{{ number_format($vendorCount ?? 0) }}</div>
+                <div class="hero-stat-label">{{ $t['local_vendors'] }}</div>
             </div>
             <div class="hero-stat">
-                <div class="hero-stat-number">{{ number_format($customerCount) }}</div>
-                <div class="hero-stat-label">Happy Customers</div>
+                <div class="hero-stat-number">{{ number_format($customerCount ?? 0) }}</div>
+                <div class="hero-stat-label">{{ $t['happy_customers'] }}</div>
             </div>
             <div class="hero-stat">
-                <div class="hero-stat-number">{{ $categoryCount }}</div>
-                <div class="hero-stat-label">Categories</div>
+                <div class="hero-stat-number">{{ $categoryCount ?? 0 }}</div>
+                <div class="hero-stat-label">{{ $t['categories_count'] }}</div>
             </div>
         </div>
 
-        <!-- Search Box -->
-        <form action="{{ route('search.results') }}" method="GET" style="width: 100%; display: flex; justify-content: center;">
+        <form action="{{ route('search.results') }}" method="GET" class="w-100" style="display: flex; justify-content: center;" id="searchForm">
             <div class="search-container">
                 <div class="input-group">
                     <i class="ri-search-line"></i>
                     <div class="input-content">
-                        <label class="input-label">What</label>
-                        <input type="text" name="query" class="input-field" placeholder="Plumbers, Bakers, Photographers..." value="{{ request('query') }}">
+                        <label class="input-label">{{ $t['search_what'] }}</label>
+                        <input type="text" name="query" class="input-field" placeholder="{{ $t['search_placeholder'] }}" value="{{ request('query') }}" id="searchQuery">
                     </div>
                 </div>
                 <div class="input-group">
                     <i class="ri-map-pin-line"></i>
                     <div class="input-content">
-                        <label class="input-label">Where</label>
-                        <input type="text" name="location" class="input-field" placeholder="Jimma, Ethiopia" value="{{ request('location', 'Jimma') }}">
+                        <label class="input-label">{{ $t['search_where'] }}</label>
+                        <input type="text" name="location" class="input-field" placeholder="{{ $t['location_placeholder'] }}" value="{{ request('location', 'Jimma') }}" id="searchLocation">
                     </div>
                 </div>
-                <button type="submit" class="search-btn" aria-label="Search">
+                <button type="submit" class="search-btn" aria-label="Search" id="searchBtn">
                     <i class="ri-arrow-right-line"></i>
                 </button>
             </div>
         </form>
     </section>
 
-    <!-- Categories Section (Dynamic from DB) -->
+    <!-- Categories Section -->
     <section id="categories" class="categories-wrapper">
         <div class="section-header">
-            <h2 class="section-title">Popular Categories</h2>
-            <a href="{{ route('search.results') }}" class="view-all">View All <i class="ri-arrow-right-s-line"></i></a>
+            <h2 class="section-title">{{ $t['popular_categories'] }}</h2>
+            <a href="{{ route('search.results') }}" class="view-all">{{ $t['view_all'] }} <i class="ri-arrow-right-s-line"></i></a>
         </div>
         <div class="categories-grid">
-            @forelse($popularCategories as $category)
-            <a href="{{ route('search.results', ['category' => $category->slug]) }}" class="category-item">
+            @forelse($popularCategories ?? [] as $category)
+            <a href="{{ route('search.results', ['category' => $category->slug ?? '']) }}" class="category-item">
                 <i class="{{ $category->icon ?? 'ri-price-tag-3-line' }} cat-icon"></i>
-                <span class="cat-name">{{ $category->name }}</span>
+                <span class="cat-name">{{ $category->name ?? '' }}</span>
             </a>
             @empty
-                <a href="{{ route('search.results', ['category' => 'coffee-tea']) }}" class="category-item"><i class="ri-cup-line cat-icon"></i><span class="cat-name">Coffee & Tea</span></a>
-                <a href="{{ route('search.results', ['category' => 'handicrafts']) }}" class="category-item"><i class="ri-palette-line cat-icon"></i><span class="cat-name">Handicrafts</span></a>
-                <a href="{{ route('search.results', ['category' => 'food']) }}" class="category-item"><i class="ri-restaurant-line cat-icon"></i><span class="cat-name">Ethiopian Food</span></a>
-                <a href="{{ route('search.results', ['category' => 'photography']) }}" class="category-item"><i class="ri-camera-lens-line cat-icon"></i><span class="cat-name">Photography</span></a>
-                <a href="{{ route('search.results', ['category' => 'events']) }}" class="category-item"><i class="ri-cake-3-line cat-icon"></i><span class="cat-name">Events</span></a>
-                <a href="{{ route('search.results', ['category' => 'home-services']) }}" class="category-item"><i class="ri-home-gear-line cat-icon"></i><span class="cat-name">Home Services</span></a>
+                <a href="{{ route('search.results', ['category' => 'coffee-tea']) }}" class="category-item">
+                    <i class="ri-cup-line cat-icon"></i>
+                    <span class="cat-name">Coffee & Tea</span>
+                </a>
+                <a href="{{ route('search.results', ['category' => 'handicrafts']) }}" class="category-item">
+                    <i class="ri-palette-line cat-icon"></i>
+                    <span class="cat-name">Handicrafts</span>
+                </a>
+                <a href="{{ route('search.results', ['category' => 'food']) }}" class="category-item">
+                    <i class="ri-restaurant-line cat-icon"></i>
+                    <span class="cat-name">Ethiopian Food</span>
+                </a>
+                <a href="{{ route('search.results', ['category' => 'photography']) }}" class="category-item">
+                    <i class="ri-camera-lens-line cat-icon"></i>
+                    <span class="cat-name">Photography</span>
+                </a>
+                <a href="{{ route('search.results', ['category' => 'events']) }}" class="category-item">
+                    <i class="ri-cake-3-line cat-icon"></i>
+                    <span class="cat-name">Events</span>
+                </a>
+                <a href="{{ route('search.results', ['category' => 'home-services']) }}" class="category-item">
+                    <i class="ri-home-gear-line cat-icon"></i>
+                    <span class="cat-name">Home Services</span>
+                </a>
             @endforelse
         </div>
     </section>
 
-    <!-- Local Jimma Categories (Dynamic from DB) -->
+    <!-- Local Jimma Categories -->
     <section class="local-section">
         <div class="section-header">
-            <h2 class="section-title">Popular in Jimma</h2>
-            <a href="{{ route('search.results', ['location' => 'Jimma']) }}" class="view-all">Explore Local <i class="ri-arrow-right-s-line"></i></a>
+            <h2 class="section-title">{{ $t['popular_in_jimma'] }}</h2>
+            <a href="{{ route('search.results', ['location' => 'Jimma']) }}" class="view-all">{{ $t['explore_local'] }} <i class="ri-arrow-right-s-line"></i></a>
         </div>
         <div class="local-grid">
-            @forelse($jimmaCategories as $localCat)
-            <a href="{{ route('search.results', ['category' => $localCat->slug, 'location' => 'Jimma']) }}" class="local-card">
+            @forelse($jimmaCategories ?? [] as $localCat)
+            <a href="{{ route('search.results', ['category' => $localCat->slug ?? '', 'location' => 'Jimma']) }}" class="local-card">
                 <div class="local-image">
                     <i class="{{ $localCat->icon ?? 'ri-store-line' }}"></i>
                 </div>
                 <div class="local-content">
-                    <h3>{{ $localCat->name }}</h3>
+                    <h3>{{ $localCat->name ?? '' }}</h3>
                     <p>{{ $localCat->short_description ?? 'Find the best local vendors in Jimma.' }}</p>
                     <div class="local-meta">
                         <span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span>
-                        <span class="local-vendors">{{ $localCat->vendors_count ?? rand(5, 30) }} vendors</span>
+                        <span class="local-vendors">{{ $localCat->vendors_count ?? rand(5, 30) }} {{ $t['local_vendors'] }}</span>
                     </div>
                 </div>
             </a>
@@ -1169,7 +2018,10 @@
                     <div class="local-content">
                         <h3>Coffee & Tea</h3>
                         <p>Fresh Ethiopian coffee from local roasters</p>
-                        <div class="local-meta"><span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span><span class="local-vendors">12 vendors</span></div>
+                        <div class="local-meta">
+                            <span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span>
+                            <span class="local-vendors">12 {{ $t['local_vendors'] }}</span>
+                        </div>
                     </div>
                 </a>
                 <a href="{{ route('search.results', ['category' => 'handicrafts', 'location' => 'Jimma']) }}" class="local-card">
@@ -1177,7 +2029,10 @@
                     <div class="local-content">
                         <h3>Traditional Handicrafts</h3>
                         <p>Authentic Ethiopian crafts and artworks</p>
-                        <div class="local-meta"><span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span><span class="local-vendors">24 vendors</span></div>
+                        <div class="local-meta">
+                            <span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span>
+                            <span class="local-vendors">24 {{ $t['local_vendors'] }}</span>
+                        </div>
                     </div>
                 </a>
                 <a href="{{ route('search.results', ['category' => 'food', 'location' => 'Jimma']) }}" class="local-card">
@@ -1185,7 +2040,10 @@
                     <div class="local-content">
                         <h3>Ethiopian Food</h3>
                         <p>Local restaurants and food vendors</p>
-                        <div class="local-meta"><span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span><span class="local-vendors">18 vendors</span></div>
+                        <div class="local-meta">
+                            <span class="location-badge"><i class="ri-map-pin-line"></i> Jimma</span>
+                            <span class="local-vendors">18 {{ $t['local_vendors'] }}</span>
+                        </div>
                     </div>
                 </a>
             @endforelse
@@ -1198,49 +2056,61 @@
             <div class="feature-icon">
                 <i class="ri-shield-check-line"></i>
             </div>
-            <h3 class="feature-title">Verified Vendors</h3>
-            <p class="feature-desc">Every vendor on our platform undergoes a strict verification process to ensure safety and quality for the Jimma community.</p>
+            <h3 class="feature-title">{{ $t['verified_vendors'] }}</h3>
+            <p class="feature-desc">{{ $t['verified_desc'] }}</p>
         </div>
         <div class="feature-card">
             <div class="feature-icon">
                 <i class="ri-money-dollar-circle-line"></i>
             </div>
-            <h3 class="feature-title">Transparent Pricing</h3>
-            <p class="feature-desc">Get clear quotes upfront in Ethiopian Birr. No hidden fees or last-minute surprises when you book services.</p>
+            <h3 class="feature-title">{{ $t['transparent_pricing'] }}</h3>
+            <p class="feature-desc">{{ $t['transparent_desc'] }}</p>
         </div>
         <div class="feature-card">
             <div class="feature-icon">
                 <i class="ri-customer-service-2-line"></i>
             </div>
-            <h3 class="feature-title">24/7 Local Support</h3>
-            <p class="feature-desc">Our dedicated support team in Jimma is always available to help you with bookings and inquiries in Amharic and English.</p>
+            <h3 class="feature-title">{{ $t['247_support'] }}</h3>
+            <p class="feature-desc">{{ $t['support_desc'] }}</p>
         </div>
     </section>
 
-    <!-- Testimonials (Dynamic from DB) -->
+    <!-- Testimonials -->
     <section class="testimonials">
         <div class="testimonials-container">
-            <h2 class="section-title" style="text-align: center;">What Jimma Residents Say</h2>
+            <h2 class="section-title text-center">{{ $t['what_residents_say'] }}</h2>
             <div class="testimonials-grid">
-                @forelse($testimonials as $testimonial)
+                @forelse($testimonials ?? [] as $testimonial)
                 <div class="testimonial-card">
-                    <p class="testimonial-text">"{{ $testimonial->content }}"</p>
+                    <p class="testimonial-text">"{{ $testimonial->content ?? '' }}"</p>
                     <div class="testimonial-author">
-                        <div class="testimonial-avatar">{{ substr($testimonial->author_name, 0, 2) }}</div>
+                        <div class="testimonial-avatar">{{ strtoupper(substr($testimonial->author_name ?? 'AA', 0, 2)) }}</div>
                         <div class="testimonial-info">
-                            <h4>{{ $testimonial->author_name }}</h4>
-                            <p>{{ $testimonial->author_role }}</p>
+                            <h4>{{ $testimonial->author_name ?? '' }}</h4>
+                            <p>{{ $testimonial->author_role ?? '' }}</p>
                         </div>
                     </div>
                 </div>
                 @empty
                 <div class="testimonial-card">
                     <p class="testimonial-text">"Vendora helped me find the best coffee supplier in Jimma. The quality is amazing and delivery is always on time!"</p>
-                    <div class="testimonial-author"><div class="testimonial-avatar">AB</div><div class="testimonial-info"><h4>Abebe Kebede</h4><p>Local Business Owner</p></div></div>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">AB</div>
+                        <div class="testimonial-info">
+                            <h4>Abebe Kebede</h4>
+                            <p>Local Business Owner</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="testimonial-card">
                     <p class="testimonial-text">"As a vendor, Vendora has connected me with so many customers in Jimma. My handicraft business has grown tremendously!"</p>
-                    <div class="testimonial-author"><div class="testimonial-avatar">AT</div><div class="testimonial-info"><h4>Azeb Tadesse</h4><p>Handicraft Artisan</p></div></div>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">AT</div>
+                        <div class="testimonial-info">
+                            <h4>Azeb Tadesse</h4>
+                            <p>Handicraft Artisan</p>
+                        </div>
+                    </div>
                 </div>
                 @endforelse
             </div>
@@ -1250,22 +2120,32 @@
     <!-- CTA Section -->
     <section class="cta-section">
         <div class="cta-container">
-            <h2 class="cta-title">Ready to Start?</h2>
-            <p class="cta-text">Join thousands of vendors and customers in Jimma and across Ethiopia.</p>
+            <h2 class="cta-title">{{ $t['ready_to_start'] }}</h2>
+            <p class="cta-text">{{ $t['cta_text'] }}</p>
             <div class="cta-buttons">
                 @guest
                     <a href="{{ route('register') }}" class="btn btn-primary">
-                        <i class="ri-store-line"></i> Become a Vendor
+                        <i class="ri-store-line"></i> {{ $t['become_vendor'] }}
                     </a>
                     <a href="{{ route('register') }}" class="btn btn-outline">
-                        <i class="ri-user-line"></i> Sign Up as Customer
+                        <i class="ri-user-line"></i> {{ $t['sign_up_customer'] }}
                     </a>
                 @else
-                    <a href="{{ Auth::user()->role === 'vendor' ? route('vendor.dashboard') : (Auth::user()->role === 'admin' ? route('admin.dashboard') : route('customer.dashboard')) }}" class="btn btn-primary">
-                        <i class="ri-dashboard-line"></i> Go to Dashboard
+                    @php
+                        $dashboardRoute = '#';
+                        if(Auth::user()->role === 'vendor') {
+                            $dashboardRoute = route('vendor.dashboard');
+                        } elseif(Auth::user()->role === 'admin') {
+                            $dashboardRoute = route('admin.dashboard');
+                        } else {
+                            $dashboardRoute = route('customer.dashboard');
+                        }
+                    @endphp
+                    <a href="{{ $dashboardRoute }}" class="btn btn-primary">
+                        <i class="ri-dashboard-line"></i> {{ $t['go_to_dashboard'] }}
                     </a>
                     <a href="{{ route('search.results') }}" class="btn btn-outline">
-                        <i class="ri-search-line"></i> Explore Vendors
+                        <i class="ri-search-line"></i> {{ $t['explore_vendors'] }}
                     </a>
                 @endguest
             </div>
@@ -1277,8 +2157,8 @@
         <div class="footer-content">
             <div class="footer-brand">
                 <h2><i class="ri-store-2-fill"></i> Vendora</h2>
-                <p class="footer-text">Connecting you with the best local professionals in Jimma and across Ethiopia. Simple, fast, and reliable.</p>
-                <div style="margin-top: 16px;">
+                <p class="footer-text">{{ $t['cta_text'] }}</p>
+                <div class="mt-4">
                     <span class="ethiopia-badge">
                         <i class="ri-map-pin-line"></i> Jimma, Ethiopia
                     </span>
@@ -1286,164 +2166,499 @@
             </div>
             <div class="footer-links">
                 <div class="link-group">
-                    <h4>Company</h4>
+                    <h4>{{ $t['company'] }}</h4>
                     <ul>
-                        <li><a href="{{ route('about') }}">About Us</a></li>
-                        <li><a href="{{ route('careers') }}">Careers</a></li>
-                        <li><a href="{{ route('press') }}">Press</a></li>
-                        <li><a href="{{ route('blog') }}">Blog</a></li>
+                        <li><a href="{{ route('about') }}">{{ $t['about_us'] }}</a></li>
+                        <li><a href="{{ route('careers') }}">{{ $t['careers'] }}</a></li>
+                        <li><a href="{{ route('press') }}">{{ $t['press'] }}</a></li>
+                        <li><a href="{{ route('blog') }}">{{ $t['blog'] }}</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
-                    <h4>Discover</h4>
+                    <h4>{{ $t['discover'] }}</h4>
                     <ul>
-                        <li><a href="{{ route('how-it-works') }}">How it works</a></li>
-                        <li><a href="{{ route('trust-safety') }}">Trust & Safety</a></li>
-                        <li><a href="{{ route('help-center') }}">Help Center</a></li>
-                        <li><a href="{{ route('invite') }}">Invite Friends</a></li>
+                        <li><a href="{{ route('how-it-works') }}">{{ $t['how_it_works'] }}</a></li>
+                        <li><a href="{{ route('trust-safety') }}">{{ $t['trust_safety'] }}</a></li>
+                        <li><a href="{{ route('help-center') }}">{{ $t['help_center'] }}</a></li>
+                        <li><a href="{{ route('invite') }}">{{ $t['invite_friends'] }}</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
-                    <h4>For Vendors</h4>
+                    <h4>{{ $t['for_vendors_title'] }}</h4>
                     <ul>
-                        <li><a href="{{ route('list-service') }}">List your service</a></li>
-                        <li><a href="{{ route('vendor-resources') }}">Vendor Resources</a></li>
-                        <li><a href="{{ route('success-stories') }}">Success Stories</a></li>
-                        <li><a href="{{ route('community') }}">Community</a></li>
+                        <li><a href="{{ route('list-service') }}">{{ $t['list_service'] }}</a></li>
+                        <li><a href="{{ route('vendor-resources') }}">{{ $t['vendor_resources'] }}</a></li>
+                        <li><a href="{{ route('success-stories') }}">{{ $t['success_stories'] }}</a></li>
+                        <li><a href="{{ route('community') }}">{{ $t['community'] }}</a></li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="bottom-bar">
-            <span>&copy; {{ date('Y') }} Vendora. All rights reserved. Jimma, Ethiopia</span>
+            <span>&copy; {{ date('Y') }} Vendora. {{ $t['rights_reserved'] }}. Jimma, Ethiopia</span>
             <div class="social-icons">
-                <a href="#" target="_blank"><i class="ri-twitter-fill"></i></a>
-                <a href="#" target="_blank"><i class="ri-instagram-fill"></i></a>
-                <a href="#" target="_blank"><i class="ri-facebook-fill"></i></a>
-                <a href="#" target="_blank"><i class="ri-telegram-fill"></i></a>
+                <a href="#" target="_blank" aria-label="Twitter"><i class="ri-twitter-fill"></i></a>
+                <a href="#" target="_blank" aria-label="Instagram"><i class="ri-instagram-fill"></i></a>
+                <a href="#" target="_blank" aria-label="Facebook"><i class="ri-facebook-fill"></i></a>
+                <a href="#" target="_blank" aria-label="Telegram"><i class="ri-telegram-fill"></i></a>
             </div>
         </div>
     </footer>
 
     <script>
-        // Mobile menu toggle
-        const menuToggle = document.getElementById('menuToggle');
-        const mobileMenu = document.getElementById('mobileMenu');
+        // ==================== COMPLETE BACKEND INTEGRATED JAVASCRIPT ====================
 
-        if (menuToggle && mobileMenu) {
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                mobileMenu.classList.toggle('active');
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Store translations for JavaScript use
+            const translations = {
+                theme_updated: '{{ $t["theme_updated"] }}',
+                language_updated: '{{ $t["language_updated"] }}',
+                search_error: '{{ $t["search_error"] }}',
 
-            // Close mobile menu when clicking on a link
-            mobileMenu.querySelectorAll('a, button').forEach(link => {
-                link.addEventListener('click', function() {
-                    mobileMenu.classList.remove('active');
+                dark_mode: '{{ $t["dark_mode"] }}',
+                light_mode: '{{ $t["light_mode"] }}'
+            };
+
+            const currentLang = '{{ $currentLang }}';
+            const currentTheme = '{{ $currentTheme }}';
+
+            // ==================== NOTIFICATION SYSTEM ====================
+
+            function showNotification(message, type = 'success') {
+                // Remove existing notifications
+                document.querySelectorAll('.custom-notification').forEach(n => n.remove());
+
+                const notification = document.createElement('div');
+                notification.className = `alert alert-${type} custom-notification`;
+                notification.innerHTML = `
+                    <i class="ri-${type === 'success' ? 'checkbox-circle' : 'error-warning'}-line"></i>
+                    <span>${message}</span>
+                `;
+
+                notification.style.position = 'fixed';
+                notification.style.top = '20px';
+                notification.style.right = '20px';
+                notification.style.zIndex = '9999';
+                notification.style.maxWidth = '300px';
+                notification.style.animation = 'slideIn 0.3s ease';
+                notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+
+            // ==================== PROFILE DROPDOWN ====================
+
+            const profileTrigger = document.getElementById('profileTrigger');
+            const profileDropdown = document.getElementById('profileDropdown');
+            const dropdownArrow = document.getElementById('dropdownArrow');
+
+            if (profileTrigger && profileDropdown) {
+                profileTrigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    profileDropdown.classList.toggle('active');
+
+                    if (dropdownArrow) {
+                        dropdownArrow.style.transform = profileDropdown.classList.contains('active')
+                            ? 'rotate(180deg)'
+                            : 'rotate(0deg)';
+                    }
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!profileDropdown.contains(event.target) && !profileTrigger.contains(event.target)) {
+                        profileDropdown.classList.remove('active');
+                        if (dropdownArrow) {
+                            dropdownArrow.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+
+                profileDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+
+            // ==================== LANGUAGE SUBMENU ====================
+
+            const languageToggle = document.getElementById('languageToggle');
+            const languageSubmenu = document.getElementById('languageSubmenu');
+            const languageArrow = document.getElementById('languageArrow');
+
+            if (languageToggle && languageSubmenu) {
+                languageToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    languageSubmenu.classList.toggle('show');
+
+                    if (languageArrow) {
+                        languageArrow.style.transform = languageSubmenu.classList.contains('show')
+                            ? 'rotate(90deg)'
+                            : 'rotate(0deg)';
+                    }
+                });
+
+                // Close language submenu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!languageSubmenu.contains(event.target) && !languageToggle.contains(event.target)) {
+                        languageSubmenu.classList.remove('show');
+                        if (languageArrow) {
+                            languageArrow.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+            }
+
+            // ==================== THEME TOGGLE WITH BACKEND ====================
+
+            window.toggleTheme = async function() {
+                const currentTheme = document.body.getAttribute('data-theme') || 'light';
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+                // Get all theme toggle elements
+                const themeToggles = document.querySelectorAll('[onclick="toggleTheme()"], .theme-toggle');
+                const themeText = document.getElementById('themeText');
+                const mobileThemeText = document.querySelector('.mobile-menu div span:first-child');
+
+                // Store original content for restore on error
+                const originalContents = [];
+
+                // Show loading state
+                themeToggles.forEach(toggle => {
+                    if (toggle.classList.contains('dropdown-item')) {
+                        const icon = toggle.querySelector('i');
+                        if (icon) {
+                            originalContents.push({ element: icon, content: icon.className });
+                            icon.className = 'ri-loader-4-line ri-spin';
+                        }
+                    } else if (toggle.classList.contains('theme-toggle')) {
+                        const icon = toggle.querySelector('i');
+                        if (icon) {
+                            originalContents.push({ element: icon, content: icon.className });
+                            icon.className = 'ri-loader-4-line ri-spin';
+                        }
+                    }
+                    toggle.style.pointerEvents = 'none';
+                });
+
+                try {
+                    const response = await fetch('{{ route("theme.toggle") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ theme: newTheme })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Update theme on page
+                        document.body.setAttribute('data-theme', data.theme);
+
+                        // Update all theme icons
+                        themeToggles.forEach(toggle => {
+                            const icon = toggle.querySelector('i');
+                            if (icon) {
+                                icon.className = data.theme === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
+                            }
+                        });
+
+                        // Update theme text
+                        if (themeText) {
+                            themeText.textContent = data.theme === 'dark' ? translations.light_mode : translations.dark_mode;
+                        }
+
+                        if (mobileThemeText && mobileThemeText.nodeType === Node.TEXT_NODE) {
+                            mobileThemeText.textContent = data.theme === 'dark' ? translations.light_mode : translations.dark_mode;
+                        } else if (mobileThemeText) {
+                            const textNode = Array.from(mobileThemeText.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+                            if (textNode) {
+                                textNode.textContent = data.theme === 'dark' ? translations.light_mode : translations.dark_mode;
+                            }
+                        }
+
+                        // Show success notification
+                        showNotification(translations.theme_updated, 'success');
+                    } else {
+                        throw new Error(data.message || 'Failed to update theme');
+                    }
+                } catch (error) {
+                    console.error('Theme toggle error:', error);
+                    showNotification(error.message || 'Failed to update theme', 'error');
+
+                    // Restore original icons on error
+                    originalContents.forEach(item => {
+                        if (item.element) {
+                            item.element.className = item.content;
+                        }
+                    });
+                } finally {
+                    // Restore pointer events
+                    themeToggles.forEach(toggle => {
+                        toggle.style.pointerEvents = 'auto';
+                    });
+                }
+            };
+
+            // ==================== LANGUAGE SWITCHING WITH BACKEND ====================
+
+            window.switchLanguage = async function(lang) {
+                const langButtons = document.querySelectorAll(`.lang-btn, .language-option`);
+                const clickedButton = event?.currentTarget || document.querySelector(`[onclick="switchLanguage('${lang}')"]`);
+
+                // Store original content
+                const originalContents = [];
+
+                // Show loading state
+                langButtons.forEach(btn => {
+                    if (btn.classList.contains('lang-btn')) {
+                        originalContents.push({ element: btn, content: btn.innerHTML });
+                        btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i>';
+                        btn.disabled = true;
+                    }
+                });
+
+                try {
+                    const response = await fetch('{{ route("language.switch") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ locale: lang })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showNotification(translations.language_updated, 'success');
+                        // Reload page after short delay to show notification
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        throw new Error(data.message || 'Failed to switch language');
+                    }
+                } catch (error) {
+                    console.error('Language switch error:', error);
+                    showNotification(error.message || 'Failed to switch language', 'error');
+
+                    // Restore button states
+                    langButtons.forEach((btn, index) => {
+                        if (btn.classList.contains('lang-btn')) {
+                            btn.innerHTML = originalContents[index]?.content || btn.innerHTML;
+                            btn.disabled = false;
+                        }
+                    });
+                }
+            };
+
+            // ==================== MOBILE MENU ====================
+
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            if (menuToggle && mobileMenu) {
+                menuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileMenu.classList.toggle('active');
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        icon.className = mobileMenu.classList.contains('active') ? 'ri-close-line' : 'ri-menu-line';
+                    }
+                });
+
+                // Close mobile menu when clicking a link
+                mobileMenu.querySelectorAll('a, button').forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        const icon = menuToggle.querySelector('i');
+                        if (icon) icon.className = 'ri-menu-line';
+                    });
+                });
+
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenu.contains(event.target) && !menuToggle.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        const icon = menuToggle.querySelector('i');
+                        if (icon) icon.className = 'ri-menu-line';
+                    }
+                });
+            }
+
+            // ==================== SMOOTH SCROLLING ====================
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    if (href && href !== '#') {
+                        e.preventDefault();
+                        const target = document.querySelector(href);
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+
+                            // Close mobile menu if open
+                            if (mobileMenu && mobileMenu.classList.contains('active')) {
+                                mobileMenu.classList.remove('active');
+                                const icon = menuToggle?.querySelector('i');
+                                if (icon) icon.className = 'ri-menu-line';
+                            }
+                        }
+                    }
                 });
             });
 
-            // Close when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!mobileMenu.contains(event.target) && !menuToggle.contains(event.target)) {
-                    mobileMenu.classList.remove('active');
-                }
-            });
-        }
+            // ==================== AUTO-HIDE ALERTS ====================
 
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
+            setTimeout(() => {
+                document.querySelectorAll('.alert:not(.custom-notification)').forEach(alert => {
+                    alert.style.transition = 'opacity 0.5s';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 5000);
+
+            // ==================== SCROLL ANIMATION ====================
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+            document.querySelectorAll('.feature-card, .category-item, .local-card, .testimonial-card').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+
+            // ==================== ACTIVE NAVIGATION ====================
+
+            const sections = document.querySelectorAll('section[id]');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                const scrollPos = window.scrollY + 100;
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionBottom = sectionTop + section.offsetHeight;
+
+                    if (scrollPos >= sectionTop && scrollPos < sectionBottom) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                document.querySelectorAll('.nav-links .nav-item, .mobile-menu .nav-item').forEach(item => {
+                    item.classList.remove('active');
+                    const href = item.getAttribute('href');
+                    if (href === `#${current}`) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+
+            // ==================== SEARCH FORM VALIDATION ====================
+
+            const searchForm = document.getElementById('searchForm');
+            if (searchForm) {
+                searchForm.addEventListener('submit', function(e) {
+                    const query = document.getElementById('searchQuery');
+                    if (query && !query.value.trim()) {
+                        e.preventDefault();
+                        showNotification(translations.search_error, 'error');
+                        query.focus();
+                    }
+                });
+            }
+
+            // ==================== ROTATING BACKGROUND IMAGES ====================
+
+            const heroBackground = document.querySelector('.hero-background');
+            if (heroBackground) {
+                const backgrounds = [
+                    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?q=80&w=2071&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=2068&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?q=80&w=2083&auto=format&fit=crop',
+                ];
+
+                setInterval(() => {
+                    const randomIndex = Math.floor(Math.random() * backgrounds.length);
+                    heroBackground.style.backgroundImage = `url('${backgrounds[randomIndex]}')`;
+                }, 10000);
+            }
+
+
+            // ==================== LOAD INITIAL THEME ====================
+
+            async function loadUserTheme() {
+                try {
+                    const response = await fetch('{{ route("theme.get") }}', {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
                     });
 
-                    // Close mobile menu if open
-                    if (mobileMenu) {
-                        mobileMenu.classList.remove('active');
+                    const data = await response.json();
+
+                    if (data.success && data.theme !== currentTheme) {
+                        document.body.setAttribute('data-theme', data.theme);
+
+                        // Update icons
+                        document.querySelectorAll('.theme-toggle i, [onclick="toggleTheme()"] i').forEach(icon => {
+                            icon.className = data.theme === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
+                        });
+
+                        // Update text
+                        const themeText = document.getElementById('themeText');
+                        if (themeText) {
+                            themeText.textContent = data.theme === 'dark' ? translations.light_mode : translations.dark_mode;
+                        }
                     }
+                } catch (error) {
+                    console.error('Failed to load theme preference:', error);
                 }
-            });
-        });
-
-        // Auto-hide alerts after 5 seconds
-        setTimeout(() => {
-            document.querySelectorAll('.alert').forEach(alert => {
-                alert.style.transition = 'opacity 0.5s';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500);
-            });
-        }, 5000);
-
-        // Add animation on scroll
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.feature-card, .category-item, .local-card, .testimonial-card').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
-        });
-
-        // Confirm logout
-        document.querySelectorAll('form[action*="logout"] button[type="submit"]').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
-
-        // Update active navigation based on scroll
-        const sections = document.querySelectorAll('section[id]');
-        window.addEventListener('scroll', () => {
-            let current = '';
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                const sectionHeight = section.clientHeight;
-                if (window.scrollY >= sectionTop - 100) {
-                    current = section.getAttribute('id');
-                }
-            });
-
-            document.querySelectorAll('.nav-links .nav-item, .mobile-menu .nav-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.getAttribute('href') === `#${current}`) {
-                    item.classList.add('active');
-                }
-            });
-        });
-
-        // Search form validation
-        document.querySelector('.search-btn').addEventListener('click', function(e) {
-            const query = document.querySelector('input[name="query"]').value.trim();
-            if (query === '') {
-                e.preventDefault();
-                alert('Please enter what you are looking for');
             }
+
+            // Load theme preference on page load
+            loadUserTheme();
+
+            console.log('Vendora Homepage loaded with full backend integration');
         });
     </script>
 
-    @if(app()->environment('local'))
+    {{--  @if(app()->environment('local'))
     <script>
-        console.log('Vendora Homepage loaded - Local environment');
+        console.log('Environment: Local');
         console.log('Stats:', {
-            vendors: '{{ $vendorCount }}',
-            customers: '{{ $customerCount }}',
-            categories: '{{ $categoryCount }}'
+            vendors: '{{ $vendorCount ?? 0 }}',
+            customers: '{{ $customerCount ?? 0 }}',
+            categories: '{{ $categoryCount ?? 0 }}',
+            theme: '{{ $currentTheme }}',
+            language: '{{ $currentLang }}'
         });
     </script>
-    @endif
+    @endif  --}}
 </body>
 </html>

@@ -31,4 +31,10 @@ class Review extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    // app/Models/Review.php
+public function vendor()
+{
+    return $this->belongsTo(User::class, 'vendor_id');
+}
 }

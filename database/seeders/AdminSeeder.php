@@ -15,11 +15,11 @@ class AdminSeeder extends Seeder
     public function run(): void
      {
       Admin::create([
-            'name' => 'Super Administrator',
+            'name' => 'Administrator',
             'email' => 'admin@localvendorfinder.com',
             'password' => Hash::make('admin123'),
             'mobile' => '+1234567890',
-            'role' => 'super_admin',
+            'role' => 'admin',
             'status' => 'active',
         ]);
 

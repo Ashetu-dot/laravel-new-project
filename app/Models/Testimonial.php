@@ -67,18 +67,18 @@ class Testimonial extends Model
         if ($this->avatar) {
             return asset('storage/' . $this->avatar);
         }
-        
+
         // Generate avatar from name initials
         $name = $this->author_name;
         $words = explode(' ', $name);
         $initials = '';
-        
+
         foreach ($words as $word) {
             if (!empty($word)) {
                 $initials .= strtoupper(substr($word, 0, 1));
             }
         }
-        
+
         return 'https://ui-avatars.com/api/?name=' . urlencode($initials) . '&background=B88E3F&color=fff&size=48';
     }
 
@@ -100,8 +100,8 @@ class Testimonial extends Model
      */
     public function excerpt($length = 100)
     {
-        return strlen($this->content) > $length 
-            ? substr($this->content, 0, $length) . '...' 
+        return strlen($this->content) > $length
+            ? substr($this->content, 0, $length) . '...'
             : $this->content;
     }
 }

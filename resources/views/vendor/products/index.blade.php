@@ -936,14 +936,14 @@
 
             @if(session('success'))
                 <div class="alert alert-success">
-                    <i class="ri-checkbox-circle-line"></i> 
+                    <i class="ri-checkbox-circle-line"></i>
                     {{ session('success') }}
                 </div>
             @endif
 
             @if(session('error'))
                 <div class="alert alert-error">
-                    <i class="ri-error-warning-line"></i> 
+                    <i class="ri-error-warning-line"></i>
                     {{ session('error') }}
                 </div>
             @endif
@@ -960,7 +960,7 @@
                             </option>
                         @endforeach
                     </select>
-                    
+
                     <select id="statusFilter" class="filter-select">
                         <option value="">All Status</option>
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
@@ -978,7 +978,7 @@
                         <option value="name-desc" {{ request('sort') == 'name-desc' ? 'selected' : '' }}>Name: Z to A</option>
                     </select>
                 </div>
-                
+
                 <div style="display: flex; gap: 8px; margin-left: auto;">
                     <button onclick="applyFilters()" class="filter-btn">
                         <i class="ri-filter-3-line"></i> Apply
@@ -1021,26 +1021,26 @@
                         @else
                             <i class="ri-image-line" style="font-size: 48px;"></i>
                         @endif
-                        
+
                         @if($product->sale_price && $product->sale_price < $product->price)
                             <span class="product-badge badge-sale" style="left: 12px; right: auto;">
                                 Sale
                             </span>
                         @endif
-                        
+
                         <span class="product-badge {{ $product->is_active ? 'badge-active' : 'badge-inactive' }}">
                             {{ $product->is_active ? 'Active' : 'Inactive' }}
                         </span>
                     </div>
-                    
+
                     <div class="product-info">
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                             <input type="checkbox" class="bulk-checkbox product-checkbox" value="{{ $product->id }}" style="width: 18px; height: 18px;">
                             <h3 class="product-name" style="margin-bottom: 0;">{{ $product->name }}</h3>
                         </div>
-                        
+
                         <p class="product-category">
-                            <i class="ri-price-tag-3-line" style="font-size: 12px;"></i> 
+                            <i class="ri-price-tag-3-line" style="font-size: 12px;"></i>
                             {{ $product->category->name ?? 'Uncategorized' }}
                         </p>
 
@@ -1067,7 +1067,7 @@
                             @else
                                 <span>{{ $product->stock }} in stock</span>
                             @endif
-                            
+
                             @if($product->sku)
                                 <span style="margin-left: auto; font-size: 11px;">SKU: {{ $product->sku }}</span>
                             @endif
@@ -1077,7 +1077,7 @@
                             <a href="{{ route('vendor.products.edit', $product->id) }}" class="action-btn action-btn-primary" title="Edit Product">
                                 <i class="ri-edit-line"></i> Edit
                             </a>
-                            
+
                             @if($product->is_active)
                                 <form action="{{ route('vendor.products.deactivate', $product->id) }}" method="POST" style="flex: 1;">
                                     @csrf
@@ -1095,7 +1095,7 @@
                                     </button>
                                 </form>
                             @endif
-                            
+
                             <form action="{{ route('vendor.products.destroy', $product->id) }}" method="POST" style="flex: 1;" onsubmit="return confirm('Are you sure you want to delete this product? This action cannot be undone.')">
                                 @csrf
                                 @method('DELETE')
@@ -1104,7 +1104,7 @@
                                 </button>
                             </form>
                         </div>
-                        
+
                         <div style="display: flex; gap: 4px; margin-top: 8px; font-size: 11px; color: var(--text-secondary);">
                             <span>Added: {{ $product->created_at->format('M d, Y') }}</span>
                             @if($product->updated_at != $product->created_at)
@@ -1145,7 +1145,7 @@
                 @else
                     <a href="{{ $products->previousPageUrl() }}" class="pagination-item"><i class="ri-arrow-left-s-line"></i></a>
                 @endif
-                
+
                 @foreach($products->getUrlRange(1, $products->lastPage()) as $page => $url)
                     @if($page == $products->currentPage())
                         <span class="pagination-item active">{{ $page }}</span>
@@ -1153,7 +1153,7 @@
                         <a href="{{ $url }}" class="pagination-item">{{ $page }}</a>
                     @endif
                 @endforeach
-                
+
                 @if($products->hasMorePages())
                     <a href="{{ $products->nextPageUrl() }}" class="pagination-item"><i class="ri-arrow-right-s-line"></i></a>
                 @else
@@ -1212,23 +1212,23 @@
             const category = document.getElementById('categoryFilter')?.value || '';
             const status = document.getElementById('statusFilter')?.value || '';
             const sort = document.getElementById('sortBy')?.value || 'newest';
-            
+
             const params = new URLSearchParams(window.location.search);
-            
+
             if (search) params.set('search', search);
             else params.delete('search');
-            
+
             if (category) params.set('category', category);
             else params.delete('category');
-            
+
             if (status) params.set('status', status);
             else params.delete('status');
-            
+
             if (sort && sort !== 'newest') params.set('sort', sort);
             else params.delete('sort');
-            
+
             params.set('page', '1'); // Reset to first page
-            
+
             window.location.href = window.location.pathname + '?' + params.toString();
         }
 
@@ -1247,12 +1247,12 @@
                 const checked = document.querySelectorAll('.product-checkbox:checked');
                 const count = checked.length;
                 selectedCountSpan.textContent = count + ' selected';
-                
+
                 // Update bulk buttons
                 [bulkActivateBtn, bulkDeactivateBtn, bulkDeleteBtn].forEach(btn => {
                     if (btn) btn.disabled = count === 0;
                 });
-                
+
                 // Update select all checkbox
                 if (selectAll) {
                     selectAll.checked = count === productCheckboxes.length;
@@ -1290,7 +1290,7 @@
             }
 
             let url, method, successMessage;
-            
+
             if (action === 'activate') {
                 url = '{{ route("vendor.products.bulk-activate") }}';
                 method = 'PATCH';
@@ -1335,9 +1335,9 @@
                 alert('Please select at least one product.');
                 return false;
             }
-            
+
             document.getElementById('bulkProductIds').value = JSON.stringify(productIds);
-            
+
             return confirm(`Are you sure you want to delete ${productIds.length} product(s)? This action cannot be undone.`);
         }
 

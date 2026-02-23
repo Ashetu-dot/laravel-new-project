@@ -54,6 +54,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'twitter_url',
         'business_hours',
         'referral_code',
+        'theme_preference',
+        'email_verified_at',
     ];
 
     /**
@@ -81,6 +83,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'total_reviews' => 'integer',
         'store_views' => 'integer',
         'business_hours' => 'array',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     /**
@@ -96,6 +100,23 @@ class User extends Authenticatable implements MustVerifyEmail
         'total_reviews' => 0,
         'country' => 'Ethiopia',
         'store_views' => 0,
+        'theme_preference' => 'light',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'avatar_url',
+        'full_address',
+        'location_string',
+        'rating_stars',
+        'rating_display',
+        'dashboard_link',
+        'following_count',
+        'followers_count',
     ];
 
     /**
@@ -214,6 +235,159 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the customer profile for the user.
+     */
+    public function customerProfile()
+    {
+        return $this->hasOne(CustomerProfile::class);
+    }
+
+    /**
+     * Get the vendor profile for the user.
+     */
+    public function vendorProfile()
+    {
+        return $this->hasOne(VendorProfile::class);
+    }
+
+    /**
+     * Get the search history for the user.
+     */
+    public function searchHistory()
+    {
+        return $this->hasMany(SearchHistory::class)->latest();
+    }
+
+    /**
+     * Get the recent searches for the user.
+     */
+    public function recentSearches()
+    {
+        return $this->hasMany(SearchHistory::class)
+                    ->latest()
+                    ->limit(5);
+    }
+
+    /**
+     * Get the saved vendors for the user.
+     */
+    public function savedVendors()
+    {
+        return $this->belongsToMany(User::class, 'saved_vendors', 'user_id', 'vendor_id')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get the recently viewed vendors for the user.
+     */
+    public function recentlyViewedVendors()
+    {
+        return $this->belongsToMany(User::class, 'recently_viewed', 'user_id', 'vendor_id')
+                    ->withPivot('created_at', 'view_count')
+                    ->orderBy('pivot_created_at', 'desc');
+    }
+
+    /**
+     * Get the cart items for the user.
+     */
+    public function cartItems()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+    /**
+     * Get the wishlist items for the user.
+     */
+    public function wishlistItems()
+    {
+        return $this->belongsToMany(Product::class, 'wishlists')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get the user's activity logs.
+     */
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
+
+    /**
+     * Get the user's login history.
+     */
+    public function loginHistory()
+    {
+        return $this->hasMany(LoginHistory::class);
+    }
+
+    /**
+     * Get the user's social accounts.
+     */
+    public function socialAccounts()
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    /**
+     * Get the user's verification requests (if vendor).
+     */
+    public function verificationRequests()
+    {
+        return $this->hasMany(VerificationRequest::class);
+    }
+
+    /**
+     * Get the user's support tickets.
+     */
+    public function supportTickets()
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
+
+    /**
+     * Get the user's coupons.
+     */
+    public function coupons()
+    {
+        return $this->belongsToMany(Coupon::class, 'user_coupons')
+                    ->withPivot('used_at', 'order_id')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get the user's favorite products.
+     */
+    public function favoriteProducts()
+    {
+        return $this->belongsToMany(Product::class, 'favorites')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Get the user's reports (if vendor).
+     */
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'vendor_id');
+    }
+
+    /**
+     * Get the user's transactions.
+     */
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Get the user's referrals.
+     */
+    public function referrals()
+    {
+        return $this->hasMany(User::class, 'referred_by');
+    }
+
+    /**
      * Check if the user is a vendor.
      */
     public function isVendor(): bool
@@ -238,6 +412,22 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Check if the user is verified.
+     */
+    public function isVerified(): bool
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    /**
+     * Check if the user is active.
+     */
+    public function isActive(): bool
+    {
+        return $this->is_active === true;
+    }
+
+    /**
      * Get the avatar URL with fallback.
      */
     public function getAvatarUrlAttribute(): string
@@ -245,17 +435,17 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($this->avatar && Storage::disk('public')->exists($this->avatar)) {
             return Storage::url($this->avatar);
         }
-        
+
         $name = $this->business_name ?? $this->name ?? 'User';
         $initials = '';
         $words = explode(' ', $name);
-        
+
         foreach ($words as $word) {
             if (!empty($word)) {
                 $initials .= strtoupper(substr($word, 0, 1));
             }
         }
-        
+
         return 'https://ui-avatars.com/api/?name=' . urlencode($initials ?: 'U') . '&background=B88E3F&color=fff&size=200';
     }
 
@@ -267,15 +457,15 @@ class User extends Authenticatable implements MustVerifyEmail
         $parts = [];
         if ($this->address_line1) $parts[] = $this->address_line1;
         if ($this->address_line2) $parts[] = $this->address_line2;
-        
+
         $cityState = [];
         if ($this->city) $cityState[] = $this->city;
         if ($this->state) $cityState[] = $this->state;
         if ($this->zip_code) $cityState[] = $this->zip_code;
-        
+
         if (!empty($cityState)) $parts[] = implode(', ', $cityState);
         if ($this->country) $parts[] = $this->country;
-        
+
         return implode(', ', $parts);
     }
 
@@ -288,7 +478,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($this->city) $parts[] = $this->city;
         if ($this->state) $parts[] = $this->state;
         if ($this->country && $this->country !== 'Ethiopia') $parts[] = $this->country;
-        
+
         return implode(', ', $parts) ?: 'Ethiopia';
     }
 
@@ -299,6 +489,26 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->following()
             ->where('vendor_id', $vendor->id)
+            ->exists();
+    }
+
+    /**
+     * Check if the user has saved a specific vendor.
+     */
+    public function hasSavedVendor(User $vendor): bool
+    {
+        return $this->savedVendors()
+            ->where('vendor_id', $vendor->id)
+            ->exists();
+    }
+
+    /**
+     * Check if the user has favorited a specific product.
+     */
+    public function hasFavoritedProduct(Product $product): bool
+    {
+        return $this->favoriteProducts()
+            ->where('product_id', $product->id)
             ->exists();
     }
 
@@ -316,6 +526,64 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getFollowersCountAttribute(): int
     {
         return $this->followers()->count();
+    }
+
+    /**
+     * Get the vendor's rating as stars HTML.
+     */
+    public function getRatingStarsAttribute(): string
+    {
+        $fullStars = floor($this->rating);
+        $halfStar = ($this->rating - $fullStars) >= 0.5;
+        $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
+
+        $html = '';
+
+        for ($i = 0; $i < $fullStars; $i++) {
+            $html .= '<i class="ri-star-fill" style="color: #f59e0b;"></i>';
+        }
+
+        if ($halfStar) {
+            $html .= '<i class="ri-star-half-fill" style="color: #f59e0b;"></i>';
+        }
+
+        for ($i = 0; $i < $emptyStars; $i++) {
+            $html .= '<i class="ri-star-line" style="color: #f59e0b;"></i>';
+        }
+
+        return $html;
+    }
+
+    /**
+     * Get the rating as a simple star count.
+     */
+    public function getRatingDisplayAttribute(): string
+    {
+        return number_format($this->rating, 1) . ' (' . $this->total_reviews . ' ' . Str::plural('review', $this->total_reviews) . ')';
+    }
+
+    /**
+     * Get the vendor's dashboard link.
+     */
+    public function getDashboardLinkAttribute(): string
+    {
+        if ($this->isVendor()) {
+            return route('vendor.dashboard');
+        } elseif ($this->isCustomer()) {
+            return route('customer.dashboard');
+        } elseif ($this->isAdmin()) {
+            return route('admin.dashboard');
+        }
+
+        return route('home');
+    }
+
+    /**
+     * Get user's theme preference.
+     */
+    public function getThemeAttribute(): string
+    {
+        return $this->theme_preference ?? session('theme', 'light');
     }
 
     /**
@@ -351,6 +619,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Scope a query to only include verified users.
+     */
+    public function scopeVerified($query)
+    {
+        return $query->whereNotNull('email_verified_at');
+    }
+
+    /**
      * Scope a query to filter vendors by category.
      */
     public function scopeByCategory($query, string $category)
@@ -367,14 +643,14 @@ class User extends Authenticatable implements MustVerifyEmail
             $q->where('city', 'like', "%{$city}%")
               ->orWhere('location', 'like', "%{$city}%");
         });
-        
+
         if ($state) {
             $query->where(function($q) use ($state) {
                 $q->where('state', 'like', "%{$state}%")
                   ->orWhere('location', 'like', "%{$state}%");
             });
         }
-        
+
         return $query;
     }
 
@@ -405,7 +681,9 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function scopePopular($query)
     {
-        return $query->orderBy('rating', 'desc')->orderBy('total_reviews', 'desc');
+        return $query->orderBy('rating', 'desc')
+                     ->orderBy('total_reviews', 'desc')
+                     ->orderBy('products_count', 'desc');
     }
 
     /**
@@ -417,37 +695,20 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the vendor's rating as stars HTML.
+     * Scope a query to order by most followed.
      */
-    public function getRatingStarsAttribute(): string
+    public function scopeMostFollowed($query)
     {
-        $fullStars = floor($this->rating);
-        $halfStar = ($this->rating - $fullStars) >= 0.5;
-        $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
-        
-        $html = '';
-        
-        for ($i = 0; $i < $fullStars; $i++) {
-            $html .= '<i class="ri-star-fill" style="color: #f59e0b;"></i>';
-        }
-        
-        if ($halfStar) {
-            $html .= '<i class="ri-star-half-fill" style="color: #f59e0b;"></i>';
-        }
-        
-        for ($i = 0; $i < $emptyStars; $i++) {
-            $html .= '<i class="ri-star-line" style="color: #f59e0b;"></i>';
-        }
-        
-        return $html;
+        return $query->withCount('followers')
+                     ->orderBy('followers_count', 'desc');
     }
 
     /**
-     * Get the rating as a simple star count.
+     * Scope a query to filter by referral code.
      */
-    public function getRatingDisplayAttribute(): string
+    public function scopeByReferral($query, string $code)
     {
-        return number_format($this->rating, 1) . ' (' . $this->total_reviews . ' ' . Str::plural('review', $this->total_reviews) . ')';
+        return $query->where('referral_code', $code);
     }
 
     /**
@@ -467,19 +728,11 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the vendor's dashboard link.
+     * Route notifications for database channel.
      */
-    public function getDashboardLinkAttribute(): string
+    public function routeNotificationForDatabase()
     {
-        if ($this->isVendor()) {
-            return route('vendor.dashboard');
-        } elseif ($this->isCustomer()) {
-            return route('customer.dashboard');
-        } elseif ($this->isAdmin()) {
-            return route('admin.dashboard');
-        }
-        
-        return route('home');
+        return $this->notifications();
     }
 
     /**
@@ -489,6 +742,15 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->last_login_at = now();
         $this->save();
+
+        // Log login history
+        if (app()->runningInConsole() === false) {
+            $this->loginHistory()->create([
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'login_at' => now(),
+            ]);
+        }
     }
 
     /**
@@ -512,20 +774,114 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function generateReferralCode(): string
     {
-        $code = 'VENDORA' . strtoupper(substr(md5($this->id . time()), 0, 6));
+        $code = 'VENDORA' . strtoupper(substr(md5($this->id . uniqid()), 0, 6));
+
+        // Ensure uniqueness
+        while (self::where('referral_code', $code)->exists()) {
+            $code = 'VENDORA' . strtoupper(substr(md5($this->id . uniqid()), 0, 6));
+        }
+
         $this->referral_code = $code;
         $this->save();
-        
+
         return $code;
     }
 
     /**
-     * Get referred users.
+     * Get referred users count.
      */
-    public function referrals()
+    public function getReferralsCountAttribute(): int
     {
-        // This would need a referrals table
-        return $this->hasMany(User::class, 'referred_by');
+        return $this->referrals()->count();
+    }
+
+    /**
+     * Add a product to wishlist.
+     */
+    public function addToWishlist(Product $product): void
+    {
+        if (!$this->wishlistItems()->where('product_id', $product->id)->exists()) {
+            $this->wishlistItems()->attach($product->id);
+        }
+    }
+
+    /**
+     * Remove a product from wishlist.
+     */
+    public function removeFromWishlist(Product $product): void
+    {
+        $this->wishlistItems()->detach($product->id);
+    }
+
+    /**
+     * Add a vendor to saved vendors.
+     */
+    public function saveVendor(User $vendor): void
+    {
+        if (!$this->savedVendors()->where('vendor_id', $vendor->id)->exists()) {
+            $this->savedVendors()->attach($vendor->id);
+        }
+    }
+
+    /**
+     * Remove a vendor from saved vendors.
+     */
+    public function unsaveVendor(User $vendor): void
+    {
+        $this->savedVendors()->detach($vendor->id);
+    }
+
+    /**
+     * Record a vendor view.
+     */
+    public function recordVendorView(User $vendor): void
+    {
+        $existing = $this->recentlyViewedVendors()
+                        ->where('vendor_id', $vendor->id)
+                        ->first();
+
+        if ($existing) {
+            $this->recentlyViewedVendors()
+                 ->updateExistingPivot($vendor->id, [
+                     'created_at' => now(),
+                     'view_count' => $existing->pivot->view_count + 1
+                 ]);
+        } else {
+            $this->recentlyViewedVendors()
+                 ->attach($vendor->id, ['view_count' => 1]);
+        }
+
+        // Keep only last 10 viewed vendors
+        $count = $this->recentlyViewedVendors()->count();
+        if ($count > 10) {
+            $oldest = $this->recentlyViewedVendors()
+                          ->orderBy('pivot_created_at', 'asc')
+                          ->limit($count - 10)
+                          ->get();
+
+            foreach ($oldest as $old) {
+                $this->recentlyViewedVendors()->detach($old->id);
+            }
+        }
+    }
+
+    /**
+     * Clear search history.
+     */
+    public function clearSearchHistory(): void
+    {
+        $this->searchHistory()->delete();
+    }
+
+    /**
+     * Get recent searches.
+     */
+    public function getRecentSearchesAttribute()
+    {
+        return $this->searchHistory()
+                    ->latest()
+                    ->limit(5)
+                    ->get();
     }
 
     /**
@@ -540,6 +896,33 @@ class User extends Authenticatable implements MustVerifyEmail
             if ($user->isVendor() && !$user->referral_code) {
                 $user->generateReferralCode();
             }
+        });
+
+        // Update timestamp on related models when user is updated
+        static::updated(function ($user) {
+            if ($user->isDirty('rating') && $user->isVendor()) {
+                // Update any vendor rating caches
+                \Cache::forget('vendor_rating_' . $user->id);
+            }
+        });
+
+        // Clean up related data when user is deleted
+        static::deleting(function ($user) {
+            // Delete related records
+            $user->searchHistory()->delete();
+            $user->activityLogs()->delete();
+            $user->notifications()->delete();
+            $user->cartItems()->delete();
+            $user->loginHistory()->delete();
+
+            // Detach relationships
+            $user->following()->detach();
+            $user->followers()->detach();
+            $user->savedVendors()->detach();
+            $user->recentlyViewedVendors()->detach();
+            $user->wishlistItems()->detach();
+            $user->favoriteProducts()->detach();
+            $user->categories()->detach();
         });
     }
 }

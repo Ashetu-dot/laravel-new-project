@@ -22,9 +22,11 @@ use App\Models\Message;
 use App\Models\User;
 use App\Models\Testimonial;
 use App\Models\Review;
-
+use App\Models\SearchHistory;
 use App\Models\JobPosting;
 use App\Models\JobApplication;
+use App\Models\SavedVendor;
+use App\Models\RecentlyViewed;
 
 class VendorCustomerController extends Controller
 {
@@ -81,6 +83,8 @@ class VendorCustomerController extends Controller
         ]);
 
         try {
+            DB::beginTransaction();
+
             // Create the user account with customer role
             $user = User::create([
                 'name' => $validated['name'],
@@ -96,6 +100,11 @@ class VendorCustomerController extends Controller
                 'total_reviews' => 0,
             ]);
 
+            // Send welcome notification
+            $this->sendWelcomeNotification($user);
+
+            DB::commit();
+
             // Send email verification notification
             $user->sendEmailVerificationNotification();
 
@@ -106,6 +115,7 @@ class VendorCustomerController extends Controller
                 ->with('success', 'Account created successfully! Please verify your email.');
 
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Customer registration failed: ' . $e->getMessage());
             return back()->withInput()
                 ->with('error', 'Registration failed. Please try again.');
@@ -177,6 +187,7 @@ class VendorCustomerController extends Controller
                     'total_reviews' => 0,
                     'is_active' => true,
                     'country' => 'Ethiopia',
+                    // 'email_verified_at' => now(), // Auto-verify for testing
                 ]);
 
                 // Generate referral code for vendor
@@ -184,13 +195,16 @@ class VendorCustomerController extends Controller
                     $user->generateReferralCode();
                 }
 
+                // Send welcome notification
+                $this->sendWelcomeNotification($user);
+
+                DB::commit();
+
                 // Log the user in
                 Auth::login($user);
 
                 // Send email verification notification
                 $user->sendEmailVerificationNotification();
-
-                DB::commit();
 
                 // Clear registration step
                 Session::forget('registration_step');
@@ -217,6 +231,25 @@ class VendorCustomerController extends Controller
     }
 
     /**
+     * Send welcome notification to new user.
+     */
+    private function sendWelcomeNotification($user)
+    {
+        try {
+            Notification::create([
+                'user_id' => $user->id,
+                'type' => 'success',
+                'title' => 'Welcome to Vendora!',
+                'message' => 'Welcome ' . ($user->business_name ?? $user->name) . '! We\'re excited to have you on board.',
+                'data' => json_encode(['user_id' => $user->id]),
+                'is_read' => false,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send welcome notification: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Send password reset link.
      */
     public function sendResetLinkEmail(Request $request)
@@ -238,10 +271,10 @@ class VendorCustomerController extends Controller
             }
 
             return back()->withErrors(['email' => __($status)]);
-            
+
         } catch (\Exception $e) {
             Log::error('Password reset error: ' . $e->getMessage());
-            
+
             return back()->withErrors([
                 'email' => 'An error occurred while sending the reset link. Please try again later.'
             ]);
@@ -278,10 +311,10 @@ class VendorCustomerController extends Controller
             }
 
             return back()->withErrors(['email' => [__($status)]]);
-            
+
         } catch (\Exception $e) {
             Log::error('Password reset error: ' . $e->getMessage());
-            
+
             return back()->withErrors([
                 'email' => 'An error occurred while resetting your password. Please try again later.'
             ]);
@@ -300,15 +333,15 @@ class VendorCustomerController extends Controller
         try {
             $email = $request->email;
             $exists = User::where('email', $email)->exists();
-            
+
             return response()->json([
                 'exists' => $exists,
                 'message' => $exists ? 'Email registered' : 'Email not registered'
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Email check error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'exists' => false,
                 'message' => 'Error checking email'
@@ -382,57 +415,57 @@ class VendorCustomerController extends Controller
         ])->onlyInput('email');
     }
 
-    /**
-     * Handle admin login request (from admin login page).
-     */
-    public function adminLogin(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+    // /**
+    //  * Handle admin login request (from admin login page).
+    //  */
+    // public function adminLogin(Request $request)
+    // {
+    //     $credentials = $request->validate([
+    //         'email' => ['required', 'email'],
+    //         'password' => ['required'],
+    //     ]);
 
-        $remember = $request->has('remember');
+    //     $remember = $request->has('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
-            $request->session()->regenerate();
+    //     if (Auth::attempt($credentials, $remember)) {
+    //         $request->session()->regenerate();
 
-            $user = Auth::user();
+    //         $user = Auth::user();
 
-            // Check if user is active
-            if (!$user->is_active) {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'Your account has been deactivated. Please contact support.',
-                ])->onlyInput('email');
-            }
+    //         // Check if user is active
+    //         if (!$user->is_active) {
+    //             Auth::logout();
+    //             return back()->withErrors([
+    //                 'email' => 'Your account has been deactivated. Please contact support.',
+    //             ])->onlyInput('email');
+    //         }
 
-            // Check if email is verified
-            if (is_null($user->email_verified_at)) {
-                Auth::logout();
-                return redirect()->route('verification.notice')
-                    ->with('error', 'Please verify your email before logging in.');
-            }
+    //         // Check if email is verified
+    //         if (is_null($user->email_verified_at)) {
+    //             Auth::logout();
+    //             return redirect()->route('verification.notice')
+    //                 ->with('error', 'Please verify your email before logging in.');
+    //         }
 
-            // Check if user is admin
-            if ($user->role !== 'admin') {
-                Auth::logout();
-                return back()->withErrors([
-                    'email' => 'This account does not have admin privileges.',
-                ])->onlyInput('email');
-            }
+    //         // Check if user is admin
+    //         if ($user->role !== 'admin') {
+    //             Auth::logout();
+    //             return back()->withErrors([
+    //                 'email' => 'This account does not have admin privileges.',
+    //             ])->onlyInput('email');
+    //         }
 
-            // Update last login
-            $user->last_login_at = now();
-            $user->save();
+    //         // Update last login
+    //         $user->last_login_at = now();
+    //         $user->save();
 
-            return redirect()->intended(route('admin.dashboard'));
-        }
+    //         return redirect()->intended(route('admin.dashboard'));
+    //     }
 
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
-    }
+    //     return back()->withErrors([
+    //         'email' => 'The provided credentials do not match our records.',
+    //     ])->onlyInput('email');
+    // }
 
     /**
      * Handle logout.
@@ -455,24 +488,24 @@ class VendorCustomerController extends Controller
             $vendorCount = User::where('role', 'vendor')
                               ->where('is_active', true)
                               ->count();
-            
+
             $customerCount = User::where('role', 'customer')
                                 ->where('is_active', true)
                                 ->count();
-            
+
             $categoryCount = Category::count();
-            
+
             // If no data yet, use defaults for display
             $vendorCount = $vendorCount ?: 500;
             $customerCount = $customerCount ?: 10000;
             $categoryCount = $categoryCount ?: 15;
-            
+
             // Get popular categories (categories with most vendors/products)
             $popularCategories = Category::withCount('products')
                                          ->orderBy('products_count', 'desc')
-                                         ->limit(6)
+                                         ->limit(16)
                                          ->get();
-            
+
             // Get categories popular in Jimma
             $jimmaCategories = Category::withCount(['products' => function($query) {
                 $query->whereHas('vendor', function($q) {
@@ -482,33 +515,33 @@ class VendorCustomerController extends Controller
             }])
             ->having('products_count', '>', 0)
             ->orderBy('products_count', 'desc')
-            ->limit(3)
+            ->limit(4)
             ->get();
-            
+
             // Get testimonials
             try {
                 $testimonials = Testimonial::where('is_active', true)
                                            ->orderBy('sort_order')
                                            ->orderBy('created_at', 'desc')
-                                           ->limit(4)
+                                           ->limit(6)
                                            ->get();
             } catch (\Exception $e) {
                 // If testimonials table doesn't exist, create empty collection
                 $testimonials = collect([]);
             }
-            
+
             return view('home', compact(
                 'vendorCount',
-                'customerCount', 
+                'customerCount',
                 'categoryCount',
                 'popularCategories',
                 'jimmaCategories',
                 'testimonials'
             ));
-            
+
         } catch (\Exception $e) {
             Log::error('Home page error: ' . $e->getMessage());
-            
+
             // Return with empty collections if there's an error
             $vendorCount = 500;
             $customerCount = 10000;
@@ -516,10 +549,10 @@ class VendorCustomerController extends Controller
             $popularCategories = collect([]);
             $jimmaCategories = collect([]);
             $testimonials = collect([]);
-            
+
             return view('home', compact(
                 'vendorCount',
-                'customerCount', 
+                'customerCount',
                 'categoryCount',
                 'popularCategories',
                 'jimmaCategories',
@@ -538,25 +571,25 @@ class VendorCustomerController extends Controller
             $vendorCount = User::where('role', 'vendor')
                               ->where('is_active', true)
                               ->count();
-            
+
             $customerCount = User::where('role', 'customer')
                                 ->where('is_active', true)
                                 ->count();
-            
+
             $categoryCount = Category::count();
-            
+
             // Get total number of successful orders/completed transactions
             $totalTransactions = Order::whereIn('status', ['completed', 'delivered'])
                                       ->count();
-            
+
             // Get average rating across all vendors
             $averageRating = User::where('role', 'vendor')
                                  ->where('rating', '>', 0)
                                  ->avg('rating');
-            
+
             // Format average rating to 1 decimal place
             $averageRating = $averageRating ? number_format($averageRating, 1) : 4.8;
-            
+
             // Get cities with most vendors
             $topCities = User::where('role', 'vendor')
                             ->where('is_active', true)
@@ -566,7 +599,7 @@ class VendorCustomerController extends Controller
                             ->orderBy('total', 'desc')
                             ->limit(5)
                             ->get();
-            
+
             // Get recent testimonials
             try {
                 $recentTestimonials = Testimonial::where('is_active', true)
@@ -576,21 +609,21 @@ class VendorCustomerController extends Controller
             } catch (\Exception $e) {
                 $recentTestimonials = collect([]);
             }
-            
+
             return view('pages.about', compact(
                 'vendorCount',
-                'customerCount', 
+                'customerCount',
                 'categoryCount',
                 'totalTransactions',
                 'averageRating',
                 'topCities',
                 'recentTestimonials'
             ));
-            
+
         } catch (\Exception $e) {
             // Log the error for debugging
             Log::error('About page error: ' . $e->getMessage());
-            
+
             // Return with default values if there's an error
             $vendorCount = 500;
             $customerCount = 10000;
@@ -599,10 +632,10 @@ class VendorCustomerController extends Controller
             $averageRating = 4.8;
             $topCities = collect([]);
             $recentTestimonials = collect([]);
-            
+
             return view('pages.about', compact(
                 'vendorCount',
-                'customerCount', 
+                'customerCount',
                 'categoryCount',
                 'totalTransactions',
                 'averageRating',
@@ -612,114 +645,99 @@ class VendorCustomerController extends Controller
         }
     }
 
+    /**
+     * Display careers page.
+     */
+    public function careers()
+    {
+        try {
+            // Fetch active positions from database
+            $positions = JobPosting::where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-/**
- * Display careers page.
- */
-public function careers()
-{
-    try {
-        // Fetch active positions from database
-        $positions = JobPosting::where('is_active', true)
-            ->orderBy('sort_order')
-            ->orderBy('created_at', 'desc')
-            ->get();
-        
-        return view('pages.careers', compact('positions'));
-        
-    } catch (\Exception $e) {
-        Log::error('Careers page error: ' . $e->getMessage());
-        
-        // Return with empty collection - blade will show fallback content
-        $positions = collect([]);
-        return view('pages.careers', compact('positions'));
-    }
-}
+            return view('pages.careers', compact('positions'));
 
+        } catch (\Exception $e) {
+            Log::error('Careers page error: ' . $e->getMessage());
 
-
-/**
- * Handle job application submission.
- */
-public function apply(Request $request)
-{
-    // Validate the request
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|max:255',
-        'phone' => 'required|string|max:20',
-        'position' => 'required|string',
-        'cover_letter' => 'nullable|string',
-        'resume' => 'required|file|mimes:pdf,doc,docx|max:5120',
-    ]);
-
-    try {
-        // Store the resume file
-        $resumePath = null;
-        if ($request->hasFile('resume')) {
-            $fileName = time() . '_' . $request->file('resume')->getClientOriginalName();
-            $resumePath = $request->file('resume')->storeAs('applications', $fileName, 'public');
+            // Return with empty collection - blade will show fallback content
+            $positions = collect([]);
+            return view('pages.careers', compact('positions'));
         }
-
-        // Get position title based on ID
-        $positionTitles = [
-            '1' => 'Senior Full Stack Developer',
-            '2' => 'Community Manager',
-            '3' => 'UI/UX Designer',
-            '4' => 'Sales & Partnerships Lead',
-            '5' => 'Open Application',
-        ];
-        
-        $positionTitle = $positionTitles[$validated['position']] ?? 'Unknown Position';
-
-        // Save to database
-        JobApplication::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'],
-            'position_id' => $validated['position'],
-            'position_title' => $positionTitle,
-            'cover_letter' => $validated['cover_letter'],
-            'resume_path' => $resumePath,
-            'user_id' => Auth::id(),
-            'status' => 'pending',
-        ]);
-
-        Log::info('Job application saved to database', [
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'position' => $positionTitle,
-        ]);
-
-        return redirect()->route('careers')
-            ->with('success', 'Application submitted successfully! We will review your application and contact you soon.');
-
-    } catch (\Exception $e) {
-        Log::error('Application submission failed: ' . $e->getMessage());
-        
-        return redirect()->back()
-            ->withInput()
-            ->with('error', 'Failed to submit application. Please try again.');
     }
-}
 
+    /**
+     * Handle job application submission.
+     */
+    public function apply(Request $request)
+    {
+        // Validate the request
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|string|max:20',
+            'position' => 'required|string',
+            'cover_letter' => 'nullable|string',
+            'resume' => 'required|file|mimes:pdf,doc,docx|max:5120',
+        ]);
 
+        try {
+            // Store the resume file
+            $resumePath = null;
+            if ($request->hasFile('resume')) {
+                $fileName = time() . '_' . $request->file('resume')->getClientOriginalName();
+                $resumePath = $request->file('resume')->storeAs('applications', $fileName, 'public');
+            }
 
+            // Get position title based on ID
+            $positionTitles = [
+                '1' => 'Senior Full Stack Developer',
+                '2' => 'Community Manager',
+                '3' => 'UI/UX Designer',
+                '4' => 'Sales & Partnerships Lead',
+                '5' => 'Open Application',
+            ];
 
+            $positionTitle = $positionTitles[$validated['position']] ?? 'Unknown Position';
 
+            // Save to database
+            JobApplication::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'position_id' => $validated['position'],
+                'position_title' => $positionTitle,
+                'cover_letter' => $validated['cover_letter'],
+                'resume_path' => $resumePath,
+                'user_id' => Auth::id(),
+                'status' => 'pending',
+            ]);
 
+            Log::info('Job application saved to database', [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'position' => $positionTitle,
+            ]);
 
+            return redirect()->route('careers')
+                ->with('success', 'Application submitted successfully! We will review your application and contact you soon.');
 
+        } catch (\Exception $e) {
+            Log::error('Application submission failed: ' . $e->getMessage());
 
-
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to submit application. Please try again.');
+        }
+    }
 
     /**
      * Display press page.
      */
     public function press()
     {
-        // You can fetch press releases from database if you have a press_releases table
-        // For now, we'll use static data from the view
         return view('pages.press');
     }
 
@@ -734,10 +752,8 @@ public function apply(Request $request)
 
         try {
             // Here you would save to database or add to mailing list
-            // For example: NewsletterSubscriber::create(['email' => $validated['email'], 'type' => 'press']);
-            
             return redirect()->route('press')->with('success', 'Thank you for subscribing to our press newsletter!');
-            
+
         } catch (\Exception $e) {
             Log::error('Press subscription failed: ' . $e->getMessage());
             return back()->with('error', 'Failed to subscribe. Please try again.');
@@ -749,8 +765,6 @@ public function apply(Request $request)
      */
     public function blog()
     {
-        // You can fetch blog posts from database if you have a posts table
-        // For now, we'll use static data from the view
         return view('pages.blog');
     }
 
@@ -759,8 +773,6 @@ public function apply(Request $request)
      */
     public function blogPost($slug)
     {
-        // Here you would fetch the specific blog post from database
-        // For now, create a simple view
         return view('pages.blog-post', compact('slug'));
     }
 
@@ -774,11 +786,8 @@ public function apply(Request $request)
         ]);
 
         try {
-            // Here you would save to database or add to mailing list
-            // For example: NewsletterSubscriber::create(['email' => $validated['email'], 'type' => 'blog']);
-            
             return redirect()->route('blog')->with('success', 'Thank you for subscribing to our blog newsletter!');
-            
+
         } catch (\Exception $e) {
             Log::error('Blog subscription failed: ' . $e->getMessage());
             return back()->with('error', 'Failed to subscribe. Please try again.');
@@ -806,11 +815,8 @@ public function apply(Request $request)
         ]);
 
         try {
-            // Here you would save the report to database and notify safety team
-            // For example: SafetyReport::create($validated);
-            
             return redirect()->route('trust-safety')->with('success', 'Thank you for your report. Our safety team will review it within 24 hours.');
-            
+
         } catch (\Exception $e) {
             Log::error('Safety report failed: ' . $e->getMessage());
             return back()->with('error', 'Failed to submit report. Please try again or contact us directly.');
@@ -822,8 +828,6 @@ public function apply(Request $request)
      */
     public function helpCenter()
     {
-        // You can fetch help articles from database if you have a help_articles table
-        // For now, we'll use static data from the view
         return view('pages.help-center');
     }
 
@@ -833,10 +837,6 @@ public function apply(Request $request)
     public function helpSearch(Request $request)
     {
         $query = $request->get('q');
-        
-        // Here you would search your help articles database
-        // For now, redirect back with message
-        
         return redirect()->route('help-center')->with('info', 'Search results for: "' . $query . '" (Search functionality coming soon)');
     }
 
@@ -845,8 +845,6 @@ public function apply(Request $request)
      */
     public function helpArticle($slug)
     {
-        // Here you would fetch the specific help article from database
-        // For now, redirect to help center with a message
         return redirect()->route('help-center')->with('info', 'Article requested: ' . $slug . ' (Coming soon)');
     }
 
@@ -859,25 +857,19 @@ public function apply(Request $request)
         $totalInvites = 0;
         $successfulInvites = 0;
         $totalEarned = 0;
-        
+
         if ($user) {
             // Generate referral code if user doesn't have one
             if (!$user->referral_code) {
                 $user->generateReferralCode();
             }
-            
-            // Get user's referrals (you would need a referrals table)
-            // $referrals = Referral::where('user_id', $user->id)->get();
-            // $totalInvites = $referrals->count();
-            // $successfulInvites = $referrals->where('status', 'completed')->count();
-            // $totalEarned = $successfulInvites * 50; // Example calculation
-            
+
             // Example data
             $totalInvites = 12;
             $successfulInvites = 8;
             $totalEarned = 450;
         }
-        
+
         return view('pages.invite', compact('user', 'totalInvites', 'successfulInvites', 'totalEarned'));
     }
 
@@ -894,20 +886,9 @@ public function apply(Request $request)
 
         try {
             $user = Auth::user();
-            
-            // Here you would send the email
-            // Mail::to($validated['friend_email'])->send(new InviteFriendMail($validated, $user));
-            
-            // Save to database (if you have a referrals table)
-            // Referral::create([
-            //     'user_id' => $user->id,
-            //     'friend_email' => $validated['friend_email'],
-            //     'friend_name' => $validated['friend_name'],
-            //     'status' => 'pending',
-            // ]);
-            
+
             return redirect()->route('invite')->with('success', 'Invitation sent successfully to ' . $validated['friend_name'] . '!');
-            
+
         } catch (\Exception $e) {
             Log::error('Invite send failed: ' . $e->getMessage());
             return back()->with('error', 'Failed to send invitation. Please try again.');
@@ -928,35 +909,29 @@ public function apply(Request $request)
     public function howItWorks()
     {
         try {
-            // Get counts for statistics
             $vendorCount = User::where('role', 'vendor')->where('is_active', true)->count();
             $customerCount = User::where('role', 'customer')->where('is_active', true)->count();
-            
-            // Get booking count (you would need a bookings table)
-            // $bookingCount = Booking::count();
             $bookingCount = 5000; // Example data
-            
-            // Get cities count
             $cityCount = User::where('role', 'vendor')
                             ->whereNotNull('city')
                             ->distinct('city')
                             ->count('city');
-            
+
             return view('pages.how-it-works', compact(
                 'vendorCount',
                 'customerCount',
                 'bookingCount',
                 'cityCount'
             ));
-            
+
         } catch (\Exception $e) {
             Log::error('How it works page error: ' . $e->getMessage());
-            
+
             $vendorCount = 500;
             $customerCount = 10000;
             $bookingCount = 5000;
             $cityCount = 15;
-            
+
             return view('pages.how-it-works', compact(
                 'vendorCount',
                 'customerCount',
@@ -972,7 +947,6 @@ public function apply(Request $request)
     public function listService()
     {
         try {
-            // Get vendor counts by category
             $categoryVendors = [
                 'food' => User::where('role', 'vendor')->where('category', 'like', '%food%')->count(),
                 'photography' => User::where('role', 'vendor')->where('category', 'like', '%photo%')->count(),
@@ -983,12 +957,12 @@ public function apply(Request $request)
                 'tech' => User::where('role', 'vendor')->where('category', 'like', '%tech%')->count(),
                 'handicrafts' => User::where('role', 'vendor')->where('category', 'like', '%handicraft%')->count(),
             ];
-            
+
             return view('pages.list-service', compact('categoryVendors'));
-            
+
         } catch (\Exception $e) {
             Log::error('List service page error: ' . $e->getMessage());
-            
+
             $categoryVendors = [
                 'food' => 245,
                 'photography' => 189,
@@ -999,7 +973,7 @@ public function apply(Request $request)
                 'tech' => 67,
                 'handicrafts' => 134,
             ];
-            
+
             return view('pages.list-service', compact('categoryVendors'));
         }
     }
@@ -1009,10 +983,9 @@ public function apply(Request $request)
      */
     public function vendorResources()
     {
-        // Get counts for community stats
-        $telegramMembers = 2500; // This could come from a config or database
+        $telegramMembers = 2500;
         $whatsappMembers = 1800;
-        
+
         return view('pages.vendor-resources', compact('telegramMembers', 'whatsappMembers'));
     }
 
@@ -1022,34 +995,27 @@ public function apply(Request $request)
     public function successStories()
     {
         try {
-            // Get vendor counts
             $vendorCount = User::where('role', 'vendor')->where('is_active', true)->count();
-            
-            // Get total earnings (this would come from orders table)
             $totalEarnings = Order::whereIn('status', ['completed', 'delivered'])->sum('total_amount');
             $totalEarningsFormatted = $totalEarnings > 0 ? number_format($totalEarnings) . '+' : '5M+';
-            
-            // Count happy customers
             $happyCustomers = User::where('role', 'customer')->where('is_active', true)->count();
-            
-            // Calculate average growth (example calculation)
             $avgGrowth = '150%';
-            
+
             return view('pages.success-stories', compact(
                 'vendorCount',
                 'avgGrowth',
                 'totalEarningsFormatted',
                 'happyCustomers'
             ));
-            
+
         } catch (\Exception $e) {
             Log::error('Success stories page error: ' . $e->getMessage());
-            
+
             $vendorCount = 500;
             $avgGrowth = '150%';
             $totalEarningsFormatted = '5M+';
             $happyCustomers = 10000;
-            
+
             return view('pages.success-stories', compact(
                 'vendorCount',
                 'avgGrowth',
@@ -1065,27 +1031,26 @@ public function apply(Request $request)
     public function community()
     {
         try {
-            // Get community stats
-            $totalMembers = User::count(); // Total users
-            $dailyPosts = 500; // This would come from a forum posts table
-            $monthlyEvents = 25; // This would come from an events table
-            $mentors = User::where('role', 'vendor')->where('is_active', true)->count() / 10; // Example calculation
-            
+            $totalMembers = User::count();
+            $dailyPosts = 500;
+            $monthlyEvents = 25;
+            $mentors = User::where('role', 'vendor')->where('is_active', true)->count() / 10;
+
             return view('pages.community', compact(
                 'totalMembers',
                 'dailyPosts',
                 'monthlyEvents',
                 'mentors'
             ));
-            
+
         } catch (\Exception $e) {
             Log::error('Community page error: ' . $e->getMessage());
-            
+
             $totalMembers = 15000;
             $dailyPosts = 500;
             $monthlyEvents = 25;
             $mentors = 50;
-            
+
             return view('pages.community', compact(
                 'totalMembers',
                 'dailyPosts',
@@ -1127,15 +1092,30 @@ public function apply(Request $request)
                 ->when($rating, function ($q, $rating) {
                     return $q->where('rating', '>=', $rating);
                 })
+                ->with(['products' => function($q) {
+                    $q->where('is_active', true)->latest()->take(2);
+                }])
+                ->withCount('followers')
                 ->orderBy('rating', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->paginate(12)
                 ->withQueryString();
 
-            $totalResults = $vendors->total();
+            // Save search history for authenticated users
+            if (Auth::check() && $query) {
+                $this->saveSearchHistory($request);
+            }
 
-            return view('search-results', compact('vendors', 'query', 'category', 'location', 'totalResults'));
-            
+            // Get trending vendors for sidebar
+            $trendingVendors = User::where('role', 'vendor')
+                ->where('is_active', true)
+                ->orderBy('rating', 'desc')
+                ->orderBy('products_count', 'desc')
+                ->limit(5)
+                ->get(['id', 'business_name', 'rating', 'products_count', 'city']);
+
+            return view('search-results', compact('vendors', 'trendingVendors'));
+
         } catch (\Exception $e) {
             Log::error('Search error: ' . $e->getMessage());
             return redirect()->route('home')->with('error', 'Search failed. Please try again.');
@@ -1143,41 +1123,964 @@ public function apply(Request $request)
     }
 
     /**
-     * Display a single vendor profile.
+     * Save search history.
      */
-    public function showVendor(string $id)
+    private function saveSearchHistory(Request $request)
     {
         try {
-            $vendor = User::where('role', 'vendor')
-                ->where('is_active', true)
-                ->with(['followers', 'products' => function($q) {
-                    $q->where('is_active', true)->latest()->take(6);
-                }])
-                ->findOrFail($id);
+            $query = $request->get('query');
 
-            // Increment store views
-            $vendor->incrementStoreViews();
-
-            $isFollowing = false;
-            if (Auth::check()) {
-                $isFollowing = Auth::user()->following()
-                    ->where('vendor_id', $vendor->id)
-                    ->exists();
+            if (empty($query)) {
+                return;
             }
 
-            $followersCount = $vendor->followers()->count();
-            $productsCount = $vendor->products()->count();
+            $resultsCount = User::where('role', 'vendor')
+                ->where('is_active', true)
+                ->where(function($q) use ($query) {
+                    $q->where('business_name', 'like', "%{$query}%")
+                      ->orWhere('description', 'like', "%{$query}%")
+                      ->orWhere('category', 'like', "%{$query}%");
+                })
+                ->count();
 
-            return view('vendor.show', compact('vendor', 'isFollowing', 'followersCount', 'productsCount'));
-            
+            SearchHistory::create([
+                'user_id' => Auth::id(),
+                'query' => $query,
+                'filters' => $request->except(['query', '_token']),
+                'results_count' => $resultsCount,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
         } catch (\Exception $e) {
-            Log::error('Show vendor error: ' . $e->getMessage());
-            return redirect()->route('home')->with('error', 'Vendor not found.');
+            Log::error('Failed to save search history: ' . $e->getMessage());
         }
     }
 
     /**
-     * Follow a vendor.
+     * Remove search history item.
+     */
+    public function removeSearchHistory($id)
+    {
+        try {
+            $history = SearchHistory::where('user_id', Auth::id())->findOrFail($id);
+            $history->delete();
+
+            if (request()->wantsJson()) {
+                return response()->json(['success' => true]);
+            }
+
+            return back()->with('success', 'Search history removed.');
+
+        } catch (\Exception $e) {
+            Log::error('Remove search history error: ' . $e->getMessage());
+
+            if (request()->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            }
+
+            return back()->with('error', 'Failed to remove search history.');
+        }
+    }
+
+    /**
+     * Clear all search history for user.
+     */
+    public function clearSearchHistory()
+    {
+        try {
+            SearchHistory::where('user_id', Auth::id())->delete();
+
+            if (request()->wantsJson()) {
+                return response()->json(['success' => true]);
+            }
+
+            return back()->with('success', 'All search history cleared.');
+
+        } catch (\Exception $e) {
+            Log::error('Clear search history error: ' . $e->getMessage());
+
+            if (request()->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            }
+
+            return back()->with('error', 'Failed to clear search history.');
+        }
+    }
+
+    /**
+     * Get quick view data for a vendor
+     */
+    public function quickView($vendorId)
+    {
+        try {
+            $vendor = User::with(['products' => function($query) {
+                $query->where('is_active', true)->latest()->limit(5);
+            }])->where('role', 'vendor')
+              ->where('is_active', true)
+              ->findOrFail($vendorId);
+
+            // Prepare images
+            $mainImage = $this->getVendorImage($vendor->main_image, 'main');
+            $subImage1 = $this->getVendorImage($vendor->sub_image_1, 'sub1');
+            $subImage2 = $this->getVendorImage($vendor->sub_image_2, 'sub2');
+
+            // Get product data with pricing
+            $products = $vendor->products->map(function($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price,
+                    'original_price' => $product->original_price,
+                    'discount' => $this->calculateDiscount($product),
+                    'image' => $this->getProductImage($product->image),
+                ];
+            });
+
+            // Get followers count
+            $followersCount = $vendor->followers()->count();
+
+            return response()->json([
+                'success' => true,
+                'id' => $vendor->id,
+                'name' => $vendor->business_name ?? $vendor->name,
+                'description' => $vendor->description ?? 'No description available',
+                'rating' => number_format($vendor->rating ?? 4.5, 1),
+                'reviews_count' => $vendor->total_reviews ?? 0,
+                'products_count' => $vendor->products_count ?? $vendor->products->count(),
+                'followers_count' => $followersCount,
+                'location' => $vendor->city ?? 'Jimma',
+                'main_image' => $mainImage,
+                'sub_image1' => $subImage1,
+                'sub_image2' => $subImage2,
+                'products' => $products,
+                'is_following' => Auth::check() ? Auth::user()->following()->where('vendor_id', $vendor->id)->exists() : false,
+                'is_saved' => Auth::check() ? $this->isSavedVendor($vendor->id) : false,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Quick view error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load vendor details'
+            ], 500);
+        }
+    }
+
+    /**
+     * Check if vendor is saved by user.
+     */
+    private function isSavedVendor($vendorId)
+    {
+        try {
+            return Auth::user()->savedVendors()->where('vendor_id', $vendorId)->exists();
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get vendor image URL
+     */
+    private function getVendorImage($image, $type)
+    {
+        if ($image && Storage::disk('public')->exists($image)) {
+            return Storage::url($image);
+        }
+
+        $defaults = [
+            'main' => 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80',
+            'sub1' => 'https://images.unsplash.com/photo-1565193566173-7a646c770962?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
+            'sub2' => 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
+        ];
+
+        return $defaults[$type] ?? $defaults['main'];
+    }
+
+    /**
+     * Get product image URL
+     */
+    private function getProductImage($image)
+    {
+        if ($image && Storage::disk('public')->exists($image)) {
+            return Storage::url($image);
+        }
+
+        return 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80';
+    }
+
+    /**
+     * Calculate discount percentage
+     */
+    private function calculateDiscount($product)
+    {
+        if (isset($product->original_price) && $product->original_price > $product->price) {
+            return round((($product->original_price - $product->price) / $product->original_price) * 100);
+        }
+        return 0;
+    }
+
+    /**
+     * Follow a vendor
+     */
+    public function followVendor(Request $request, $vendorId)
+    {
+        try {
+            $vendor = User::where('role', 'vendor')->findOrFail($vendorId);
+
+            if (Auth::id() === $vendor->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You cannot follow yourself'
+                ], 400);
+            }
+
+            if (!Auth::user()->following()->where('vendor_id', $vendorId)->exists()) {
+                Auth::user()->following()->attach($vendorId);
+
+                // Update followers count
+                $vendor->increment('followers_count');
+
+                // Send notification to vendor
+                $this->sendFollowNotification($vendorId, Auth::user()->name);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Vendor followed successfully',
+                    'followers_count' => $vendor->followers_count + 1
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Already following this vendor'
+            ], 400);
+
+        } catch (\Exception $e) {
+            Log::error('Follow vendor error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to follow vendor'
+            ], 500);
+        }
+    }
+
+    /**
+     * Send follow notification to vendor.
+     */
+    private function sendFollowNotification($vendorId, $followerName)
+    {
+        try {
+            Notification::create([
+                'user_id' => $vendorId,
+                'type' => 'follow',
+                'title' => 'New Follower',
+                'message' => $followerName . ' started following your shop.',
+                'data' => json_encode(['follower_name' => $followerName]),
+                'is_read' => false,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send follow notification: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Unfollow a vendor
+     */
+    public function unfollowVendor(Request $request, $vendorId)
+    {
+        try {
+            $vendor = User::where('role', 'vendor')->findOrFail($vendorId);
+
+            if (Auth::user()->following()->where('vendor_id', $vendorId)->exists()) {
+                Auth::user()->following()->detach($vendorId);
+
+                // Update followers count
+                $vendor->decrement('followers_count');
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Vendor unfollowed successfully',
+                    'followers_count' => max(0, $vendor->followers_count - 1)
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Not following this vendor'
+            ], 400);
+
+        } catch (\Exception $e) {
+            Log::error('Unfollow vendor error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to unfollow vendor'
+            ], 500);
+        }
+    }
+
+    /**
+     * Save a vendor
+     */
+    public function saveVendor(Request $request, $vendorId)
+    {
+        try {
+            $vendor = User::where('role', 'vendor')->findOrFail($vendorId);
+
+            if (!Auth::user()->savedVendors()->where('vendor_id', $vendorId)->exists()) {
+                Auth::user()->savedVendors()->attach($vendorId);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Vendor saved successfully'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Vendor already saved'
+            ], 400);
+
+        } catch (\Exception $e) {
+            Log::error('Save vendor error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to save vendor'
+            ], 500);
+        }
+    }
+
+    /**
+     * Unsave a vendor
+     */
+    public function unsaveVendor(Request $request, $vendorId)
+    {
+        try {
+            if (Auth::user()->savedVendors()->where('vendor_id', $vendorId)->exists()) {
+                Auth::user()->savedVendors()->detach($vendorId);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Vendor removed from saved'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Vendor not in saved list'
+            ], 400);
+
+        } catch (\Exception $e) {
+            Log::error('Unsave vendor error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to unsave vendor'
+            ], 500);
+        }
+    }
+
+    // /**
+    //  * Display a single vendor profile.
+    //  */
+    // public function showVendor(string $id)
+    // {
+    //     try {
+    //         $vendor = User::where('role', 'vendor')
+    //             ->where('is_active', true)
+    //             ->with(['followers', 'products' => function($q) {
+    //                 $q->where('is_active', true)->latest()->take(6);
+    //             }])
+    //             ->findOrFail($id);
+
+    //         // Increment store views
+    //         $vendor->incrementStoreViews();
+
+    //         // Record this view in user's history if logged in
+    //         if (Auth::check()) {
+    //             $this->recordVendorView(Auth::user(), $vendor);
+    //         }
+
+    //         $isFollowing = false;
+    //         if (Auth::check()) {
+    //             $isFollowing = Auth::user()->following()
+    //                 ->where('vendor_id', $vendor->id)
+    //                 ->exists();
+    //         }
+
+    //         $followersCount = $vendor->followers()->count();
+    //         $productsCount = $vendor->products()->count();
+
+    //         return view('vendor.show', compact('vendor', 'isFollowing', 'followersCount', 'productsCount'));
+
+    //     } catch (\Exception $e) {
+    //         Log::error('Show vendor error: ' . $e->getMessage());
+    //         return redirect()->route('home')->with('error', 'Vendor not found.');
+    //     }
+    // }
+
+
+
+
+
+//     /**
+//  * Display a single vendor profile.
+//  */
+// public function showVendor(string $id)
+// {
+//     try {
+//         // Log the attempt
+//         Log::info('Attempting to show vendor with ID: ' . $id);
+
+//         // Check if user is logged in (for recently viewed tracking)
+//         $user = Auth::user();
+
+//         // Find the vendor with proper error handling
+//         $vendor = User::where('role', 'vendor')
+//             ->where('is_active', true)
+//             ->with(['followers', 'products' => function($q) {
+//                 $q->where('is_active', true)->latest()->take(6);
+//             }])
+//             ->withCount('followers')
+//             ->find($id);
+
+//         // Check if vendor exists
+//         if (!$vendor) {
+//             Log::warning('Vendor not found with ID: ' . $id);
+
+//             // Check if it's a user but not a vendor
+//             $userCheck = User::find($id);
+//             if ($userCheck) {
+//                 Log::warning('User found but role is: ' . $userCheck->role);
+//                 return redirect()->route('home')
+//                     ->with('error', 'This user is not registered as a vendor.');
+//             }
+
+//             return redirect()->route('home')
+//                 ->with('error', 'Vendor not found. The vendor may have been deactivated or removed.');
+//         }
+
+//         // Increment store views
+//         try {
+//             $vendor->incrementStoreViews();
+//         } catch (\Exception $e) {
+//             Log::error('Failed to increment store views: ' . $e->getMessage());
+//         }
+
+//         // Record this view in user's history if logged in
+//         if ($user) {
+//             try {
+//                 $this->recordVendorView($user, $vendor);
+//             } catch (\Exception $e) {
+//                 Log::error('Failed to record vendor view: ' . $e->getMessage());
+//             }
+//         }
+
+//         $isFollowing = false;
+//         if ($user) {
+//             try {
+//                 $isFollowing = $user->following()
+//                     ->where('vendor_id', $vendor->id)
+//                     ->exists();
+//             } catch (\Exception $e) {
+//                 Log::error('Failed to check follow status: ' . $e->getMessage());
+//             }
+//         }
+
+//         $followersCount = $vendor->followers_count ?? $vendor->followers()->count();
+//         $productsCount = $vendor->products_count ?? $vendor->products()->count();
+
+//         return view('vendor.show', compact('vendor', 'isFollowing', 'followersCount', 'productsCount'));
+
+//     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+//         Log::error('Vendor not found (ModelNotFoundException): ' . $e->getMessage());
+//         return redirect()->route('home')
+//             ->with('error', 'Vendor not found. The vendor may have been deactivated or removed.');
+
+//     } catch (\Exception $e) {
+//         Log::error('Show vendor error: ' . $e->getMessage());
+//         Log::error('Stack trace: ' . $e->getTraceAsString());
+
+//         return redirect()->route('home')
+//             ->with('error', 'An error occurred while loading the vendor profile. Please try again.');
+//     }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// /**
+//  * Display a single vendor profile.
+//  */
+// public function showVendor(string $id)
+// {
+//     try {
+//         // Find the vendor with basic information first
+//         $vendor = User::where('role', 'vendor')
+//             ->where('is_active', true)
+//             ->find($id);
+
+//         if (!$vendor) {
+//             return redirect()->route('home')
+//                 ->with('error', 'Vendor not found.');
+//         }
+
+//         // Manually get followers count
+//         $followersCount = DB::table('followers')
+//             ->where('vendor_id', $vendor->id)
+//             ->count();
+
+//         // Manually get products
+//         $products = Product::where('vendor_id', $vendor->id)
+//             ->where('is_active', true)
+//             ->latest()
+//             ->take(6)
+//             ->get();
+
+//         // Manually get reviews
+//         $reviews = Review::where('vendor_id', $vendor->id)
+//             ->with('user')
+//             ->latest()
+//             ->take(5)
+//             ->get();
+
+//         // Calculate average rating
+//         $averageRating = $reviews->avg('rating') ?? 4.5;
+//         $totalReviews = $reviews->count();
+
+//         // Attach products and reviews to vendor object
+//         $vendor->products = $products;
+//         $vendor->reviews = $reviews;
+//         $vendor->rating = $averageRating;
+//         $vendor->total_reviews = $totalReviews;
+
+//         // Increment store views
+//         try {
+//             $vendor->store_views = ($vendor->store_views ?? 0) + 1;
+//             $vendor->save();
+//         } catch (\Exception $e) {
+//             Log::error('Failed to increment store views: ' . $e->getMessage());
+//         }
+
+//         // Check if current user is following this vendor
+//         $isFollowing = false;
+//         if (Auth::check()) {
+//             $isFollowing = DB::table('followers')
+//                 ->where('user_id', Auth::id())
+//                 ->where('vendor_id', $vendor->id)
+//                 ->exists();
+//         }
+
+//         // Record in recently viewed if user is logged in
+//         if (Auth::check()) {
+//             try {
+//                 $this->recordVendorView(Auth::user(), $vendor);
+//             } catch (\Exception $e) {
+//                 Log::error('Failed to record vendor view: ' . $e->getMessage());
+//             }
+//         }
+
+//         return view('vendor.show', compact('vendor', 'isFollowing', 'followersCount'));
+
+//     } catch (\Exception $e) {
+//         Log::error('Show vendor error: ' . $e->getMessage());
+//         Log::error('Stack trace: ' . $e->getTraceAsString());
+
+//         return redirect()->route('home')
+//             ->with('error', 'An error occurred while loading the vendor profile. Please try again.');
+//     }
+// }
+
+
+
+
+
+
+
+
+
+/**
+ * Display a single vendor profile.
+ */
+public function showVendor(string $id)
+{
+    try {
+        // Find the vendor
+        $vendor = User::where('role', 'vendor')
+            ->where('is_active', true)
+            ->find($id);
+
+        if (!$vendor) {
+            return redirect()->route('home')->with('error', 'Vendor not found.');
+        }
+
+        // Manually get followers count
+        $followersCount = DB::table('followers')
+            ->where('vendor_id', $vendor->id)
+            ->count();
+
+        // Manually get products
+        $products = Product::where('vendor_id', $vendor->id)
+            ->where('is_active', true)
+            ->latest()
+            ->take(6)
+            ->get();
+
+        // For vendor reviews, we'll use product reviews (aggregate)
+        // Get all product IDs for this vendor
+        $productIds = $products->pluck('id')->toArray();
+
+        // Get reviews for all vendor's products
+        $reviews = collect([]);
+        $totalRating = 0;
+        $reviewCount = 0;
+
+        if (!empty($productIds)) {
+            $reviews = Review::whereIn('product_id', $productIds)
+                ->with('user')
+                ->where('is_approved', true)
+                ->latest()
+                ->take(5)
+                ->get();
+
+            // Calculate average rating from all product reviews
+            $allReviews = Review::whereIn('product_id', $productIds)
+                ->where('is_approved', true)
+                ->get();
+
+            $totalRating = $allReviews->sum('rating');
+            $reviewCount = $allReviews->count();
+        }
+
+        $averageRating = $reviewCount > 0 ? round($totalRating / $reviewCount, 1) : 4.5;
+
+        // Attach products and reviews to vendor object
+        $vendor->products = $products;
+        $vendor->reviews = $reviews;
+        $vendor->rating = $averageRating;
+        $vendor->total_reviews = $reviewCount;
+
+        // Increment store views
+        try {
+            $vendor->store_views = ($vendor->store_views ?? 0) + 1;
+            $vendor->save();
+        } catch (\Exception $e) {
+            Log::error('Failed to increment store views: ' . $e->getMessage());
+        }
+
+        // Check if current user is following this vendor
+        $isFollowing = false;
+        if (Auth::check()) {
+            $isFollowing = DB::table('followers')
+                ->where('user_id', Auth::id())
+                ->where('vendor_id', $vendor->id)
+                ->exists();
+        }
+
+        // Record in recently viewed if user is logged in
+        if (Auth::check()) {
+            try {
+                $this->recordVendorView(Auth::user(), $vendor);
+            } catch (\Exception $e) {
+                Log::error('Failed to record vendor view: ' . $e->getMessage());
+            }
+        }
+
+        return view('vendor.show', compact('vendor', 'isFollowing', 'followersCount'));
+
+    } catch (\Exception $e) {
+        Log::error('Show vendor error: ' . $e->getMessage());
+        Log::error('Stack trace: ' . $e->getTraceAsString());
+
+        return redirect()->route('home')
+            ->with('error', 'An error occurred while loading the vendor profile. Please try again.');
+    }
+}
+
+
+
+
+
+
+
+
+
+/**
+ * Send contact message to vendor
+ */
+public function sendContactMessage(Request $request)
+{
+    try {
+        $request->validate([
+            'vendor_id' => 'required|exists:users,id',
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $user = Auth::user();
+        $vendor = User::findOrFail($request->vendor_id);
+
+        // Create a message in the messages table
+        try {
+            $message = Message::create([
+                'sender_id' => $user->id,
+                'receiver_id' => $vendor->id,
+                'subject' => 'Contact from ' . $user->name,
+                'content' => $request->message,
+                'is_read' => false,
+            ]);
+        } catch (\Exception $e) {
+            // If Message model doesn't exist, log the message
+            Log::info('Contact message from ' . $user->email . ' to vendor ' . $vendor->email . ': ' . $request->message);
+
+            // You could also send an email here
+            // Mail::raw($request->message, function($mail) use ($user, $vendor) {
+            //     $mail->to($vendor->email)
+            //          ->subject('Contact from ' . $user->name)
+            //          ->from($user->email, $user->name);
+            // });
+        }
+
+        // Create a notification for the vendor
+        try {
+            Notification::create([
+                'user_id' => $vendor->id,
+                'type' => 'message',
+                'title' => 'New Message from ' . $user->name,
+                'message' => 'You have received a new message from a customer.',
+                'data' => json_encode([
+                    'sender_id' => $user->id,
+                    'sender_name' => $user->name,
+                    'message_preview' => Str::limit($request->message, 50)
+                ]),
+                'is_read' => false,
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('Could not create notification: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Your message has been sent successfully!'
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation error',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Contact vendor error: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send message. Please try again.'
+        ], 500);
+    }
+}
+
+
+
+
+
+/**
+ * Show vendor profile (authenticated vendor viewing their own profile)
+ */
+public function vendorProfile()
+{
+    try {
+        $user = Auth::user();
+
+        if (!$user || $user->role !== 'vendor') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Get followers count
+        $followersCount = DB::table('followers')
+            ->where('vendor_id', $user->id)
+            ->count();
+
+        // Get following count
+        $followingCount = DB::table('followers')
+            ->where('user_id', $user->id)
+            ->count();
+
+        // Get products count
+        $productsCount = DB::table('products')
+            ->where('vendor_id', $user->id)
+            ->count();
+
+        // Get unread notifications count
+        try {
+            $unreadNotificationsCount = Notification::where('user_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+        } catch (\Exception $e) {
+            $unreadNotificationsCount = 0;
+            Log::warning('Could not get notification count: ' . $e->getMessage());
+        }
+
+        // Get unread messages count
+        try {
+            $unreadMessagesCount = Message::where('receiver_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+        } catch (\Exception $e) {
+            $unreadMessagesCount = 0;
+            Log::warning('Could not get message count: ' . $e->getMessage());
+        }
+
+        return view('vendor.profile', compact(
+            'user',
+            'followersCount',
+            'followingCount',
+            'productsCount',
+            'unreadNotificationsCount',
+            'unreadMessagesCount'
+        ));
+
+    } catch (\Exception $e) {
+        Log::error('Vendor profile error: ' . $e->getMessage());
+        return redirect()->route('vendor.dashboard')
+            ->with('error', 'Failed to load profile. Please try again.');
+    }
+}
+
+
+
+
+
+
+
+
+/**
+ * Record vendor view for user.
+ */
+private function recordVendorView($user, $vendor)
+{
+    try {
+        // Check if the recently_viewed table exists
+        $exists = DB::table('recently_viewed')
+            ->where('user_id', $user->id)
+            ->where('vendor_id', $vendor->id)
+            ->first();
+
+        if ($exists) {
+            DB::table('recently_viewed')
+                ->where('user_id', $user->id)
+                ->where('vendor_id', $vendor->id)
+                ->update([
+                    'view_count' => $exists->view_count + 1,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+        } else {
+            DB::table('recently_viewed')->insert([
+                'user_id' => $user->id,
+                'vendor_id' => $vendor->id,
+                'view_count' => 1,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+
+        // Keep only last 10 viewed vendors
+        $count = DB::table('recently_viewed')
+            ->where('user_id', $user->id)
+            ->count();
+
+        if ($count > 10) {
+            $oldest = DB::table('recently_viewed')
+                ->where('user_id', $user->id)
+                ->orderBy('created_at', 'asc')
+                ->limit($count - 10)
+                ->get();
+
+            foreach ($oldest as $old) {
+                DB::table('recently_viewed')
+                    ->where('user_id', $user->id)
+                    ->where('vendor_id', $old->vendor_id)
+                    ->delete();
+            }
+        }
+    } catch (\Exception $e) {
+        Log::warning('Could not record vendor view: ' . $e->getMessage());
+    }
+}
+
+
+
+
+
+
+    // /**
+    //  * Record vendor view for user.
+    //  */
+    // private function recordVendorView($user, $vendor)
+    // {
+    //     try {
+    //         $existing = $user->recentlyViewedVendors()
+    //                         ->where('vendor_id', $vendor->id)
+    //                         ->first();
+
+    //         if ($existing) {
+    //             $user->recentlyViewedVendors()
+    //                  ->updateExistingPivot($vendor->id, [
+    //                      'created_at' => now(),
+    //                      'view_count' => ($existing->pivot->view_count ?? 0) + 1
+    //                  ]);
+    //         } else {
+    //             $user->recentlyViewedVendors()
+    //                  ->attach($vendor->id, ['view_count' => 1]);
+    //         }
+
+    //         // Keep only last 10 viewed vendors
+    //         $count = $user->recentlyViewedVendors()->count();
+    //         if ($count > 10) {
+    //             $oldest = $user->recentlyViewedVendors()
+    //                           ->orderBy('pivot_created_at', 'asc')
+    //                           ->limit($count - 10)
+    //                           ->get();
+
+    //             foreach ($oldest as $old) {
+    //                 $user->recentlyViewedVendors()->detach($old->id);
+    //             }
+    //         }
+    //     } catch (\Exception $e) {
+    //         Log::warning('Could not record vendor view: ' . $e->getMessage());
+    //     }
+    // }
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Follow a vendor (non-AJAX).
      */
     public function follow(Request $request, string $id)
     {
@@ -1200,8 +2103,14 @@ public function apply(Request $request)
 
             $user->following()->attach($vendor->id, ['created_at' => now(), 'updated_at' => now()]);
 
+            // Update followers count
+            $vendor->increment('followers_count');
+
+            // Send notification
+            $this->sendFollowNotification($vendor->id, $user->name);
+
             return back()->with('success', 'Now following ' . ($vendor->business_name ?? $vendor->name));
-            
+
         } catch (\Exception $e) {
             Log::error('Follow error: ' . $e->getMessage());
             return back()->with('error', 'Failed to follow vendor. Please try again.');
@@ -1209,7 +2118,7 @@ public function apply(Request $request)
     }
 
     /**
-     * Unfollow a vendor.
+     * Unfollow a vendor (non-AJAX).
      */
     public function unfollow(Request $request, string $id)
     {
@@ -1221,10 +2130,17 @@ public function apply(Request $request)
             $vendor = User::where('role', 'vendor')->findOrFail($id);
             $user = Auth::user();
 
-            $user->following()->detach($vendor->id);
+            if ($user->following()->where('vendor_id', $vendor->id)->exists()) {
+                $user->following()->detach($vendor->id);
+
+                // Update followers count
+                if ($vendor->followers_count > 0) {
+                    $vendor->decrement('followers_count');
+                }
+            }
 
             return back()->with('success', 'Unfollowed ' . ($vendor->business_name ?? $vendor->name));
-            
+
         } catch (\Exception $e) {
             Log::error('Unfollow error: ' . $e->getMessage());
             return back()->with('error', 'Failed to unfollow vendor. Please try again.');
@@ -1245,16 +2161,50 @@ public function apply(Request $request)
 
             $followersCount = $user->role === 'vendor' ? $user->followers()->count() : 0;
             $followingCount = $user->following()->count();
-            
+
             $productsCount = $user->role === 'vendor' ? Product::where('vendor_id', $user->id)->count() : 0;
 
             return view('profile.show', compact('user', 'followersCount', 'followingCount', 'productsCount'));
-            
+
         } catch (\Exception $e) {
             Log::error('Profile show error: ' . $e->getMessage());
             return redirect()->route('home')->with('error', 'User not found.');
         }
     }
+
+
+
+
+
+
+/**
+ * Show vendor settings (authenticated vendor viewing their own settings)
+ */
+public function vendorSettings()
+{
+    try {
+        $user = Auth::user();
+
+        if (!$user || $user->role !== 'vendor') {
+            abort(403, 'Unauthorized access.');
+        }
+
+        return view('vendor.settings', compact('user'));
+
+    } catch (\Exception $e) {
+        Log::error('Vendor settings error: ' . $e->getMessage());
+        return redirect()->route('vendor.dashboard')
+            ->with('error', 'Failed to load settings. Please try again.');
+    }
+}
+
+
+
+
+
+
+
+
 
     /**
      * Show the form for editing the profile.
@@ -1269,7 +2219,7 @@ public function apply(Request $request)
             }
 
             return view('profile.edit', compact('user'));
-            
+
         } catch (\Exception $e) {
             Log::error('Profile edit error: ' . $e->getMessage());
             return redirect()->route('home')->with('error', 'User not found.');
@@ -1321,7 +2271,7 @@ public function apply(Request $request)
 
             return redirect()->route('profile.show', $user->id)
                 ->with('success', 'Profile updated successfully.');
-                
+
         } catch (\Exception $e) {
             Log::error('Profile update error: ' . $e->getMessage());
             return back()->withInput()->with('error', 'Failed to update profile. Please try again.');
@@ -1355,6 +2305,12 @@ public function apply(Request $request)
                 Product::where('vendor_id', $user->id)->delete();
             }
 
+            // Clear search history
+            SearchHistory::where('user_id', $user->id)->delete();
+
+            // Clear notifications
+            Notification::where('user_id', $user->id)->delete();
+
             Auth::logout();
             $user->delete();
 
@@ -1364,11 +2320,11 @@ public function apply(Request $request)
             request()->session()->regenerateToken();
 
             return redirect()->route('home')->with('success', 'Your account has been deleted.');
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Account deletion failed: ' . $e->getMessage());
-            
+
             return back()->with('error', 'Failed to delete account. Please try again.');
         }
     }
@@ -1472,7 +2428,7 @@ public function apply(Request $request)
                 'categories',
                 'averageRating'
             ));
-            
+
         } catch (\Exception $e) {
             Log::error('Vendor dashboard error: ' . $e->getMessage());
             return redirect()->route('home')->with('error', 'Unable to load dashboard. Please try again.');
@@ -1537,7 +2493,7 @@ public function apply(Request $request)
             // Cart count (session-based)
             $cart = session()->get('cart', []);
             $cartCount = array_sum(array_column($cart, 'quantity'));
-            
+
             $cartItems = collect([]);
             $cartTotal = 0;
 
@@ -1553,7 +2509,7 @@ public function apply(Request $request)
                 'cartItems',
                 'cartTotal'
             ));
-            
+
         } catch (\Exception $e) {
             Log::error('Customer dashboard error: ' . $e->getMessage());
             return redirect()->route('home')->with('error', 'Unable to load dashboard. Please try again.');
@@ -1603,7 +2559,7 @@ public function apply(Request $request)
                 'unreadNotificationsCount',
                 'unreadMessagesCount'
             ));
-            
+
         } catch (\Exception $e) {
             Log::error('Following page error: ' . $e->getMessage());
             return redirect()->route('home')->with('error', 'Unable to load following list.');
@@ -1638,7 +2594,7 @@ public function apply(Request $request)
             $user->update($validated);
 
             return back()->with('success', 'Settings updated successfully.');
-            
+
         } catch (\Exception $e) {
             Log::error('Update settings error: ' . $e->getMessage());
             return back()->with('error', 'Failed to update settings. Please try again.');
@@ -1665,7 +2621,7 @@ public function apply(Request $request)
             ]);
 
             return back()->with('success', 'Password updated successfully.');
-            
+
         } catch (\Exception $e) {
             Log::error('Update password error: ' . $e->getMessage());
             return back()->with('error', 'Failed to update password. Please try again.');
@@ -1698,7 +2654,7 @@ public function apply(Request $request)
             ];
 
             return response()->json($stats);
-            
+
         } catch (\Exception $e) {
             Log::error('Get vendor stats error: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to fetch stats'], 500);
@@ -1725,7 +2681,7 @@ public function apply(Request $request)
                 ->get(['id', 'business_name', 'city', 'state', 'avatar', 'rating', 'category']);
 
             return response()->json($vendors);
-            
+
         } catch (\Exception $e) {
             Log::error('Search vendors error: ' . $e->getMessage());
             return response()->json(['error' => 'Search failed'], 500);
@@ -1752,7 +2708,7 @@ public function apply(Request $request)
                 'rating' => $vendor->rating,
                 'description' => $vendor->description,
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Get vendor error: ' . $e->getMessage());
             return response()->json(['error' => 'Vendor not found'], 404);
@@ -1780,10 +2736,87 @@ public function apply(Request $request)
             $request->user()->sendEmailVerificationNotification();
 
             return back()->with('success', 'Verification link sent!');
-            
+
         } catch (\Exception $e) {
             Log::error('Resend verification error: ' . $e->getMessage());
             return back()->with('error', 'Failed to send verification email. Please try again.');
+        }
+    }
+
+    /**
+     * Display cookie policy page.
+     */
+    public function cookiePolicy()
+    {
+        return view('pages.cookie-policy');
+    }
+
+    /**
+     * Handle contact form submission.
+     */
+    public function contactSubmit(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+        ]);
+
+        try {
+            // Here you would send email or save to database
+            // Mail::to('support@vendora.com')->send(new ContactFormMail($validated));
+
+            return redirect()->route('contact')->with('success', 'Thank you for contacting us. We will get back to you soon!');
+
+        } catch (\Exception $e) {
+            Log::error('Contact form submission error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to send message. Please try again.');
+        }
+    }
+
+    // API Methods
+    public function apiVendors(Request $request)
+    {
+        try {
+            $vendors = User::where('role', 'vendor')
+                ->where('is_active', true)
+                ->paginate(20);
+
+            return response()->json($vendors);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch vendors'], 500);
+        }
+    }
+
+    public function apiVendor($id)
+    {
+        try {
+            $vendor = User::where('role', 'vendor')
+                ->where('is_active', true)
+                ->findOrFail($id);
+
+            return response()->json($vendor);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Vendor not found'], 404);
+        }
+    }
+
+    public function apiSearch(Request $request)
+    {
+        try {
+            $query = $request->get('q');
+
+            $vendors = User::where('role', 'vendor')
+                ->where('is_active', true)
+                ->when($query, function ($q, $query) {
+                    return $q->where('business_name', 'like', "%{$query}%");
+                })
+                ->paginate(20);
+
+            return response()->json($vendors);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Search failed'], 500);
         }
     }
 }

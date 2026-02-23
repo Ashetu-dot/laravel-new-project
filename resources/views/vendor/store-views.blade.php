@@ -774,7 +774,7 @@
             <div class="page-header">
                 <div>
                     <h1>
-                        <i class="ri-eye-line" style="color: var(--primary-gold);"></i> 
+                        <i class="ri-eye-line" style="color: var(--primary-gold);"></i>
                         Store Views Analytics
                     </h1>
                     <p>Track your store's visibility and customer engagement</p>
@@ -865,7 +865,7 @@
                 <!-- Traffic Sources -->
                 <div class="insight-card">
                     <h3>🌐 Traffic Sources</h3>
-                    
+
                     <div class="traffic-source-item">
                         <div class="source-info">
                             <i class="ri-google-line" style="color: #4285F4;"></i>
@@ -914,7 +914,7 @@
                 <!-- Top Pages -->
                 <div class="insight-card">
                     <h3>📄 Most Viewed Pages</h3>
-                    
+
                     <div class="traffic-source-item">
                         <div class="source-info">
                             <span class="source-name">Homepage</span>
@@ -1048,7 +1048,7 @@
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
-            
+
             // Reload with period parameter
             window.location.href = '{{ route("vendor.store-views") }}?period=' + period;
         }

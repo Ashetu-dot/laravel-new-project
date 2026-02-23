@@ -16,6 +16,9 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ThemeController;
+use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\BlogController;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -34,80 +37,76 @@ use Illuminate\Support\Facades\Auth;
 // Homepage with dynamic stats
 Route::get('/', [VendorCustomerController::class, 'home'])->name('home');
 
-
-
 // =========================================================================
 // STATIC PAGES
 // =========================================================================
 Route::view('/privacy-policy', 'pages.privacy-policy')->name('privacy.policy');
 Route::view('/terms-of-service', 'pages.terms-of-service')->name('terms.service');
-// Route::view('/press', 'pages.press')->name('press');
 Route::get('/about', [VendorCustomerController::class, 'about'])->name('about');
+Route::get('/cookie-policy', [VendorCustomerController::class, 'cookiePolicy'])->name('cookie-policy');
+Route::view('/contact', 'pages.contact')->name('contact');
+
+// Theme routes
+Route::post('/toggle-theme', [ThemeController::class, 'toggle'])->name('theme.toggle');
+Route::get('/get-theme', [ThemeController::class, 'getTheme'])->name('theme.get');
+
+// Language switcher
+Route::post('/switch-language', [LanguageController::class, 'switch'])->name('language.switch');
 
 // Careers
-// Route::get('/careers', [VendorCustomerController::class, 'careers'])->name('careers');
-// Route::post('/careers/apply', [VendorCustomerController::class, 'apply'])->name('careers.apply');
 Route::get('/careers', [VendorCustomerController::class, 'careers'])->name('careers');
 Route::post('/careers/apply', [VendorCustomerController::class, 'apply'])->name('careers.apply');
 
-//Blog
+// Blog
 Route::get('/blog', [VendorCustomerController::class, 'blog'])->name('blog');
 Route::get('/blog/{slug}', [VendorCustomerController::class, 'blogPost'])->name('blog.post');
 Route::post('/blog/subscribe', [VendorCustomerController::class, 'blogSubscribe'])->name('blog.subscribe');
 
-//press
+// Press
 Route::get('/press', [VendorCustomerController::class, 'press'])->name('press');
 Route::post('/press/subscribe', [VendorCustomerController::class, 'pressSubscribe'])->name('press.subscribe');
 
-//Trust & Safety
+// Trust & Safety
 Route::get('/trust-safety', [VendorCustomerController::class, 'trustSafety'])->name('trust-safety');
 Route::post('/safety/report', [VendorCustomerController::class, 'safetyReport'])->name('safety.report');
 
-//help-center
+// Help Center
 Route::get('/help-center', [VendorCustomerController::class, 'helpCenter'])->name('help-center');
 Route::get('/help-center/search', [VendorCustomerController::class, 'helpSearch'])->name('help.search');
 Route::get('/help-center/article/{slug}', [VendorCustomerController::class, 'helpArticle'])->name('help.article');
 
-
-//invite friends
+// Invite Friends
 Route::get('/invite', [VendorCustomerController::class, 'invite'])->name('invite');
 Route::post('/invite/send', [VendorCustomerController::class, 'sendInvite'])->name('invite.send');
 
 // How it works
 Route::get('/how-it-works', [VendorCustomerController::class, 'howItWorks'])->name('how-it-works');
 
-//feature
+// Features
 Route::get('/features', [VendorCustomerController::class, 'features'])->name('features');
 
-//list-service
+// List Service
 Route::get('/list-service', [VendorCustomerController::class, 'listService'])->name('list-service');
 
-//vendor-resources
+// Vendor Resources
 Route::get('/vendor-resources', [VendorCustomerController::class, 'vendorResources'])->name('vendor-resources');
 
-//success stories
+// Success Stories
 Route::get('/success-stories', [VendorCustomerController::class, 'successStories'])->name('success-stories');
 
-//Community
+// Community
 Route::get('/community', [VendorCustomerController::class, 'community'])->name('community');
-
-
-// Route::get('/privacy-policy', [VendorCustomerController::class, 'privacyPolicy'])->name('privacy-policy');
-// Route::get('/terms-of-service', [VendorCustomerController::class, 'termsOfService'])->name('terms-of-service');
-Route::get('/cookie-policy', [VendorCustomerController::class, 'cookiePolicy'])->name('cookie-policy');
-
-Route::view('/contact', 'pages.contact')->name('contact');
 
 // =========================================================================
 // PUBLIC VENDOR SEARCH & PROFILES
 // =========================================================================
 
 // Vendor search and listing
+Route::get('/compare', [VendorController::class, 'compare'])->name('vendors.compare');
+Route::get('/vendors/{vendor}/quick-view', [VendorCustomerController::class, 'quickView'])->name('vendor.quick-view');
 Route::get('/search', [VendorCustomerController::class, 'search'])->name('search.results');
 Route::get('/vendors/search', [VendorCustomerController::class, 'searchVendors'])->name('vendors.search');
 Route::get('/vendors/{id}', [VendorCustomerController::class, 'showVendor'])->name('vendor.show');
-
-// AJAX endpoint for getting vendor details
 Route::get('/vendors/{id}/details', [VendorCustomerController::class, 'getVendor'])->name('vendors.get');
 
 // =========================================================================
@@ -119,9 +118,11 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [VendorCustomerController::class, 'index'])->name('login');
     Route::post('/login', [VendorCustomerController::class, 'store'])->name('login.authenticate');
 
-    // Admin Login
+    //Admin Login
     Route::get('/admin/login', [AdminController::class, 'create'])->name('admin.login');
-    Route::post('/admin/login', [VendorCustomerController::class, 'adminLogin'])->name('admin.login.submit');
+    Route::post('/admin/login', [AdminController::class, 'store'])->name('admin.login.submit');
+
+   
 
     // Vendor Registration (Multi-step)
     Route::get('/register', [VendorCustomerController::class, 'create'])->name('register');
@@ -171,7 +172,37 @@ Route::middleware('auth')->group(function () {
 
     // Follow/Unfollow vendors
     Route::post('/vendor/{id}/follow', [VendorCustomerController::class, 'follow'])->name('vendor.follow');
-    Route::post('/vendor/{id}/unfollow', [VendorCustomerController::class, 'unfollow'])->name('vendor.unfollow');
+    Route::delete('/vendor/{id}/unfollow', [VendorCustomerController::class, 'unfollow'])->name('vendor.unfollow');
+    
+    // AJAX endpoints for follow/unfollow
+    Route::post('/vendors/{vendor}/follow', [VendorCustomerController::class, 'followVendor'])->name('vendor.follow.ajax');
+    Route::delete('/vendors/{vendor}/unfollow', [VendorCustomerController::class, 'unfollowVendor'])->name('vendor.unfollow.ajax');
+    
+    // Save/Unsave vendors
+    Route::post('/vendors/{vendor}/save', [VendorCustomerController::class, 'saveVendor'])->name('vendor.save');
+    Route::post('/vendors/{vendor}/unsave', [VendorCustomerController::class, 'unsaveVendor'])->name('vendor.unsave');
+
+    // Contact Vendor
+    Route::post('/contact/vendor', [VendorCustomerController::class, 'sendContactMessage'])->name('contact.vendor');
+});
+
+// =========================================================================
+// NOTIFICATION ROUTES (Accessible by all authenticated users)
+// =========================================================================
+
+Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('unread-count');
+    Route::get('/recent', [NotificationController::class, 'getRecent'])->name('recent');
+});
+
+// =========================================================================
+// SEARCH HISTORY ROUTES
+// =========================================================================
+
+Route::middleware(['auth'])->group(function () {
+    Route::delete('/search/history/{id}', [VendorCustomerController::class, 'removeSearchHistory'])->name('search.history.remove');
+    Route::delete('/search/history/clear/all', [VendorCustomerController::class, 'clearSearchHistory'])->name('search.history.clear');
+    Route::post('/search/save', [VendorCustomerController::class, 'saveSearch'])->name('search.save');
 });
 
 // =========================================================================
@@ -213,7 +244,37 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/customer/dashboard', [VendorCustomerController::class, 'customerDashboard'])
         ->name('customer.dashboard')
         ->middleware('role:customer');
+
+
+
+
+
+
+//take this
+
+
+
+
+
+
+
+
+
+   // Admin dashboard - FIXED: Now points to AdminController
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])
+        ->name('admin.dashboard')
+        ->middleware('role:admin');
+
+
+
 });
+
+// =========================================================================
+// PUBLIC PRODUCT ROUTES
+// =========================================================================
+Route::get('/product/{id}', [ProductController::class, 'publicShow'])->name('product.show');
+Route::get('/products', [ProductController::class, 'publicIndex'])->name('products.public');
+Route::get('/products/category/{category}', [ProductController::class, 'byCategory'])->name('products.category');
 
 // =========================================================================
 // COMPLETE VENDOR ROUTES
@@ -224,6 +285,10 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     Route::get('/dashboard', [VendorCustomerController::class, 'vendorDashboard'])->name('dashboard');
     Route::get('/store/{id}', [VendorCustomerController::class, 'showVendor'])->name('store');
     Route::get('/store', [VendorCustomerController::class, 'showVendor'])->name('store.index');
+
+    // ======== VENDOR PROFILE ========
+    // FIXED: Using vendorProfile method instead of show
+    Route::get('/profile', [VendorCustomerController::class, 'vendorProfile'])->name('profile');
 
     // ======== ORDERS MANAGEMENT ========
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
@@ -243,6 +308,9 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 
+    // Vendor products listing for public
+    Route::get('/{vendor}/products', [ProductController::class, 'vendorProducts'])->name('products');
+
     // Product status updates
     Route::patch('/products/{id}/activate', [ProductController::class, 'activate'])->name('products.activate');
     Route::patch('/products/{id}/deactivate', [ProductController::class, 'deactivate'])->name('products.deactivate');
@@ -252,6 +320,10 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     Route::post('/products/bulk-delete', [ProductController::class, 'bulkDelete'])->name('products.bulk-delete');
     Route::patch('/products/bulk-activate', [ProductController::class, 'bulkActivate'])->name('products.bulk-activate');
     Route::patch('/products/bulk-deactivate', [ProductController::class, 'bulkDeactivate'])->name('products.bulk-deactivate');
+
+    // Notification AJAX endpoints
+    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+    Route::get('/notifications/recent', [NotificationController::class, 'getRecent'])->name('notifications.recent');
 
     // AJAX endpoints for products
     Route::get('/products-list', [ProductController::class, 'getVendorProducts'])->name('products.list');
@@ -267,6 +339,7 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     // ======== ANALYTICS ========
     Route::get('/sales-report', [VendorController::class, 'salesReport'])->name('sales-report');
     Route::get('/store-views', [VendorController::class, 'storeViews'])->name('store-views');
+    Route::get('/export-sales', [VendorController::class, 'exportSalesReport'])->name('export-sales');
 
     // ======== REVIEWS MANAGEMENT ========
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
@@ -275,15 +348,21 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     Route::get('/reviews-stats', [ReviewController::class, 'getStats'])->name('reviews.stats');
 
     // ======== SETTINGS ========
-    Route::get('/profile', [VendorCustomerController::class, 'show'])->name('profile');
-    Route::get('/settings', [VendorCustomerController::class, 'edit'])->name('settings');
+    // IMPORTANT: This was duplicated - we're keeping only one profile route
+    // Route::get('/profile', [VendorCustomerController::class, 'show'])->name('profile'); // REMOVED - duplicate
+    // Route::get('/settings', [VendorCustomerController::class, 'edit'])->name('settings');
+
+    Route::get('/settings', [VendorCustomerController::class, 'vendorSettings'])->name('settings');
     Route::post('/settings', [VendorCustomerController::class, 'updateSettings'])->name('settings.update');
     Route::post('/password', [VendorCustomerController::class, 'updatePassword'])->name('password.update');
 
     // ======== NOTIFICATIONS ========
     Route::get('/notifications', [VendorController::class, 'notifications'])->name('notifications');
+    Route::get('/notifications/{id}', [VendorController::class, 'getNotification'])->name('notifications.get');
     Route::post('/notifications/{id}/read', [VendorController::class, 'markNotificationAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [VendorController::class, 'markAllNotificationsAsRead'])->name('notifications.read-all');
+    Route::delete('/notifications/{id}', [VendorController::class, 'deleteNotification'])->name('notifications.delete');
+    Route::delete('/notifications/clear-all', [VendorController::class, 'clearAllNotifications'])->name('notifications.clear-all');
     Route::get('/unread-counts', [VendorController::class, 'getUnreadCounts'])->name('unread-counts');
 
     // ======== MESSAGES ========
@@ -300,6 +379,16 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
 
     // ======== CUSTOMER DASHBOARD ========
     Route::get('/dashboard', [VendorCustomerController::class, 'customerDashboard'])->name('dashboard');
+
+    // ======== NOTIFICATIONS ========
+    Route::get('/notifications', [NotificationController::class, 'customerNotifications'])->name('notifications');
+    Route::get('/notifications/{id}', [NotificationController::class, 'show'])->name('notifications.show');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::delete('/notifications/clear-all', [NotificationController::class, 'clearAll'])->name('notifications.clear-all');
+    Route::get('/notifications/recent', [NotificationController::class, 'getRecent'])->name('notifications.recent');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
 
     // ======== WISHLIST MANAGEMENT ========
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
@@ -343,13 +432,6 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::post('/settings', [VendorCustomerController::class, 'updateSettings'])->name('settings.update');
     Route::post('/password', [VendorCustomerController::class, 'updatePassword'])->name('password.update');
 
-    // ======== CUSTOMER NOTIFICATIONS ========
-    Route::get('/notifications', [NotificationController::class, 'customerNotifications'])->name('notifications');
-    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
-    Route::get('/notifications/recent', [NotificationController::class, 'getRecent'])->name('notifications.recent');
-    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
-
     // ======== CUSTOMER MESSAGES ========
     Route::get('/messages', [MessageController::class, 'customerMessages'])->name('messages');
     Route::post('/messages/send', [MessageController::class, 'send'])->name('messages.send');
@@ -365,10 +447,12 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
 Route::prefix('admin')->name('admin.')->group(function () {
 
     // Guest admin routes (login only)
-    Route::middleware('guest')->group(function () {
+     Route::middleware('guest')->group(function () {
         Route::get('/login', [AdminController::class, 'create'])->name('login');
         Route::post('/login', [AdminController::class, 'store'])->name('login.submit');
-    });
+      });
+    //       Route::get('/admin/login', [AdminController::class, 'create'])->name('admin.login');
+    //  Route::post('/admin/login', [AdminController::class, 'store'])->name('admin.login.submit');
 
     // Protected admin routes
     Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -379,6 +463,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Dashboard
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
         Route::get('/search', [AdminController::class, 'search'])->name('search');
+
+    //       Route::get('/admin/login', [AdminController::class, 'create'])->name('admin.login');
+    // Route::post('/admin/login', [AdminController::class, 'adminLogin'])->name('admin.login.submit');
 
         // ======== ORDERS MANAGEMENT ========
         Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
@@ -438,37 +525,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
 
-        // ======== ADMIN MANAGEMENT (Super Admin only) ========
-        Route::middleware('permission:manage-admins')->group(function () {
-            Route::get('/admins', [AdminController::class, 'list'])->name('admins.list');
-            Route::get('/admins/create', [AdminController::class, 'createAdmin'])->name('admins.create');
-            Route::post('/admins', [AdminController::class, 'storeAdmin'])->name('admins.store');
-            Route::get('/admins/{id}', [AdminController::class, 'show'])->name('admins.show');
-            Route::get('/admins/{id}/edit', [AdminController::class, 'edit'])->name('admins.edit');
-            Route::put('/admins/{id}', [AdminController::class, 'update'])->name('admins.update');
-            Route::delete('/admins/{id}', [AdminController::class, 'destroy'])->name('admins.destroy');
-            Route::post('/admins/{id}/status', [AdminController::class, 'changeStatus'])->name('admins.status');
-        });
+        // ======== ADMIN NOTIFICATIONS ========
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+        Route::get('/notifications/{id}', [NotificationController::class, 'show'])->name('notifications.show');
+        Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+        Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+        Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+        Route::delete('/notifications/clear-all', [NotificationController::class, 'clearAll'])->name('notifications.clear-all');
+        Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
 
-        // ======== ROLES & PERMISSIONS ========
-        Route::get('/roles', [AdminController::class, 'roles'])->name('roles');
-        Route::get('/roles/create', [AdminController::class, 'createRole'])->name('roles.create');
-        Route::post('/roles', [AdminController::class, 'storeRole'])->name('roles.store');
-        Route::get('/roles/{id}/edit', [AdminController::class, 'editRole'])->name('roles.edit');
-        Route::put('/roles/{id}', [AdminController::class, 'updateRole'])->name('roles.update');
-        Route::delete('/roles/{id}', [AdminController::class, 'deleteRole'])->name('roles.delete');
-
-        // ======== NOTIFICATIONS ========
-        Route::get('/notifications', [AdminController::class, 'notifications'])->name('notifications');
-        Route::post('/notifications/{id}/read', [AdminController::class, 'markNotificationAsRead'])->name('notifications.read');
-        Route::post('/notifications/read-all', [AdminController::class, 'markAllNotificationsAsRead'])->name('notifications.read-all');
-        Route::get('/notifications/unread-count', [AdminController::class, 'getUnreadCount'])->name('notifications.unread-count');
-
-        // ======== MESSAGES ========
-        Route::get('/messages', [AdminController::class, 'messages'])->name('messages');
-        Route::get('/messages/{id}', [AdminController::class, 'showMessage'])->name('messages.show');
-        Route::post('/messages/{id}/reply', [AdminController::class, 'replyMessage'])->name('messages.reply');
-        Route::get('/messages/conversation/{userId}', [AdminController::class, 'getConversation'])->name('messages.conversation');
+        // ======== ADMIN MESSAGES ========
+        Route::get('/messages', [MessageController::class, 'index'])->name('messages');
+        Route::get('/messages/{id}', [MessageController::class, 'show'])->name('messages.show');
+        Route::post('/messages/{id}/reply', [MessageController::class, 'reply'])->name('messages.reply');
+        Route::get('/messages/conversation/{userId}', [MessageController::class, 'getConversation'])->name('messages.conversation');
 
         // ======== HELP & SUPPORT ========
         Route::get('/help', [AdminController::class, 'help'])->name('help');
@@ -491,11 +561,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/stats', [AdminController::class, 'getStats'])->name('stats');
             Route::get('/chart-data', [AdminController::class, 'getChartDataAjax'])->name('chart.data');
         });
+
+        // Blog routes
+        Route::prefix('blog')->name('blog.')->group(function () {
+            Route::get('/', [VendorCustomerController::class, 'blog'])->name('index');
+            Route::get('/search', [BlogController::class, 'search'])->name('search');
+            Route::get('/category/{slug}', [BlogController::class, 'category'])->name('category');
+            Route::get('/tag/{slug}', [BlogController::class, 'tag'])->name('tag');
+            Route::get('/{slug}', [BlogController::class, 'show'])->name('show');
+            Route::post('/newsletter', [BlogController::class, 'newsletter'])->name('newsletter');
+        });
     });
 });
 
 // =========================================================================
-// API ROUTES (Optional - if you need API endpoints)
+// API ROUTES
 // =========================================================================
 
 Route::prefix('api')->name('api.')->group(function () {
@@ -532,9 +612,22 @@ Route::prefix('api')->name('api.')->group(function () {
 });
 
 // =========================================================================
+// CONTACT FORM SUBMISSION
+// =========================================================================
+Route::post('/contact/submit', [VendorCustomerController::class, 'contactSubmit'])->name('contact.submit');
+
+// =========================================================================
+// REVIEW ROUTES
+// =========================================================================
+Route::get('/vendors/{id}/reviews', [VendorCustomerController::class, 'loadMoreReviews'])->name('vendor.reviews');
+
+// =========================================================================
 // FALLBACK ROUTE (404 handling)
 // =========================================================================
 
 Route::fallback(function () {
     return view('errors.404');
 });
+
+
+
