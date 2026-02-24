@@ -7,8 +7,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-
-
         :root {
             --primary-gold: #B88E3F;
             --primary-gold-hover: #9c7832;
@@ -235,6 +233,25 @@
             background-color: #FFEBEE;
             color: var(--error-color);
             border: 1px solid #FFCDD2;
+        }
+
+        /* Vendor Info Message */
+        .vendor-info-message {
+            background-color: #fef3e7;
+            border-left: 4px solid var(--primary-gold);
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #7d5d2c;
+        }
+
+        .vendor-info-message i {
+            color: var(--primary-gold);
+            font-size: 20px;
         }
 
         /* Form */
@@ -811,6 +828,21 @@
                 <button type="button" class="role-tab" data-role="vendor" onclick="setRole('vendor')">
                     <i class="ri-store-line"></i> Vendor
                 </button>
+                <button type="button" class="role-tab" data-role="admin" onclick="setRole('admin')">
+                    <i class="ri-shield-user-line"></i> Admin
+                </button>
+            </div>
+
+            <!-- Vendor Info Message (Hidden by default) -->
+            <div id="vendorInfoMessage" class="vendor-info-message" style="display: none;">
+                <i class="ri-information-line"></i>
+                <span>Vendor accounts require admin approval. If your account is not approved yet, you won't be able to login.</span>
+            </div>
+
+            <!-- Admin Info Message (Hidden by default) -->
+            <div id="adminInfoMessage" class="vendor-info-message" style="display: none; background-color: #ffebee; border-left-color: var(--error-color);">
+                <i class="ri-shield-keyhole-line"></i>
+                <span>Admin access is restricted to authorized personnel only.</span>
             </div>
 
             <!-- Login Form -->
@@ -830,7 +862,8 @@
                                placeholder="Enter your email"
                                value="{{ old('email') }}"
                                required
-                               autofocus>
+                               autofocus
+                               autocomplete="email">
                     </div>
                     @error('email')
                         <div class="error-message">
@@ -849,7 +882,8 @@
                                name="password"
                                class="form-control @error('password') error @enderror"
                                placeholder="Enter your password"
-                               required>
+                               required
+                               autocomplete="current-password">
                         <i class="ri-eye-off-line toggle-password" onclick="togglePassword(this)"></i>
                     </div>
                     @error('password')
@@ -893,8 +927,8 @@
     <div class="footer-minimal">
         <div>&copy; {{ date('Y') }} Vendora. All rights reserved. Jimma, Ethiopia</div>
         <div class="footer-links">
-            <a href="{{ route('privacy.policy') }}">Privacy Policy</a>
-            <a href="{{ route('terms.service') }}">Terms of Service</a>
+            <a href="{{ route('privacy-policy') }}">Privacy Policy</a>
+            <a href="{{ route('terms-of-service') }}">Terms of Service</a>
             <a href="{{ route('contact') }}">Contact Us</a>
         </div>
     </div>
@@ -919,15 +953,28 @@
             // Update welcome text based on role
             const title = document.getElementById('welcomeTitle');
             const subtitle = document.getElementById('welcomeSubtitle');
+            const emailField = document.getElementById('email');
+            const vendorMessage = document.getElementById('vendorInfoMessage');
+            const adminMessage = document.getElementById('adminInfoMessage');
+
+            // Hide all messages first
+            vendorMessage.style.display = 'none';
+            adminMessage.style.display = 'none';
 
             if (role === 'vendor') {
                 title.textContent = 'Welcome Vendor!';
                 subtitle.textContent = 'Sign in to manage your store';
-                document.getElementById('email').placeholder = 'Enter your business email';
+                emailField.placeholder = 'Enter your business email';
+                vendorMessage.style.display = 'flex';
+            } else if (role === 'admin') {
+                title.textContent = 'Admin Login';
+                subtitle.textContent = 'Sign in to access admin dashboard';
+                emailField.placeholder = 'Enter your admin email';
+                adminMessage.style.display = 'flex';
             } else {
                 title.textContent = 'Welcome Back!';
                 subtitle.textContent = 'Sign in to continue to your account';
-                document.getElementById('email').placeholder = 'Enter your email';
+                emailField.placeholder = 'Enter your email';
             }
 
             // Save to localStorage
@@ -948,7 +995,7 @@
             }
         }
 
-        // Form submission with loading state - FIXED VERSION
+        // Form submission with loading state
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const submitBtn = document.getElementById('submitBtn');
 
@@ -961,10 +1008,6 @@
             // Disable button and show spinner
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Signing in...';
-
-            // The form will submit normally - no need to prevent default
-            // The button will remain disabled during form submission
-            // If the page redirects, the button state will be reset automatically
         });
 
         // Auto-hide alerts after 5 seconds
@@ -975,8 +1018,6 @@
                 setTimeout(() => alert.remove(), 500);
             });
         }, 5000);
-
-
 
         // Input focus effects
         document.querySelectorAll('.form-control').forEach(input => {
@@ -989,7 +1030,7 @@
             });
         });
 
-        // Prevent double submission with a flag - SIMPLIFIED
+        // Prevent double submission with a flag
         let submitted = false;
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             if (submitted) {
@@ -1006,7 +1047,7 @@
 
         // Load last selected role from localStorage
         const lastRole = localStorage.getItem('lastLoginRole');
-        if (lastRole) {
+        if (lastRole && ['customer', 'vendor', 'admin'].includes(lastRole)) {
             setRole(lastRole);
         } else {
             setRole('customer');
@@ -1023,7 +1064,39 @@
             }
         });
 
+        // Mobile menu toggle (if needed)
+        document.getElementById('menuBtn')?.addEventListener('click', function() {
+            // Add your mobile menu logic here if needed
+            console.log('Menu clicked');
+        });
 
+        // Add email validation on blur
+        document.getElementById('email').addEventListener('blur', function() {
+            const email = this.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !emailRegex.test(email)) {
+                // Show invalid email message without blocking
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = '<i class="ri-error-warning-fill"></i> Please enter a valid email address';
+                
+                // Remove any existing error message
+                const existingError = this.parentElement.parentElement.querySelector('.error-message');
+                if (existingError) {
+                    existingError.remove();
+                }
+                
+                this.parentElement.parentElement.appendChild(errorDiv);
+                this.classList.add('error');
+            } else {
+                this.classList.remove('error');
+                const existingError = this.parentElement.parentElement.querySelector('.error-message');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+        });
     </script>
 </body>
 </html>

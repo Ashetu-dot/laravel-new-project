@@ -15,7 +15,7 @@ class CheckPermission
     public function handle(Request $request, Closure $next, ...$permissions): Response
     {
         if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Please login first.');
+            return redirect()->guest(route('login'))->with('error', 'Please login first.');
         }
 
         $user = Auth::user();
@@ -23,6 +23,7 @@ class CheckPermission
         // Super admin has all permissions
         if ($user->role === 'admin' && $user->email === 'admin@vendora.com') {
             return $next($request);
+            
         }
 
         // Check if user has any of the required permissions

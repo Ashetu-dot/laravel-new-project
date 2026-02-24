@@ -2389,8 +2389,8 @@
                 <a href="{{ route('home') }}">{{ __('Home') }}</a>
                 <a href="{{ route('search.results') }}">{{ __('Browse Vendors') }}</a>
                 <a href="{{ route('register') }}">{{ __('Become a Vendor') }}</a>
-                <a href="{{ route('privacy.policy') }}">{{ __('Privacy Policy') }}</a>
-                <a href="{{ route('terms.service') }}">{{ __('Terms of Service') }}</a>
+                <a href="{{ route('privacy-policy') }}">{{ __('Privacy Policy') }}</a>
+                <a href="{{ route('terms-of-service') }}">{{ __('Terms of Service') }}</a>
                 <a href="{{ route('contact') }}">{{ __('Contact Us') }}</a>
             </div>
             <p>&copy; {{ date('Y') }} Vendora Marketplace. {{ __('Connecting Jimma with local vendors. All rights reserved.') }}</p>
