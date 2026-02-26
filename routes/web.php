@@ -303,14 +303,27 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
 
     // ======== ANALYTICS ========
     Route::get('/sales-report', [VendorController::class, 'salesReport'])->name('sales-report');
-    Route::get('/store-views', [VendorController::class, 'storeViews'])->name('store-views');
     Route::get('/export-sales', [VendorController::class, 'exportSalesReport'])->name('export-sales');
+    
+    // Store views
+    Route::get('/store-views', [VendorController::class, 'storeViews'])->name('store-views');
+    Route::get('/export-store-views', [VendorController::class, 'exportStoreViews'])->name('export-store-views');
+
 
     // ======== REVIEWS MANAGEMENT ========
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+    Route::get('/reviews/{id}', [ReviewController::class, 'show'])->name('reviews.show');
     Route::post('/reviews/{id}/approve', [ReviewController::class, 'approve'])->name('reviews.approve');
+    Route::post('/reviews/{id}/reject', [ReviewController::class, 'reject'])->name('reviews.reject');
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
     Route::get('/reviews-stats', [ReviewController::class, 'getStats'])->name('reviews.stats');
+
+    // Bulk operations
+    Route::post('/reviews/bulk-approve', [ReviewController::class, 'bulkApprove'])->name('reviews.bulk-approve');
+    Route::post('/reviews/bulk-delete', [ReviewController::class, 'bulkDelete'])->name('reviews.bulk-delete');
+    
+    // Export
+    Route::get('/reviews/export', [ReviewController::class, 'export'])->name('reviews.export');
 
     // ======== SETTINGS ========
     Route::get('/settings', [VendorCustomerController::class, 'vendorSettings'])->name('settings');
@@ -331,6 +344,15 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     Route::get('/messages/conversation/{userId}', [VendorController::class, 'getConversation'])->name('messages.conversation');
     Route::post('/messages/send', [VendorController::class, 'sendMessage'])->name('messages.send');
     Route::post('/messages/{id}/read', [VendorController::class, 'markMessageAsRead'])->name('messages.read');
+
+    // Saved vendors
+    Route::get('/saved', [VendorController::class, 'getSavedVendors'])->name('saved');
+    Route::post('/save/{vendor}', [VendorController::class, 'saveVendor'])->name('save');
+    Route::delete('/unsave/{vendor}', [VendorController::class, 'unsaveVendor'])->name('unsave');
+    Route::get('/check-saved/{vendor}', [VendorController::class, 'checkSavedVendor'])->name('check-saved');
+
+    // Stats
+    Route::get('/stats', [VendorController::class, 'getVendorStats'])->name('stats');
 });
 
 // =========================================================================
@@ -422,6 +444,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Dashboard
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
         Route::get('/search', [AdminController::class, 'search'])->name('search');
+
+
+         
+
+
+        // ======== ADMIN MANAGEMENT (ADD THIS SECTION) ========
+        Route::get('/admins', [AdminController::class, 'admins'])->name('admins.list');
+        Route::get('/admins/create', [AdminController::class, 'createAdmin'])->name('admins.create');
+        Route::post('/admins', [AdminController::class, 'storeAdmin'])->name('admins.store');
+        Route::get('/admins/{id}', [AdminController::class, 'showAdmin'])->name('admins.show');
+        Route::get('/admins/{id}/edit', [AdminController::class, 'editAdmin'])->name('admins.edit');
+        Route::put('/admins/{id}', [AdminController::class, 'updateAdmin'])->name('admins.update');
+        Route::delete('/admins/{id}', [AdminController::class, 'deleteAdmin'])->name('admins.delete');
+        Route::post('/admins/{id}/toggle-status', [AdminController::class, 'toggleAdminStatus'])->name('admins.toggle-status');
+
+
+
+
+
+
+           // ======== ROLES & PERMISSIONS  ========
+        Route::get('/roles', [AdminController::class, 'roles'])->name('roles');
+        Route::get('/roles/create', [AdminController::class, 'createRole'])->name('roles.create');
+        Route::post('/roles', [AdminController::class, 'storeRole'])->name('roles.store');
+        Route::get('/roles/{id}', [AdminController::class, 'showRole'])->name('roles.show');
+        Route::get('/roles/{id}/edit', [AdminController::class, 'editRole'])->name('roles.edit');
+        Route::put('/roles/{id}', [AdminController::class, 'updateRole'])->name('roles.update');
+        Route::delete('/roles/{id}', [AdminController::class, 'deleteRole'])->name('roles.delete');
         
          // ======== USERS MANAGEMENT (ADD THIS SECTION) ========
         Route::get('/users', [AdminController::class, 'users'])->name('users');
@@ -517,6 +567,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // ======== HELP & SUPPORT ========
         Route::get('/help', [AdminController::class, 'help'])->name('help');
         Route::get('/documentation', [AdminController::class, 'documentation'])->name('documentation');
+        Route::get('/documentation/pdf', [AdminController::class, 'downloadDocumentationPDF'])->name('help.documentation.pdf');
 
         // ======== ANALYTICS & STATISTICS ========
         Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');

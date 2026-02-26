@@ -23,6 +23,7 @@
             --success: #10b981;
             --warning: #f59e0b;
             --error: #ef4444;
+            --chapa: #4F46E5;
         }
 
         /* Dark Mode Variables */
@@ -36,6 +37,7 @@
             --light-gray: #111827;
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             --shadow-hover: 0 8px 30px rgba(212, 165, 90, 0.2);
+            --chapa: #6366F1;
         }
 
         * {
@@ -462,6 +464,55 @@
         .feature-tag.active {
             background: var(--primary-gold);
             color: white;
+        }
+
+        /* Payment Method Tags - Specific for Cash and Chapa */
+        .payment-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 2px;
+            transition: var(--transition);
+        }
+
+        .payment-tag.cash {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+        }
+
+        .payment-tag.cash:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+        }
+
+        .payment-tag.chapa {
+            background: linear-gradient(135deg, var(--chapa), #818CF8);
+            color: white;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+        }
+
+        .payment-tag.chapa:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Chapa Badge */
+        .chapa-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #4F46E5, #818CF8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
         }
 
         /* Back Button */
@@ -939,31 +990,54 @@
                 @endforeach
             </div>
 
-            <!-- Payment Methods Row -->
+            <!-- Payment Methods Row - UPDATED with only Cash and Chapa -->
             <div class="compare-row">
                 <div class="compare-cell label">{{ __('Payment Methods') }}</div>
                 @foreach($comparisonData as $vendor)
                 <div class="compare-cell">
                     @if(isset($vendor['payment_methods']) && count($vendor['payment_methods']) > 0)
-                        <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
                             @foreach($vendor['payment_methods'] as $method)
-                                @php
-                                    $icons = [
-                                        'cash' => 'ri-bank-card-line',
-                                        'card' => 'ri-bank-card-2-line',
-                                        'bank' => 'ri-bank-line',
-                                        'telebirr' => 'ri-wifi-line',
-                                        'm-pesa' => 'ri-phone-line',
-                                    ];
-                                    $icon = $icons[$method] ?? 'ri-bank-card-line';
-                                @endphp
-                                <span class="feature-tag" title="{{ ucfirst($method) }}">
-                                    <i class="{{ $icon }}"></i>
-                                </span>
+                                @if(in_array($method, ['cash', 'chapa']))
+                                    @if($method === 'cash')
+                                    <span class="payment-tag cash" title="{{ __('Cash on Delivery') }}">
+                                        <i class="ri-bank-card-line"></i>
+                                        {{ __('Cash') }}
+                                    </span>
+                                    @elseif($method === 'chapa')
+                                    <span class="payment-tag chapa" title="{{ __('Pay with Chapa') }}">
+                                        <i class="ri-flashlight-line"></i>
+                                        Chapa
+                                    </span>
+                                    @endif
+                                @endif
                             @endforeach
                         </div>
                     @else
-                        <span class="text-muted">{{ __('Cash on delivery') }}</span>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+                            <!-- Default to Cash if no payment methods specified -->
+                            <span class="payment-tag cash" title="{{ __('Cash on Delivery') }}">
+                                <i class="ri-bank-card-line"></i>
+                                {{ __('Cash') }}
+                            </span>
+                        </div>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+
+            <!-- Chapa Badge Row - Additional row for Chapa information -->
+            <div class="compare-row">
+                <div class="compare-cell label">{{ __('Online Payment') }}</div>
+                @foreach($comparisonData as $vendor)
+                <div class="compare-cell">
+                    @if(isset($vendor['payment_methods']) && in_array('chapa', $vendor['payment_methods']))
+                        <div class="chapa-badge">
+                            <i class="ri-flashlight-fill"></i>
+                            {{ __('Chapa Secure Payment') }}
+                        </div>
+                    @else
+                        <span class="text-muted">{{ __('Cash only') }}</span>
                     @endif
                 </div>
                 @endforeach

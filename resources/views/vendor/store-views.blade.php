@@ -355,11 +355,17 @@
             font-weight: 500;
             cursor: pointer;
             color: var(--text-secondary);
+            transition: all 0.2s;
         }
 
         .date-range-btn.active {
             background-color: var(--primary-gold);
             color: white;
+        }
+
+        .date-range-btn:hover:not(.active) {
+            background-color: #f3f4f6;
+            color: var(--primary-gold);
         }
 
         /* Stats Grid */
@@ -389,6 +395,12 @@
             display: flex;
             align-items: center;
             gap: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
         }
 
         .stat-icon {
@@ -463,10 +475,13 @@
             height: 240px;
             gap: 8px;
             margin-top: 30px;
+            overflow-x: auto;
+            padding-bottom: 10px;
         }
 
         .bar-wrapper {
             flex: 1;
+            min-width: 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -479,6 +494,32 @@
             border-radius: 8px 8px 0 0;
             transition: height 0.3s ease;
             min-height: 4px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .bar:hover {
+            background: linear-gradient(to top, #9c7832, #d4a959);
+        }
+
+        .bar-tooltip {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--sidebar-bg);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .bar:hover .bar-tooltip {
+            opacity: 1;
         }
 
         .bar-label {
@@ -513,6 +554,9 @@
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .traffic-source-item {
@@ -554,6 +598,7 @@
             height: 100%;
             background-color: var(--primary-gold);
             border-radius: 20px;
+            transition: width 0.3s ease;
         }
 
         /* Page Views Table */
@@ -617,6 +662,12 @@
             transition: all 0.2s;
         }
 
+        .pagination-item:hover {
+            background-color: var(--primary-gold);
+            color: white;
+            border-color: var(--primary-gold);
+        }
+
         .pagination-item.active {
             background-color: var(--primary-gold);
             color: white;
@@ -644,6 +695,8 @@
 
         .btn-primary:hover {
             background-color: #9c7832;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(184, 142, 63, 0.3);
         }
 
         .btn-secondary {
@@ -655,6 +708,33 @@
         .btn-secondary:hover {
             border-color: var(--primary-gold);
             color: var(--primary-gold);
+            background-color: #fef3e7;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(184, 142, 63, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-gold);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--border-color);
         }
     </style>
 </head>
@@ -676,7 +756,7 @@
                 <a href="{{ route('vendor.dashboard') }}" class="nav-item">
                     <i class="ri-dashboard-line"></i> Dashboard
                 </a>
-                <a href="{{ route('vendor.show', Auth::user()->id) }}" class="nav-item">
+                <a href="{{ route('vendor.store', Auth::user()->id) }}" class="nav-item">
                     <i class="ri-store-line"></i> My Store
                 </a>
                 <a href="{{ route('vendor.orders.index') }}" class="nav-item">
@@ -712,15 +792,15 @@
 
             <div class="nav-group">
                 <div class="nav-label">SETTINGS</div>
-                <a href="{{ route('profile.show', Auth::user()->id) }}" class="nav-item">
+                <a href="{{ route('vendor.profile') }}" class="nav-item">
                     <i class="ri-user-line"></i> Profile
                 </a>
-                <a href="{{ route('profile.edit', Auth::user()->id) }}" class="nav-item">
+                <a href="{{ route('vendor.settings') }}" class="nav-item">
                     <i class="ri-settings-4-line"></i> Store Settings
                 </a>
                 <form method="POST" action="{{ route('logout') }}" style="display: block; margin-top: 8px;">
                     @csrf
-                    <button type="submit" class="logout-btn">
+                    <button type="submit" class="logout-btn" onclick="return confirm('Are you sure you want to logout?')">
                         <i class="ri-logout-box-line"></i> Logout
                     </button>
                 </form>
@@ -729,7 +809,11 @@
 
         <div class="user-profile">
             <div class="avatar">
-                {{ substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2) }}
+                @if(Auth::user()->avatar)
+                    <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->business_name ?? Auth::user()->name }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                @else
+                    {{ strtoupper(substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2)) }}
+                @endif
             </div>
             <div class="user-info">
                 <h4>{{ Auth::user()->business_name ?? Auth::user()->name }}</h4>
@@ -779,15 +863,15 @@
                     </h1>
                     <p>Track your store's visibility and customer engagement</p>
                 </div>
-                <div class="date-range">
-                    <button class="date-range-btn active" onclick="setPeriod('today')">Today</button>
-                    <button class="date-range-btn" onclick="setPeriod('week')">Week</button>
-                    <button class="date-range-btn" onclick="setPeriod('month')">Month</button>
-                    <button class="date-range-btn" onclick="setPeriod('year')">Year</button>
+                <div class="date-range" id="dateRangeFilter">
+                    <button class="date-range-btn {{ $period === 'today' ? 'active' : '' }}" data-period="today" onclick="setPeriod('today')">Today</button>
+                    <button class="date-range-btn {{ $period === 'week' ? 'active' : '' }}" data-period="week" onclick="setPeriod('week')">Week</button>
+                    <button class="date-range-btn {{ $period === 'month' ? 'active' : '' }}" data-period="month" onclick="setPeriod('month')">Month</button>
+                    <button class="date-range-btn {{ $period === 'year' ? 'active' : '' }}" data-period="year" onclick="setPeriod('year')">Year</button>
                 </div>
             </div>
 
-            <!-- Stats Cards -->
+            <!-- Stats Cards - FIXED: Added null checks for all trend variables -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon bg-blue-light">
@@ -796,8 +880,9 @@
                     <div class="stat-details">
                         <div class="stat-value">{{ number_format($totalViews) }}</div>
                         <div class="stat-label">Total Views</div>
-                        <div class="stat-change trend-up">
-                            <i class="ri-arrow-up-line"></i> +12.5%
+                        <div class="stat-change {{ isset($viewsTrend) && $viewsTrend >= 0 ? 'trend-up' : 'trend-down' }}">
+                            <i class="ri-arrow-{{ isset($viewsTrend) && $viewsTrend >= 0 ? 'up' : 'down' }}-line"></i> 
+                            {{ isset($viewsTrend) ? number_format(abs($viewsTrend), 1) : '0.0' }}%
                         </div>
                     </div>
                 </div>
@@ -809,8 +894,9 @@
                     <div class="stat-details">
                         <div class="stat-value">{{ number_format($uniqueVisitors) }}</div>
                         <div class="stat-label">Unique Visitors</div>
-                        <div class="stat-change trend-up">
-                            <i class="ri-arrow-up-line"></i> +8.3%
+                        <div class="stat-change {{ isset($visitorsTrend) && $visitorsTrend >= 0 ? 'trend-up' : 'trend-down' }}">
+                            <i class="ri-arrow-{{ isset($visitorsTrend) && $visitorsTrend >= 0 ? 'up' : 'down' }}-line"></i> 
+                            {{ isset($visitorsTrend) ? number_format(abs($visitorsTrend), 1) : '0.0' }}%
                         </div>
                     </div>
                 </div>
@@ -822,8 +908,9 @@
                     <div class="stat-details">
                         <div class="stat-value">{{ $averageTimeOnSite }}</div>
                         <div class="stat-label">Avg. Time on Site</div>
-                        <div class="stat-change trend-up">
-                            <i class="ri-arrow-up-line"></i> +2.1%
+                        <div class="stat-change {{ isset($timeTrend) && $timeTrend >= 0 ? 'trend-up' : 'trend-down' }}">
+                            <i class="ri-arrow-{{ isset($timeTrend) && $timeTrend >= 0 ? 'up' : 'down' }}-line"></i> 
+                            {{ isset($timeTrend) ? number_format(abs($timeTrend), 1) : '0.0' }}%
                         </div>
                     </div>
                 </div>
@@ -835,8 +922,9 @@
                     <div class="stat-details">
                         <div class="stat-value">{{ $bounceRate }}%</div>
                         <div class="stat-label">Bounce Rate</div>
-                        <div class="stat-change trend-down">
-                            <i class="ri-arrow-down-line"></i> -3.2%
+                        <div class="stat-change {{ isset($bounceTrend) && $bounceTrend <= 0 ? 'trend-down' : 'trend-up' }}">
+                            <i class="ri-arrow-{{ isset($bounceTrend) && $bounceTrend <= 0 ? 'down' : 'up' }}-line"></i> 
+                            {{ isset($bounceTrend) ? number_format(abs($bounceTrend), 1) : '0.0' }}%
                         </div>
                     </div>
                 </div>
@@ -845,18 +933,27 @@
             <!-- Views Chart -->
             <div class="chart-container">
                 <div class="chart-header">
-                    <h3>Daily Store Views (Last 30 Days)</h3>
-                    <button class="btn btn-secondary" onclick="exportChart()">
-                        <i class="ri-download-2-line"></i> Export
+                    <h3>Daily Store Views (Last {{ count($dailyViews) }} days)</h3>
+                    <button class="btn btn-secondary" onclick="exportData()">
+                        <i class="ri-download-2-line"></i> Export Data
                     </button>
                 </div>
-                <div class="bar-chart">
-                    @foreach($dailyViews as $view)
+                <div class="bar-chart" id="viewsChart">
+                    @forelse($dailyViews as $view)
                     <div class="bar-wrapper">
-                        <div class="bar" style="height: {{ min(200, ($view['views'] / 100) * 200) }}px;"></div>
+                        <div class="bar" style="height: {{ isset($maxViews) && $maxViews > 0 ? min(200, ($view['views'] / $maxViews) * 200) : 0 }}px;" 
+                             onmouseover="showTooltip(this, '{{ number_format($view['views']) }} views')"
+                             onmouseout="hideTooltip(this)">
+                            <div class="bar-tooltip">{{ number_format($view['views']) }} views</div>
+                        </div>
                         <div class="bar-label">{{ $view['date'] }}</div>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="empty-state">
+                        <i class="ri-bar-chart-2-line"></i>
+                        <p>No view data available for this period</p>
+                    </div>
+                    @endforelse
                 </div>
             </div>
 
@@ -864,112 +961,65 @@
             <div class="insights-grid">
                 <!-- Traffic Sources -->
                 <div class="insight-card">
-                    <h3>🌐 Traffic Sources</h3>
+                    <h3><i class="ri-global-line" style="color: var(--primary-gold);"></i> Traffic Sources</h3>
 
+                    @forelse($referrers as $referrer)
                     <div class="traffic-source-item">
                         <div class="source-info">
-                            <i class="ri-google-line" style="color: #4285F4;"></i>
-                            <span class="source-name">Organic Search</span>
+                            @if($referrer['source'] == 'Direct')
+                                <i class="ri-link" style="color: #34A853;"></i>
+                            @elseif($referrer['source'] == 'Google')
+                                <i class="ri-google-line" style="color: #4285F4;"></i>
+                            @elseif($referrer['source'] == 'Facebook')
+                                <i class="ri-facebook-line" style="color: #1877F2;"></i>
+                            @elseif($referrer['source'] == 'Telegram')
+                                <i class="ri-telegram-line" style="color: #26A5E4;"></i>
+                            @elseif($referrer['source'] == 'Instagram')
+                                <i class="ri-instagram-line" style="color: #E4405F;"></i>
+                            @else
+                                <i class="ri-window-line" style="color: #6b7280;"></i>
+                            @endif
+                            <span class="source-name">{{ $referrer['source'] }}</span>
                         </div>
-                        <span class="source-value">45%</span>
+                        <span class="source-value">{{ $referrer['percentage'] }}%</span>
                     </div>
                     <div class="source-bar">
-                        <div class="source-bar-fill" style="width: 45%"></div>
+                        <div class="source-bar-fill" style="width: {{ $referrer['percentage'] }}%"></div>
                     </div>
-
-                    <div class="traffic-source-item">
-                        <div class="source-info">
-                            <i class="ri-facebook-line" style="color: #1877F2;"></i>
-                            <span class="source-name">Social Media</span>
-                        </div>
-                        <span class="source-value">28%</span>
+                    @empty
+                    <div class="empty-state">
+                        <i class="ri-global-line"></i>
+                        <p>No traffic source data available</p>
                     </div>
-                    <div class="source-bar">
-                        <div class="source-bar-fill" style="width: 28%"></div>
-                    </div>
-
-                    <div class="traffic-source-item">
-                        <div class="source-info">
-                            <i class="ri-mail-line" style="color: #EA4335;"></i>
-                            <span class="source-name">Email Marketing</span>
-                        </div>
-                        <span class="source-value">15%</span>
-                    </div>
-                    <div class="source-bar">
-                        <div class="source-bar-fill" style="width: 15%"></div>
-                    </div>
-
-                    <div class="traffic-source-item">
-                        <div class="source-info">
-                            <i class="ri-link" style="color: #34A853;"></i>
-                            <span class="source-name">Direct</span>
-                        </div>
-                        <span class="source-value">12%</span>
-                    </div>
-                    <div class="source-bar">
-                        <div class="source-bar-fill" style="width: 12%"></div>
-                    </div>
+                    @endforelse
                 </div>
 
                 <!-- Top Pages -->
                 <div class="insight-card">
-                    <h3>📄 Most Viewed Pages</h3>
+                    <h3><i class="ri-file-copy-line" style="color: var(--primary-gold);"></i> Most Viewed Pages</h3>
 
+                    @forelse($popularPages as $page)
                     <div class="traffic-source-item">
                         <div class="source-info">
-                            <span class="source-name">Homepage</span>
+                            <span class="source-name">{{ $page['page'] }}</span>
                         </div>
-                        <span class="source-value">1,245 views</span>
+                        <span class="source-value">{{ number_format($page['views']) }} views</span>
                     </div>
                     <div class="source-bar">
-                        <div class="source-bar-fill" style="width: 100%"></div>
+                        <div class="source-bar-fill" style="width: {{ ($page['views'] / $popularPages[0]['views']) * 100 }}%"></div>
                     </div>
-
-                    <div class="traffic-source-item">
-                        <div class="source-info">
-                            <span class="source-name">Products Page</span>
-                        </div>
-                        <span class="source-value">892 views</span>
+                    @empty
+                    <div class="empty-state">
+                        <i class="ri-file-copy-line"></i>
+                        <p>No page view data available</p>
                     </div>
-                    <div class="source-bar">
-                        <div class="source-bar-fill" style="width: 72%"></div>
-                    </div>
-
-                    <div class="traffic-source-item">
-                        <div class="source-info">
-                            <span class="source-name">Coffee Collection</span>
-                        </div>
-                        <span class="source-value">567 views</span>
-                    </div>
-                    <div class="source-bar">
-                        <div class="source-bar-fill" style="width: 46%"></div>
-                    </div>
-
-                    <div class="traffic-source-item">
-                        <div class="source-info">
-                            <span class="source-name">About Us</span>
-                        </div>
-                        <span class="source-value">234 views</span>
-                    </div>
-                    <div class="source-bar">
-                        <div class="source-bar-fill" style="width: 19%"></div>
-                    </div>
-
-                    <div class="traffic-source-item">
-                        <div class="source-info">
-                            <span class="source-name">Contact Page</span>
-                        </div>
-                        <span class="source-value">156 views</span>
-                    </div>
-                    <div class="source-bar">
-                        <div class="source-bar-fill" style="width: 13%"></div>
-                    </div>
+                    @endforelse
                 </div>
             </div>
 
             <!-- Page Views Detail Table -->
             <div class="table-container">
-                <h3 style="margin-bottom: 20px;">📊 Page Views by Date</h3>
+                <h3 style="margin-bottom: 20px;"><i class="ri-table-line" style="color: var(--primary-gold);"></i> Page Views by Date</h3>
                 <table>
                     <thead>
                         <tr>
@@ -981,41 +1031,63 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach(array_slice($dailyViews, 0, 10) as $index => $view)
+                        @forelse($dailyViews as $index => $view)
                         <tr>
                             <td>{{ $view['date'] }}</td>
                             <td><strong>{{ number_format($view['views']) }}</strong></td>
-                            <td>{{ number_format(rand(10, 60)) }}</td>
-                            <td>{{ rand(1, 3) }}m {{ rand(0, 59) }}s</td>
+                            <td>{{ number_format($view['unique'] ?? rand(10, 60)) }}</td>
+                            <td>{{ $view['avg_time'] ?? rand(1, 3) . 'm ' . rand(0, 59) . 's' }}</td>
                             <td>
-                                @if($index > 0 && $view['views'] > ($dailyViews[$index-1]['views'] ?? 0))
-                                    <span class="trend-indicator trend-up">
-                                        <i class="ri-arrow-up-line"></i> +{{ round(($view['views'] - ($dailyViews[$index-1]['views'] ?? 0)) / ($dailyViews[$index-1]['views'] ?? 1) * 100) }}%
-                                    </span>
-                                @elseif($index > 0)
-                                    <span class="trend-indicator trend-down">
-                                        <i class="ri-arrow-down-line"></i> -{{ round((($dailyViews[$index-1]['views'] ?? 0) - $view['views']) / ($dailyViews[$index-1]['views'] ?? 1) * 100) }}%
-                                    </span>
+                                @if($index > 0)
+                                    @php
+                                        $prevViews = $dailyViews[$index-1]['views'] ?? $view['views'];
+                                        $change = $prevViews > 0 ? (($view['views'] - $prevViews) / $prevViews) * 100 : 0;
+                                    @endphp
+                                    @if($change > 0)
+                                        <span class="trend-indicator trend-up">
+                                            <i class="ri-arrow-up-line"></i> +{{ number_format($change, 1) }}%
+                                        </span>
+                                    @elseif($change < 0)
+                                        <span class="trend-indicator trend-down">
+                                            <i class="ri-arrow-down-line"></i> {{ number_format($change, 1) }}%
+                                        </span>
+                                    @else
+                                        <span class="trend-indicator">-</span>
+                                    @endif
                                 @else
                                     <span class="trend-indicator">-</span>
                                 @endif
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                <i class="ri-table-line"></i>
+                                <p>No data available for this period</p>
+                            </td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
 
                 <!-- Pagination -->
-                <div class="pagination">
-                    <a href="#" class="pagination-item"><i class="ri-arrow-left-s-line"></i></a>
-                    <a href="#" class="pagination-item active">1</a>
-                    <a href="#" class="pagination-item">2</a>
-                    <a href="#" class="pagination-item">3</a>
-                    <a href="#" class="pagination-item"><i class="ri-arrow-right-s-line"></i></a>
-                </div>
+                @if(isset($dailyViews) && is_object($dailyViews) && method_exists($dailyViews, 'links') && $dailyViews->hasPages())
+    <div class="pagination">
+        {{ $dailyViews->links() }}
+    </div>
+@endif
+
             </div>
         </div>
     </main>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="text-align: center;">
+            <div class="loading-spinner" style="width: 40px; height: 40px;"></div>
+            <p style="margin-top: 16px; color: var(--primary-gold);">Loading data...</p>
+        </div>
+    </div>
 
     <script>
         // CSRF Token
@@ -1041,7 +1113,7 @@
             }
         });
 
-        // Set period function
+        // Set period function with AJAX
         function setPeriod(period) {
             // Update active button
             document.querySelectorAll('.date-range-btn').forEach(btn => {
@@ -1049,23 +1121,265 @@
             });
             event.target.classList.add('active');
 
-            // Reload with period parameter
-            window.location.href = '{{ route("vendor.store-views") }}?period=' + period;
-        }
+            // Show loading overlay
+            document.getElementById('loadingOverlay').style.display = 'flex';
 
-        // Export chart function
-        function exportChart() {
-            alert('Export functionality will be available soon!');
-        }
-
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
+            // Fetch new data via AJAX
+            fetch(`{{ route('vendor.store-views') }}?period=${period}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
                 }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update stats
+                updateStats(data);
+                // Update chart
+                updateChart(data.dailyViews, data.maxViews);
+                // Update traffic sources
+                updateTrafficSources(data.referrers);
+                // Update popular pages
+                updatePopularPages(data.popularPages);
+                // Update table
+                updateTable(data.dailyViews);
+                
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').style.display = 'none';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('loadingOverlay').style.display = 'none';
+                alert('Failed to load data. Please try again.');
             });
-        });
+        }
+
+        // Update stats function
+        function updateStats(data) {
+            // Update stat values
+            document.querySelector('.stat-card:nth-child(1) .stat-value').textContent = formatNumber(data.totalViews);
+            document.querySelector('.stat-card:nth-child(2) .stat-value').textContent = formatNumber(data.uniqueVisitors);
+            document.querySelector('.stat-card:nth-child(3) .stat-value').textContent = data.averageTimeOnSite;
+            document.querySelector('.stat-card:nth-child(4) .stat-value').textContent = data.bounceRate + '%';
+            
+            // Update trends
+            if (data.viewsTrend !== undefined) {
+                updateTrend(document.querySelector('.stat-card:nth-child(1) .stat-change'), data.viewsTrend);
+            }
+            if (data.visitorsTrend !== undefined) {
+                updateTrend(document.querySelector('.stat-card:nth-child(2) .stat-change'), data.visitorsTrend);
+            }
+            if (data.timeTrend !== undefined) {
+                updateTrend(document.querySelector('.stat-card:nth-child(3) .stat-change'), data.timeTrend);
+            }
+            
+            // Update bounce rate trend (inverse)
+            if (data.bounceTrend !== undefined) {
+                const bounceElement = document.querySelector('.stat-card:nth-child(4) .stat-change');
+                const bounceTrend = data.bounceTrend;
+                if (bounceTrend <= 0) {
+                    bounceElement.className = 'stat-change trend-down';
+                    bounceElement.innerHTML = `<i class="ri-arrow-down-line"></i> ${Math.abs(bounceTrend).toFixed(1)}%`;
+                } else {
+                    bounceElement.className = 'stat-change trend-up';
+                    bounceElement.innerHTML = `<i class="ri-arrow-up-line"></i> ${bounceTrend.toFixed(1)}%`;
+                }
+            }
+        }
+
+        function updateTrend(element, trend) {
+            if (trend >= 0) {
+                element.className = 'stat-change trend-up';
+                element.innerHTML = `<i class="ri-arrow-up-line"></i> ${trend.toFixed(1)}%`;
+            } else {
+                element.className = 'stat-change trend-down';
+                element.innerHTML = `<i class="ri-arrow-down-line"></i> ${Math.abs(trend).toFixed(1)}%`;
+            }
+        }
+
+        function updateChart(dailyViews, maxViews) {
+            const chart = document.getElementById('viewsChart');
+            if (!dailyViews || dailyViews.length === 0) {
+                chart.innerHTML = '<div class="empty-state"><i class="ri-bar-chart-2-line"></i><p>No view data available for this period</p></div>';
+                return;
+            }
+            
+            let html = '';
+            dailyViews.forEach(view => {
+                const height = maxViews > 0 ? (view.views / maxViews) * 200 : 0;
+                html += `
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height: ${Math.max(4, height)}px;" 
+                             onmouseover="showTooltip(this, '${formatNumber(view.views)} views')"
+                             onmouseout="hideTooltip(this)">
+                            <div class="bar-tooltip">${formatNumber(view.views)} views</div>
+                        </div>
+                        <div class="bar-label">${view.date}</div>
+                    </div>
+                `;
+            });
+            chart.innerHTML = html;
+        }
+
+        function updateTrafficSources(referrers) {
+            const container = document.querySelector('.insight-card:first-child');
+            if (!referrers || referrers.length === 0) {
+                container.innerHTML = `
+                    <h3><i class="ri-global-line" style="color: var(--primary-gold);"></i> Traffic Sources</h3>
+                    <div class="empty-state">
+                        <i class="ri-global-line"></i>
+                        <p>No traffic source data available</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<h3><i class="ri-global-line" style="color: var(--primary-gold);"></i> Traffic Sources</h3>';
+            referrers.forEach(referrer => {
+                let icon = 'ri-window-line';
+                let color = '#6b7280';
+                
+                if (referrer.source === 'Direct') { icon = 'ri-link'; color = '#34A853'; }
+                else if (referrer.source === 'Google') { icon = 'ri-google-line'; color = '#4285F4'; }
+                else if (referrer.source === 'Facebook') { icon = 'ri-facebook-line'; color = '#1877F2'; }
+                else if (referrer.source === 'Telegram') { icon = 'ri-telegram-line'; color = '#26A5E4'; }
+                else if (referrer.source === 'Instagram') { icon = 'ri-instagram-line'; color = '#E4405F'; }
+                
+                html += `
+                    <div class="traffic-source-item">
+                        <div class="source-info">
+                            <i class="${icon}" style="color: ${color};"></i>
+                            <span class="source-name">${referrer.source}</span>
+                        </div>
+                        <span class="source-value">${referrer.percentage}%</span>
+                    </div>
+                    <div class="source-bar">
+                        <div class="source-bar-fill" style="width: ${referrer.percentage}%"></div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function updatePopularPages(pages) {
+            const container = document.querySelector('.insight-card:last-child');
+            if (!pages || pages.length === 0) {
+                container.innerHTML = `
+                    <h3><i class="ri-file-copy-line" style="color: var(--primary-gold);"></i> Most Viewed Pages</h3>
+                    <div class="empty-state">
+                        <i class="ri-file-copy-line"></i>
+                        <p>No page view data available</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<h3><i class="ri-file-copy-line" style="color: var(--primary-gold);"></i> Most Viewed Pages</h3>';
+            const maxViews = pages[0].views;
+            
+            pages.forEach(page => {
+                const percentage = (page.views / maxViews) * 100;
+                html += `
+                    <div class="traffic-source-item">
+                        <div class="source-info">
+                            <span class="source-name">${page.page}</span>
+                        </div>
+                        <span class="source-value">${formatNumber(page.views)} views</span>
+                    </div>
+                    <div class="source-bar">
+                        <div class="source-bar-fill" style="width: ${percentage}%"></div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function updateTable(dailyViews) {
+            const tbody = document.querySelector('tbody');
+            if (!dailyViews || dailyViews.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <i class="ri-table-line"></i>
+                            <p>No data available for this period</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            dailyViews.forEach((view, index) => {
+                let trendHtml = '<span class="trend-indicator">-</span>';
+                if (index > 0) {
+                    const prevViews = dailyViews[index-1].views;
+                    const change = prevViews > 0 ? ((view.views - prevViews) / prevViews) * 100 : 0;
+                    
+                    if (change > 0) {
+                        trendHtml = `<span class="trend-indicator trend-up"><i class="ri-arrow-up-line"></i> +${change.toFixed(1)}%</span>`;
+                    } else if (change < 0) {
+                        trendHtml = `<span class="trend-indicator trend-down"><i class="ri-arrow-down-line"></i> ${change.toFixed(1)}%</span>`;
+                    }
+                }
+                
+                html += `
+                    <tr>
+                        <td>${view.date}</td>
+                        <td><strong>${formatNumber(view.views)}</strong></td>
+                        <td>${formatNumber(view.unique || Math.floor(Math.random() * 50) + 10)}</td>
+                        <td>${view.avg_time || Math.floor(Math.random() * 3) + 1}m ${Math.floor(Math.random() * 60)}s</td>
+                        <td>${trendHtml}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // Tooltip functions
+        function showTooltip(element, text) {
+            const tooltip = element.querySelector('.bar-tooltip');
+            if (tooltip) {
+                tooltip.style.opacity = '1';
+            }
+        }
+
+        function hideTooltip(element) {
+            const tooltip = element.querySelector('.bar-tooltip');
+            if (tooltip) {
+                tooltip.style.opacity = '0';
+            }
+        }
+
+        // Format number function
+        function formatNumber(number) {
+            return new Intl.NumberFormat('en-US').format(number || 0);
+        }
+
+        // Export data function
+        function exportData() {
+            const period = document.querySelector('.date-range-btn.active').dataset.period || 'month';
+            window.location.href = `{{ route('vendor.export-store-views') }}?period=${period}`;
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            const activePeriod = document.querySelector('.date-range-btn.active').dataset.period || 'month';
+            fetch(`{{ route('vendor.store-views') }}?period=${activePeriod}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateStats(data);
+                updateChart(data.dailyViews, data.maxViews);
+                updateTrafficSources(data.referrers);
+                updatePopularPages(data.popularPages);
+                updateTable(data.dailyViews);
+            })
+            .catch(error => console.error('Auto-refresh error:', error));
+        }, 300000); // 5 minutes
     </script>
 
 </body>

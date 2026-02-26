@@ -8,6 +8,9 @@ use App\Models\User;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Message;
+use App\Models\Notification;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Promotion;
 use Illuminate\Http\Request;
 use App\Http\Requests\AdminLoginRequest;
@@ -1207,13 +1210,83 @@ public function store(AdminLoginRequest $request)
         return view('admin.help.index');
     }
 
+    // /**
+    //  * Display documentation.
+    //  */
+    // public function documentation()
+    // {
+    //     return view('admin.help.documentation');
+    // }
+
+
+
     /**
-     * Display documentation.
-     */
-    public function documentation()
-    {
-        return view('admin.help.documentation');
+ * Display documentation page.
+ */
+public function documentation()
+{
+    $user = Auth::user();
+    
+    // Get unread counts for header
+    try {
+        $unreadNotificationsCount = Notification::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+    } catch (\Exception $e) {
+        $unreadNotificationsCount = 0;
     }
+
+    try {
+        $unreadMessagesCount = Message::where('receiver_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+    } catch (\Exception $e) {
+        $unreadMessagesCount = 0;
+    }
+
+    $version = '2.1.0';
+    $lastUpdated = now()->format('F j, Y');
+
+    return view('admin.help.documentation', compact(
+        'user',
+        'version',
+        'lastUpdated',
+        'unreadNotificationsCount',
+        'unreadMessagesCount'
+    ));
+}
+
+
+
+/**
+ * Download documentation as PDF.
+ */
+public function downloadDocumentationPDF()
+{
+    $user = Auth::user();
+    $version = '2.1.0';
+    $lastUpdated = now()->format('F j, Y');
+    
+    $data = [
+        'version' => $version,
+        'lastUpdated' => $lastUpdated,
+        'generatedAt' => now()->format('Y-m-d H:i:s')
+    ];
+    
+    $pdf = Pdf::loadView('admin.documentation-pdf', $data);
+    $pdf->setPaper('A4', 'portrait');
+    $pdf->setOptions([
+        'defaultFont' => 'sans-serif',
+        'isHtml5ParserEnabled' => true,
+        'isRemoteEnabled' => true
+    ]);
+    
+    return $pdf->download('vendora-documentation-v' . $version . '.pdf');
+}
+
+
+
+
 
     /**
      * ========================================================================

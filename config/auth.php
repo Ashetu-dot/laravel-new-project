@@ -49,4 +49,14 @@ return [
 
     'password_timeout' => 10800,
 
+
+
+
+
+    
+// 'password' => [
+//     'uncompromised' => env('PASSWORD_UNCOMPROMISED', false), // Disable globally
+// ],
+
+
 ];

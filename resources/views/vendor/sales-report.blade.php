@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Sales Report - Vendora | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         * {
             margin: 0;
@@ -44,7 +45,7 @@
             width: 100%;
         }
 
-        /* Sidebar styles (identical to dashboard for consistency) */
+        /* Sidebar styles */
         .sidebar {
             width: 280px;
             background-color: var(--sidebar-bg);
@@ -181,6 +182,10 @@
             font-size: 12px;
         }
 
+        .logout-form {
+            margin-top: 8px;
+        }
+
         .logout-btn {
             background: none;
             border: none;
@@ -194,7 +199,6 @@
             width: 100%;
             border-radius: 8px;
             transition: all 0.2s;
-            margin-top: 8px;
         }
 
         .logout-btn:hover {
@@ -478,6 +482,25 @@
             color: var(--text-secondary);
         }
 
+        .loading-overlay {
+            position: relative;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(184, 142, 63, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-gold);
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         .top-products-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -660,6 +683,13 @@
             font-size: 13px;
             text-decoration: none;
             transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .pagination-item:hover {
+            background-color: var(--primary-gold);
+            color: white;
+            border-color: var(--primary-gold);
         }
 
         .pagination-item.active {
@@ -669,11 +699,51 @@
         }
 
         .bg-soft-gold { background-color: #fef3e7; color: var(--primary-gold); }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--border-color);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background-color: #fed7aa;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar (same as dashboard) -->
+    <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="brand">
             <i class="ri-store-3-fill"></i>
@@ -689,7 +759,7 @@
                 <a href="{{ route('vendor.dashboard') }}" class="nav-item">
                     <i class="ri-dashboard-line"></i> Dashboard
                 </a>
-                <a href="{{ route('vendor.show', Auth::user()->id) }}" class="nav-item">
+                <a href="{{ route('vendor.store', Auth::user()->id) }}" class="nav-item">
                     <i class="ri-store-line"></i> My Store
                 </a>
                 <a href="{{ route('vendor.orders.index') }}" class="nav-item">
@@ -712,7 +782,7 @@
 
             <div class="nav-group">
                 <div class="nav-label">ANALYTICS</div>
-                <a href="#" class="nav-item active">
+                <a href="{{ route('vendor.sales-report') }}" class="nav-item active">
                     <i class="ri-bar-chart-2-line"></i> Sales Report
                 </a>
                 <a href="{{ route('vendor.store-views') }}" class="nav-item">
@@ -725,23 +795,32 @@
 
             <div class="nav-group">
                 <div class="nav-label">SETTINGS</div>
-                <a href="#" class="nav-item">
+                <a href="{{ route('vendor.profile') }}" class="nav-item">
                     <i class="ri-user-line"></i> Profile
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{{ route('vendor.settings') }}" class="nav-item">
                     <i class="ri-settings-4-line"></i> Store Settings
                 </a>
-                <button class="logout-btn" onclick="if(confirm('Logout?')){}">
-                    <i class="ri-logout-box-line"></i> Logout
-                </button>
+                <form method="POST" action="{{ route('logout') }}" class="logout-form">
+                    @csrf
+                    <button type="submit" class="logout-btn" onclick="return confirm('Are you sure you want to logout?')">
+                        <i class="ri-logout-box-line"></i> Logout
+                    </button>
+                </form>
             </div>
         </div>
 
         <div class="user-profile">
-            <div class="avatar">TT</div>
+            <div class="avatar">
+                @if(Auth::user()->avatar)
+                    <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->business_name ?? Auth::user()->name }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                @else
+                    {{ strtoupper(substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2)) }}
+                @endif
+            </div>
             <div class="user-info">
-                <h4>Tadu Store</h4>
-                <p>Vendor since Mar 2024</p>
+                <h4>{{ Auth::user()->business_name ?? Auth::user()->name }}</h4>
+                <p>Vendor since {{ Auth::user()->created_at->format('M Y') }}</p>
             </div>
         </div>
     </nav>
@@ -760,13 +839,17 @@
             </div>
 
             <div class="header-actions">
-                <a href="#" class="icon-btn">
+                <a href="{{ route('vendor.notifications') }}" class="icon-btn">
                     <i class="ri-notification-3-line"></i>
-                    <span class="badge-count">3</span>
+                    @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
+                        <span class="badge-count">{{ $unreadNotificationsCount }}</span>
+                    @endif
                 </a>
-                <a href="#" class="icon-btn">
+                <a href="{{ route('vendor.messages') }}" class="icon-btn">
                     <i class="ri-mail-line"></i>
-                    <span class="badge-count">5</span>
+                    @if(isset($unreadMessagesCount) && $unreadMessagesCount > 0)
+                        <span class="badge-count">{{ $unreadMessagesCount }}</span>
+                    @endif
                 </a>
             </div>
         </header>
@@ -777,13 +860,13 @@
             <div class="report-header">
                 <h1>📊 Sales Performance</h1>
                 <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-                    <div class="date-range">
-                        <button class="date-range-btn active">Today</button>
-                        <button class="date-range-btn">Week</button>
-                        <button class="date-range-btn">Month</button>
-                        <button class="date-range-btn">Year</button>
+                    <div class="date-range" id="dateRangeFilter">
+                        <button class="date-range-btn {{ $period === 'today' ? 'active' : '' }}" data-period="today">Today</button>
+                        <button class="date-range-btn {{ $period === 'week' ? 'active' : '' }}" data-period="week">Week</button>
+                        <button class="date-range-btn {{ $period === 'month' ? 'active' : '' }}" data-period="month">Month</button>
+                        <button class="date-range-btn {{ $period === 'year' ? 'active' : '' }}" data-period="year">Year</button>
                     </div>
-                    <button class="export-btn"><i class="ri-download-2-line"></i> Export</button>
+                    <button class="export-btn" id="exportBtn"><i class="ri-download-2-line"></i> Export</button>
                 </div>
             </div>
 
@@ -791,43 +874,59 @@
             <div class="kpi-grid">
                 <div class="kpi-card">
                     <div class="kpi-title">Total Revenue</div>
-                    <div class="kpi-value">ETB 245,800</div>
-                    <div class="kpi-trend trend-up"><i class="ri-arrow-up-line"></i> +12.5% vs last period</div>
+                    <div class="kpi-value">ETB {{ number_format($totalRevenue, 2) }}</div>
+                    <div class="kpi-trend {{ $revenueTrend >= 0 ? 'trend-up' : 'trend-down' }}">
+                        <i class="ri-{{ $revenueTrend >= 0 ? 'arrow-up' : 'arrow-down' }}-line"></i> 
+                        {{ number_format(abs($revenueTrend), 1) }}% vs last period
+                    </div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-title">Orders</div>
-                    <div class="kpi-value">324</div>
-                    <div class="kpi-trend trend-up"><i class="ri-arrow-up-line"></i> +8.2%</div>
+                    <div class="kpi-value">{{ $totalOrders }}</div>
+                    <div class="kpi-trend {{ $ordersTrend >= 0 ? 'trend-up' : 'trend-down' }}">
+                        <i class="ri-{{ $ordersTrend >= 0 ? 'arrow-up' : 'arrow-down' }}-line"></i> 
+                        {{ number_format(abs($ordersTrend), 1) }}%
+                    </div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-title">Average Order Value</div>
-                    <div class="kpi-value">ETB 758</div>
-                    <div class="kpi-trend trend-up"><i class="ri-arrow-up-line"></i> +3.1%</div>
+                    <div class="kpi-value">ETB {{ number_format($averageOrderValue, 2) }}</div>
+                    <div class="kpi-trend {{ $aovTrend >= 0 ? 'trend-up' : 'trend-down' }}">
+                        <i class="ri-{{ $aovTrend >= 0 ? 'arrow-up' : 'arrow-down' }}-line"></i> 
+                        {{ number_format(abs($aovTrend), 1) }}%
+                    </div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-title">Conversion Rate</div>
-                    <div class="kpi-value">4.8%</div>
-                    <div class="kpi-trend trend-down"><i class="ri-arrow-down-line"></i> -0.4%</div>
+                    <div class="kpi-value">{{ number_format($conversionRate, 1) }}%</div>
+                    <div class="kpi-trend {{ $conversionTrend >= 0 ? 'trend-up' : 'trend-down' }}">
+                        <i class="ri-{{ $conversionTrend >= 0 ? 'arrow-up' : 'arrow-down' }}-line"></i> 
+                        {{ number_format(abs($conversionTrend), 1) }}%
+                    </div>
                 </div>
             </div>
 
             <!-- Sales Chart -->
             <div class="chart-container">
                 <div class="chart-header">
-                    <h3>Sales Trend (Last 7 days)</h3>
+                    <h3>Sales Trend (Last {{ count($chartData) }} days)</h3>
                     <div class="chart-legend">
                         <div class="legend-item"><span class="legend-color" style="background: var(--primary-gold);"></span> This period</div>
                         <div class="legend-item"><span class="legend-color" style="background: #e5e7eb;"></span> Previous period</div>
                     </div>
                 </div>
-                <div class="bar-chart">
-                    <div class="bar-wrapper"><div class="bar" style="height: 140px;"></div><div class="bar-label">Mon</div></div>
-                    <div class="bar-wrapper"><div class="bar" style="height: 190px;"></div><div class="bar-label">Tue</div></div>
-                    <div class="bar-wrapper"><div class="bar" style="height: 110px;"></div><div class="bar-label">Wed</div></div>
-                    <div class="bar-wrapper"><div class="bar" style="height: 210px;"></div><div class="bar-label">Thu</div></div>
-                    <div class="bar-wrapper"><div class="bar" style="height: 280px;"></div><div class="bar-label">Fri</div></div>
-                    <div class="bar-wrapper"><div class="bar" style="height: 320px;"></div><div class="bar-label">Sat</div></div>
-                    <div class="bar-wrapper"><div class="bar" style="height: 260px;"></div><div class="bar-label">Sun</div></div>
+                <div class="bar-chart" id="salesChart">
+                    @forelse($chartData as $item)
+                        <div class="bar-wrapper">
+                            <div class="bar" style="height: {{ $item['height'] }}px;"></div>
+                            <div class="bar-label">{{ $item['label'] }}</div>
+                        </div>
+                    @empty
+                        <div class="empty-state">
+                            <i class="ri-bar-chart-2-line"></i>
+                            <p>No sales data available for this period</p>
+                        </div>
+                    @endforelse
                 </div>
             </div>
 
@@ -835,105 +934,411 @@
             <div class="top-products-grid">
                 <div class="insight-card">
                     <h3>🏆 Top Selling Products</h3>
-                    <div class="product-rank-item">
-                        <div class="product-rank-info"><span class="rank-number">1</span><div><h4>Ethiopian Coffee (1kg)</h4><p>45 units sold</p></div></div>
-                        <div class="product-rank-value">ETB 22,500</div>
-                    </div>
-                    <div class="product-rank-item">
-                        <div class="product-rank-info"><span class="rank-number">2</span><div><h4>Habesha Kemis</h4><p>23 units sold</p></div></div>
-                        <div class="product-rank-value">ETB 34,500</div>
-                    </div>
-                    <div class="product-rank-item">
-                        <div class="product-rank-info"><span class="rank-number">3</span><div><h4>Traditional Jewelry Set</h4><p>18 units sold</p></div></div>
-                        <div class="product-rank-value">ETB 27,000</div>
-                    </div>
-                    <div class="product-rank-item">
-                        <div class="product-rank-info"><span class="rank-number">4</span><div><h4>Spice Mix (Berbere)</h4><p>32 units sold</p></div></div>
-                        <div class="product-rank-value">ETB 9,600</div>
-                    </div>
+                    @forelse($topProducts as $index => $product)
+                        <div class="product-rank-item">
+                            <div class="product-rank-info">
+                                <span class="rank-number">{{ $index + 1 }}</span>
+                                <div class="product-rank-detail">
+                                    <h4>{{ $product['name'] }}</h4>
+                                    <p>{{ $product['quantity'] }} units sold</p>
+                                </div>
+                            </div>
+                            <div class="product-rank-value">ETB {{ number_format($product['revenue'], 2) }}</div>
+                        </div>
+                    @empty
+                        <div class="empty-state">
+                            <i class="ri-shopping-bag-line"></i>
+                            <p>No products sold yet</p>
+                        </div>
+                    @endforelse
                 </div>
 
                 <div class="insight-card">
                     <h3>💳 Payment Methods</h3>
                     <div class="payment-method-list">
-                        <div><div class="payment-method-item"><span class="payment-method-name"><i class="ri-bank-card-line"></i> Cash on Delivery</span><span>68%</span></div><div class="payment-bar"><div class="payment-bar-fill" style="width:68%"></div></div></div>
-                        <div><div class="payment-method-item"><span class="payment-method-name"><i class="ri-phone-line"></i> Mobile Money</span><span>22%</span></div><div class="payment-bar"><div class="payment-bar-fill" style="width:22%"></div></div></div>
-                        <div><div class="payment-method-item"><span class="payment-method-name"><i class="ri-bank-line"></i> Bank Transfer</span><span>10%</span></div><div class="payment-bar"><div class="payment-bar-fill" style="width:10%"></div></div></div>
+                        @forelse($paymentMethods as $method)
+                            <div>
+                                <div class="payment-method-item">
+                                    <span class="payment-method-name">
+                                        @if($method['name'] == 'Cash on Delivery' || $method['name'] == 'cash')
+                                            <i class="ri-bank-card-line"></i>
+                                        @elseif($method['name'] == 'Mobile Money' || $method['name'] == 'telebirr')
+                                            <i class="ri-phone-line"></i>
+                                        @elseif($method['name'] == 'Bank Transfer' || $method['name'] == 'bank')
+                                            <i class="ri-bank-line"></i>
+                                        @else
+                                            <i class="ri-secure-payment-line"></i>
+                                        @endif
+                                        {{ $method['name'] }}
+                                    </span>
+                                    <span>{{ $method['percentage'] }}%</span>
+                                </div>
+                                <div class="payment-bar">
+                                    <div class="payment-bar-fill" style="width:{{ $method['percentage'] }}%"></div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="empty-state">
+                                <i class="ri-bank-card-line"></i>
+                                <p>No payment data available</p>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
 
-            <!-- Recent Transactions -->
+            <!-- Recent Transactions - FIXED: Changed $transactions to $recentTransactions -->
             <div class="recent-transactions">
                 <h3>📋 Recent Transactions</h3>
-                <div class="transaction-row">
-                    <div class="transaction-info">
-                        <div class="transaction-icon"><i class="ri-shopping-bag-line"></i></div>
-                        <div class="transaction-detail"><h4>#ORD-3421</h4><p>Abebe K. • 2 items</p></div>
+                @forelse($recentTransactions as $transaction)
+                    <div class="transaction-row">
+                        <div class="transaction-info">
+                            <div class="transaction-icon bg-soft-gold">
+                                <i class="ri-shopping-bag-line"></i>
+                            </div>
+                            <div class="transaction-detail">
+                                <h4>#{{ $transaction->order_number ?? 'ORD-' . $transaction->id }}</h4>
+                                <p>
+                                    <i class="ri-user-line" style="font-size: 12px; margin-right: 4px;"></i>
+                                    {{ $transaction->user->name ?? 'Guest Customer' }} • 
+                                    <i class="ri-shopping-bag-3-line" style="font-size: 12px; margin-right: 4px; margin-left: 4px;"></i>
+                                    {{ $transaction->items->count() }} {{ Str::plural('item', $transaction->items->count()) }}
+                                </p>
+                                <small style="color: var(--text-secondary);">
+                                    <i class="ri-time-line" style="font-size: 11px;"></i>
+                                    {{ $transaction->created_at->diffForHumans() }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="transaction-amount positive">
+                            <strong>ETB {{ number_format($transaction->total_amount, 2) }}</strong>
+                            <div>
+                                @php
+                                    $statusColor = 'badge-success';
+                                    if($transaction->status == 'pending') $statusColor = 'badge-warning';
+                                    else if($transaction->status == 'cancelled') $statusColor = 'badge-danger';
+                                    else if($transaction->status == 'processing') $statusColor = 'badge-info';
+                                @endphp
+                                <span class="badge {{ $statusColor }}">
+                                    {{ ucfirst($transaction->status) }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="transaction-amount positive">+ ETB 2,450</div>
-                </div>
-                <div class="transaction-row">
-                    <div class="transaction-info">
-                        <div class="transaction-icon"><i class="ri-shopping-bag-line"></i></div>
-                        <div class="transaction-detail"><h4>#ORD-3420</h4><p>Meron T. • 1 item</p></div>
+                @empty
+                    <div class="empty-state">
+                        <i class="ri-history-line" style="font-size: 48px; color: var(--border-color);"></i>
+                        <p style="margin-top: 16px; color: var(--text-secondary);">No transactions found for this period</p>
+                        <p style="font-size: 13px; color: var(--text-secondary);">When you receive orders, they will appear here</p>
                     </div>
-                    <div class="transaction-amount positive">+ ETB 1,550</div>
-                </div>
-                <div class="transaction-row">
-                    <div class="transaction-info">
-                        <div class="transaction-icon"><i class="ri-shopping-bag-line"></i></div>
-                        <div class="transaction-detail"><h4>#ORD-3419</h4><p>Biruk D. • 3 items</p></div>
-                    </div>
-                    <div class="transaction-amount positive">+ ETB 3,780</div>
-                </div>
-                <div class="transaction-row">
-                    <div class="transaction-info">
-                        <div class="transaction-icon"><i class="ri-shopping-bag-line"></i></div>
-                        <div class="transaction-detail"><h4>#ORD-3418</h4><p>Azeb T. • 5 items</p></div>
-                    </div>
-                    <div class="transaction-amount positive">+ ETB 5,200</div>
-                </div>
+                @endforelse
 
-                <!-- Pagination (simple) -->
-                <div class="pagination">
-                    <a href="#" class="pagination-item"><i class="ri-arrow-left-s-line"></i></a>
-                    <a href="#" class="pagination-item active">1</a>
-                    <a href="#" class="pagination-item">2</a>
-                    <a href="#" class="pagination-item">3</a>
-                    <a href="#" class="pagination-item"><i class="ri-arrow-right-s-line"></i></a>
-                </div>
+                <!-- Pagination - FIXED: Changed $transactions to $recentTransactions with method check -->
+                @if(method_exists($recentTransactions, 'hasPages') && $recentTransactions->hasPages())
+                    <div class="pagination">
+                        {{ $recentTransactions->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </main>
 
-    <!-- Mobile menu toggle script -->
+    <!-- Loading Overlay for AJAX requests -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="text-align: center;">
+            <div class="loading-spinner" style="width: 40px; height: 40px; border-width: 3px;"></div>
+            <p style="margin-top: 16px; color: var(--primary-gold);">Loading...</p>
+        </div>
+    </div>
+
     <script>
+        // Mobile menu toggle
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
+            
             if (menuToggle && sidebar) {
                 menuToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('active');
                 });
+                
                 document.addEventListener('click', function(e) {
                     if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
                         sidebar.classList.remove('active');
                     }
                 });
             }
-        });
 
-        // dummy filter and export (no backend)
-        document.querySelectorAll('.date-range-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.date-range-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                // In a real app, you'd fetch new data here
+            // Date range filter with AJAX
+            const dateRangeButtons = document.querySelectorAll('.date-range-btn');
+            dateRangeButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Update active state
+                    dateRangeButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const period = this.dataset.period;
+                    
+                    // Show loading overlay
+                    document.getElementById('loadingOverlay').style.display = 'flex';
+                    
+                    // Fetch new data
+                    fetch(`{{ route('vendor.sales-report') }}?period=${period}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Update KPI cards
+                        updateKPIs(data);
+                        // Update chart
+                        updateChart(data.chartData);
+                        // Update top products
+                        updateTopProducts(data.topProducts);
+                        // Update payment methods
+                        updatePaymentMethods(data.paymentMethods);
+                        // Update transactions
+                        updateTransactions(data.recentTransactions);
+                        
+                        // Store pagination HTML if available
+                        if (data.pagination) {
+                            window.paginationHtml = data.pagination;
+                        }
+                        
+                        // Hide loading overlay
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                        alert('Failed to load data. Please try again.');
+                    });
+                });
             });
+
+            // Export button
+            document.getElementById('exportBtn')?.addEventListener('click', function() {
+                const period = document.querySelector('.date-range-btn.active').dataset.period;
+                window.location.href = `{{ route('vendor.export-sales') }}?period=${period}`;
+            });
+
+            // Auto-refresh every 5 minutes
+            setInterval(() => {
+                const activePeriod = document.querySelector('.date-range-btn.active').dataset.period;
+                fetch(`{{ route('vendor.sales-report') }}?period=${activePeriod}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    updateKPIs(data);
+                    updateChart(data.chartData);
+                    updateTopProducts(data.topProducts);
+                    updatePaymentMethods(data.paymentMethods);
+                    updateTransactions(data.recentTransactions);
+                    if (data.pagination) {
+                        window.paginationHtml = data.pagination;
+                    }
+                })
+                .catch(error => console.error('Auto-refresh error:', error));
+            }, 300000); // 5 minutes
         });
 
-        document.querySelector('.export-btn')?.addEventListener('click', () => alert('Export started (demo)'));
+        // Update functions
+        function updateKPIs(data) {
+            document.querySelector('.kpi-card:nth-child(1) .kpi-value').textContent = 'ETB ' + formatNumber(data.totalRevenue);
+            document.querySelector('.kpi-card:nth-child(2) .kpi-value').textContent = data.totalOrders;
+            document.querySelector('.kpi-card:nth-child(3) .kpi-value').textContent = 'ETB ' + formatNumber(data.averageOrderValue);
+            document.querySelector('.kpi-card:nth-child(4) .kpi-value').textContent = data.conversionRate + '%';
+            
+            // Update trends
+            updateTrend(document.querySelector('.kpi-card:nth-child(1) .kpi-trend'), data.revenueTrend);
+            updateTrend(document.querySelector('.kpi-card:nth-child(2) .kpi-trend'), data.ordersTrend);
+            updateTrend(document.querySelector('.kpi-card:nth-child(3) .kpi-trend'), data.aovTrend);
+            updateTrend(document.querySelector('.kpi-card:nth-child(4) .kpi-trend'), data.conversionTrend);
+        }
+
+        function updateTrend(element, trend) {
+            const icon = element.querySelector('i');
+            
+            if (trend >= 0) {
+                element.className = 'kpi-trend trend-up';
+                icon.className = 'ri-arrow-up-line';
+            } else {
+                element.className = 'kpi-trend trend-down';
+                icon.className = 'ri-arrow-down-line';
+            }
+            // Keep the text content but update the number
+            const textNode = element.childNodes[2];
+            if (textNode) {
+                element.innerHTML = icon.outerHTML + ' ' + Math.abs(trend).toFixed(1) + '% vs last period';
+            }
+        }
+
+        function updateChart(chartData) {
+            const chart = document.getElementById('salesChart');
+            if (!chartData || chartData.length === 0) {
+                chart.innerHTML = '<div class="empty-state"><i class="ri-bar-chart-2-line"></i><p>No sales data available for this period</p></div>';
+                return;
+            }
+            
+            let html = '';
+            chartData.forEach(item => {
+                html += `
+                    <div class="bar-wrapper">
+                        <div class="bar" style="height: ${item.height}px;" title="ETB ${formatNumber(item.value)}"></div>
+                        <div class="bar-label">${item.label}</div>
+                    </div>
+                `;
+            });
+            chart.innerHTML = html;
+        }
+
+        function updateTopProducts(products) {
+            const container = document.querySelector('.insight-card:first-child');
+            if (!products || products.length === 0) {
+                container.innerHTML = `
+                    <h3>🏆 Top Selling Products</h3>
+                    <div class="empty-state">
+                        <i class="ri-shopping-bag-line"></i>
+                        <p>No products sold yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<h3>🏆 Top Selling Products</h3>';
+            products.forEach((product, index) => {
+                html += `
+                    <div class="product-rank-item">
+                        <div class="product-rank-info">
+                            <span class="rank-number">${index + 1}</span>
+                            <div class="product-rank-detail">
+                                <h4>${product.name || 'Product'}</h4>
+                                <p>${product.quantity || 0} units sold</p>
+                            </div>
+                        </div>
+                        <div class="product-rank-value">ETB ${formatNumber(product.revenue || 0)}</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function updatePaymentMethods(methods) {
+            const container = document.querySelector('.insight-card:last-child');
+            if (!methods || methods.length === 0) {
+                container.innerHTML = `
+                    <h3>💳 Payment Methods</h3>
+                    <div class="empty-state">
+                        <i class="ri-bank-card-line"></i>
+                        <p>No payment data available</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<h3>💳 Payment Methods</h3><div class="payment-method-list">';
+            methods.forEach(method => {
+                let icon = 'ri-bank-card-line';
+                if (method.name === 'Cash on Delivery' || method.name === 'cash') icon = 'ri-bank-card-line';
+                else if (method.name === 'Mobile Money' || method.name === 'telebirr') icon = 'ri-phone-line';
+                else if (method.name === 'Bank Transfer' || method.name === 'bank') icon = 'ri-bank-line';
+                else icon = 'ri-secure-payment-line';
+                
+                html += `
+                    <div>
+                        <div class="payment-method-item">
+                            <span class="payment-method-name">
+                                <i class="${icon}"></i>
+                                ${method.name}
+                            </span>
+                            <span>${method.percentage || 0}%</span>
+                        </div>
+                        <div class="payment-bar">
+                            <div class="payment-bar-fill" style="width:${method.percentage || 0}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function updateTransactions(transactions) {
+            const container = document.querySelector('.recent-transactions');
+            if (!transactions || transactions.length === 0) {
+                container.innerHTML = `
+                    <h3>📋 Recent Transactions</h3>
+                    <div class="empty-state">
+                        <i class="ri-history-line" style="font-size: 48px; color: var(--border-color);"></i>
+                        <p style="margin-top: 16px; color: var(--text-secondary);">No transactions found for this period</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<h3>📋 Recent Transactions</h3>';
+            transactions.forEach(transaction => {
+                // Determine status color
+                let statusClass = 'badge-success';
+                let statusText = transaction.status || 'completed';
+                if (statusText === 'pending') statusClass = 'badge-warning';
+                else if (statusText === 'cancelled') statusClass = 'badge-danger';
+                else if (statusText === 'processing') statusClass = 'badge-info';
+                
+                html += `
+                    <div class="transaction-row">
+                        <div class="transaction-info">
+                            <div class="transaction-icon bg-soft-gold">
+                                <i class="ri-shopping-bag-line"></i>
+                            </div>
+                            <div class="transaction-detail">
+                                <h4>#${transaction.order_number || 'ORD-' + (transaction.id || '')}</h4>
+                                <p>
+                                    <i class="ri-user-line" style="font-size: 12px; margin-right: 4px;"></i>
+                                    ${transaction.customer_name || transaction.user?.name || 'Customer'} • 
+                                    <i class="ri-shopping-bag-3-line" style="font-size: 12px; margin-right: 4px; margin-left: 4px;"></i>
+                                    ${transaction.items_count || transaction.items?.count || 0} items
+                                </p>
+                                <small style="color: var(--text-secondary);">
+                                    <i class="ri-time-line" style="font-size: 11px;"></i>
+                                    ${transaction.date || 'Just now'}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="transaction-amount positive">
+                            <strong>ETB ${formatNumber(transaction.amount || transaction.total_amount || 0)}</strong>
+                            <div>
+                                <span class="badge ${statusClass}">
+                                    ${statusText.charAt(0).toUpperCase() + statusText.slice(1)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Add pagination if exists
+            if (window.paginationHtml) {
+                html += `<div class="pagination">${window.paginationHtml}</div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function formatNumber(number) {
+            return new Intl.NumberFormat('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(number || 0);
+        }
     </script>
 
 </body>
