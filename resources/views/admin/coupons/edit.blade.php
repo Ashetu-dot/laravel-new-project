@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Edit Promotion - Vendora Admin | Jimma, Ethiopia</title>
+    <title>Edit Coupon - Vendora Admin | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
@@ -30,6 +30,12 @@
             --danger-color: #ef4444;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
@@ -403,20 +409,41 @@
         .input-group {
             display: flex;
             align-items: center;
+            gap: 8px;
+        }
+
+        .input-group .form-control {
+            flex: 1;
         }
 
         .input-group-text {
             padding: 12px 16px;
             background-color: #f3f4f6;
             border: 1px solid var(--border-color);
-            border-right: none;
-            border-radius: 8px 0 0 8px;
+            border-radius: 8px;
             color: var(--text-secondary);
             font-size: 14px;
+            white-space: nowrap;
         }
 
-        .input-group .form-control {
-            border-radius: 0 8px 8px 0;
+        .input-group-append {
+            display: flex;
+        }
+
+        .btn-outline-secondary {
+            padding: 12px 16px;
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-outline-secondary:hover {
+            border-color: var(--primary-gold);
+            color: var(--primary-gold);
         }
 
         .error-message {
@@ -433,6 +460,7 @@
             display: flex;
             gap: 24px;
             margin-top: 8px;
+            flex-wrap: wrap;
         }
 
         .radio-option {
@@ -453,127 +481,12 @@
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            margin-bottom: 12px;
         }
 
         .checkbox-option input[type="checkbox"] {
             width: 16px;
             height: 16px;
             cursor: pointer;
-        }
-
-        /* Products Selection */
-        .products-section {
-            margin-top: 24px;
-            padding: 20px;
-            background-color: #f9fafb;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .products-section h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .products-search {
-            margin-bottom: 16px;
-        }
-
-        .products-list {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background-color: white;
-        }
-
-        .product-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .product-item:last-child {
-            border-bottom: none;
-        }
-
-        .product-item input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-        }
-
-        .product-image {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            background-color: #f3f4f6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .product-image img {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-
-        .product-details {
-            flex: 1;
-        }
-
-        .product-name {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .product-meta {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .product-price {
-            font-weight: 600;
-            color: var(--primary-gold);
-        }
-
-        /* Current Banner */
-        .current-banner {
-            margin-top: 12px;
-            padding: 16px;
-            background-color: #f9fafb;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .current-banner h4 {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .banner-preview {
-            max-width: 300px;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 12px;
-        }
-
-        .banner-preview img {
-            width: 100%;
-            height: auto;
-            object-fit: cover;
         }
 
         /* Alert Messages */
@@ -607,7 +520,7 @@
         .alert-info {
             background-color: #dbeafe;
             color: #1e40af;
-            border-left: 4px solid var(--accent-blue, #3b82f6);
+            border-left: 4px solid #3b82f6;
         }
 
         /* Buttons */
@@ -707,6 +620,73 @@
             border-top-color: var(--primary-gold);
             animation: spin 0.8s linear infinite;
         }
+
+        /* Help Text */
+        .help-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* Vendor Select */
+        .vendor-select {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .vendor-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .vendor-option:last-child {
+            border-bottom: none;
+        }
+
+        .vendor-option input[type="radio"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Usage Stats */
+        .usage-stats {
+            background-color: #f9fafb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .stat-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: var(--primary-gold);
+        }
     </style>
 </head>
 <body>
@@ -747,10 +727,10 @@
 
             <div class="nav-group">
                 <div class="nav-label">MARKETING</div>
-                <a href="{{ route('admin.promotions') }}" class="nav-item active">
+                <a href="{{ route('admin.promotions') }}" class="nav-item">
                     <i class="ri-megaphone-line"></i> Promotions
                 </a>
-                <a href="{{ route('admin.coupons') }}" class="nav-item">
+                <a href="{{ route('admin.coupons') }}" class="nav-item active">
                     <i class="ri-coupon-line"></i> Coupons
                 </a>
             </div>
@@ -796,7 +776,7 @@
                     <i class="ri-menu-line"></i>
                 </div>
                 <div class="page-title">
-                    <i class="ri-megaphone-line" style="color: var(--primary-gold);"></i> Edit Promotion
+                    <i class="ri-coupon-line" style="color: var(--primary-gold);"></i> Edit Coupon
                 </div>
             </div>
 
@@ -822,13 +802,13 @@
             <div class="page-header">
                 <div>
                     <h1>
-                        <i class="ri-megaphone-line"></i>
-                        Edit Promotion: {{ $promotion->name }}
+                        <i class="ri-coupon-line"></i>
+                        Edit Coupon: {{ $coupon->code }}
                     </h1>
-                    <p>Update promotion details and settings</p>
+                    <p>Update coupon details and settings</p>
                 </div>
-                <a href="{{ route('admin.promotions') }}" class="btn btn-secondary">
-                    <i class="ri-arrow-left-line"></i> Back to Promotions
+                <a href="{{ route('admin.coupons') }}" class="btn btn-secondary">
+                    <i class="ri-arrow-left-line"></i> Back to Coupons
                 </a>
             </div>
 
@@ -858,49 +838,31 @@
                 </div>
             @endif
 
-            <!-- Edit Promotion Form -->
+            <!-- Edit Coupon Form -->
             <div class="form-container">
-                <form method="POST" action="{{ route('admin.promotions.update', $promotion->id) }}" id="promotionForm" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('admin.coupons.update', $coupon->id) }}" id="couponForm">
                     @csrf
                     @method('PUT')
 
                     <div class="form-grid">
-                        <!-- Promotion Name -->
-                        <div class="form-group">
-                            <label for="name" class="form-label">
-                                <i class="ri-megaphone-line"></i> Promotion Name
-                            </label>
-                            <input type="text" 
-                                   id="name" 
-                                   name="name" 
-                                   class="form-control @error('name') error @enderror" 
-                                   placeholder="e.g., Summer Sale 2024"
-                                   value="{{ old('name', $promotion->name) }}"
-                                   required>
-                            @error('name')
-                                <div class="error-message">
-                                    <i class="ri-error-warning-fill"></i> {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-
-                        <!-- Promotion Code -->
+                        <!-- Coupon Code -->
                         <div class="form-group">
                             <label for="code" class="form-label">
-                                <i class="ri-coupon-line"></i> Promotion Code
+                                <i class="ri-coupon-line"></i> Coupon Code
                             </label>
                             <div class="input-group">
                                 <input type="text" 
                                        id="code" 
                                        name="code" 
                                        class="form-control @error('code') error @enderror" 
-                                       placeholder="SUMMER2024"
-                                       value="{{ old('code', $promotion->code) }}"
+                                       placeholder="e.g., SUMMER2024"
+                                       value="{{ old('code', $coupon->code) }}"
                                        required>
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="generateCode()" style="margin-left: 8px;">
+                                <button type="button" class="btn-outline-secondary" onclick="generateCode()">
                                     <i class="ri-refresh-line"></i> Generate
                                 </button>
                             </div>
+                            <small class="help-text">Unique code customers will enter at checkout</small>
                             @error('code')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
@@ -908,16 +870,14 @@
                             @enderror
                         </div>
 
-                        <!-- Promotion Type -->
+                        <!-- Discount Type -->
                         <div class="form-group">
                             <label for="type" class="form-label">
-                                <i class="ri-price-tag-3-line"></i> Promotion Type
+                                <i class="ri-price-tag-3-line"></i> Discount Type
                             </label>
-                            <select id="type" name="type" class="form-control @error('type') error @enderror" required onchange="togglePromotionType()">
-                                <option value="percentage" {{ old('type', $promotion->type) == 'percentage' ? 'selected' : '' }}>Percentage Discount</option>
-                                <option value="fixed" {{ old('type', $promotion->type) == 'fixed' ? 'selected' : '' }}>Fixed Amount Discount</option>
-                                <option value="bogo" {{ old('type', $promotion->type) == 'bogo' ? 'selected' : '' }}>Buy One Get One (BOGO)</option>
-                                <option value="free_shipping" {{ old('type', $promotion->type) == 'free_shipping' ? 'selected' : '' }}>Free Shipping</option>
+                            <select id="type" name="type" class="form-control @error('type') error @enderror" required onchange="toggleType()">
+                                <option value="percentage" {{ old('type', $coupon->type) == 'percentage' ? 'selected' : '' }}>Percentage Discount</option>
+                                <option value="fixed" {{ old('type', $coupon->type) == 'fixed' ? 'selected' : '' }}>Fixed Amount Discount</option>
                             </select>
                             @error('type')
                                 <div class="error-message">
@@ -926,82 +886,48 @@
                             @enderror
                         </div>
 
-                        <!-- Discount Value (Percentage) -->
-                        <div class="form-group" id="percentageField" style="{{ old('type', $promotion->type) == 'percentage' ? 'display: block;' : 'display: none;' }}">
-                            <label for="discount_percentage" class="form-label">
-                                <i class="ri-percent-line"></i> Discount Percentage
+                        <!-- Discount Value -->
+                        <div class="form-group">
+                            <label for="value" class="form-label" id="valueLabel">
+                                <i class="ri-percent-line"></i> Discount Value (%)
                             </label>
                             <div class="input-group">
-                                <span class="input-group-text">%</span>
                                 <input type="number" 
-                                       id="discount_percentage" 
-                                       name="discount_percentage" 
-                                       class="form-control" 
+                                       id="value" 
+                                       name="value" 
+                                       class="form-control @error('value') error @enderror" 
                                        placeholder="20"
-                                       min="1" 
-                                       max="100"
-                                       step="1"
-                                       value="{{ old('discount_percentage', $promotion->type == 'percentage' ? $promotion->value : '') }}">
+                                       min="0.01"
+                                       step="0.01"
+                                       value="{{ old('value', $coupon->value) }}"
+                                       required>
+                                <span class="input-group-text" id="valueSuffix">{{ $coupon->type == 'percentage' ? '%' : 'ETB' }}</span>
                             </div>
-                            @error('discount_percentage')
+                            @error('value')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
                             @enderror
                         </div>
 
-                        <!-- Discount Value (Fixed) -->
-                        <div class="form-group" id="fixedField" style="{{ old('type', $promotion->type) == 'fixed' ? 'display: block;' : 'display: none;' }}">
-                            <label for="discount_amount" class="form-label">
-                                <i class="ri-money-cny-circle-line"></i> Discount Amount (ETB)
+                        <!-- Maximum Discount (for percentage) -->
+                        <div class="form-group" id="maxDiscountField" style="{{ old('type', $coupon->type) == 'percentage' ? 'display: block;' : 'display: none;' }}">
+                            <label for="max_discount_amount" class="form-label">
+                                <i class="ri-coupon-line"></i> Maximum Discount (ETB)
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">ETB</span>
                                 <input type="number" 
-                                       id="discount_amount" 
-                                       name="discount_amount" 
+                                       id="max_discount_amount" 
+                                       name="max_discount_amount" 
                                        class="form-control" 
-                                       placeholder="500"
-                                       min="1"
-                                       step="1"
-                                       value="{{ old('discount_amount', $promotion->type == 'fixed' ? $promotion->value : '') }}">
+                                       placeholder="1000"
+                                       min="0"
+                                       step="0.01"
+                                       value="{{ old('max_discount_amount', $coupon->max_discount_amount) }}">
                             </div>
-                            @error('discount_amount')
-                                <div class="error-message">
-                                    <i class="ri-error-warning-fill"></i> {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-
-                        <!-- Date Range -->
-                        <div class="form-group">
-                            <label for="start_date" class="form-label">
-                                <i class="ri-calendar-line"></i> Start Date
-                            </label>
-                            <input type="datetime-local" 
-                                   id="start_date" 
-                                   name="start_date" 
-                                   class="form-control @error('start_date') error @enderror" 
-                                   value="{{ old('start_date', \Carbon\Carbon::parse($promotion->start_date)->format('Y-m-d\TH:i')) }}"
-                                   required>
-                            @error('start_date')
-                                <div class="error-message">
-                                    <i class="ri-error-warning-fill"></i> {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label for="end_date" class="form-label">
-                                <i class="ri-calendar-line"></i> End Date
-                            </label>
-                            <input type="datetime-local" 
-                                   id="end_date" 
-                                   name="end_date" 
-                                   class="form-control @error('end_date') error @enderror" 
-                                   value="{{ old('end_date', \Carbon\Carbon::parse($promotion->end_date)->format('Y-m-d\TH:i')) }}"
-                                   required>
-                            @error('end_date')
+                            <small class="help-text">Maximum discount amount (leave empty for no limit)</small>
+                            @error('max_discount_amount')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
@@ -1010,86 +936,106 @@
 
                         <!-- Minimum Purchase -->
                         <div class="form-group">
-                            <label for="min_purchase" class="form-label">
+                            <label for="min_order_amount" class="form-label">
                                 <i class="ri-shopping-cart-line"></i> Minimum Purchase (ETB)
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">ETB</span>
                                 <input type="number" 
-                                       id="min_purchase" 
-                                       name="min_purchase" 
+                                       id="min_order_amount" 
+                                       name="min_order_amount" 
                                        class="form-control" 
                                        placeholder="0 for no minimum"
                                        min="0"
-                                       step="1"
-                                       value="{{ old('min_purchase', $promotion->min_purchase) }}">
+                                       step="0.01"
+                                       value="{{ old('min_order_amount', $coupon->min_order_amount ?? 0) }}">
                             </div>
-                            <small class="form-text text-muted">Leave as 0 for no minimum purchase requirement</small>
-                            @error('min_purchase')
+                            <small class="help-text">Minimum order amount required to use this coupon</small>
+                            @error('min_order_amount')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
                             @enderror
                         </div>
 
-                        <!-- Max Discount Amount (for percentage) -->
-                        <div class="form-group" id="maxDiscountField" style="{{ old('type', $promotion->type) == 'percentage' ? 'display: block;' : 'display: none;' }}">
-                            <label for="max_discount" class="form-label">
-                                <i class="ri-coupon-line"></i> Maximum Discount (ETB)
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">ETB</span>
-                                <input type="number" 
-                                       id="max_discount" 
-                                       name="max_discount" 
-                                       class="form-control" 
-                                       placeholder="1000"
-                                       min="0"
-                                       step="1"
-                                       value="{{ old('max_discount', $promotion->max_discount) }}">
-                            </div>
-                            <small class="form-text text-muted">Maximum discount amount (leave empty for no limit)</small>
-                            @error('max_discount')
-                                <div class="error-message">
-                                    <i class="ri-error-warning-fill"></i> {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-
-                        <!-- Usage Limit Per User -->
+                        <!-- Expiry Date -->
                         <div class="form-group">
-                            <label for="usage_limit" class="form-label">
-                                <i class="ri-user-line"></i> Usage Limit Per Customer
+                            <label for="expires_at" class="form-label">
+                                <i class="ri-calendar-line"></i> Expiry Date
+                            </label>
+                            <input type="datetime-local" 
+                                   id="expires_at" 
+                                   name="expires_at" 
+                                   class="form-control @error('expires_at') error @enderror" 
+                                   value="{{ old('expires_at', $coupon->expires_at ? $coupon->expires_at->format('Y-m-d\TH:i') : now()->addDays(30)->format('Y-m-d\TH:i')) }}"
+                                   required>
+                            <small class="help-text">When this coupon expires</small>
+                            @error('expires_at')
+                                <div class="error-message">
+                                    <i class="ri-error-warning-fill"></i> {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <!-- Usage Stats (Read Only) -->
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="ri-bar-chart-line"></i> Usage Statistics
+                            </label>
+                            <div class="usage-stats">
+                                <div class="stat-row">
+                                    <span class="stat-label">Times Used</span>
+                                    <span class="stat-value">{{ $coupon->used_count ?? 0 }}</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Maximum Total Uses</span>
+                                    <span class="stat-value">{{ $coupon->max_uses ?? 'Unlimited' }}</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Uses Per Customer</span>
+                                    <span class="stat-value">{{ $coupon->per_user_limit ?? 1 }}</span>
+                                </div>
+                                <div class="stat-row">
+                                    <span class="stat-label">Created</span>
+                                    <span class="stat-value">{{ $coupon->created_at->format('M d, Y') }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Max Uses -->
+                        <div class="form-group">
+                            <label for="max_uses" class="form-label">
+                                <i class="ri-group-line"></i> Maximum Total Uses
                             </label>
                             <input type="number" 
-                                   id="usage_limit" 
-                                   name="usage_limit" 
+                                   id="max_uses" 
+                                   name="max_uses" 
+                                   class="form-control" 
+                                   placeholder="0 for unlimited"
+                                   min="0"
+                                   value="{{ old('max_uses', $coupon->max_uses) }}">
+                            <small class="help-text">Total number of times this coupon can be used</small>
+                            @error('max_uses')
+                                <div class="error-message">
+                                    <i class="ri-error-warning-fill"></i> {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <!-- Per User Limit -->
+                        <div class="form-group">
+                            <label for="per_user_limit" class="form-label">
+                                <i class="ri-user-line"></i> Uses Per Customer
+                            </label>
+                            <input type="number" 
+                                   id="per_user_limit" 
+                                   name="per_user_limit" 
                                    class="form-control" 
                                    placeholder="1"
                                    min="0"
-                                   value="{{ old('usage_limit', $promotion->usage_limit_per_user) }}">
-                            <small class="form-text text-muted">0 for unlimited</small>
-                            @error('usage_limit')
-                                <div class="error-message">
-                                    <i class="ri-error-warning-fill"></i> {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-
-                        <!-- Total Usage Limit -->
-                        <div class="form-group">
-                            <label for="total_usage_limit" class="form-label">
-                                <i class="ri-group-line"></i> Total Usage Limit
-                            </label>
-                            <input type="number" 
-                                   id="total_usage_limit" 
-                                   name="total_usage_limit" 
-                                   class="form-control" 
-                                   placeholder="1000"
-                                   min="0"
-                                   value="{{ old('total_usage_limit', $promotion->total_usage_limit) }}">
-                            <small class="form-text text-muted">0 for unlimited</small>
-                            @error('total_usage_limit')
+                                   value="{{ old('per_user_limit', $coupon->per_user_limit ?? 1) }}">
+                            <small class="help-text">How many times each customer can use this coupon</small>
+                            @error('per_user_limit')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
@@ -1103,22 +1049,65 @@
                             </label>
                             <div class="radio-group">
                                 <label class="radio-option">
-                                    <input type="radio" name="is_active" value="1" {{ old('is_active', $promotion->is_active) == '1' ? 'checked' : '' }}>
+                                    <input type="radio" name="is_active" value="1" {{ old('is_active', $coupon->is_active) == '1' ? 'checked' : '' }}>
                                     <span>Active</span>
                                 </label>
                                 <label class="radio-option">
-                                    <input type="radio" name="is_active" value="0" {{ old('is_active', $promotion->is_active) == '0' ? 'checked' : '' }}>
+                                    <input type="radio" name="is_active" value="0" {{ old('is_active', $coupon->is_active) == '0' ? 'checked' : '' }}>
                                     <span>Inactive</span>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- Used Count (Read Only) -->
-                        <div class="form-group">
+                        <!-- Vendor Assignment -->
+                        <div class="form-group full-width">
                             <label class="form-label">
-                                <i class="ri-bar-chart-line"></i> Times Used
+                                <i class="ri-store-line"></i> Assign to Vendor (Optional)
                             </label>
-                            <input type="text" class="form-control" value="{{ $promotion->used_count }}" readonly disabled>
+                            <div class="radio-group" style="margin-bottom: 16px;">
+                                <label class="radio-option">
+                                    <input type="radio" name="vendor_scope" value="all" {{ !$coupon->vendor_id ? 'checked' : '' }} onchange="toggleVendorSelection()">
+                                    <span>All Vendors</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="vendor_scope" value="specific" {{ $coupon->vendor_id ? 'checked' : '' }} onchange="toggleVendorSelection()">
+                                    <span>Specific Vendor</span>
+                                </label>
+                            </div>
+
+                            <div id="vendorSelection" style="display: {{ $coupon->vendor_id ? 'block' : 'none' }};">
+                                <select name="vendor_id" id="vendor_id" class="form-control">
+                                    <option value="">Select a vendor</option>
+                                    @foreach($vendors as $vendor)
+                                        <option value="{{ $vendor->id }}" {{ old('vendor_id', $coupon->vendor_id) == $vendor->id ? 'selected' : '' }}>
+                                            {{ $vendor->business_name ?? $vendor->name }} ({{ $vendor->email }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="help-text">If specific vendor is selected, coupon will only work for that vendor's products</small>
+                            </div>
+                        </div>
+
+                        <!-- User Assignment -->
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="ri-user-line"></i> Assign to Specific User (Optional)
+                            </label>
+                            <input type="text" 
+                                   id="user_search" 
+                                   class="form-control" 
+                                   placeholder="Search for a user by email or name..."
+                                   autocomplete="off"
+                                   value="{{ $coupon->user ? $coupon->user->name . ' (' . $coupon->user->email . ')' : '' }}">
+                            <input type="hidden" id="user_id" name="user_id" value="{{ old('user_id', $coupon->user_id) }}">
+                            <div id="user_search_results" style="display: none; margin-top: 8px; border: 1px solid var(--border-color); border-radius: 8px; max-height: 200px; overflow-y: auto;"></div>
+                            <div id="selected_user" style="margin-top: 8px; {{ $coupon->user_id ? 'display: block;' : 'display: none;' }}">
+                                <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background-color: #f9fafb; border-radius: 8px;">
+                                    <span id="selected_user_name">{{ $coupon->user ? $coupon->user->name . ' (' . $coupon->user->email . ')' : '' }}</span>
+                                    <button type="button" class="btn-outline-secondary btn-sm" onclick="clearUser()">Remove</button>
+                                </div>
+                            </div>
+                            <small class="help-text">If a specific user is selected, only that user can use this coupon</small>
                         </div>
 
                         <!-- Description -->
@@ -1129,119 +1118,23 @@
                             <textarea id="description" 
                                       name="description" 
                                       class="form-control @error('description') error @enderror" 
-                                      placeholder="Describe the promotion details...">{{ old('description', $promotion->description) }}</textarea>
+                                      placeholder="Describe what this coupon is for...">{{ old('description', $coupon->description) }}</textarea>
+                            <small class="help-text">Internal description (not visible to customers)</small>
                             @error('description')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
                             @enderror
                         </div>
-
-                        <!-- Terms & Conditions -->
-                        <div class="form-group full-width">
-                            <label for="terms" class="form-label">
-                                <i class="ri-file-copy-line"></i> Terms & Conditions
-                            </label>
-                            <textarea id="terms" 
-                                      name="terms" 
-                                      class="form-control" 
-                                      placeholder="Terms and conditions for this promotion">{{ old('terms', $promotion->terms_conditions) }}</textarea>
-                        </div>
-
-                        <!-- Current Banner -->
-                        @if($promotion->banner)
-                        <div class="form-group full-width">
-                            <label class="form-label">
-                                <i class="ri-image-line"></i> Current Banner
-                            </label>
-                            <div class="current-banner">
-                                <div class="banner-preview">
-                                    <img src="{{ Storage::url($promotion->banner) }}" alt="Promotion Banner">
-                                </div>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="remove_banner" value="1">
-                                    <span>Remove current banner</span>
-                                </label>
-                            </div>
-                        </div>
-                        @endif
-
-                        <!-- New Banner Image -->
-                        <div class="form-group full-width">
-                            <label for="banner" class="form-label">
-                                <i class="ri-image-line"></i> Update Banner Image
-                            </label>
-                            <input type="file" 
-                                   id="banner" 
-                                   name="banner" 
-                                   class="form-control" 
-                                   accept="image/*"
-                                   onchange="previewImage(this)">
-                            <small class="form-text text-muted">Recommended size: 1200x400px (max 2MB)</small>
-                            <div id="imagePreview" style="margin-top: 12px; display: none;">
-                                <img src="#" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 8px;">
-                            </div>
-                            @error('banner')
-                                <div class="error-message">
-                                    <i class="ri-error-warning-fill"></i> {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-
-                        <!-- Applicable Products -->
-                        <div class="form-group full-width">
-                            <label class="form-label">
-                                <i class="ri-shopping-bag-line"></i> Applicable Products
-                            </label>
-                            <div class="radio-group" style="margin-bottom: 16px;">
-                                <label class="radio-option">
-                                    <input type="radio" name="product_scope" value="all" {{ old('product_scope', $promotion->product_scope) == 'all' ? 'checked' : '' }} onchange="toggleProductSelection()">
-                                    <span>All Products</span>
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="product_scope" value="selected" {{ old('product_scope', $promotion->product_scope) == 'selected' ? 'checked' : '' }} onchange="toggleProductSelection()">
-                                    <span>Selected Products</span>
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="product_scope" value="categories" {{ old('product_scope', $promotion->product_scope) == 'categories' ? 'checked' : '' }} onchange="toggleProductSelection()">
-                                    <span>By Category</span>
-                                </label>
-                            </div>
-
-                            <!-- Selected Products -->
-                            <div id="selectedProductsSection" style="display: {{ old('product_scope', $promotion->product_scope) == 'selected' ? 'block' : 'none' }};">
-                                <div class="products-search">
-                                    <input type="text" id="productSearch" class="form-control" placeholder="Search products...">
-                                </div>
-                                <div class="products-list" id="productsList">
-                                    <!-- Products will be loaded here via AJAX -->
-                                    <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
-                                        Loading products...
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Categories Selection -->
-                            <div id="categoriesSection" style="display: {{ old('product_scope', $promotion->product_scope) == 'categories' ? 'block' : 'none' }};">
-                                <select name="categories[]" id="categories" class="form-control" multiple size="5">
-                                    @foreach($categories ?? [] as $category)
-                                        <option value="{{ $category->id }}" {{ in_array($category->id, old('categories', $promotion->categories->pluck('id')->toArray())) ? 'selected' : '' }}>
-                                            {{ $category->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple categories</small>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Form Actions -->
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ route('admin.promotions') }}'">
+                        <a href="{{ route('admin.coupons') }}" class="btn btn-secondary">
                             <i class="ri-close-line"></i> Cancel
-                        </button>
+                        </a>
                         <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="ri-save-line"></i> Update Promotion
+                            <i class="ri-save-line"></i> Update Coupon
                         </button>
                     </div>
                 </form>
@@ -1257,7 +1150,6 @@
     <script>
         // CSRF Token
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        let selectedProductIds = {{ json_encode(old('products', $promotion->products->pluck('id')->toArray())) }};
 
         // Mobile menu toggle
         document.addEventListener('DOMContentLoaded', function() {
@@ -1278,138 +1170,114 @@
                 });
             }
 
-            // Load products if needed
-            @if(old('product_scope', $promotion->product_scope) == 'selected')
-                loadProducts();
-            @endif
-
-            // Set min date for end date
-            const startDate = document.getElementById('start_date');
-            const endDate = document.getElementById('end_date');
-
-            if (startDate && endDate) {
-                startDate.addEventListener('change', function() {
-                    endDate.min = this.value;
-                });
-            }
+            // Initialize type toggle
+            toggleType();
         });
 
-        // Generate random code
-        function generateCode() {
-            const prefix = document.getElementById('name').value.substring(0, 3).toUpperCase() || 'PROMO';
-            const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-            document.getElementById('code').value = prefix + random;
-        }
-
-        // Toggle promotion type fields
-        function togglePromotionType() {
+        // Toggle type fields
+        function toggleType() {
             const type = document.getElementById('type').value;
-            
-            document.getElementById('percentageField').style.display = 'none';
-            document.getElementById('fixedField').style.display = 'none';
-            document.getElementById('maxDiscountField').style.display = 'none';
+            const valueLabel = document.getElementById('valueLabel');
+            const valueSuffix = document.getElementById('valueSuffix');
+            const maxDiscountField = document.getElementById('maxDiscountField');
             
             if (type === 'percentage') {
-                document.getElementById('percentageField').style.display = 'block';
-                document.getElementById('maxDiscountField').style.display = 'block';
-            } else if (type === 'fixed') {
-                document.getElementById('fixedField').style.display = 'block';
+                valueLabel.innerHTML = '<i class="ri-percent-line"></i> Discount Value (%)';
+                valueSuffix.textContent = '%';
+                maxDiscountField.style.display = 'block';
+            } else {
+                valueLabel.innerHTML = '<i class="ri-money-cny-circle-line"></i> Discount Amount (ETB)';
+                valueSuffix.textContent = 'ETB';
+                maxDiscountField.style.display = 'none';
             }
         }
 
-        // Toggle product selection sections
-        function toggleProductSelection() {
-            const scope = document.querySelector('input[name="product_scope"]:checked').value;
+        // Toggle vendor selection
+        function toggleVendorSelection() {
+            const scope = document.querySelector('input[name="vendor_scope"]:checked').value;
+            const vendorSelection = document.getElementById('vendorSelection');
             
-            document.getElementById('selectedProductsSection').style.display = 'none';
-            document.getElementById('categoriesSection').style.display = 'none';
-            
-            if (scope === 'selected') {
-                document.getElementById('selectedProductsSection').style.display = 'block';
-                loadProducts();
-            } else if (scope === 'categories') {
-                document.getElementById('categoriesSection').style.display = 'block';
-            }
+            vendorSelection.style.display = scope === 'specific' ? 'block' : 'none';
         }
 
-        // Load products via AJAX
-        function loadProducts() {
-            const productsList = document.getElementById('productsList');
+        // Generate random coupon code
+        function generateCode() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+                code += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
             
-            fetch('{{ route("admin.products.list") }}', {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.products) {
-                    let html = '';
-                    data.products.forEach(product => {
-                        const checked = selectedProductIds.includes(product.id) ? 'checked' : '';
-                        html += `
-                            <div class="product-item">
-                                <input type="checkbox" name="products[]" value="${product.id}" ${checked} onchange="updateSelectedProducts(this)">
-                                <div class="product-image">
-                                    ${product.image ? `<img src="${product.image}" alt="${product.name}">` : '<i class="ri-shopping-bag-line"></i>'}
+            // Add prefix based on type
+            const type = document.getElementById('type').value;
+            if (type === 'percentage') {
+                code = 'PCT' + code;
+            } else {
+                code = 'FIX' + code;
+            }
+            
+            document.getElementById('code').value = code;
+        }
+
+        // User search functionality
+        let searchTimeout;
+        document.getElementById('user_search').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value;
+            
+            if (query.length < 2) {
+                document.getElementById('user_search_results').style.display = 'none';
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                fetch(`/admin/users/search?q=${encodeURIComponent(query)}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(users => {
+                    const resultsDiv = document.getElementById('user_search_results');
+                    if (users.length > 0) {
+                        let html = '';
+                        users.forEach(user => {
+                            html += `
+                                <div class="user-result" style="padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border-color);" onclick="selectUser(${user.id}, '${user.name} (${user.email})')">
+                                    <strong>${user.name}</strong><br>
+                                    <small>${user.email}</small>
                                 </div>
-                                <div class="product-details">
-                                    <div class="product-name">${product.name}</div>
-                                    <div class="product-meta">${product.category} • Stock: ${product.stock}</div>
-                                </div>
-                                <div class="product-price">ETB ${product.price}</div>
-                            </div>
-                        `;
-                    });
-                    productsList.innerHTML = html;
-                    
-                    // Add search functionality
-                    document.getElementById('productSearch').addEventListener('input', function(e) {
-                        const search = e.target.value.toLowerCase();
-                        document.querySelectorAll('.product-item').forEach(item => {
-                            const name = item.querySelector('.product-name').textContent.toLowerCase();
-                            item.style.display = name.includes(search) ? 'flex' : 'none';
+                            `;
                         });
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error loading products:', error);
-                productsList.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">Failed to load products</div>';
-            });
+                        resultsDiv.innerHTML = html;
+                        resultsDiv.style.display = 'block';
+                    } else {
+                        resultsDiv.innerHTML = '<div style="padding: 10px; color: var(--text-secondary);">No users found</div>';
+                        resultsDiv.style.display = 'block';
+                    }
+                });
+            }, 300);
+        });
+
+        // Select user from search
+        function selectUser(userId, userName) {
+            document.getElementById('user_id').value = userId;
+            document.getElementById('selected_user_name').textContent = userName;
+            document.getElementById('selected_user').style.display = 'block';
+            document.getElementById('user_search').value = userName;
+            document.getElementById('user_search_results').style.display = 'none';
         }
 
-        // Update selected products array
-        function updateSelectedProducts(checkbox) {
-            if (checkbox.checked) {
-                selectedProductIds.push(parseInt(checkbox.value));
-            } else {
-                selectedProductIds = selectedProductIds.filter(id => id !== parseInt(checkbox.value));
-            }
+        // Clear selected user
+        function clearUser() {
+            document.getElementById('user_id').value = '';
+            document.getElementById('selected_user').style.display = 'none';
+            document.getElementById('user_search').value = '';
         }
 
-        // Preview image before upload
-        function previewImage(input) {
-            const preview = document.getElementById('imagePreview');
-            const img = preview.querySelector('img');
-            
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    img.src = e.target.result;
-                    preview.style.display = 'block';
-                }
-                
-                reader.readAsDataURL(input.files[0]);
-            } else {
-                preview.style.display = 'none';
-            }
-        }
-
-        // Form submission with loading state
-        document.getElementById('promotionForm').addEventListener('submit', function(e) {
+        // Form submission
+        document.getElementById('couponForm').addEventListener('submit', function(e) {
             const submitBtn = document.getElementById('submitBtn');
             
             if (submitBtn.disabled) {
@@ -1417,32 +1285,20 @@
                 return;
             }
             
-            // Validate dates
-            const startDate = new Date(document.getElementById('start_date').value);
-            const endDate = new Date(document.getElementById('end_date').value);
-            
-            if (endDate <= startDate) {
+            // Validate value
+            const value = document.getElementById('value').value;
+            if (!value || value <= 0) {
                 e.preventDefault();
-                alert('End date must be after start date');
+                alert('Please enter a valid discount value');
                 return;
             }
             
-            // Validate based on type
-            const type = document.getElementById('type').value;
-            if (type === 'percentage') {
-                const percentage = document.getElementById('discount_percentage').value;
-                if (!percentage || percentage < 1 || percentage > 100) {
-                    e.preventDefault();
-                    alert('Please enter a valid discount percentage (1-100)');
-                    return;
-                }
-            } else if (type === 'fixed') {
-                const amount = document.getElementById('discount_amount').value;
-                if (!amount || amount < 1) {
-                    e.preventDefault();
-                    alert('Please enter a valid discount amount');
-                    return;
-                }
+            // Validate expiry
+            const expiresAt = new Date(document.getElementById('expires_at').value);
+            if (expiresAt <= new Date()) {
+                e.preventDefault();
+                alert('Expiry date must be in the future');
+                return;
             }
             
             submitBtn.disabled = true;
@@ -1450,7 +1306,7 @@
             document.getElementById('loadingOverlay').style.display = 'flex';
         });
 
-        // Auto-hide alerts after 5 seconds
+        // Auto-hide alerts
         setTimeout(() => {
             document.querySelectorAll('.alert').forEach(alert => {
                 alert.style.transition = 'opacity 0.5s';
@@ -1458,16 +1314,17 @@
                 setTimeout(() => alert.remove(), 500);
             });
         }, 5000);
-
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
     </script>
+
+    <style>
+        .user-result:hover {
+            background-color: #f9fafb;
+        }
+        .btn-outline-secondary.btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+    </style>
 
 </body>
 </html>

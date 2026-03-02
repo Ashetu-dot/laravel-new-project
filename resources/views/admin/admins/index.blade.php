@@ -40,6 +40,20 @@
             --primary-gold: #B88E3F;
         }
 
+        /* Dark Mode Variables */
+        body.dark-mode {
+            --primary-bg: #111827;
+            --sidebar-bg: #1a1e2b;
+            --sidebar-text: #94a3b8;
+            --sidebar-text-active: #ffffff;
+            --sidebar-active-bg: #2d3348;
+            --card-bg: #1f2937;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --primary-gold: #D4A55A;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -56,6 +70,7 @@
             min-height: 100vh;
             overflow-x: hidden;
             display: flex;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         /* Sidebar */
@@ -71,6 +86,7 @@
             bottom: 0;
             z-index: 100;
             overflow-y: auto;
+            transition: background-color 0.3s;
         }
 
         @media (max-width: 768px) {
@@ -198,6 +214,7 @@
             position: sticky;
             top: 0;
             z-index: 99;
+            transition: background-color 0.3s;
         }
 
         .menu-toggle {
@@ -269,6 +286,7 @@
             color: var(--text-secondary);
             transition: background 0.2s;
             position: relative;
+            text-decoration: none;
         }
 
         .icon-btn:hover {
@@ -350,6 +368,12 @@
             display: flex;
             align-items: center;
             gap: 16px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(184, 142, 63, 0.15);
         }
 
         .stat-icon {
@@ -409,7 +433,7 @@
 
         .btn-primary:hover {
             background-color: #9c7832;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(184, 142, 63, 0.3);
         }
 
@@ -420,8 +444,23 @@
         }
 
         .btn-secondary:hover {
-            border-color: var(--text-dark);
-            color: var(--text-dark);
+            border-color: var(--primary-gold);
+            color: var(--primary-gold);
+        }
+
+        .btn-danger {
+            background-color: var(--accent-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
         }
 
         /* Table */
@@ -431,6 +470,7 @@
             padding: 24px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             overflow-x: auto;
+            border: 1px solid var(--border-color);
         }
 
         .table-header {
@@ -438,6 +478,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .table-title {
@@ -458,18 +500,22 @@
             font-weight: 600;
             text-transform: uppercase;
             border-bottom: 1px solid var(--border-color);
-            background-color: #f9fafb;
+            background-color: var(--primary-bg);
         }
 
         td {
             padding: 16px;
-            border-bottom: 1px solid #f3f4f6;
+            border-bottom: 1px solid var(--border-color);
             font-size: 14px;
             color: var(--text-primary);
         }
 
+        tr:last-child td {
+            border-bottom: none;
+        }
+
         tr:hover td {
-            background-color: #f9fafb;
+            background-color: rgba(184, 142, 63, 0.02);
         }
 
         .admin-name {
@@ -480,8 +526,8 @@
         }
 
         .admin-avatar {
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary-gold), #9c7832);
             display: flex;
@@ -489,7 +535,7 @@
             justify-content: center;
             color: white;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         .status-badge {
@@ -500,8 +546,23 @@
             display: inline-block;
         }
 
-        .status-active { background-color: #d1fae5; color: #065f46; }
-        .status-inactive { background-color: #fee2e2; color: #991b1b; }
+        .status-active { 
+            background-color: #d1fae5; 
+            color: #065f46; 
+        }
+        body.dark-mode .status-active {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        .status-inactive { 
+            background-color: #fee2e2; 
+            color: #991b1b; 
+        }
+        body.dark-mode .status-inactive {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
 
         .action-buttons {
             display: flex;
@@ -509,9 +570,9 @@
         }
 
         .action-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -521,21 +582,50 @@
             cursor: pointer;
             transition: all 0.2s;
             text-decoration: none;
+            font-size: 16px;
         }
 
         .action-btn:hover {
             background-color: var(--primary-gold);
             color: white;
             border-color: var(--primary-gold);
+            transform: translateY(-2px);
+        }
+
+        .action-btn.view:hover {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .action-btn.edit:hover {
+            background-color: var(--primary-gold);
+            border-color: var(--primary-gold);
+        }
+
+        .action-btn.delete:hover {
+            background-color: var(--accent-red);
+            border-color: var(--accent-red);
         }
 
         /* Pagination */
         .pagination {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
             margin-top: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .pagination-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .pagination-item {
@@ -547,6 +637,8 @@
             font-size: 13px;
             text-decoration: none;
             transition: all 0.2s;
+            min-width: 36px;
+            text-align: center;
         }
 
         .pagination-item:hover {
@@ -560,6 +652,11 @@
             border-color: var(--primary-gold);
         }
 
+        .pagination-item.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -567,6 +664,7 @@
             background-color: var(--card-bg);
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
         }
 
         .empty-icon {
@@ -605,6 +703,60 @@
         .logout-btn:hover {
             background-color: var(--sidebar-active-bg);
             color: var(--accent-red);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        body.dark-mode .alert-success {
+            background-color: rgba(16, 185, 129, 0.2);
+            border-color: #10b981;
+            color: #6ee7b7;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #b91c1c;
+        }
+        body.dark-mode .alert-error {
+            background-color: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #fca5a5;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-gold);
+            color: white;
+            border-color: var(--primary-gold);
         }
 
         .bg-blue-light { background-color: #eff6ff; color: var(--accent-blue); }
@@ -715,20 +867,35 @@
                 <div class="search-bar">
                     <i class="ri-search-line"></i>
                     <form method="GET" action="{{ route('admin.admins.list') }}" style="width: 100%;">
-                        <input type="text" name="search" placeholder="Search admins..." value="{{ request('search') }}">
+                        <input type="text" name="search" placeholder="Search admins by name, email or phone..." value="{{ request('search') }}">
                     </form>
                 </div>
             </div>
 
             <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="ri-moon-line"></i>
+                </button>
                 <a href="{{ route('admin.help') }}" class="icon-btn">
                     <i class="ri-question-line"></i>
                 </a>
                 <a href="{{ route('admin.notifications') }}" class="icon-btn">
                     <i class="ri-notification-3-line"></i>
+                    @php
+                        $unreadCount = $unreadNotificationsCount ?? 0;
+                    @endphp
+                    @if($unreadCount > 0)
+                        <span class="badge-count">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('admin.messages') }}" class="icon-btn">
                     <i class="ri-mail-line"></i>
+                    @php
+                        $messageCount = $unreadMessagesCount ?? 0;
+                    @endphp
+                    @if($messageCount > 0)
+                        <span class="badge-count">{{ $messageCount > 9 ? '9+' : $messageCount }}</span>
+                    @endif
                 </a>
             </div>
         </header>
@@ -749,20 +916,20 @@
             </div>
 
             @if(session('success'))
-                <div class="alert alert-success" style="background-color: #d1fae5; color: #065f46; padding: 16px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+                <div class="alert alert-success">
                     <i class="ri-checkbox-circle-line"></i>
                     {{ session('success') }}
                 </div>
             @endif
 
             @if(session('error'))
-                <div class="alert alert-error" style="background-color: #fee2e2; color: #991b1b; padding: 16px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+                <div class="alert alert-error">
                     <i class="ri-error-warning-line"></i>
                     {{ session('error') }}
                 </div>
             @endif
 
-            <!-- Stats Cards -->
+            <!-- Stats Cards - Using $stats from controller -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon bg-blue-light">
@@ -770,7 +937,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-label">Total Admins</div>
-                        <div class="stat-number">{{ $admins->total() ?? 0 }}</div>
+                        <div class="stat-number">{{ $stats['total'] ?? 0 }}</div>
                     </div>
                 </div>
 
@@ -780,7 +947,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-label">Active</div>
-                        <div class="stat-number">{{ $admins->where('is_active', true)->count() ?? 0 }}</div>
+                        <div class="stat-number">{{ $stats['active'] ?? 0 }}</div>
                     </div>
                 </div>
 
@@ -790,8 +957,21 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-label">Inactive</div>
-                        <div class="stat-number">{{ $admins->where('is_active', false)->count() ?? 0 }}</div>
+                        <div class="stat-number">{{ $stats['inactive'] ?? 0 }}</div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="action-bar">
+                <div>
+                    <span>Filter by status: </span>
+                    <a href="{{ route('admin.admins.list') }}" class="btn btn-secondary btn-sm {{ !request('status') ? 'active' : '' }}">All</a>
+                    <a href="{{ route('admin.admins.list', ['status' => 'active']) }}" class="btn btn-secondary btn-sm {{ request('status') == 'active' ? 'active' : '' }}">Active</a>
+                    <a href="{{ route('admin.admins.list', ['status' => 'inactive']) }}" class="btn btn-secondary btn-sm {{ request('status') == 'inactive' ? 'active' : '' }}">Inactive</a>
+                </div>
+                <div>
+                    <span class="text-secondary">Total: {{ $admins->total() ?? 0 }} admins</span>
                 </div>
             </div>
 
@@ -810,16 +990,17 @@
                             <th>Role</th>
                             <th>Status</th>
                             <th>Last Login</th>
+                            <th>Joined</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($admins ?? [] as $admin)
+                        @forelse($admins as $admin)
                         <tr>
                             <td>
                                 <div class="admin-name">
                                     <div class="admin-avatar">
-                                        {{ substr($admin->name, 0, 2) }}
+                                        {{ strtoupper(substr($admin->name, 0, 2)) }}
                                     </div>
                                     <div>
                                         <div style="font-weight: 600;">{{ $admin->name }}</div>
@@ -844,19 +1025,20 @@
                                     <span style="color: var(--text-secondary);">Never</span>
                                 @endif
                             </td>
+                            <td>{{ $admin->created_at->format('M d, Y') }}</td>
                             <td>
                                 <div class="action-buttons">
-                                    <a href="{{ route('admin.admins.show', $admin->id) }}" class="action-btn" title="View Admin">
+                                    <a href="{{ route('admin.admins.show', $admin->id) }}" class="action-btn view" title="View Admin">
                                         <i class="ri-eye-line"></i>
                                     </a>
                                     @if(Auth::id() !== $admin->id)
-                                        <a href="{{ route('admin.admins.edit', $admin->id) }}" class="action-btn" title="Edit Admin">
+                                        <a href="{{ route('admin.admins.edit', $admin->id) }}" class="action-btn edit" title="Edit Admin">
                                             <i class="ri-edit-line"></i>
                                         </a>
-                                        <form action="{{ route('admin.admins.destroy', $admin->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this admin?')">
+                                        <form action="{{ route('admin.admins.delete', $admin->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this admin? This action cannot be undone.')">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="action-btn" title="Delete Admin">
+                                            <button type="submit" class="action-btn delete" title="Delete Admin">
                                                 <i class="ri-delete-bin-line"></i>
                                             </button>
                                         </form>
@@ -873,7 +1055,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 60px;">
+                            <td colspan="7" style="text-align: center; padding: 60px;">
                                 <i class="ri-shield-user-line" style="font-size: 48px; color: var(--text-secondary); margin-bottom: 16px; display: block;"></i>
                                 <h3 style="margin-bottom: 8px;">No admins found</h3>
                                 <p style="color: var(--text-secondary);">Get started by creating your first admin user</p>
@@ -888,7 +1070,30 @@
 
                 <!-- Pagination -->
                 <div class="pagination">
-                    {{ $admins->links() }}
+                    <div class="pagination-info">
+                        Showing {{ $admins->firstItem() ?? 0 }} to {{ $admins->lastItem() ?? 0 }} of {{ $admins->total() ?? 0 }} results
+                    </div>
+                    <div class="pagination-links">
+                        @if($admins->onFirstPage())
+                            <span class="pagination-item disabled">Previous</span>
+                        @else
+                            <a href="{{ $admins->previousPageUrl() }}" class="pagination-item">Previous</a>
+                        @endif
+                        
+                        @foreach($admins->getUrlRange(1, $admins->lastPage()) as $page => $url)
+                            @if($page == $admins->currentPage())
+                                <span class="pagination-item active">{{ $page }}</span>
+                            @else
+                                <a href="{{ $url }}" class="pagination-item">{{ $page }}</a>
+                            @endif
+                        @endforeach
+                        
+                        @if($admins->hasMorePages())
+                            <a href="{{ $admins->nextPageUrl() }}" class="pagination-item">Next</a>
+                        @else
+                            <span class="pagination-item disabled">Next</span>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -914,7 +1119,39 @@
                     }
                 }
             });
+
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(() => {
+                document.querySelectorAll('.alert').forEach(alert => {
+                    alert.style.transition = 'opacity 0.5s';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                });
+            }, 5000);
         });
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.querySelector('i').className = 'ri-sun-line';
+            }
+
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                const icon = this.querySelector('i');
+                if (document.body.classList.contains('dark-mode')) {
+                    icon.className = 'ri-sun-line';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    icon.className = 'ri-moon-line';
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        }
 
         // Change admin status
         function changeStatus(adminId, newStatus) {
@@ -930,10 +1167,22 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        location.reload();
+                        // Show success message
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success';
+                        alertDiv.innerHTML = '<i class="ri-checkbox-circle-line"></i> Admin status updated successfully.';
+                        document.querySelector('.dashboard-container').insertBefore(alertDiv, document.querySelector('.stats-grid'));
+                        
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
                     } else {
-                        alert('Failed to update status');
+                        alert(data.message || 'Failed to update status');
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating status.');
                 });
             }
         }
@@ -947,6 +1196,5 @@
             });
         });
     </script>
-
 </body>
 </html>

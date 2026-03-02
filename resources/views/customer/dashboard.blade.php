@@ -824,7 +824,7 @@
                     <i class="ri-search-line"></i>
                     Discover
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{{ route('customer.orders') }}" class="nav-item">
                     <i class="ri-shopping-bag-3-line"></i>
                     My Orders
                 </a>
@@ -832,15 +832,15 @@
 
             <div class="nav-group">
                 <div class="nav-label">SHOPPING</div>
-                <a href="#" class="nav-item">
+                <a href="{{ route('customer.wishlist.index') }}" class="nav-item">
                     <i class="ri-heart-3-line"></i>
                     Wishlist
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{{ route('customer.following') }}" class="nav-item">
                     <i class="ri-store-2-line"></i>
                     Following
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{{ route('customer.coupons') }}" class="nav-item">
                     <i class="ri-coupon-3-line"></i>
                     My Coupons
                 </a>
@@ -894,10 +894,10 @@
             </div>
 
             <div class="header-actions">
-                <a href="" class="icon-btn">
+                <a href="{{ route('customer.notifications') }}" class="icon-btn">
                     <i class="ri-notification-3-line"></i>
                 </a>
-                <a href="#" class="icon-btn">
+                <a href="{{ route('customer.cart.index')}}" class="icon-btn">
                     <i class="ri-shopping-cart-2-line"></i>
                 </a>
             </div>

@@ -16,15 +16,310 @@ use Illuminate\Http\Request;
 use App\Http\Requests\AdminLoginRequest;
 use App\Services\Admin\AdminService;
 use App\Http\Requests\AdminCreateRequest;
+
 use App\Http\Requests\AdminUpdateRequest;
 use App\Http\Requests\AdminPasswordUpdateRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
     protected $adminService;
+
+
+/**
+     * Dashboard overview
+     */
+    public function dashboard()
+    {
+        $stats = [
+            'total_users' => User::count(),
+            'total_vendors' => User::where('role', 'vendor')->count(),
+            'total_customers' => User::where('role', 'customer')->count(),
+            'total_admins' => User::where('role', 'admin')->count(),
+            'pending_vendors' => User::where('role', 'vendor')->where('is_active', false)->count(),
+        ];
+
+        return view('admin.dashboard', compact('stats'));
+    }
+
+    /**
+     * Display users list
+     */
+    public function users(Request $request)
+    {
+        // Get filter parameters
+        $role = $request->get('role', 'all');
+        $status = $request->get('status', 'all');
+        $search = $request->get('search');
+
+        // Build query
+        $query = User::query();
+
+        // Apply role filter
+        if ($role !== 'all') {
+            $query->where('role', $role);
+        }
+
+        // Apply status filter
+        if ($status === 'active') {
+            $query->where('is_active', true);
+        } elseif ($status === 'inactive') {
+            $query->where('is_active', false);
+        }
+
+        // Apply search
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('business_name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        // Get users with pagination
+        $users = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        // Get statistics for the view
+        $stats = [
+            'total' => User::count(),
+            'vendors' => User::where('role', 'vendor')->count(),
+            'customers' => User::where('role', 'customer')->count(),
+            'admins' => User::where('role', 'admin')->count(),
+            'pending' => User::where('role', 'vendor')->where('is_active', false)->count(),
+        ];
+
+        return view('admin.users.index', compact('users', 'stats', 'role', 'status', 'search'));
+    }
+
+    /**
+     * Show single user details
+     */
+    public function showUser($id)
+    {
+        $user = User::with(['products', 'reviews'])->findOrFail($id);
+
+        $stats = [
+            'products_count' => $user->products()->count(),
+            'reviews_count' => $user->reviews()->count(),
+            'average_rating' => $user->reviews()->avg('rating') ?? 0,
+            'orders_count' => DB::table('orders')->where('vendor_id', $id)->count(),
+        ];
+
+        return view('admin.users.show', compact('user', 'stats'));
+    }
+
+    /**
+     * Show edit user form
+     */
+    public function editUser($id)
+    {
+        $user = User::findOrFail($id);
+        return view('admin.users.edit', compact('user'));
+    }
+
+    /**
+     * Update user
+     */
+    public function updateUser(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $id,
+            'business_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'role' => 'sometimes|in:admin,vendor,customer',
+            'is_active' => 'sometimes|boolean',
+            'is_verified' => 'sometimes|boolean',
+        ]);
+
+        $user->update($validated);
+
+        return redirect()->route('admin.users.show', $user->id)
+            ->with('success', 'User updated successfully.');
+    }
+
+    /**
+     * Toggle user status (active/inactive)
+     */
+    public function toggleStatus($id)
+    {
+        $user = User::findOrFail($id);
+        $user->is_active = !$user->is_active;
+        $user->save();
+
+        $status = $user->is_active ? 'activated' : 'deactivated';
+
+        return redirect()->back()->with('success', "User {$status} successfully.");
+    }
+
+
+
+    /**
+     * Toggle vendor verification
+     */
+    public function toggleVerification($id)
+    {
+        $user = User::where('role', 'vendor')->findOrFail($id);
+
+        // Using email_verified_at instead of is_verified
+        $user->email_verified_at = $user->email_verified_at ? null : now();
+        $user->save();
+
+        $status = $user->email_verified_at ? 'verified' : 'unverified';
+
+        return redirect()->back()->with('success', "Vendor {$status} successfully.");
+    }
+
+
+
+    /**
+     * Delete user
+     */
+    public function deleteUser($id)
+    {
+        $user = User::findOrFail($id);
+
+        // Don't allow deleting own account
+        if (auth()->id() === $user->id) {
+            return redirect()->back()->with('error', 'You cannot delete your own account.');
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.users')->with('success', 'User deleted successfully.');
+    }
+
+    /**
+     * Export users list
+     */
+    public function exportUsers(Request $request)
+    {
+        $role = $request->get('role', 'all');
+
+        $query = User::query();
+
+        if ($role !== 'all') {
+            $query->where('role', $role);
+        }
+
+        $users = $query->get();
+
+        // Generate CSV
+        $filename = 'users_' . date('Y-m-d') . '.csv';
+        $handle = fopen('php://output', 'w');
+
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        // Add headers
+        fputcsv($handle, ['ID', 'Name', 'Email', 'Role', 'Business Name', 'Phone', 'Active', 'Verified', 'Joined']);
+
+        // Add data
+        foreach ($users as $user) {
+            fputcsv($handle, [
+                $user->id,
+                $user->name,
+                $user->email,
+                $user->role,
+                $user->business_name,
+                $user->phone,
+                $user->is_active ? 'Yes' : 'No',
+                $user->is_verified ? 'Yes' : 'No',
+                $user->created_at->format('Y-m-d')
+            ]);
+        }
+
+        fclose($handle);
+        exit;
+    }
+
+    /**
+     * Pending vendors list
+     */
+    public function pendingVendors()
+    {
+        $vendors = User::where('role', 'vendor')
+            ->where('is_active', false)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('admin.users.pending', compact('vendors'));
+    }
+
+    /**
+     * Approve vendor
+     */
+    public function approveVendor($id)
+    {
+        $vendor = User::where('role', 'vendor')->findOrFail($id);
+        $vendor->is_active = true;
+        $vendor->save();
+
+        // Send notification email to vendor
+        // Mail::to($vendor->email)->send(new VendorApproved($vendor));
+
+        return redirect()->back()->with('success', 'Vendor approved successfully.');
+    }
+
+    /**
+     * Reject vendor with reason
+     */
+    public function rejectVendor(Request $request, $id)
+    {
+        $vendor = User::where('role', 'vendor')->findOrFail($id);
+
+        $validated = $request->validate([
+            'reason' => 'required|string|max:500'
+        ]);
+
+        // Send rejection email with reason
+        // Mail::to($vendor->email)->send(new VendorRejected($vendor, $validated['reason']));
+
+        $vendor->delete(); // Or you can keep but mark as rejected
+
+        return redirect()->route('admin.users')->with('success', 'Vendor rejected.');
+    }
+
+    /**
+     * Bulk actions on users
+     */
+    public function bulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:activate,deactivate,delete',
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'exists:users,id'
+        ]);
+
+        $users = User::whereIn('id', $validated['user_ids']);
+
+        switch ($validated['action']) {
+            case 'activate':
+                $users->update(['is_active' => true]);
+                $message = 'Users activated successfully.';
+                break;
+            case 'deactivate':
+                $users->update(['is_active' => false]);
+                $message = 'Users deactivated successfully.';
+                break;
+            case 'delete':
+                // Don't allow deleting own account
+                if (in_array(auth()->id(), $validated['user_ids'])) {
+                    return redirect()->back()->with('error', 'You cannot delete your own account.');
+                }
+                $users->delete();
+                $message = 'Users deleted successfully.';
+                break;
+        }
+
+        return redirect()->back()->with('success', $message);
+    }
 
     /**
      * Constructor with dependency injection
@@ -198,34 +493,12 @@ class AdminController extends Controller
         // Get remembered credentials for pre-filling
         $rememberedCredentials = $this->adminService->getRememberMeCredentials();
 
-        return view('admin.login', [
+        return view('auth.login', [
             'remembered_email' => $rememberedCredentials['email'] ?? '',
             'remember_checked' => !empty($rememberedCredentials)
         ]);
     }
 
-    // /**
-    //  * Handle admin login request.
-    //  */
-    // public function store(AdminLoginRequest $request)
-    // {
-    //     $validated = $request->validated();
-
-    //     $result = $this->adminService->login(
-    //         $validated['email'],
-    //         $validated['password'],
-    //         $request->boolean('remember')
-    //     );
-
-    //     if ($result === 1) {
-    //         return redirect()->route('admin.dashboard')
-    //             ->with('success', 'Welcome back! Successfully logged in.');
-    //     }
-
-    //     return back()
-    //         ->withErrors(['email' => 'The provided credentials are incorrect.'])
-    //         ->withInput($request->only('email', 'remember'));
-    // }
 
 
 
@@ -252,8 +525,6 @@ public function store(AdminLoginRequest $request)
         ->withErrors(['email' => 'The provided credentials are incorrect.'])
         ->withInput($request->only('email', 'remember'));
 }
-
-
 
 
     /**
@@ -796,79 +1067,520 @@ public function store(AdminLoginRequest $request)
         return view('admin.promotions.index', compact('promotions', 'status'));
     }
 
-    /**
-     * Show form to create promotion.
-     */
-    public function createPromotion()
-    {
-        return view('admin.promotions.create');
+    // /**
+    //  * Show form to create promotion.
+    //  */
+    // public function createPromotion()
+    // {
+    //     return view('admin.promotions.create');
+    // }
+
+
+
+/**
+ * Show create promotion form.
+ */
+public function createPromotion()
+{
+    $user = Auth::user();
+    
+    // Get categories for filter
+    $categories = Category::all();
+    
+    // Get unread counts
+    try {
+        $unreadNotificationsCount = Notification::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+    } catch (\Exception $e) {
+        $unreadNotificationsCount = 0;
     }
 
-    /**
-     * Store a new promotion.
-     */
-    public function storePromotion(Request $request)
-    {
-        $request->validate([
-            'code' => 'required|string|unique:promotions',
-            'type' => 'required|in:fixed,percentage',
-            'value' => 'required|numeric|min:0',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'usage_limit' => 'nullable|integer|min:1',
-            'is_active' => 'boolean',
+    try {
+        $unreadMessagesCount = Message::where('receiver_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+    } catch (\Exception $e) {
+        $unreadMessagesCount = 0;
+    }
+    
+    return view('admin.promotions.create', compact(
+        'user',
+        'categories',
+        'unreadNotificationsCount',
+        'unreadMessagesCount'
+    ));
+}
+
+
+
+
+
+
+
+
+    
+    // /**
+    //  * Store a new promotion.
+    //  */
+    // public function storePromotion(Request $request)
+    // {
+    //     $request->validate([
+    //         'code' => 'required|string|unique:promotions',
+    //         'type' => 'required|in:fixed,percentage',
+    //         'value' => 'required|numeric|min:0',
+    //         'start_date' => 'required|date',
+    //         'end_date' => 'required|date|after:start_date',
+    //         'usage_limit' => 'nullable|integer|min:1',
+    //         'is_active' => 'boolean',
+    //     ]);
+
+    //     $promotion = Promotion::create($request->all());
+
+    //     return redirect()->route('admin.promotions')
+    //         ->with('success', 'Promotion created successfully.');
+    // }
+
+
+
+
+
+
+
+
+
+
+
+ /**
+ * Store a new promotion.
+ */
+public function storePromotion(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'type' => 'required|in:percentage,fixed,bogo,free_shipping',
+        'discount_percentage' => 'required_if:type,percentage|nullable|numeric|min:1|max:100',
+        'discount_amount' => 'required_if:type,fixed|nullable|numeric|min:1',
+        'start_date' => 'required|date',
+        'end_date' => 'required|date|after:start_date',
+        'min_purchase' => 'nullable|numeric|min:0',
+        'max_discount' => 'nullable|numeric|min:0',
+        'usage_limit' => 'nullable|integer|min:0',
+        'total_usage_limit' => 'nullable|integer|min:0',
+        'is_active' => 'required|in:0,1',
+        'description' => 'nullable|string',
+        'terms' => 'nullable|string',
+        'banner' => 'nullable|image|max:2048',
+        'product_scope' => 'required|in:all,selected,categories',
+        'products' => 'required_if:product_scope,selected|array',
+        'products.*' => 'exists:products,id',
+        'categories' => 'required_if:product_scope,categories|array',
+        'categories.*' => 'exists:categories,id',
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        // Create promotion
+        $promotion = new \App\Models\Promotion();
+        $promotion->name = $request->name;
+        $promotion->type = $request->type;
+        $promotion->start_date = $request->start_date;
+        $promotion->end_date = $request->end_date;
+        $promotion->min_purchase = $request->min_purchase ?? 0;
+        $promotion->usage_limit = $request->usage_limit ?? 0;
+        $promotion->total_usage_limit = $request->total_usage_limit ?? 0;
+        $promotion->is_active = $request->is_active;
+        $promotion->description = $request->description;
+        $promotion->terms = $request->terms;
+        $promotion->product_scope = $request->product_scope;
+        $promotion->created_by = Auth::id();
+
+        // Set discount value based on type
+        if ($request->type === 'percentage') {
+            $promotion->discount_value = $request->discount_percentage;
+            $promotion->max_discount = $request->max_discount;
+        } elseif ($request->type === 'fixed') {
+            $promotion->discount_value = $request->discount_amount;
+        }
+
+        // Handle banner upload
+        if ($request->hasFile('banner')) {
+            $path = $request->file('banner')->store('promotions', 'public');
+            $promotion->banner = $path;
+        }
+
+        $promotion->save();
+
+        // Save applicable products
+        if ($request->product_scope === 'selected' && $request->has('products')) {
+            $promotion->products()->attach($request->products);
+        }
+
+        // Save applicable categories
+        if ($request->product_scope === 'categories' && $request->has('categories')) {
+            $promotion->categories()->attach($request->categories);
+        }
+
+        DB::commit();
+
+        Log::info('Promotion created', [
+            'promotion_id' => $promotion->id,
+            'name' => $promotion->name,
+            'created_by' => Auth::id()
         ]);
 
-        $promotion = Promotion::create($request->all());
-
         return redirect()->route('admin.promotions')
-            ->with('success', 'Promotion created successfully.');
+            ->with('success', 'Promotion created successfully!');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Promotion creation error: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return redirect()->back()
+            ->with('error', 'Failed to create promotion. Please try again.')
+            ->withInput();
     }
+}
 
-    /**
-     * Show form to edit promotion.
-     */
-    public function editPromotion($id)
-    {
-        $promotion = Promotion::findOrFail($id);
-        return view('admin.promotions.edit', compact('promotion'));
-    }
 
-    /**
-     * Update promotion.
-     */
-    public function updatePromotion(Request $request, $id)
-    {
-        $promotion = Promotion::findOrFail($id);
 
-        $request->validate([
-            'code' => 'required|string|unique:promotions,code,' . $promotion->id,
-            'type' => 'required|in:fixed,percentage',
-            'value' => 'required|numeric|min:0',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'usage_limit' => 'nullable|integer|min:1',
-            'is_active' => 'boolean',
+
+/**
+ * Get products list for AJAX.
+ */
+public function getProductsList()
+{
+    try {
+        $products = Product::with('category')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get()
+            ->map(function($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => number_format($product->price, 2),
+                    'category' => $product->category->name ?? 'Uncategorized',
+                    'stock' => $product->stock,
+                    'image' => $product->image ? Storage::url($product->image) : null
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'products' => $products
         ]);
 
-        $promotion->update($request->all());
+    } catch (\Exception $e) {
+        Log::error('Error fetching products list: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to fetch products'
+        ], 500);
+    }
+}
 
-        return redirect()->route('admin.promotions')
-            ->with('success', 'Promotion updated successfully.');
+
+    // /**
+    //  * Show form to edit promotion.
+    //  */
+    // public function editPromotion($id)
+    // {
+    //     $promotion = Promotion::findOrFail($id);
+    //     return view('admin.promotions.edit', compact('promotion'));
+    // }
+
+
+
+
+/**
+ * Show edit promotion form.
+ */
+public function editPromotion($id)
+{
+    $user = Auth::user();
+    $promotion = \App\Models\Promotion::with(['products', 'categories'])->findOrFail($id);
+    
+    // Get categories for filter
+    $categories = \App\Models\Category::all();
+    
+    // Get unread counts
+    try {
+        $unreadNotificationsCount = Notification::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+    } catch (\Exception $e) {
+        $unreadNotificationsCount = 0;
     }
 
-    /**
-     * Delete promotion.
-     */
-    public function deletePromotion($id)
-    {
+    try {
+        $unreadMessagesCount = Message::where('receiver_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+    } catch (\Exception $e) {
+        $unreadMessagesCount = 0;
+    }
+    
+    return view('admin.promotions.edit', compact(
+        'user',
+        'promotion',
+        'categories',
+        'unreadNotificationsCount',
+        'unreadMessagesCount'
+    ));
+}
+
+/**
+ * Update a promotion.
+ */
+public function updatePromotion(Request $request, $id)
+{
+    $promotion = Promotion::findOrFail($id);
+
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'code' => 'required|string|unique:promotions,code,' . $id . '|max:50',
+        'type' => 'required|in:percentage,fixed,bogo,free_shipping',
+        'discount_percentage' => 'required_if:type,percentage|nullable|numeric|min:1|max:100',
+        'discount_amount' => 'required_if:type,fixed|nullable|numeric|min:1',
+        'start_date' => 'required|date',
+        'end_date' => 'required|date|after:start_date',
+        'min_purchase' => 'nullable|numeric|min:0',
+        'max_discount' => 'nullable|numeric|min:0',
+        'usage_limit' => 'nullable|integer|min:0',
+        'total_usage_limit' => 'nullable|integer|min:0',
+        'is_active' => 'required|in:0,1',
+        'description' => 'nullable|string',
+        'terms' => 'nullable|string',
+        'banner' => 'nullable|image|max:2048',
+        'remove_banner' => 'nullable|in:1',
+        'product_scope' => 'required|in:all,selected,categories',
+        'products' => 'required_if:product_scope,selected|array',
+        'products.*' => 'exists:products,id',
+        'categories' => 'required_if:product_scope,categories|array',
+        'categories.*' => 'exists:categories,id',
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        // Log the update attempt
+        Log::info('Updating promotion', [
+            'promotion_id' => $id,
+            'data' => $request->except(['_token', '_method', 'banner'])
+        ]);
+
+        // Update promotion
+        $promotion->name = $request->name;
+        $promotion->code = strtoupper($request->code);
+        $promotion->type = $request->type;
+        $promotion->start_date = $request->start_date;
+        $promotion->end_date = $request->end_date;
+        $promotion->min_purchase = $request->min_purchase ?? 0;
+        $promotion->usage_limit_per_user = $request->usage_limit ?? 0;
+        $promotion->total_usage_limit = $request->total_usage_limit ?? 0;
+        $promotion->is_active = $request->is_active;
+        $promotion->description = $request->description;
+        $promotion->terms_conditions = $request->terms;
+        $promotion->product_scope = $request->product_scope;
+
+        // Set discount value based on type
+        if ($request->type === 'percentage') {
+            $promotion->value = $request->discount_percentage;
+            $promotion->max_discount = $request->max_discount;
+        } elseif ($request->type === 'fixed') {
+            $promotion->value = $request->discount_amount;
+            $promotion->max_discount = null;
+        } else {
+            $promotion->value = null;
+            $promotion->max_discount = null;
+        }
+
+        // Handle banner upload
+        if ($request->hasFile('banner')) {
+            // Log banner upload
+            Log::info('Processing banner upload', [
+                'original_name' => $request->file('banner')->getClientOriginalName(),
+                'size' => $request->file('banner')->getSize()
+            ]);
+
+            // Delete old banner if exists
+            if ($promotion->banner) {
+                Storage::disk('public')->delete($promotion->banner);
+                Log::info('Deleted old banner', ['path' => $promotion->banner]);
+            }
+            
+            // Store new banner
+            $path = $request->file('banner')->store('promotions', 'public');
+            $promotion->banner = $path;
+            Log::info('New banner uploaded', ['path' => $path]);
+
+        } elseif ($request->has('remove_banner') && $request->remove_banner == '1' && $promotion->banner) {
+            // Remove banner without uploading new one
+            Storage::disk('public')->delete($promotion->banner);
+            $promotion->banner = null;
+            Log::info('Banner removed');
+        }
+
+        $promotion->save();
+        Log::info('Promotion saved', ['promotion_id' => $promotion->id]);
+
+        // Update applicable products
+        $promotion->products()->detach();
+        if ($request->product_scope === 'selected' && $request->has('products')) {
+            $promotion->products()->attach($request->products);
+            Log::info('Products attached', ['product_ids' => $request->products]);
+        }
+
+        // Update applicable categories
+        $promotion->categories()->detach();
+        if ($request->product_scope === 'categories' && $request->has('categories')) {
+            $promotion->categories()->attach($request->categories);
+            Log::info('Categories attached', ['category_ids' => $request->categories]);
+        }
+
+        DB::commit();
+
+        Log::info('Promotion updated successfully', [
+            'promotion_id' => $promotion->id,
+            'name' => $promotion->name,
+            'updated_by' => Auth::id()
+        ]);
+
+        return redirect()->route('admin.promotions')
+            ->with('success', 'Promotion updated successfully!');
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        DB::rollBack();
+        Log::error('Validation error in promotion update', [
+            'errors' => $e->errors()
+        ]);
+        throw $e;
+
+    } catch (\Illuminate\Database\QueryException $e) {
+        DB::rollBack();
+        Log::error('Database error in promotion update', [
+            'message' => $e->getMessage(),
+            'sql' => $e->getSql() ?? 'N/A',
+            'bindings' => $e->getBindings() ?? []
+        ]);
+        
+        return redirect()->back()
+            ->with('error', 'Database error: ' . $e->getMessage())
+            ->withInput();
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Promotion update error', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return redirect()->back()
+            ->with('error', 'Failed to update promotion: ' . $e->getMessage())
+            ->withInput();
+    }
+}
+
+
+
+
+
+
+
+    
+
+    // /**
+    //  * Update promotion.
+    //  */
+    // public function updatePromotion(Request $request, $id)
+    // {
+    //     $promotion = Promotion::findOrFail($id);
+
+    //     $request->validate([
+    //         'code' => 'required|string|unique:promotions,code,' . $promotion->id,
+    //         'type' => 'required|in:fixed,percentage',
+    //         'value' => 'required|numeric|min:0',
+    //         'start_date' => 'required|date',
+    //         'end_date' => 'required|date|after:start_date',
+    //         'usage_limit' => 'nullable|integer|min:1',
+    //         'is_active' => 'boolean',
+    //     ]);
+
+    //     $promotion->update($request->all());
+
+    //     return redirect()->route('admin.promotions')
+    //         ->with('success', 'Promotion updated successfully.');
+    // }
+
+   /**
+ * Delete a promotion.
+ */
+public function deletePromotion($id)
+{
+    try {
         $promotion = Promotion::findOrFail($id);
+        
+        // Log the deletion attempt
+        Log::info('Attempting to delete promotion', [
+            'promotion_id' => $id,
+            'name' => $promotion->name
+        ]);
+
+        // Check if promotion has been used
+        $usageCount = PromotionUsage::where('promotion_id', $id)->count();
+        if ($usageCount > 0) {
+            Log::warning('Cannot delete promotion that has been used', [
+                'promotion_id' => $id,
+                'usage_count' => $usageCount
+            ]);
+            
+            return redirect()->back()
+                ->with('error', 'Cannot delete promotion that has been used.');
+        }
+        
+        DB::beginTransaction();
+        
+        // Delete banner image if exists
+        if ($promotion->banner) {
+            Storage::disk('public')->delete($promotion->banner);
+            Log::info('Deleted promotion banner', ['path' => $promotion->banner]);
+        }
+        
+        // Delete pivot relationships
+        $promotion->products()->detach();
+        $promotion->categories()->detach();
+        
         $promotion->delete();
-
+        
+        DB::commit();
+        
+        Log::info('Promotion deleted successfully', [
+            'promotion_id' => $id,
+            'deleted_by' => Auth::id()
+        ]);
+        
         return redirect()->route('admin.promotions')
             ->with('success', 'Promotion deleted successfully.');
+            
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error deleting promotion', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'promotion_id' => $id
+        ]);
+        
+        return redirect()->back()
+            ->with('error', 'Failed to delete promotion: ' . $e->getMessage());
     }
-
+}
     /**
      * ========================================================================
      * ROLES & PERMISSIONS MANAGEMENT
@@ -1226,7 +1938,7 @@ public function store(AdminLoginRequest $request)
 public function documentation()
 {
     $user = Auth::user();
-    
+
     // Get unread counts for header
     try {
         $unreadNotificationsCount = Notification::where('user_id', $user->id)
@@ -1266,13 +1978,13 @@ public function downloadDocumentationPDF()
     $user = Auth::user();
     $version = '2.1.0';
     $lastUpdated = now()->format('F j, Y');
-    
+
     $data = [
         'version' => $version,
         'lastUpdated' => $lastUpdated,
         'generatedAt' => now()->format('Y-m-d H:i:s')
     ];
-    
+
     $pdf = Pdf::loadView('admin.documentation-pdf', $data);
     $pdf->setPaper('A4', 'portrait');
     $pdf->setOptions([
@@ -1280,7 +1992,7 @@ public function downloadDocumentationPDF()
         'isHtml5ParserEnabled' => true,
         'isRemoteEnabled' => true
     ]);
-    
+
     return $pdf->download('vendora-documentation-v' . $version . '.pdf');
 }
 

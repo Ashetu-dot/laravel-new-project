@@ -21,8 +21,9 @@ return new class extends Migration
             // ROLE & STATUS
             $table->string('role')->default('customer'); // customer, vendor, admin
             $table->boolean('is_active')->default(true);
-            $table->timestamp('last_login_at')->nullable();
-            
+            $table->boolean('is_verified')->default(false); // <-- ADD THIS LINE
+            $table->timestamp('vendor_verified_at')->nullable(); // <-- OPTIONAL: timestamp when verified
+            $table->timestamp('last_login_at')->nullable();            
             $table->rememberToken();
             $table->timestamps();
             

@@ -19,7 +19,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
-         'name',
+        'name',
         'email',
         'password',
         'role',
@@ -28,7 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'state',
         'country',
         'address_line1',
-       'address_line2',
+        'address_line2',
         'zip_code',
         'business_name',
         'category',
@@ -40,13 +40,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'sub_image_1',
         'sub_image_2',
         'is_active',
-       'last_login_at',
+        'last_login_at',
         'referral_code',
         'products_count',
         'rating',
         'total_reviews',
-        'is_active',
-        'last_login_at',
         'store_views',
         'location',
         'latitude',
@@ -197,6 +195,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Alias for received reviews (for vendors) - This matches the relationship name used in AdminController
+     */
+    public function reviews()
+    {
+        return $this->receivedReviews();
+    }
+
+    /**
      * Get the messages sent by the user.
      */
     public function sentMessages()
@@ -320,6 +326,22 @@ class User extends Authenticatable implements MustVerifyEmail
     public function loginHistory()
     {
         return $this->hasMany(LoginHistory::class);
+    }
+
+    /**
+     * Get the user's wishlist.
+     */
+    public function wishlist()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    /**
+     * Get the user's wishlist products.
+     */
+    public function wishlistProducts()
+    {
+        return $this->belongsToMany(Product::class, 'wishlists')->withTimestamps();
     }
 
     /**
@@ -885,6 +907,9 @@ class User extends Authenticatable implements MustVerifyEmail
                     ->limit(5)
                     ->get();
     }
+
+
+    
 
     /**
      * Boot the model.

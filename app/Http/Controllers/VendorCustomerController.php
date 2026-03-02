@@ -1742,55 +1742,111 @@ class VendorCustomerController extends Controller
         }
     }
 
-    /**
-     * Display the vendors that the customer follows.
-     */
-    public function following()
-    {
-        try {
-            $user = Auth::user();
+    // /**
+    //  * Display the vendors that the customer follows.
+    //  */
+    // public function following()
+    // {
+    //     try {
+    //         $user = Auth::user();
 
-            if (!$user || $user->role !== 'customer') {
-                abort(403);
-            }
+    //         if (!$user || $user->role !== 'customer') {
+    //             abort(403);
+    //         }
 
-            // Get vendors that the customer follows with pagination
-            $following = $user->following()
-                ->with(['products' => function($q) {
-                    $q->where('is_active', true)->take(3);
-                }])
-                ->orderBy('followers.created_at', 'desc')
-                ->paginate(12);
+    //         // Get vendors that the customer follows with pagination
+    //         $following = $user->following()
+    //             ->with(['products' => function($q) {
+    //                 $q->where('is_active', true)->take(3);
+    //             }])
+    //             ->orderBy('followers.created_at', 'desc')
+    //             ->paginate(12);
 
-            // Get unread counts for header
-            try {
-                $unreadNotificationsCount = Notification::where('user_id', $user->id)
-                    ->where('is_read', false)
-                    ->count();
-            } catch (\Exception $e) {
-                $unreadNotificationsCount = 0;
-            }
+    //         // Get unread counts for header
+    //         try {
+    //             $unreadNotificationsCount = Notification::where('user_id', $user->id)
+    //                 ->where('is_read', false)
+    //                 ->count();
+    //         } catch (\Exception $e) {
+    //             $unreadNotificationsCount = 0;
+    //         }
 
-            try {
-                $unreadMessagesCount = Message::where('receiver_id', $user->id)
-                    ->where('is_read', false)
-                    ->count();
-            } catch (\Exception $e) {
-                $unreadMessagesCount = 0;
-            }
+    //         try {
+    //             $unreadMessagesCount = Message::where('receiver_id', $user->id)
+    //                 ->where('is_read', false)
+    //                 ->count();
+    //         } catch (\Exception $e) {
+    //             $unreadMessagesCount = 0;
+    //         }
 
-            return view('customer.following', compact(
-                'user',
-                'following',
-                'unreadNotificationsCount',
-                'unreadMessagesCount'
-            ));
+    //         return view('customer.following', compact(
+    //             'user',
+    //             'following',
+    //             'unreadNotificationsCount',
+    //             'unreadMessagesCount'
+    //         ));
 
-        } catch (\Exception $e) {
-            Log::error('Following page error: ' . $e->getMessage());
-            return redirect()->route('home')->with('error', 'Unable to load following list.');
+    //     } catch (\Exception $e) {
+    //         Log::error('Following page error: ' . $e->getMessage());
+    //         return redirect()->route('home')->with('error', 'Unable to load following list.');
+    //     }
+    // }
+
+
+/**
+ * Display the vendors that the customer follows.
+ */
+public function following()
+{
+    try {
+        $user = Auth::user();
+
+        if (!$user || $user->role !== 'customer') {
+            abort(403);
         }
+
+        // Get vendors that the customer follows with pagination
+        $following = $user->following()
+            ->with(['products' => function($q) {
+                $q->where('is_active', true)->take(3);
+            }])
+            ->withCount('products')
+            ->orderBy('followers.created_at', 'desc')
+            ->paginate(12);
+
+        // Get unread counts for header
+        try {
+            $unreadNotificationsCount = Notification::where('user_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+        } catch (\Exception $e) {
+            $unreadNotificationsCount = 0;
+        }
+
+        try {
+            $unreadMessagesCount = Message::where('receiver_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+        } catch (\Exception $e) {
+            $unreadMessagesCount = 0;
+        }
+
+        return view('customer.following', compact(
+            'user',
+            'following',
+            'unreadNotificationsCount',
+            'unreadMessagesCount'
+        ));
+
+    } catch (\Exception $e) {
+        Log::error('Following page error: ' . $e->getMessage());
+        return redirect()->route('customer.dashboard')
+            ->with('error', 'Unable to load following list.');
     }
+}
+
+
+
 
     /**
      * Update vendor settings.
@@ -1887,32 +1943,158 @@ class VendorCustomerController extends Controller
         }
     }
 
-    /**
-     * Search vendors for AJAX endpoints.
-     */
-    public function searchVendors(Request $request)
-    {
-        try {
-            $query = $request->get('q');
+    // /**
+    //  * Search vendors for AJAX endpoints.
+    //  */
+    // public function searchVendors(Request $request)
+    // {
+    //     try {
+    //         $query = $request->get('q');
 
-            $vendors = User::where('role', 'vendor')
-                ->where('is_active', true)
-                ->when($query, function ($q, $query) {
-                    return $q->where(function ($subQ) use ($query) {
-                        $subQ->where('business_name', 'like', "%{$query}%")
-                             ->orWhere('description', 'like', "%{$query}%");
-                    });
-                })
-                ->limit(10)
-                ->get(['id', 'business_name', 'city', 'state', 'avatar', 'rating', 'category']);
+    //         $vendors = User::where('role', 'vendor')
+    //             ->where('is_active', true)
+    //             ->when($query, function ($q, $query) {
+    //                 return $q->where(function ($subQ) use ($query) {
+    //                     $subQ->where('business_name', 'like', "%{$query}%")
+    //                          ->orWhere('description', 'like', "%{$query}%");
+    //                 });
+    //             })
+    //             ->limit(10)
+    //             ->get(['id', 'business_name', 'city', 'state', 'avatar', 'rating', 'category']);
 
-            return response()->json($vendors);
+    //         return response()->json($vendors);
 
-        } catch (\Exception $e) {
-            Log::error('Search vendors error: ' . $e->getMessage());
-            return response()->json(['error' => 'Search failed'], 500);
-        }
+    //     } catch (\Exception $e) {
+    //         Log::error('Search vendors error: ' . $e->getMessage());
+    //         return response()->json(['error' => 'Search failed'], 500);
+    //     }
+    // }
+
+
+
+
+
+
+/**
+ * Search vendors for display.
+ */
+public function searchVendors(Request $request)
+{
+    $query = $request->get('q');
+    $category = $request->get('category');
+    $location = $request->get('location');
+    $rating = $request->get('rating');
+    $sort = $request->get('sort', 'name');
+
+    $vendors = User::where('role', 'vendor')
+        ->where('is_active', true)
+        ->when($query, function ($q, $query) {
+            return $q->where(function ($subQ) use ($query) {
+                $subQ->where('business_name', 'like', "%{$query}%")
+                     ->orWhere('description', 'like', "%{$query}%");
+            });
+        })
+        ->when($category, function ($q, $category) {
+            return $q->where('category', $category);
+        })
+        ->when($location, function ($q, $location) {
+            return $q->where(function ($subQ) use ($location) {
+                $subQ->where('city', 'LIKE', "%{$location}%")
+                     ->orWhere('state', 'LIKE', "%{$location}%");
+            });
+        })
+        ->when($rating, function ($q, $rating) {
+            return $q->where('rating', '>=', $rating);
+        })
+        ->withCount('products')
+        ->withCount('followers');
+
+    // Apply sorting
+    switch($sort) {
+        case 'rating':
+            $vendors->orderBy('rating', 'desc');
+            break;
+        case 'newest':
+            $vendors->orderBy('created_at', 'desc');
+            break;
+        default:
+            $vendors->orderBy('business_name', 'asc');
     }
+
+    $vendors = $vendors->paginate(12);
+
+    // Transform vendors for display
+    $transformedVendors = $vendors->map(function($vendor) {
+        $rating = $vendor->rating ?? 0;
+        $fullStars = floor($rating);
+        $halfStar = ($rating - $fullStars) >= 0.5;
+        
+        $stars = '';
+        for ($i = 1; $i <= 5; $i++) {
+            if ($i <= $fullStars) {
+                $stars .= '<i class="ri-star-fill" style="color: #f59e0b;"></i>';
+            } elseif ($halfStar && $i == $fullStars + 1) {
+                $stars .= '<i class="ri-star-half-fill" style="color: #f59e0b;"></i>';
+                $halfStar = false;
+            } else {
+                $stars .= '<i class="ri-star-line" style="color: #e5e7eb;"></i>';
+            }
+        }
+
+        return [
+            'id' => $vendor->id,
+            'business_name' => $vendor->business_name ?? $vendor->name,
+            'city' => $vendor->city ?? 'Jimma',
+            'state' => $vendor->state ?? 'Oromia',
+            'avatar' => $vendor->avatar ? Storage::url($vendor->avatar) : null,
+            'rating' => number_format($rating, 1),
+            'category' => $vendor->category ?? 'General Store',
+            'avatar_url' => $vendor->avatar ? Storage::url($vendor->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($vendor->business_name ?? $vendor->name) . '&background=B88E3F&color=fff&size=200',
+            'full_address' => ($vendor->city ?? 'Jimma') . ', ' . ($vendor->state ?? 'Oromia'),
+            'location_string' => ($vendor->city ?? 'Jimma') . ', ' . ($vendor->state ?? 'Oromia'),
+            'rating_stars' => $stars,
+            'rating_display' => number_format($rating, 1) . ' (' . ($vendor->total_reviews ?? 0) . ' reviews)',
+            'dashboard_link' => route('vendor.show', $vendor->id),
+            'following_count' => 0,
+            'followers_count' => $vendor->followers_count ?? 0,
+            'products_count' => $vendor->products_count ?? 0,
+            'total_reviews' => $vendor->total_reviews ?? 0,
+            'verified' => !is_null($vendor->email_verified_at),
+            'avatar_text' => strtoupper(substr($vendor->business_name ?? $vendor->name, 0, 2))
+        ];
+    });
+
+    // For AJAX requests
+    if ($request->ajax()) {
+        return response()->json([
+            'vendors' => $transformedVendors,
+            'pagination' => [
+                'current_page' => $vendors->currentPage(),
+                'last_page' => $vendors->lastPage(),
+                'per_page' => $vendors->perPage(),
+                'total' => $vendors->total()
+            ]
+        ]);
+    }
+
+    return view('vendors.search', [
+        'vendors' => $transformedVendors,
+        'pagination' => [
+            'current_page' => $vendors->currentPage(),
+            'last_page' => $vendors->lastPage(),
+            'per_page' => $vendors->perPage(),
+            'total' => $vendors->total()
+        ]
+    ]);
+}
+
+
+
+
+
+
+
+    
 
     /**
      * Get vendor by ID for AJAX.
@@ -1977,29 +2159,80 @@ class VendorCustomerController extends Controller
         return view('pages.cookie-policy');
     }
 
-    /**
-     * Handle contact form submission.
-     */
-    public function contactSubmit(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string',
+    // /**
+    //  * Handle contact form submission.
+    //  */
+    // public function contactSubmit(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'email' => 'required|email|max:255',
+    //         'subject' => 'required|string|max:255',
+    //         'message' => 'required|string',
+    //     ]);
+
+    //     try {
+    //         // Here you would send email or save to database
+    //         // Mail::to('support@vendora.com')->send(new ContactFormMail($validated));
+
+    //         return redirect()->route('contact')->with('success', 'Thank you for contacting us. We will get back to you soon!');
+
+    //     } catch (\Exception $e) {
+    //         Log::error('Contact form submission error: ' . $e->getMessage());
+    //         return back()->with('error', 'Failed to send message. Please try again.');
+    //     }
+    // }
+
+
+
+
+/**
+ * Display contact page.
+ */
+public function contact()
+{
+    return view('pages.contact');
+}
+
+/**
+ * Handle contact form submission.
+ */
+public function contactSubmit(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'subject' => 'required|string|max:255',
+        'message' => 'required|string|min:10',
+    ]);
+
+    try {
+        // Here you would send email or save to database
+        // Mail::to('support@vendora.com')->send(new ContactFormMail($request->all()));
+        
+        // Log the contact submission
+        Log::info('Contact form submission', [
+            'name' => $request->name,
+            'email' => $request->email,
+            'subject' => $request->subject
         ]);
 
-        try {
-            // Here you would send email or save to database
-            // Mail::to('support@vendora.com')->send(new ContactFormMail($validated));
+        return redirect()->route('contact')->with('success', 'Thank you for contacting us! We will get back to you within 24 hours.');
 
-            return redirect()->route('contact')->with('success', 'Thank you for contacting us. We will get back to you soon!');
-
-        } catch (\Exception $e) {
-            Log::error('Contact form submission error: ' . $e->getMessage());
-            return back()->with('error', 'Failed to send message. Please try again.');
-        }
+    } catch (\Exception $e) {
+        Log::error('Contact form submission error: ' . $e->getMessage());
+        return redirect()->back()
+            ->with('error', 'Failed to send message. Please try again.')
+            ->withInput();
     }
+}
+
+
+
+
+
+
+    
 
     // API Methods
     public function apiVendors(Request $request)

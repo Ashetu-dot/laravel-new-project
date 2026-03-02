@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\PromotionController;
 use App\Http\Controllers\VendorCustomerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
@@ -51,6 +52,9 @@ Route::view('/terms-of-service', 'pages.terms-of-service')->name('terms-of-servi
 Route::get('/about', [VendorCustomerController::class, 'about'])->name('about');
 Route::get('/cookie-policy', [VendorCustomerController::class, 'cookiePolicy'])->name('cookie-policy');
 Route::view('/contact', 'pages.contact')->name('contact');
+Route::get('/contact', [VendorCustomerController::class, 'contact'])->name('contact');
+Route::post('/contact/submit', [VendorCustomerController::class, 'contactSubmit'])->name('contact.submit');
+
 
 // Theme routes
 Route::post('/toggle-theme', [ThemeController::class, 'toggle'])->name('theme.toggle');
@@ -253,7 +257,7 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     // ======== VENDOR PROFILE ========
     Route::get('/profile', [VendorCustomerController::class, 'vendorProfile'])->name('profile');
 
-      
+
 
     // ======== ORDERS MANAGEMENT ========
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
@@ -263,6 +267,8 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export');
     Route::get('/orders-list', [OrderController::class, 'getOrders'])->name('orders.list');
     Route::get('/orders-stats', [OrderController::class, 'getStats'])->name('orders.stats');
+    Route::get('/orders/{id}/invoice', [OrderController::class, 'printInvoice'])->name('orders.invoice');
+
 
     // ======== PRODUCTS MANAGEMENT ========
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -304,7 +310,7 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     // ======== ANALYTICS ========
     Route::get('/sales-report', [VendorController::class, 'salesReport'])->name('sales-report');
     Route::get('/export-sales', [VendorController::class, 'exportSalesReport'])->name('export-sales');
-    
+
     // Store views
     Route::get('/store-views', [VendorController::class, 'storeViews'])->name('store-views');
     Route::get('/export-store-views', [VendorController::class, 'exportStoreViews'])->name('export-store-views');
@@ -321,7 +327,7 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     // Bulk operations
     Route::post('/reviews/bulk-approve', [ReviewController::class, 'bulkApprove'])->name('reviews.bulk-approve');
     Route::post('/reviews/bulk-delete', [ReviewController::class, 'bulkDelete'])->name('reviews.bulk-delete');
-    
+
     // Export
     Route::get('/reviews/export', [ReviewController::class, 'export'])->name('reviews.export');
 
@@ -377,6 +383,14 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/add/{product}', [WishlistController::class, 'add'])->name('wishlist.add');
     Route::delete('/wishlist/remove/{product}', [WishlistController::class, 'remove'])->name('wishlist.remove');
+    Route::delete('/wishlist/item/{id}', [WishlistController::class, 'removeById'])->name('wishlist.remove-by-id');
+    Route::get('/wishlist/check/{product}', [WishlistController::class, 'check'])->name('wishlist.check');
+    Route::get('/wishlist/count', [WishlistController::class, 'getCount'])->name('wishlist.count');
+    Route::delete('/wishlist/clear', [WishlistController::class, 'clear'])->name('wishlist.clear');
+    Route::post('/wishlist/move-to-cart/{product}', [WishlistController::class, 'moveToCart'])->name('wishlist.move-to-cart');
+    Route::post('/wishlist/bulk-remove', [WishlistController::class, 'bulkRemove'])->name('wishlist.bulk-remove');
+
+
 
     // ======== FOLLOWING MANAGEMENT ========
     Route::get('/following', [VendorCustomerController::class, 'following'])->name('following');
@@ -426,7 +440,6 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
 // =========================================================================
 // ADMIN ROUTES
 // =========================================================================
-
 Route::prefix('admin')->name('admin.')->group(function () {
 
     // Guest admin routes (login only)
@@ -434,6 +447,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/login', [AdminController::class, 'create'])->name('login');
         Route::post('/login', [AdminController::class, 'store'])->name('login.submit');
     });
+
+
 
     // Protected admin routes
     Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -446,10 +461,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/search', [AdminController::class, 'search'])->name('search');
 
 
-         
+//Route::get('/admin/test-admins', [App\Http\Controllers\Admin\AdminController::class, 'testAdmins']);
+
 
 
         // ======== ADMIN MANAGEMENT (ADD THIS SECTION) ========
+           // Route::get('/admins', [App\Http\Controllers\Admin\AdminController::class, 'admins'])->name('admins.list');
         Route::get('/admins', [AdminController::class, 'admins'])->name('admins.list');
         Route::get('/admins/create', [AdminController::class, 'createAdmin'])->name('admins.create');
         Route::post('/admins', [AdminController::class, 'storeAdmin'])->name('admins.store');
@@ -464,6 +481,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
 
+
+
            // ======== ROLES & PERMISSIONS  ========
         Route::get('/roles', [AdminController::class, 'roles'])->name('roles');
         Route::get('/roles/create', [AdminController::class, 'createRole'])->name('roles.create');
@@ -472,13 +491,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/roles/{id}/edit', [AdminController::class, 'editRole'])->name('roles.edit');
         Route::put('/roles/{id}', [AdminController::class, 'updateRole'])->name('roles.update');
         Route::delete('/roles/{id}', [AdminController::class, 'deleteRole'])->name('roles.delete');
-        
+
          // ======== USERS MANAGEMENT (ADD THIS SECTION) ========
         Route::get('/users', [AdminController::class, 'users'])->name('users');
+        Route::get('/users/pending', [AdminController::class, 'pendingVendors'])->name('users.pending');
+
         Route::get('/users/{id}', [AdminController::class, 'showUser'])->name('users.show');
         Route::get('/users/{id}/edit', [AdminController::class, 'editUser'])->name('users.edit');
         Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('users.update');
+        Route::post('/users/{id}/toggle-status', [AdminController::class, 'toggleStatus'])->name('users.toggle-status');
+        Route::post('/users/{id}/toggle-verification', [AdminController::class, 'toggleVerification'])->name('users.toggle-verification');
         Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
+        Route::post('/vendors/{id}/approve', [AdminController::class, 'approveVendor'])->name('vendors.approve');
+        Route::post('/vendors/{id}/reject', [AdminController::class, 'rejectVendor'])->name('vendors.reject');
+        Route::get('/users/export', [AdminController::class, 'exportUsers'])->name('users.export');
+        Route::post('/users/bulk-action', [AdminController::class, 'bulkAction'])->name('users.bulk-action');
         Route::post('/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('users.toggle-status');
         Route::get('/users-stats', [AdminController::class, 'getUserStats'])->name('users.stats');
 
@@ -509,6 +536,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
          // ======== PRODUCTS MANAGEMENT (ADD THIS IF MISSING) ========
         Route::get('/products', [AdminController::class, 'products'])->name('products');
+        Route::get('/products/create', [AdminController::class, 'createProduct'])->name('products.create'); // ADD THIS LINE
+        Route::post('/products', [AdminController::class, 'storeProduct'])->name('products.store'); // ADD THIS LINE
         Route::get('/products/{id}', [AdminController::class, 'showProduct'])->name('products.show');
         Route::get('/products/{id}/edit', [AdminController::class, 'editProduct'])->name('products.edit');
         Route::put('/products/{id}', [AdminController::class, 'updateProduct'])->name('products.update');
@@ -519,14 +548,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // ======== CATALOG MANAGEMENT ========
         Route::get('/catalog', [AdminController::class, 'catalog'])->name('catalog');
         Route::get('/catalog/products', [AdminController::class, 'products'])->name('catalog.products');
+
+        Route::get('/categories', [AdminController::class, 'categories'])->name('categories');
+
         Route::get('/catalog/categories', [AdminController::class, 'categories'])->name('catalog.categories');
+        Route::get('/categories/create', [AdminController::class, 'createCategory'])->name('categories.create');
+
+        Route::post('/categories', [AdminController::class, 'storeCategory'])->name('categories.store');
+
+        Route::get('/categories/{id}', [AdminController::class, 'showCategory'])->name('categories.show');
+
+        Route::get('/categories/{id}/edit', [AdminController::class, 'editCategory'])->name('categories.edit');
+
+        Route::put('/categories/{id}', [AdminController::class, 'updateCategory'])->name('categories.update');
+
+        Route::delete('/categories/{id}', [AdminController::class, 'deleteCategory'])->name('categories.destroy');
+
         Route::get('/catalog/products/export', [AdminController::class, 'exportProducts'])->name('catalog.products.export');
 
-        // ======== INVENTORY MANAGEMENT ========
-        Route::get('/inventory', [AdminController::class, 'inventory'])->name('inventory');
-        Route::get('/inventory/low-stock', [AdminController::class, 'lowStock'])->name('inventory.low-stock');
-        Route::post('/inventory/{product}/restock', [AdminController::class, 'restock'])->name('inventory.restock');
-        Route::get('/inventory/export', [AdminController::class, 'exportInventory'])->name('inventory.export');
+       
+
 
         // ======== PROMOTIONS MANAGEMENT ========
         Route::get('/promotions', [AdminController::class, 'promotions'])->name('promotions');
@@ -534,12 +575,29 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/promotions', [AdminController::class, 'storePromotion'])->name('promotions.store');
         Route::get('/promotions/{id}/edit', [AdminController::class, 'editPromotion'])->name('promotions.edit');
         Route::put('/promotions/{id}', [AdminController::class, 'updatePromotion'])->name('promotions.update');
-        Route::delete('/promotions/{id}', [AdminController::class, 'deletePromotion'])->name('promotions.delete');
+        //Route::delete('/promotions/{id}', [AdminController::class, 'deletePromotion'])->name('promotions.delete');
+        Route::delete('/promotions/{id}', [AdminController::class, 'deletePromotion'])->name('promotions.destroy'); // This is the missing route
+
+
+
+        Route::get('/products/list', [ProductController::class, 'getProductsList'])->name('products.list');
 
         // ======== COUPONS MANAGEMENT ========
         Route::get('/coupons', [CouponController::class, 'adminIndex'])->name('coupons');
+        Route::get('/coupons/create', [CouponController::class, 'create'])->name('coupons.create');
+        Route::post('/coupons', [CouponController::class, 'store'])->name('coupons.store');
+
+        Route::get('/coupons/{id}/edit', [CouponController::class, 'edit'])->name('coupons.edit');
+        Route::put('/coupons/{id}', [CouponController::class, 'update'])->name('coupons.update');
+
         Route::post('/coupons/generate', [CouponController::class, 'generate'])->name('coupons.generate');
         Route::delete('/coupons/{id}', [CouponController::class, 'adminDelete'])->name('coupons.delete');
+        Route::post('/coupons/{id}/toggle', [CouponController::class, 'toggleStatus'])->name('coupons.toggle');
+        Route::post('/coupons/bulk-delete', [CouponController::class, 'bulkDelete'])->name('coupons.bulk-delete');
+        Route::get('/coupons/export', [CouponController::class, 'export'])->name('coupons.export');
+
+
+
 
         // ======== ADMIN PROFILE & SETTINGS ========
         Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
@@ -622,6 +680,9 @@ Route::prefix('api')->name('api.')->group(function () {
         Route::get('/customer/wishlist', [WishlistController::class, 'apiIndex'])->name('customer.wishlist');
         Route::post('/customer/wishlist/add/{product}', [WishlistController::class, 'apiAdd'])->name('customer.wishlist.add');
         Route::delete('/customer/wishlist/remove/{product}', [WishlistController::class, 'apiRemove'])->name('customer.wishlist.remove');
+
+        // ADD THIS NEW ROUTE FOR BATCH CHECK
+        Route::post('/customer/wishlist/check-batch', [WishlistController::class, 'apiCheckBatch'])->name('customer.wishlist.check-batch');
 
         // Cart API endpoints
         Route::get('/cart', [CartController::class, 'apiIndex'])->name('cart');
