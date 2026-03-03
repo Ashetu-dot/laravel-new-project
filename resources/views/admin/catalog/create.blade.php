@@ -3,14 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Create Coupon - Vendora Admin | Jimma, Ethiopia</title>
+    <title>Create Product - Vendora Admin | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @font-face {
+            font-family: 'Inter';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Regular.otf') format('opentype');
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: 'Inter';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Medium.otf') format('opentype');
+            font-weight: 500;
+        }
+        @font-face {
+            font-family: 'Inter';
+            src: url('https://assets-persist.lovart.ai/agent-static-assets/NotoSansHans-Bold.otf') format('opentype');
+            font-weight: 700;
         }
 
         :root {
@@ -25,15 +35,23 @@
             --border-color: #e5e7eb;
             --primary-gold: #B88E3F;
             --primary-gold-hover: #9c7832;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
+            --accent-red: #ef4444;
+            --accent-green: #10b981;
+            --accent-blue: #3b82f6;
+            --accent-yellow: #f59e0b;
+            --accent-purple: #8b5cf6;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
         }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--primary-bg);
             color: var(--text-primary);
             display: flex;
@@ -159,12 +177,12 @@
             color: white;
             font-weight: 600;
             margin-right: 12px;
+            overflow: hidden;
         }
 
         .avatar img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
         }
 
@@ -179,10 +197,7 @@
             font-size: 12px;
         }
 
-        .logout-form {
-            margin-top: 8px;
-        }
-
+        /* Logout Button */
         .logout-btn {
             background: none;
             border: none;
@@ -196,11 +211,12 @@
             width: 100%;
             border-radius: 8px;
             transition: all 0.2s;
+            margin-top: 8px;
         }
 
         .logout-btn:hover {
             background-color: var(--sidebar-active-bg);
-            color: var(--danger-color);
+            color: var(--accent-red);
         }
 
         /* Main Content */
@@ -279,7 +295,7 @@
             position: absolute;
             top: -5px;
             right: -5px;
-            background-color: var(--danger-color);
+            background-color: var(--accent-red);
             color: white;
             font-size: 10px;
             width: 18px;
@@ -301,7 +317,6 @@
             }
         }
 
-        /* Page Header */
         .page-header {
             display: flex;
             justify-content: space-between;
@@ -378,6 +393,7 @@
             font-size: 14px;
             transition: all 0.2s;
             font-family: inherit;
+            background-color: white;
         }
 
         .form-control:focus {
@@ -387,66 +403,48 @@
         }
 
         .form-control.error {
-            border-color: var(--danger-color);
-        }
-
-        .form-control[type="date"],
-        .form-control[type="datetime-local"] {
-            color-scheme: light;
+            border-color: var(--accent-red);
         }
 
         textarea.form-control {
-            min-height: 100px;
+            min-height: 120px;
             resize: vertical;
         }
 
         .input-group {
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-
-        .input-group .form-control {
-            flex: 1;
         }
 
         .input-group-text {
             padding: 12px 16px;
             background-color: #f3f4f6;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-right: none;
+            border-radius: 8px 0 0 8px;
             color: var(--text-secondary);
             font-size: 14px;
-            white-space: nowrap;
+            font-weight: 500;
         }
 
-        .input-group-append {
-            display: flex;
-        }
-
-        .btn-outline-secondary {
-            padding: 12px 16px;
-            background-color: transparent;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .btn-outline-secondary:hover {
-            border-color: var(--primary-gold);
-            color: var(--primary-gold);
+        .input-group .form-control {
+            border-radius: 0 8px 8px 0;
         }
 
         .error-message {
-            color: var(--danger-color);
+            color: var(--accent-red);
             font-size: 12px;
             margin-top: 4px;
             display: flex;
             align-items: center;
             gap: 4px;
+        }
+
+        .form-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            display: block;
         }
 
         /* Radio & Checkbox */
@@ -470,17 +468,67 @@
             cursor: pointer;
         }
 
-        .checkbox-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        /* Image Upload */
+        .image-upload-container {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
             cursor: pointer;
+            transition: all 0.2s;
+            background-color: #f9fafb;
         }
 
-        .checkbox-option input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
+        .image-upload-container:hover {
+            border-color: var(--primary-gold);
+            background-color: #fef3e7;
+        }
+
+        .image-upload-container i {
+            font-size: 48px;
+            color: var(--primary-gold);
+            margin-bottom: 12px;
+        }
+
+        .image-upload-container p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .image-preview {
+            display: none;
+            margin-top: 16px;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .image-preview img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+        }
+
+        .image-preview .remove-image {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .image-preview .remove-image:hover {
+            background-color: var(--accent-red);
         }
 
         /* Alert Messages */
@@ -491,30 +539,36 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .alert-success {
             background-color: #d1fae5;
             color: #065f46;
-            border-left: 4px solid var(--success-color);
+            border-left: 4px solid var(--accent-green);
         }
 
         .alert-error {
             background-color: #fee2e2;
             color: #991b1b;
-            border-left: 4px solid var(--danger-color);
+            border-left: 4px solid var(--accent-red);
         }
 
         .alert-warning {
             background-color: #fef3c7;
             color: #92400e;
-            border-left: 4px solid var(--warning-color);
-        }
-
-        .alert-info {
-            background-color: #dbeafe;
-            color: #1e40af;
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid var(--accent-yellow);
         }
 
         /* Buttons */
@@ -537,10 +591,15 @@
             color: white;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             background-color: var(--primary-gold-hover);
             transform: translateY(-1px);
             box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -555,17 +614,12 @@
         }
 
         .btn-danger {
-            background-color: var(--danger-color);
+            background-color: var(--accent-red);
             color: white;
         }
 
         .btn-danger:hover {
             background-color: #dc2626;
-        }
-
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 13px;
         }
 
         .form-actions {
@@ -600,53 +654,27 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.9);
             z-index: 9999;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
+            gap: 16px;
         }
 
         .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(184, 142, 63, 0.3);
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(184, 142, 63, 0.2);
             border-radius: 50%;
             border-top-color: var(--primary-gold);
             animation: spin 0.8s linear infinite;
         }
 
-        /* Help Text */
-        .help-text {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            display: block;
-        }
-
-        /* Vendor Select */
-        .vendor-select {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 8px;
-        }
-
-        .vendor-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px;
-            border-bottom: 1px solid #f3f4f6;
-        }
-
-        .vendor-option:last-child {
-            border-bottom: none;
-        }
-
-        .vendor-option input[type="radio"] {
-            width: 16px;
-            height: 16px;
+        .loading-text {
+            color: var(--primary-gold);
+            font-weight: 600;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -684,6 +712,12 @@
                 <a href="{{ route('admin.products') }}" class="nav-item">
                     <i class="ri-shopping-cart-line"></i> Products
                 </a>
+                <a href="{{ route('admin.categories') }}" class="nav-item">
+                    <i class="ri-price-tag-3-line"></i> Categories
+                </a>
+                <a href="{{ route('admin.inventory') }}" class="nav-item">
+                    <i class="ri-archive-line"></i> Inventory
+                </a>
             </div>
 
             <div class="nav-group">
@@ -691,13 +725,26 @@
                 <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                     <i class="ri-megaphone-line"></i> Promotions
                 </a>
-                <a href="{{ route('admin.coupons') }}" class="nav-item active">
+                <a href="{{ route('admin.coupons') }}" class="nav-item">
                     <i class="ri-coupon-line"></i> Coupons
                 </a>
             </div>
 
             <div class="nav-group">
+                <div class="nav-label">ANALYTICS</div>
+                <a href="{{ route('admin.analytics') }}" class="nav-item">
+                    <i class="ri-bar-chart-2-line"></i> Analytics
+                </a>
+                <a href="{{ route('admin.reports') }}" class="nav-item">
+                    <i class="ri-file-list-3-line"></i> Reports
+                </a>
+            </div>
+
+            <div class="nav-group">
                 <div class="nav-label">SYSTEM</div>
+                <a href="{{ route('admin.admins.list') }}" class="nav-item">
+                    <i class="ri-shield-user-line"></i> Administrators
+                </a>
                 <a href="{{ route('admin.settings') }}" class="nav-item">
                     <i class="ri-settings-4-line"></i> Settings
                 </a>
@@ -723,7 +770,7 @@
             </div>
             <div class="user-info">
                 <h4>{{ Auth::user()->name }}</h4>
-                <p>Administrator</p>
+                <p>{{ ucfirst(Auth::user()->role ?? 'administrator') }}</p>
             </div>
         </div>
     </nav>
@@ -737,7 +784,7 @@
                     <i class="ri-menu-line"></i>
                 </div>
                 <div class="page-title">
-                    <i class="ri-coupon-line" style="color: var(--primary-gold);"></i> Create Coupon
+                    <i class="ri-shopping-cart-line" style="color: var(--primary-gold);"></i> Create Product
                 </div>
             </div>
 
@@ -754,23 +801,24 @@
                         <span class="badge-count">{{ $unreadMessagesCount }}</span>
                     @endif
                 </a>
+                <a href="{{ route('admin.products') }}" class="btn btn-secondary" style="margin-left: 8px;">
+                    <i class="ri-arrow-left-line"></i> Back
+                </a>
             </div>
         </header>
 
         <!-- Dashboard Container -->
         <div class="dashboard-container">
+
             <!-- Page Header -->
             <div class="page-header">
                 <div>
                     <h1>
-                        <i class="ri-coupon-line"></i>
-                        Create New Coupon
+                        <i class="ri-shopping-cart-line"></i>
+                        Create New Product
                     </h1>
-                    <p>Create a new discount coupon for your customers</p>
+                    <p>Add a new product to your marketplace</p>
                 </div>
-                <a href="{{ route('admin.coupons') }}" class="btn btn-secondary">
-                    <i class="ri-arrow-left-line"></i> Back to Coupons
-                </a>
             </div>
 
             <!-- Alert Messages -->
@@ -799,178 +847,152 @@
                 </div>
             @endif
 
-            <!-- Create Coupon Form -->
+            <!-- Create Product Form -->
             <div class="form-container">
-                <form method="POST" action="{{ route('admin.coupons.store') }}" id="couponForm">
+                <form method="POST" action="{{ route('admin.products.store') }}" id="productForm" enctype="multipart/form-data">
                     @csrf
 
                     <div class="form-grid">
-                        <!-- Coupon Code -->
+                        <!-- Product Name -->
                         <div class="form-group">
-                            <label for="code" class="form-label">
-                                <i class="ri-coupon-line"></i> Coupon Code
+                            <label for="name" class="form-label">
+                                <i class="ri-shopping-cart-line"></i> Product Name
                             </label>
-                            <div class="input-group">
-                                <input type="text"
-                                       id="code"
-                                       name="code"
-                                       class="form-control @error('code') error @enderror"
-                                       placeholder="e.g., SUMMER2024"
-                                       value="{{ old('code') }}"
-                                       required>
-                                <button type="button" class="btn-outline-secondary" onclick="generateCode()">
-                                    <i class="ri-refresh-line"></i> Generate
-                                </button>
-                            </div>
-                            <small class="help-text">Unique code customers will enter at checkout</small>
-                            @error('code')
+                            <input type="text"
+                                   id="name"
+                                   name="name"
+                                   class="form-control @error('name') error @enderror"
+                                   placeholder="e.g., Premium Coffee Beans"
+                                   value="{{ old('name') }}"
+                                   required>
+                            @error('name')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
                             @enderror
                         </div>
 
-                        <!-- Discount Type -->
+                        <!-- SKU -->
                         <div class="form-group">
-                            <label for="type" class="form-label">
-                                <i class="ri-price-tag-3-line"></i> Discount Type
+                            <label for="sku" class="form-label">
+                                <i class="ri-barcode-line"></i> SKU (Stock Keeping Unit)
                             </label>
-                            <select id="type" name="type" class="form-control @error('type') error @enderror" required onchange="toggleType()">
-                                <option value="percentage" {{ old('type') == 'percentage' ? 'selected' : '' }}>Percentage Discount</option>
-                                <option value="fixed" {{ old('type') == 'fixed' ? 'selected' : '' }}>Fixed Amount Discount</option>
+                            <input type="text"
+                                   id="sku"
+                                   name="sku"
+                                   class="form-control @error('sku') error @enderror"
+                                   placeholder="e.g., PRD-001"
+                                   value="{{ old('sku') }}">
+                            <small class="form-text">Leave empty for auto-generation</small>
+                            @error('sku')
+                                <div class="error-message">
+                                    <i class="ri-error-warning-fill"></i> {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <!-- Category -->
+                        <div class="form-group">
+                            <label for="category_id" class="form-label">
+                                <i class="ri-price-tag-3-line"></i> Category
+                            </label>
+                            <select id="category_id" name="category_id" class="form-control @error('category_id') error @enderror" required>
+                                <option value="">Select Category</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
                             </select>
-                            @error('type')
+                            @error('category_id')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
                             @enderror
                         </div>
 
-                        <!-- Discount Value -->
+                        <!-- Vendor -->
                         <div class="form-group">
-                            <label for="value" class="form-label" id="valueLabel">
-                                <i class="ri-percent-line"></i> Discount Value (%)
+                            <label for="vendor_id" class="form-label">
+                                <i class="ri-store-line"></i> Vendor
                             </label>
-                            <div class="input-group">
-                                <input type="number"
-                                       id="value"
-                                       name="value"
-                                       class="form-control @error('value') error @enderror"
-                                       placeholder="20"
-                                       min="0.01"
-                                       step="0.01"
-                                       value="{{ old('value') }}"
-                                       required>
-                                <span class="input-group-text" id="valueSuffix">%</span>
-                            </div>
-                            @error('value')
+                            <select id="vendor_id" name="vendor_id" class="form-control @error('vendor_id') error @enderror" required>
+                                <option value="">Select Vendor</option>
+                                @foreach($vendors as $vendor)
+                                    <option value="{{ $vendor->id }}" {{ old('vendor_id') == $vendor->id ? 'selected' : '' }}>
+                                        {{ $vendor->business_name ?? $vendor->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('vendor_id')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
                             @enderror
                         </div>
 
-                        <!-- Maximum Discount (for percentage) -->
-                        <div class="form-group" id="maxDiscountField" style="{{ old('type') == 'percentage' ? 'display: block;' : 'display: none;' }}">
-                            <label for="max_discount_amount" class="form-label">
-                                <i class="ri-coupon-line"></i> Maximum Discount (ETB)
+                        <!-- Price -->
+                        <div class="form-group">
+                            <label for="price" class="form-label">
+                                <i class="ri-money-dollar-circle-line"></i> Regular Price (ETB)
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">ETB</span>
                                 <input type="number"
-                                       id="max_discount_amount"
-                                       name="max_discount_amount"
-                                       class="form-control"
+                                       id="price"
+                                       name="price"
+                                       class="form-control @error('price') error @enderror"
                                        placeholder="1000"
                                        min="0"
                                        step="0.01"
-                                       value="{{ old('max_discount_amount') }}">
+                                       value="{{ old('price') }}"
+                                       required>
                             </div>
-                            <small class="help-text">Maximum discount amount (leave empty for no limit)</small>
-                            @error('max_discount_amount')
+                            @error('price')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
                             @enderror
                         </div>
 
-                        <!-- Minimum Purchase -->
+                        <!-- Sale Price -->
                         <div class="form-group">
-                            <label for="min_order_amount" class="form-label">
-                                <i class="ri-shopping-cart-line"></i> Minimum Purchase (ETB)
+                            <label for="sale_price" class="form-label">
+                                <i class="ri-price-tag-3-line"></i> Sale Price (ETB)
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">ETB</span>
                                 <input type="number"
-                                       id="min_order_amount"
-                                       name="min_order_amount"
-                                       class="form-control"
-                                       placeholder="0 for no minimum"
+                                       id="sale_price"
+                                       name="sale_price"
+                                       class="form-control @error('sale_price') error @enderror"
+                                       placeholder="800"
                                        min="0"
                                        step="0.01"
-                                       value="{{ old('min_order_amount', 0) }}">
+                                       value="{{ old('sale_price') }}">
                             </div>
-                            <small class="help-text">Minimum order amount required to use this coupon</small>
-                            @error('min_order_amount')
+                            <small class="form-text">Leave empty if not on sale</small>
+                            @error('sale_price')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
                             @enderror
                         </div>
 
-                        <!-- Expiry Date -->
+                        <!-- Stock -->
                         <div class="form-group">
-                            <label for="expires_at" class="form-label">
-                                <i class="ri-calendar-line"></i> Expiry Date
+                            <label for="stock" class="form-label">
+                                <i class="ri-stack-line"></i> Stock Quantity
                             </label>
-                            <input type="datetime-local"
-                                   id="expires_at"
-                                   name="expires_at"
-                                   class="form-control @error('expires_at') error @enderror"
-                                   value="{{ old('expires_at', now()->addDays(30)->format('Y-m-d\TH:i')) }}"
+                            <input type="number"
+                                   id="stock"
+                                   name="stock"
+                                   class="form-control @error('stock') error @enderror"
+                                   placeholder="100"
+                                   min="0"
+                                   value="{{ old('stock', 0) }}"
                                    required>
-                            <small class="help-text">When this coupon expires</small>
-                            @error('expires_at')
-                                <div class="error-message">
-                                    <i class="ri-error-warning-fill"></i> {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-
-                        <!-- Max Uses -->
-                        <div class="form-group">
-                            <label for="max_uses" class="form-label">
-                                <i class="ri-group-line"></i> Maximum Total Uses
-                            </label>
-                            <input type="number"
-                                   id="max_uses"
-                                   name="max_uses"
-                                   class="form-control"
-                                   placeholder="0 for unlimited"
-                                   min="0"
-                                   value="{{ old('max_uses') }}">
-                            <small class="help-text">Total number of times this coupon can be used</small>
-                            @error('max_uses')
-                                <div class="error-message">
-                                    <i class="ri-error-warning-fill"></i> {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-
-                        <!-- Per User Limit -->
-                        <div class="form-group">
-                            <label for="per_user_limit" class="form-label">
-                                <i class="ri-user-line"></i> Uses Per Customer
-                            </label>
-                            <input type="number"
-                                   id="per_user_limit"
-                                   name="per_user_limit"
-                                   class="form-control"
-                                   placeholder="1"
-                                   min="0"
-                                   value="{{ old('per_user_limit', 1) }}">
-                            <small class="help-text">How many times each customer can use this coupon</small>
-                            @error('per_user_limit')
+                            @error('stock')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
@@ -994,54 +1016,23 @@
                             </div>
                         </div>
 
-                        <!-- Vendor Assignment (Optional) -->
+                        <!-- Tags -->
                         <div class="form-group full-width">
-                            <label class="form-label">
-                                <i class="ri-store-line"></i> Assign to Vendor (Optional)
-                            </label>
-                            <div class="radio-group" style="margin-bottom: 16px;">
-                                <label class="radio-option">
-                                    <input type="radio" name="vendor_scope" value="all" {{ old('vendor_scope', 'all') == 'all' ? 'checked' : '' }} onchange="toggleVendorSelection()">
-                                    <span>All Vendors</span>
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="vendor_scope" value="specific" {{ old('vendor_scope') == 'specific' ? 'checked' : '' }} onchange="toggleVendorSelection()">
-                                    <span>Specific Vendor</span>
-                                </label>
-                            </div>
-
-                            <div id="vendorSelection" style="display: {{ old('vendor_scope') == 'specific' ? 'block' : 'none' }};">
-                                <select name="vendor_id" id="vendor_id" class="form-control">
-                                    <option value="">Select a vendor</option>
-                                    @foreach($vendors ?? [] as $vendor)
-                                        <option value="{{ $vendor->id }}" {{ old('vendor_id') == $vendor->id ? 'selected' : '' }}>
-                                            {{ $vendor->business_name ?? $vendor->name }} ({{ $vendor->email }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <small class="help-text">If specific vendor is selected, coupon will only work for that vendor's products</small>
-                            </div>
-                        </div>
-
-                        <!-- User Assignment (Optional) -->
-                        <div class="form-group full-width">
-                            <label for="user_id" class="form-label">
-                                <i class="ri-user-line"></i> Assign to Specific User (Optional)
+                            <label for="tags" class="form-label">
+                                <i class="ri-price-tag-3-line"></i> Tags
                             </label>
                             <input type="text"
-                                   id="user_search"
-                                   class="form-control"
-                                   placeholder="Search for a user by email or name..."
-                                   autocomplete="off">
-                            <input type="hidden" id="user_id" name="user_id" value="{{ old('user_id') }}">
-                            <div id="user_search_results" style="display: none; margin-top: 8px; border: 1px solid var(--border-color); border-radius: 8px; max-height: 200px; overflow-y: auto;"></div>
-                            <div id="selected_user" style="margin-top: 8px; {{ old('user_id') ? 'display: block;' : 'display: none;' }}">
-                                <div style="display: flex; align-items: center; gap: 8px; padding: 8px; background-color: #f9fafb; border-radius: 8px;">
-                                    <span id="selected_user_name"></span>
-                                    <button type="button" class="btn-outline-secondary btn-sm" onclick="clearUser()">Remove</button>
+                                   id="tags"
+                                   name="tags"
+                                   class="form-control @error('tags') error @enderror"
+                                   placeholder="e.g., coffee, premium, organic (comma separated)"
+                                   value="{{ old('tags') }}">
+                            <small class="form-text">Separate tags with commas</small>
+                            @error('tags')
+                                <div class="error-message">
+                                    <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
-                            </div>
-                            <small class="help-text">If a specific user is selected, only that user can use this coupon</small>
+                            @enderror
                         </div>
 
                         <!-- Description -->
@@ -1052,9 +1043,67 @@
                             <textarea id="description"
                                       name="description"
                                       class="form-control @error('description') error @enderror"
-                                      placeholder="Describe what this coupon is for...">{{ old('description') }}</textarea>
-                            <small class="help-text">Internal description (not visible to customers)</small>
+                                      placeholder="Detailed product description..."
+                                      required>{{ old('description') }}</textarea>
                             @error('description')
+                                <div class="error-message">
+                                    <i class="ri-error-warning-fill"></i> {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        <!-- Meta Title (SEO) -->
+                        <div class="form-group">
+                            <label for="meta_title" class="form-label">
+                                <i class="ri-file-search-line"></i> Meta Title (SEO)
+                            </label>
+                            <input type="text"
+                                   id="meta_title"
+                                   name="meta_title"
+                                   class="form-control"
+                                   placeholder="SEO title (optional)"
+                                   value="{{ old('meta_title') }}">
+                            <small class="form-text">Leave empty to use product name</small>
+                        </div>
+
+                        <!-- Meta Description (SEO) -->
+                        <div class="form-group">
+                            <label for="meta_description" class="form-label">
+                                <i class="ri-file-search-line"></i> Meta Description (SEO)
+                            </label>
+                            <input type="text"
+                                   id="meta_description"
+                                   name="meta_description"
+                                   class="form-control"
+                                   placeholder="SEO description (optional)"
+                                   value="{{ old('meta_description') }}">
+                        </div>
+
+                        <!-- Product Image -->
+                        <div class="form-group full-width">
+                            <label for="image" class="form-label">
+                                <i class="ri-image-line"></i> Product Image
+                            </label>
+                            <div class="image-upload-container" onclick="document.getElementById('image').click()">
+                                <i class="ri-upload-cloud-line"></i>
+                                <p>Click to upload product image</p>
+                                <p style="font-size: 12px; margin-top: 8px;">JPG, PNG, GIF up to 2MB</p>
+                            </div>
+                            <input type="file"
+                                   id="image"
+                                   name="image"
+                                   class="form-control"
+                                   accept="image/jpeg,image/png,image/gif,image/webp"
+                                   style="display: none;"
+                                   onchange="previewImage(this)">
+
+                            <div class="image-preview" id="imagePreview">
+                                <img src="#" alt="Preview">
+                                <button type="button" class="remove-image" onclick="removeImage()">
+                                    <i class="ri-close-line"></i>
+                                </button>
+                            </div>
+                            @error('image')
                                 <div class="error-message">
                                     <i class="ri-error-warning-fill"></i> {{ $message }}
                                 </div>
@@ -1064,11 +1113,11 @@
 
                     <!-- Form Actions -->
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ route('admin.coupons') }}'">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ route('admin.products') }}'">
                             <i class="ri-close-line"></i> Cancel
                         </button>
                         <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="ri-coupon-line"></i> Create Coupon
+                            <i class="ri-shopping-cart-line"></i> Create Product
                         </button>
                     </div>
                 </form>
@@ -1079,11 +1128,12 @@
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
+        <div class="loading-text">Creating product...</div>
     </div>
 
     <script>
         // CSRF Token
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
         // Mobile menu toggle
         document.addEventListener('DOMContentLoaded', function() {
@@ -1095,6 +1145,7 @@
                     sidebar.classList.toggle('active');
                 });
 
+                // Close sidebar when clicking outside on mobile
                 document.addEventListener('click', function(event) {
                     if (window.innerWidth <= 768) {
                         if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
@@ -1103,137 +1154,98 @@
                     }
                 });
             }
-
-            // Set min date for expiry
-            const expiresAt = document.getElementById('expires_at');
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            expiresAt.min = now.toISOString().slice(0, 16);
         });
 
-        // Toggle type fields
-        function toggleType() {
-            const type = document.getElementById('type').value;
-            const valueLabel = document.getElementById('valueLabel');
-            const valueSuffix = document.getElementById('valueSuffix');
-            const maxDiscountField = document.getElementById('maxDiscountField');
+        // Preview image before upload
+        function previewImage(input) {
+            const preview = document.getElementById('imagePreview');
+            const img = preview.querySelector('img');
 
-            if (type === 'percentage') {
-                valueLabel.innerHTML = '<i class="ri-percent-line"></i> Discount Value (%)';
-                valueSuffix.textContent = '%';
-                maxDiscountField.style.display = 'block';
-            } else {
-                valueLabel.innerHTML = '<i class="ri-money-cny-circle-line"></i> Discount Amount (ETB)';
-                valueSuffix.textContent = 'ETB';
-                maxDiscountField.style.display = 'none';
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Validate file size (max 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('File size must be less than 2MB');
+                    input.value = '';
+                    return;
+                }
+
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Please upload a valid image file (JPEG, PNG, GIF, WebP)');
+                    input.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+
+                reader.readAsDataURL(file);
             }
         }
 
-        // Toggle vendor selection
-        function toggleVendorSelection() {
-            const scope = document.querySelector('input[name="vendor_scope"]:checked').value;
-            const vendorSelection = document.getElementById('vendorSelection');
+        // Remove image preview
+        function removeImage() {
+            const input = document.getElementById('image');
+            const preview = document.getElementById('imagePreview');
 
-            vendorSelection.style.display = scope === 'specific' ? 'block' : 'none';
+            input.value = '';
+            preview.style.display = 'none';
         }
 
-        // Generate random coupon code
-        function generateCode() {
-            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            for (let i = 0; i < 8; i++) {
-                code += characters.charAt(Math.floor(Math.random() * characters.length));
+        // Form validation
+        function validateForm() {
+            const name = document.getElementById('name').value.trim();
+            if (!name) {
+                alert('Please enter a product name');
+                return false;
             }
 
-            // Add prefix based on type
-            const type = document.getElementById('type').value;
-            if (type === 'percentage') {
-                code = 'PCT' + code;
-            } else {
-                code = 'FIX' + code;
+            const price = document.getElementById('price').value;
+            if (!price || price <= 0) {
+                alert('Please enter a valid price');
+                return false;
             }
 
-            document.getElementById('code').value = code;
-        }
-
-        // User search functionality
-        let searchTimeout;
-        document.getElementById('user_search').addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            const query = this.value;
-
-            if (query.length < 2) {
-                document.getElementById('user_search_results').style.display = 'none';
-                return;
+            const category = document.getElementById('category_id').value;
+            if (!category) {
+                alert('Please select a category');
+                return false;
             }
 
-            searchTimeout = setTimeout(() => {
-                fetch(`/admin/users/search?q=${encodeURIComponent(query)}`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(users => {
-                    const resultsDiv = document.getElementById('user_search_results');
-                    if (users.length > 0) {
-                        let html = '';
-                        users.forEach(user => {
-                            html += `
-                                <div class="user-result" style="padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border-color);" onclick="selectUser(${user.id}, '${user.name} (${user.email})')">
-                                    <strong>${user.name}</strong><br>
-                                    <small>${user.email}</small>
-                                </div>
-                            `;
-                        });
-                        resultsDiv.innerHTML = html;
-                        resultsDiv.style.display = 'block';
-                    } else {
-                        resultsDiv.innerHTML = '<div style="padding: 10px; color: var(--text-secondary);">No users found</div>';
-                        resultsDiv.style.display = 'block';
-                    }
-                });
-            }, 300);
-        });
+            const vendor = document.getElementById('vendor_id').value;
+            if (!vendor) {
+                alert('Please select a vendor');
+                return false;
+            }
 
-        // Select user from search
-        function selectUser(userId, userName) {
-            document.getElementById('user_id').value = userId;
-            document.getElementById('selected_user_name').textContent = userName;
-            document.getElementById('selected_user').style.display = 'block';
-            document.getElementById('user_search').value = '';
-            document.getElementById('user_search_results').style.display = 'none';
+            const stock = document.getElementById('stock').value;
+            if (stock < 0) {
+                alert('Stock cannot be negative');
+                return false;
+            }
+
+            const salePrice = document.getElementById('sale_price').value;
+            if (salePrice && parseFloat(salePrice) >= parseFloat(price)) {
+                alert('Sale price must be less than regular price');
+                return false;
+            }
+
+            return true;
         }
 
-        // Clear selected user
-        function clearUser() {
-            document.getElementById('user_id').value = '';
-            document.getElementById('selected_user').style.display = 'none';
-        }
-
-        // Form submission
-        document.getElementById('couponForm').addEventListener('submit', function(e) {
+        // Form submission with loading state
+        document.getElementById('productForm').addEventListener('submit', function(e) {
             const submitBtn = document.getElementById('submitBtn');
 
-            if (submitBtn.disabled) {
+            if (!validateForm()) {
                 e.preventDefault();
-                return;
-            }
-
-            // Validate value
-            const value = document.getElementById('value').value;
-            if (!value || value <= 0) {
-                e.preventDefault();
-                alert('Please enter a valid discount value');
-                return;
-            }
-
-            // Validate expiry
-            const expiresAt = new Date(document.getElementById('expires_at').value);
-            if (expiresAt <= new Date()) {
-                e.preventDefault();
-                alert('Expiry date must be in the future');
                 return;
             }
 
@@ -1242,7 +1254,16 @@
             document.getElementById('loadingOverlay').style.display = 'flex';
         });
 
-        // Auto-hide alerts
+        // Confirm logout
+        document.querySelectorAll('.logout-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to logout?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        // Auto-hide alerts after 5 seconds
         setTimeout(() => {
             document.querySelectorAll('.alert').forEach(alert => {
                 alert.style.transition = 'opacity 0.5s';
@@ -1251,16 +1272,6 @@
             });
         }, 5000);
     </script>
-
-    <style>
-        .user-result:hover {
-            background-color: #f9fafb;
-        }
-        .btn-outline-secondary.btn-sm {
-            padding: 4px 8px;
-            font-size: 12px;
-        }
-    </style>
 
 </body>
 </html>

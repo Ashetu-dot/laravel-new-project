@@ -24,27 +24,67 @@ class PromotionController extends Controller
         $user = Auth::user();
         
         try {
-            $promotions = Promotion::with(['creator', 'categories', 'products'])
-                ->withCount('usages')
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
+            $query = Promotion::with(['creator', 'categories', 'products'])
+                ->withCount('usages');
+            
+            // Apply status filter
+            $status = $request->get('status');
+            $now = now();
+            
+            if ($status === 'active') {
+                $query->where('is_active', true)
+                    ->where('start_date', '<=', $now)
+                    ->where('end_date', '>=', $now);
+            } elseif ($status === 'upcoming') {
+                $query->where('is_active', true)
+                    ->where('start_date', '>', $now);
+            } elseif ($status === 'expired') {
+                $query->where('end_date', '<', $now);
+            }
+            
+            // Apply search filter
+            if ($request->has('search') && !empty($request->search)) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('code', 'like', "%{$search}%");
+                });
+            }
+            
+            $promotions = $query->orderBy('created_at', 'desc')->paginate(15);
+            
+            // Calculate stats for the dashboard cards
+            $activeCount = Promotion::where('is_active', true)
+                ->where('start_date', '<=', $now)
+                ->where('end_date', '>=', $now)
+                ->count();
+                
+            $upcomingCount = Promotion::where('is_active', true)
+                ->where('start_date', '>', $now)
+                ->count();
+                
+            $expiredCount = Promotion::where('end_date', '<', $now)->count();
 
             // Get unread notifications count
             $unreadNotificationsCount = 0;
             $unreadMessagesCount = 0;
             
             try {
-                $unreadNotificationsCount = \App\Models\Notification::where('user_id', $user->id)
-                    ->where('is_read', false)
-                    ->count();
+                if (class_exists('App\Models\Notification')) {
+                    $unreadNotificationsCount = \App\Models\Notification::where('user_id', $user->id)
+                        ->where('is_read', false)
+                        ->count();
+                }
             } catch (\Exception $e) {
                 Log::warning('Notifications table might not exist: ' . $e->getMessage());
             }
 
             try {
-                $unreadMessagesCount = \App\Models\Message::where('receiver_id', $user->id)
-                    ->where('is_read', false)
-                    ->count();
+                if (class_exists('App\Models\Message')) {
+                    $unreadMessagesCount = \App\Models\Message::where('receiver_id', $user->id)
+                        ->where('is_read', false)
+                        ->count();
+                }
             } catch (\Exception $e) {
                 Log::warning('Messages table might not exist: ' . $e->getMessage());
             }
@@ -53,11 +93,16 @@ class PromotionController extends Controller
                 'promotions', 
                 'user',
                 'unreadNotificationsCount',
-                'unreadMessagesCount'
+                'unreadMessagesCount',
+                'activeCount',
+                'upcomingCount',
+                'expiredCount'
             ));
             
         } catch (\Exception $e) {
-            Log::error('Failed to load promotions: ' . $e->getMessage());
+            Log::error('Failed to load promotions: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->back()->with('error', 'Failed to load promotions.');
         }
     }
@@ -70,33 +115,48 @@ class PromotionController extends Controller
         $user = Auth::user();
         
         try {
-            // Get categories with product counts
-            $categories = Category::withCount('products')
-                ->orderBy('name')
-                ->get();
+            // Get categories with error handling
+            try {
+                $categories = Category::orderBy('name')->get();
+            } catch (\Exception $e) {
+                Log::warning('Categories query failed: ' . $e->getMessage());
+                $categories = collect([]);
+            }
 
-            // Get products for selection
-            $products = Product::select('id', 'name', 'price', 'stock', 'image', 'category_id')
-                ->with('category:id,name')
-                ->orderBy('name')
-                ->limit(500)
-                ->get();
+            // Get products with error handling
+            try {
+                $products = Product::select('id', 'name', 'price', 'stock', 'image', 'category_id')
+                    ->orderBy('name')
+                    ->limit(500)
+                    ->get();
+            } catch (\Exception $e) {
+                Log::warning('Products query failed: ' . $e->getMessage());
+                $products = collect([]);
+            }
 
-            // Get unread counts
+            // Get unread counts with error handling
             $unreadNotificationsCount = 0;
             $unreadMessagesCount = 0;
             
             try {
-                $unreadNotificationsCount = \App\Models\Notification::where('user_id', $user->id)
-                    ->where('is_read', false)
-                    ->count();
-            } catch (\Exception $e) {}
+                if (class_exists('App\Models\Notification')) {
+                    $unreadNotificationsCount = \App\Models\Notification::where('user_id', $user->id)
+                        ->where('is_read', false)
+                        ->count();
+                }
+            } catch (\Exception $e) {
+                Log::warning('Notifications query failed: ' . $e->getMessage());
+            }
 
             try {
-                $unreadMessagesCount = \App\Models\Message::where('receiver_id', $user->id)
-                    ->where('is_read', false)
-                    ->count();
-            } catch (\Exception $e) {}
+                if (class_exists('App\Models\Message')) {
+                    $unreadMessagesCount = \App\Models\Message::where('receiver_id', $user->id)
+                        ->where('is_read', false)
+                        ->count();
+                }
+            } catch (\Exception $e) {
+                Log::warning('Messages query failed: ' . $e->getMessage());
+            }
 
             return view('admin.promotions.create', compact(
                 'categories', 
@@ -107,8 +167,18 @@ class PromotionController extends Controller
             ));
             
         } catch (\Exception $e) {
-            Log::error('Failed to load create form: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to load create form.');
+            Log::error('Failed to load create form: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Return with empty collections
+            return view('admin.promotions.create', [
+                'categories' => collect([]),
+                'products' => collect([]),
+                'user' => $user,
+                'unreadNotificationsCount' => 0,
+                'unreadMessagesCount' => 0
+            ])->with('warning', 'Some data could not be loaded. The form may have limited functionality.');
         }
     }
 
@@ -194,7 +264,7 @@ class PromotionController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.promotions')
+            return redirect()->route('admin.promotions.promotions')
                 ->with('success', 'Promotion created successfully!');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -206,13 +276,11 @@ class PromotionController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // Log the error for debugging
             Log::error('Failed to create promotion: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'input' => $request->except(['_token', 'banner'])
             ]);
 
-            // Delete uploaded banner if exists
             if (isset($bannerPath) && Storage::disk('public')->exists($bannerPath)) {
                 Storage::disk('public')->delete($bannerPath);
             }
@@ -235,27 +303,29 @@ class PromotionController extends Controller
                 ->withCount('usages')
                 ->findOrFail($id);
 
-            // Get recent usages
             $recentUsages = $promotion->usages()
                 ->with('user')
                 ->orderBy('created_at', 'desc')
                 ->limit(20)
                 ->get();
 
-            // Get unread counts
             $unreadNotificationsCount = 0;
             $unreadMessagesCount = 0;
             
             try {
-                $unreadNotificationsCount = \App\Models\Notification::where('user_id', $user->id)
-                    ->where('is_read', false)
-                    ->count();
+                if (class_exists('App\Models\Notification')) {
+                    $unreadNotificationsCount = \App\Models\Notification::where('user_id', $user->id)
+                        ->where('is_read', false)
+                        ->count();
+                }
             } catch (\Exception $e) {}
 
             try {
-                $unreadMessagesCount = \App\Models\Message::where('receiver_id', $user->id)
-                    ->where('is_read', false)
-                    ->count();
+                if (class_exists('App\Models\Message')) {
+                    $unreadMessagesCount = \App\Models\Message::where('receiver_id', $user->id)
+                        ->where('is_read', false)
+                        ->count();
+                }
             } catch (\Exception $e) {}
 
             return view('admin.promotions.show', compact(
@@ -268,7 +338,7 @@ class PromotionController extends Controller
             
         } catch (\Exception $e) {
             Log::error('Failed to load promotion: ' . $e->getMessage());
-            return redirect()->route('admin.promotions')
+            return redirect()->route('admin.promotions.promotions')
                 ->with('error', 'Promotion not found.');
         }
     }
@@ -283,32 +353,43 @@ class PromotionController extends Controller
         try {
             $promotion = Promotion::with(['products', 'categories'])->findOrFail($id);
             
-            $categories = Category::withCount('products')->orderBy('name')->get();
+            try {
+                $categories = Category::orderBy('name')->get();
+            } catch (\Exception $e) {
+                Log::warning('Categories query failed in edit: ' . $e->getMessage());
+                $categories = collect([]);
+            }
             
-            $products = Product::select('id', 'name', 'price', 'stock', 'image', 'category_id')
-                ->with('category:id,name')
-                ->orderBy('name')
-                ->limit(500)
-                ->get();
+            try {
+                $products = Product::select('id', 'name', 'price', 'stock', 'image', 'category_id')
+                    ->orderBy('name')
+                    ->limit(500)
+                    ->get();
+            } catch (\Exception $e) {
+                Log::warning('Products query failed in edit: ' . $e->getMessage());
+                $products = collect([]);
+            }
 
-            // Get selected IDs
             $selectedProducts = $promotion->products->pluck('id')->toArray();
             $selectedCategories = $promotion->categories->pluck('id')->toArray();
 
-            // Get unread counts
             $unreadNotificationsCount = 0;
             $unreadMessagesCount = 0;
             
             try {
-                $unreadNotificationsCount = \App\Models\Notification::where('user_id', $user->id)
-                    ->where('is_read', false)
-                    ->count();
+                if (class_exists('App\Models\Notification')) {
+                    $unreadNotificationsCount = \App\Models\Notification::where('user_id', $user->id)
+                        ->where('is_read', false)
+                        ->count();
+                }
             } catch (\Exception $e) {}
 
             try {
-                $unreadMessagesCount = \App\Models\Message::where('receiver_id', $user->id)
-                    ->where('is_read', false)
-                    ->count();
+                if (class_exists('App\Models\Message')) {
+                    $unreadMessagesCount = \App\Models\Message::where('receiver_id', $user->id)
+                        ->where('is_read', false)
+                        ->count();
+                }
             } catch (\Exception $e) {}
 
             return view('admin.promotions.edit', compact(
@@ -324,7 +405,7 @@ class PromotionController extends Controller
             
         } catch (\Exception $e) {
             Log::error('Failed to load edit form: ' . $e->getMessage());
-            return redirect()->route('admin.promotions')
+            return redirect()->route('admin.promotions.promotions')
                 ->with('error', 'Promotion not found.');
         }
     }
@@ -337,7 +418,6 @@ class PromotionController extends Controller
         try {
             $promotion = Promotion::findOrFail($id);
             
-            // Validate the request
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'code' => 'required|string|unique:promotions,code,' . $id . '|max:50',
@@ -363,9 +443,7 @@ class PromotionController extends Controller
 
             DB::beginTransaction();
 
-            // Handle banner upload
             if ($request->hasFile('banner')) {
-                // Delete old banner
                 if ($promotion->banner && Storage::disk('public')->exists($promotion->banner)) {
                     Storage::disk('public')->delete($promotion->banner);
                 }
@@ -374,7 +452,6 @@ class PromotionController extends Controller
                 $promotion->banner = $bannerPath;
             }
 
-            // Determine the value based on type
             if ($validated['type'] === 'percentage') {
                 $promotion->value = $validated['discount_percentage'];
             } elseif ($validated['type'] === 'fixed') {
@@ -383,7 +460,6 @@ class PromotionController extends Controller
                 $promotion->value = null;
             }
 
-            // Update other fields
             $promotion->name = $validated['name'];
             $promotion->code = strtoupper($validated['code']);
             $promotion->type = $validated['type'];
@@ -400,7 +476,6 @@ class PromotionController extends Controller
             
             $promotion->save();
 
-            // Sync relationships based on product scope
             if ($validated['product_scope'] === 'selected') {
                 $promotion->products()->sync($validated['products'] ?? []);
                 $promotion->categories()->sync([]);
@@ -414,7 +489,7 @@ class PromotionController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.promotions')
+            return redirect()->route('admin.promotions.promotions')
                 ->with('success', 'Promotion updated successfully!');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -446,22 +521,18 @@ class PromotionController extends Controller
             
             DB::beginTransaction();
             
-            // Delete banner if exists
             if ($promotion->banner && Storage::disk('public')->exists($promotion->banner)) {
                 Storage::disk('public')->delete($promotion->banner);
             }
             
-            // Delete related records
             $promotion->products()->detach();
             $promotion->categories()->detach();
             $promotion->usages()->delete();
-            
-            // Delete the promotion
             $promotion->delete();
             
             DB::commit();
             
-            return redirect()->route('admin.promotions')
+            return redirect()->route('admin.promotions.promotions')
                 ->with('success', 'Promotion deleted successfully!');
                 
         } catch (\Exception $e) {
@@ -485,24 +556,33 @@ class PromotionController extends Controller
         try {
             $search = $request->get('search', '');
             
-            $query = Product::select('id', 'name', 'price', 'stock', 'image', 'category_id')
-                ->with('category:id,name')
-                ->orderBy('name');
+            $query = Product::select('id', 'name', 'price', 'stock', 'image', 'category_id');
             
             if ($search) {
                 $query->where('name', 'like', "%{$search}%");
             }
             
-            $products = $query->limit(500)
+            $products = $query->orderBy('name')
+                ->limit(500)
                 ->get()
                 ->map(function($product) {
+                    $categoryName = 'Uncategorized';
+                    if ($product->category_id) {
+                        try {
+                            $category = Category::find($product->category_id);
+                            $categoryName = $category ? $category->name : 'Uncategorized';
+                        } catch (\Exception $e) {
+                            $categoryName = 'Uncategorized';
+                        }
+                    }
+                    
                     return [
                         'id' => $product->id,
                         'name' => $product->name,
                         'price' => $product->price,
                         'stock' => $product->stock,
                         'image' => $product->image ? Storage::url($product->image) : null,
-                        'category' => $product->category->name ?? 'Uncategorized'
+                        'category' => $categoryName
                     ];
                 });
 
@@ -557,7 +637,6 @@ class PromotionController extends Controller
             
             DB::beginTransaction();
             
-            // Create new promotion based on original
             $newPromotion = $originalPromotion->replicate();
             $newPromotion->name = $originalPromotion->name . ' (Copy)';
             $newPromotion->code = $originalPromotion->code . '_COPY_' . rand(100, 999);
@@ -566,7 +645,6 @@ class PromotionController extends Controller
             $newPromotion->created_at = now();
             $newPromotion->updated_at = now();
             
-            // Duplicate banner if exists
             if ($originalPromotion->banner && Storage::disk('public')->exists($originalPromotion->banner)) {
                 $extension = pathinfo($originalPromotion->banner, PATHINFO_EXTENSION);
                 $newPath = 'promotions/' . uniqid() . '.' . $extension;
@@ -576,7 +654,6 @@ class PromotionController extends Controller
             
             $newPromotion->save();
             
-            // Duplicate relationships
             $newPromotion->products()->sync($originalPromotion->products->pluck('id'));
             $newPromotion->categories()->sync($originalPromotion->categories->pluck('id'));
             
@@ -593,7 +670,7 @@ class PromotionController extends Controller
                 'id' => $id
             ]);
             
-            return redirect()->route('admin.promotions')
+            return redirect()->route('admin.promotions.promotions')
                 ->with('error', 'Failed to duplicate promotion.');
         }
     }
@@ -621,7 +698,6 @@ class PromotionController extends Controller
             $callback = function() use ($promotions) {
                 $handle = fopen('php://output', 'w');
                 
-                // Add CSV headers
                 fputcsv($handle, [
                     'ID',
                     'Name',
@@ -640,7 +716,6 @@ class PromotionController extends Controller
                     'Created At'
                 ]);
 
-                // Add data rows
                 foreach ($promotions as $promotion) {
                     fputcsv($handle, [
                         $promotion->id,
@@ -688,7 +763,6 @@ class PromotionController extends Controller
             foreach ($request->promotion_ids as $id) {
                 $promotion = Promotion::find($id);
                 if ($promotion) {
-                    // Delete banner if exists
                     if ($promotion->banner && Storage::disk('public')->exists($promotion->banner)) {
                         Storage::disk('public')->delete($promotion->banner);
                     }

@@ -516,7 +516,7 @@
                     <i class="ri-archive-line"></i>
                     Catalog
                 </a>
-                <a href="{{ route('admin.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                     <i class="ri-price-tag-3-line"></i>
                     Promotions
                 </a>
@@ -599,7 +599,7 @@
                     <p class="help-desc">Read detailed guides and API documentation</p>
                 </a>
 
-                <a href="#" class="help-card" onclick="alert('Support tickets feature coming soon!')">
+                <a href="{{ route('admin.support-tickets') }}" class="help-card">
                     <div class="help-icon bg-green-light">
                         <i class="ri-ticket-line"></i>
                     </div>
@@ -607,7 +607,7 @@
                     <p class="help-desc">Submit and track support requests</p>
                 </a>
 
-                <a href="#" class="help-card" onclick="alert('Video tutorials coming soon!')">
+                <a href="{{ route('admin.video-tutorials') }}" class="help-card">
                     <div class="help-icon bg-yellow-light">
                         <i class="ri-video-line"></i>
                     </div>

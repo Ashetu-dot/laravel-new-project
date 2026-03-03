@@ -825,7 +825,7 @@
 
             <div class="nav-group">
                 <div class="nav-label">MARKETING</div>
-                <a href="{{ route('admin.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                     <i class="ri-megaphone-line"></i> Promotions
                 </a>
                 <a href="{{ route('admin.coupons') }}" class="nav-item">
@@ -1086,7 +1086,7 @@
                     <!-- Getting Started Section -->
                     <section id="getting-started" class="doc-section">
                         <h2>Getting Started</h2>
-                        
+
                         <div class="doc-tip">
                             <i class="ri-lightbulb-line"></i>
                             <div class="doc-tip-content">
@@ -1115,7 +1115,7 @@
                     <!-- Dashboard Section -->
                     <section id="dashboard" class="doc-section">
                         <h2>Dashboard</h2>
-                        
+
                         <p>The dashboard provides a real-time overview of your marketplace performance.</p>
 
                         <h3>Key Metrics</h3>
@@ -1139,7 +1139,7 @@
                     <!-- Orders Section -->
                     <section id="orders" class="doc-section">
                         <h2>Orders Management</h2>
-                        
+
                         <div class="doc-warning">
                             <i class="ri-alert-line"></i>
                             <div class="doc-warning-content">
@@ -1516,7 +1516,7 @@
             // Highlight active section on scroll
             const sections = document.querySelectorAll('.doc-section');
             const navLinks = document.querySelectorAll('.doc-nav-link, .doc-nav-section a');
-            
+
             window.addEventListener('scroll', () => {
                 let current = '';
                 sections.forEach(section => {
@@ -1580,7 +1580,7 @@
                     if (text.includes(query.toLowerCase())) {
                         section.style.display = 'block';
                         found = true;
-                        
+
                         // Highlight matching text
                         const elements = section.querySelectorAll('p, li, h2, h3');
                         elements.forEach(el => {
@@ -1627,7 +1627,7 @@
                 e.preventDefault();
                 document.getElementById('searchInput').focus();
             }
-            
+
             // Esc to clear search
             if (e.key === 'Escape') {
                 document.getElementById('searchInput').value = '';

@@ -154,6 +154,7 @@ Route::post('/check-email-exists', [RegisterController::class, 'checkEmailExists
 
 // Test route - REMOVE IN PRODUCTION
 Route::get('/verify-email/{email}', [RegisterController::class, 'manuallyVerifyEmail']);
+
 // =========================================================================
 // AUTHENTICATED ROUTES (Common for all users)
 // =========================================================================
@@ -171,17 +172,17 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/{id}', [VendorCustomerController::class, 'update'])->name('profile.update');
     Route::delete('/profile/{id}', [VendorCustomerController::class, 'destroy'])->name('profile.destroy');
 
-    // Follow/Unfollow vendors
-    Route::post('/vendor/{id}/follow', [VendorCustomerController::class, 'follow'])->name('vendor.follow');
-    Route::delete('/vendor/{id}/unfollow', [VendorCustomerController::class, 'unfollow'])->name('vendor.unfollow');
+    // Follow/Unfollow vendors - RENAMED TO AVOID DUPLICATES
+    Route::post('/vendor/{id}/follow', [VendorCustomerController::class, 'follow'])->name('user.vendor.follow');
+    Route::delete('/vendor/{id}/unfollow', [VendorCustomerController::class, 'unfollow'])->name('user.vendor.unfollow');
 
     // AJAX endpoints for follow/unfollow
     Route::post('/vendors/{vendor}/follow', [VendorCustomerController::class, 'followVendor'])->name('vendor.follow.ajax');
     Route::delete('/vendors/{vendor}/unfollow', [VendorCustomerController::class, 'unfollowVendor'])->name('vendor.unfollow.ajax');
 
-    // Save/Unsave vendors
-    Route::post('/vendors/{vendor}/save', [VendorCustomerController::class, 'saveVendor'])->name('vendor.save');
-    Route::post('/vendors/{vendor}/unsave', [VendorCustomerController::class, 'unsaveVendor'])->name('vendor.unsave');
+    // Save/Unsave vendors - RENAMED TO AVOID DUPLICATES
+    Route::post('/vendors/{vendor}/save', [VendorCustomerController::class, 'saveVendor'])->name('vendor.save.customer');
+    Route::post('/vendors/{vendor}/unsave', [VendorCustomerController::class, 'unsaveVendor'])->name('vendor.unsave.customer');
 
     // Contact Vendor
     Route::post('/contact/vendor', [VendorCustomerController::class, 'sendContactMessage'])->name('contact.vendor');
@@ -257,18 +258,15 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     // ======== VENDOR PROFILE ========
     Route::get('/profile', [VendorCustomerController::class, 'vendorProfile'])->name('profile');
 
-
-
     // ======== ORDERS MANAGEMENT ========
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
     Route::post('/orders/bulk-update-status', [OrderController::class, 'bulkUpdateStatus'])->name('orders.bulk-update-status');
     Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export');
-    Route::get('/orders-list', [OrderController::class, 'getOrders'])->name('orders.list');
-    Route::get('/orders-stats', [OrderController::class, 'getStats'])->name('orders.stats');
+    Route::get('/orders-list', [OrderController::class, 'getOrders'])->name('orders.list.vendor');
+    Route::get('/orders-stats', [OrderController::class, 'getStats'])->name('orders.stats.vendor');
     Route::get('/orders/{id}/invoice', [OrderController::class, 'printInvoice'])->name('orders.invoice');
-
 
     // ======== PRODUCTS MANAGEMENT ========
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -279,8 +277,8 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
 
-    // Vendor products listing for public
-    Route::get('/{vendor}/products', [ProductController::class, 'vendorProducts'])->name('products');
+    // Vendor products listing for public - RENAMED
+    Route::get('/{vendor}/products', [ProductController::class, 'vendorProducts'])->name('vendor.products.list');
 
     // Product status updates
     Route::patch('/products/{id}/activate', [ProductController::class, 'activate'])->name('products.activate');
@@ -296,16 +294,18 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
     Route::get('/notifications/recent', [NotificationController::class, 'getRecent'])->name('notifications.recent');
 
-    // AJAX endpoints for products
-    Route::get('/products-list', [ProductController::class, 'getVendorProducts'])->name('products.list');
-    Route::get('/products-stats', [ProductController::class, 'getStats'])->name('products.stats');
+    // AJAX endpoints for products - RENAMED
+    Route::get('/products-list', [ProductController::class, 'getVendorProducts'])->name('products.list.vendor');
+    Route::get('/products-stats', [ProductController::class, 'getStats'])->name('products.stats.vendor');
 
     // ======== CATEGORIES MANAGEMENT ========
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
-    Route::get('/categories-list', [CategoryController::class, 'getCategories'])->name('categories.list');
+    Route::get('/categories-list', [CategoryController::class, 'getCategories'])->name('categories.list.vendor');
+
+
 
     // ======== ANALYTICS ========
     Route::get('/sales-report', [VendorController::class, 'salesReport'])->name('sales-report');
@@ -314,7 +314,6 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     // Store views
     Route::get('/store-views', [VendorController::class, 'storeViews'])->name('store-views');
     Route::get('/export-store-views', [VendorController::class, 'exportStoreViews'])->name('export-store-views');
-
 
     // ======== REVIEWS MANAGEMENT ========
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
@@ -351,11 +350,11 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     Route::post('/messages/send', [VendorController::class, 'sendMessage'])->name('messages.send');
     Route::post('/messages/{id}/read', [VendorController::class, 'markMessageAsRead'])->name('messages.read');
 
-    // Saved vendors
+    // Saved vendors - RENAMED
     Route::get('/saved', [VendorController::class, 'getSavedVendors'])->name('saved');
-    Route::post('/save/{vendor}', [VendorController::class, 'saveVendor'])->name('save');
-    Route::delete('/unsave/{vendor}', [VendorController::class, 'unsaveVendor'])->name('unsave');
-    Route::get('/check-saved/{vendor}', [VendorController::class, 'checkSavedVendor'])->name('check-saved');
+    Route::post('/save/{vendor}', [VendorController::class, 'saveVendor'])->name('vendor.save.vendor');
+    Route::delete('/unsave/{vendor}', [VendorController::class, 'unsaveVendor'])->name('vendor.unsave.vendor');
+    Route::get('/check-saved/{vendor}', [VendorController::class, 'checkSavedVendor'])->name('vendor.check-saved');
 
     // Stats
     Route::get('/stats', [VendorController::class, 'getVendorStats'])->name('stats');
@@ -390,8 +389,6 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::post('/wishlist/move-to-cart/{product}', [WishlistController::class, 'moveToCart'])->name('wishlist.move-to-cart');
     Route::post('/wishlist/bulk-remove', [WishlistController::class, 'bulkRemove'])->name('wishlist.bulk-remove');
 
-
-
     // ======== FOLLOWING MANAGEMENT ========
     Route::get('/following', [VendorCustomerController::class, 'following'])->name('following');
 
@@ -417,7 +414,7 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::put('/orders/{id}/cancel', [OrderController::class, 'customerOrderCancel'])->name('orders.cancel');
     Route::get('/orders/{id}/track', [OrderController::class, 'customerOrderTrack'])->name('orders.track');
     Route::post('/orders/{id}/reorder', [OrderController::class, 'customerReorder'])->name('orders.reorder');
-    Route::get('/orders-stats', [OrderController::class, 'getCustomerOrderStats'])->name('orders.stats');
+    Route::get('/orders-stats', [OrderController::class, 'getCustomerOrderStats'])->name('orders.stats.customer');
 
     // ======== CUSTOMER PROFILE ========
     Route::get('/profile', [VendorCustomerController::class, 'show'])->name('profile');
@@ -448,8 +445,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/login', [AdminController::class, 'store'])->name('login.submit');
     });
 
-
-
     // Protected admin routes
     Route::middleware(['auth', 'role:admin'])->group(function () {
 
@@ -460,30 +455,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
         Route::get('/search', [AdminController::class, 'search'])->name('search');
 
-
-//Route::get('/admin/test-admins', [App\Http\Controllers\Admin\AdminController::class, 'testAdmins']);
-
-
-
-        // ======== ADMIN MANAGEMENT (ADD THIS SECTION) ========
-           // Route::get('/admins', [App\Http\Controllers\Admin\AdminController::class, 'admins'])->name('admins.list');
-        Route::get('/admins', [AdminController::class, 'admins'])->name('admins.list');
+        // ======== ADMIN MANAGEMENT ========
+        // Use existing admin management methods on AdminController
+        Route::get('/admins', [AdminController::class, 'list'])->name('admins.list');
         Route::get('/admins/create', [AdminController::class, 'createAdmin'])->name('admins.create');
         Route::post('/admins', [AdminController::class, 'storeAdmin'])->name('admins.store');
-        Route::get('/admins/{id}', [AdminController::class, 'showAdmin'])->name('admins.show');
-        Route::get('/admins/{id}/edit', [AdminController::class, 'editAdmin'])->name('admins.edit');
-        Route::put('/admins/{id}', [AdminController::class, 'updateAdmin'])->name('admins.update');
-        Route::delete('/admins/{id}', [AdminController::class, 'deleteAdmin'])->name('admins.delete');
-        Route::post('/admins/{id}/toggle-status', [AdminController::class, 'toggleAdminStatus'])->name('admins.toggle-status');
+        Route::get('/admins/{id}', [AdminController::class, 'show'])->name('admins.show');
+        Route::get('/admins/{id}/edit', [AdminController::class, 'edit'])->name('admins.edit');
+        Route::put('/admins/{id}', [AdminController::class, 'update'])->name('admins.update');
+        Route::delete('/admins/{id}', [AdminController::class, 'destroy'])->name('admins.delete');
+        Route::post('/admins/{id}/toggle-status', [AdminController::class, 'changeStatus'])->name('admins.toggle-status');
 
-
-
-
-
-
-
-
-           // ======== ROLES & PERMISSIONS  ========
+        // ======== ROLES & PERMISSIONS ========
         Route::get('/roles', [AdminController::class, 'roles'])->name('roles');
         Route::get('/roles/create', [AdminController::class, 'createRole'])->name('roles.create');
         Route::post('/roles', [AdminController::class, 'storeRole'])->name('roles.store');
@@ -492,21 +475,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/roles/{id}', [AdminController::class, 'updateRole'])->name('roles.update');
         Route::delete('/roles/{id}', [AdminController::class, 'deleteRole'])->name('roles.delete');
 
-         // ======== USERS MANAGEMENT (ADD THIS SECTION) ========
+        // ======== USERS MANAGEMENT ========
         Route::get('/users', [AdminController::class, 'users'])->name('users');
         Route::get('/users/pending', [AdminController::class, 'pendingVendors'])->name('users.pending');
-
         Route::get('/users/{id}', [AdminController::class, 'showUser'])->name('users.show');
         Route::get('/users/{id}/edit', [AdminController::class, 'editUser'])->name('users.edit');
         Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('users.update');
-        Route::post('/users/{id}/toggle-status', [AdminController::class, 'toggleStatus'])->name('users.toggle-status');
+        Route::post('/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('users.toggle-status');
         Route::post('/users/{id}/toggle-verification', [AdminController::class, 'toggleVerification'])->name('users.toggle-verification');
         Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('users.delete');
         Route::post('/vendors/{id}/approve', [AdminController::class, 'approveVendor'])->name('vendors.approve');
         Route::post('/vendors/{id}/reject', [AdminController::class, 'rejectVendor'])->name('vendors.reject');
         Route::get('/users/export', [AdminController::class, 'exportUsers'])->name('users.export');
         Route::post('/users/bulk-action', [AdminController::class, 'bulkAction'])->name('users.bulk-action');
-        Route::post('/users/{id}/toggle-status', [AdminController::class, 'toggleUserStatus'])->name('users.toggle-status');
         Route::get('/users-stats', [AdminController::class, 'getUserStats'])->name('users.stats');
 
         // ======== ORDERS MANAGEMENT ========
@@ -514,7 +495,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/orders/{id}', [AdminController::class, 'showOrder'])->name('orders.show');
         Route::put('/orders/{id}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.status');
         Route::get('/orders/export', [AdminController::class, 'exportOrders'])->name('orders.export');
-        Route::get('/orders-stats', [AdminController::class, 'getOrderStats'])->name('orders.stats');
+        Route::get('/orders-stats', [AdminController::class, 'getOrderStats'])->name('orders.stats.admin');
 
         // ======== CUSTOMERS MANAGEMENT ========
         Route::get('/customers', [AdminController::class, 'customers'])->name('customers');
@@ -522,6 +503,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/customers/{id}/edit', [AdminController::class, 'editCustomer'])->name('customers.edit');
         Route::put('/customers/{id}', [AdminController::class, 'updateCustomer'])->name('customers.update');
         Route::delete('/customers/{id}', [AdminController::class, 'deleteCustomer'])->name('customers.delete');
+
+        Route::post('/customers/{id}/toggle-status', [AdminController::class, 'toggleCustomerStatus'])->name('customers.toggle-status'); // ✅ FIXED: using toggleCustomerStatus
+
         Route::get('/customers-stats', [AdminController::class, 'getCustomerStats'])->name('customers.stats');
 
         // ======== VENDORS MANAGEMENT ========
@@ -534,70 +518,82 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/vendors/{id}/status', [AdminController::class, 'changeVendorStatus'])->name('vendors.status');
         Route::get('/vendors-stats', [AdminController::class, 'getVendorStats'])->name('vendors.stats');
 
-         // ======== PRODUCTS MANAGEMENT (ADD THIS IF MISSING) ========
+        // ======== PRODUCTS MANAGEMENT ========
         Route::get('/products', [AdminController::class, 'products'])->name('products');
-        Route::get('/products/create', [AdminController::class, 'createProduct'])->name('products.create'); // ADD THIS LINE
-        Route::post('/products', [AdminController::class, 'storeProduct'])->name('products.store'); // ADD THIS LINE
+        Route::get('/products/create', [AdminController::class, 'createProduct'])->name('products.create');
+        Route::post('/products', [AdminController::class, 'storeProduct'])->name('products.store');
         Route::get('/products/{id}', [AdminController::class, 'showProduct'])->name('products.show');
         Route::get('/products/{id}/edit', [AdminController::class, 'editProduct'])->name('products.edit');
         Route::put('/products/{id}', [AdminController::class, 'updateProduct'])->name('products.update');
         Route::delete('/products/{id}', [AdminController::class, 'deleteProduct'])->name('products.delete');
         Route::post('/products/{id}/toggle-status', [AdminController::class, 'toggleProductStatus'])->name('products.toggle-status');
-        Route::get('/products-stats', [AdminController::class, 'getProductStats'])->name('products.stats');
+        Route::get('/products-stats', [AdminController::class, 'getProductStats'])->name('products.stats.admin');
 
         // ======== CATALOG MANAGEMENT ========
         Route::get('/catalog', [AdminController::class, 'catalog'])->name('catalog');
         Route::get('/catalog/products', [AdminController::class, 'products'])->name('catalog.products');
-
-        Route::get('/categories', [AdminController::class, 'categories'])->name('categories');
-
-        Route::get('/catalog/categories', [AdminController::class, 'categories'])->name('catalog.categories');
-        Route::get('/categories/create', [AdminController::class, 'createCategory'])->name('categories.create');
-
-        Route::post('/categories', [AdminController::class, 'storeCategory'])->name('categories.store');
-
-        Route::get('/categories/{id}', [AdminController::class, 'showCategory'])->name('categories.show');
-
-        Route::get('/categories/{id}/edit', [AdminController::class, 'editCategory'])->name('categories.edit');
-
-        Route::put('/categories/{id}', [AdminController::class, 'updateCategory'])->name('categories.update');
-
-        Route::delete('/categories/{id}', [AdminController::class, 'deleteCategory'])->name('categories.destroy');
-
+        Route::get('/catalog/products/create', [AdminController::class, 'createProduct'])->name('catalog.products.create');
+        Route::post('/catalog/products', [AdminController::class, 'storeProduct'])->name('catalog.products.store');
+        Route::get('/catalog/products/{id}', [AdminController::class, 'showProduct'])->name('catalog.products.show');
+        Route::get('/catalog/products/{id}/edit', [AdminController::class, 'editProduct'])->name('catalog.products.edit');
+        Route::put('/catalog/products/{id}', [AdminController::class, 'updateProduct'])->name('catalog.products.update');
+        Route::delete('/catalog/products/{id}', [AdminController::class, 'deleteProduct'])->name('catalog.products.delete');
+        Route::post('/catalog/products/{id}/toggle-status', [AdminController::class, 'toggleProductStatus'])->name('catalog.products.toggle-status');
         Route::get('/catalog/products/export', [AdminController::class, 'exportProducts'])->name('catalog.products.export');
 
-       
+        // Categories routes (under catalog)
+        Route::get('/catalog/categories', [AdminController::class, 'categories'])->name('catalog.categories');
+        Route::get('/catalog/categories/create', [AdminController::class, 'createCategory'])->name('catalog.categories.create');
+        Route::post('/catalog/categories', [AdminController::class, 'storeCategory'])->name('catalog.categories.store');
+        Route::get('/catalog/categories/{id}', [AdminController::class, 'showCategory'])->name('catalog.categories.show');
+        Route::get('/catalog/categories/{id}/edit', [AdminController::class, 'editCategory'])->name('catalog.categories.edit');
+        Route::put('/catalog/categories/{id}', [AdminController::class, 'updateCategory'])->name('catalog.categories.update');
+        Route::delete('/catalog/categories/{id}', [AdminController::class, 'deleteCategory'])->name('catalog.categories.destroy');
+        Route::post('/catalog/categories/{id}/toggle-status', [AdminController::class, 'toggleCategoryStatus'])->name('catalog.categories.toggle-status');
+        Route::get('/catalog/categories/export', [AdminController::class, 'exportCategories'])->name('catalog.categories.export');
 
+        // ======== INVENTORY MANAGEMENT ========
+        Route::get('/inventory', [AdminController::class, 'inventory'])->name('inventory');
+        Route::get('/inventory/low-stock', [AdminController::class, 'lowStock'])->name('inventory.low-stock');
+        Route::post('/inventory/{product}/restock', [AdminController::class, 'restock'])->name('inventory.restock');
+        Route::get('/inventory/export', [AdminController::class, 'exportInventory'])->name('inventory.export');
+        Route::get('/inventory/reorder/export', [AdminController::class, 'exportReorderList'])->name('inventory.reorder.export');
 
         // ======== PROMOTIONS MANAGEMENT ========
-        Route::get('/promotions', [AdminController::class, 'promotions'])->name('promotions');
-        Route::get('/promotions/create', [AdminController::class, 'createPromotion'])->name('promotions.create');
-        Route::post('/promotions', [AdminController::class, 'storePromotion'])->name('promotions.store');
-        Route::get('/promotions/{id}/edit', [AdminController::class, 'editPromotion'])->name('promotions.edit');
-        Route::put('/promotions/{id}', [AdminController::class, 'updatePromotion'])->name('promotions.update');
-        //Route::delete('/promotions/{id}', [AdminController::class, 'deletePromotion'])->name('promotions.delete');
-        Route::delete('/promotions/{id}', [AdminController::class, 'deletePromotion'])->name('promotions.destroy'); // This is the missing route
+        Route::prefix('promotions')->name('promotions.')->group(function () {
+            Route::get('/', [PromotionController::class, 'index'])->name('promotions');
+            Route::get('/create', [PromotionController::class, 'create'])->name('create');
+            Route::post('/store', [PromotionController::class, 'store'])->name('store');
+            Route::get('/{id}', [PromotionController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [PromotionController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [PromotionController::class, 'update'])->name('update');
+            Route::delete('/{id}', [PromotionController::class, 'destroy'])->name('destroy');
 
+            // AJAX routes - RENAMED
+            Route::get('/products/list', [PromotionController::class, 'getProductsList'])->name('products.list.promotions');
+            Route::post('/{id}/toggle-status', [PromotionController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/{id}/duplicate', [PromotionController::class, 'duplicate'])->name('duplicate');
 
+            // Bulk actions
+            Route::post('/bulk/delete', [PromotionController::class, 'bulkDelete'])->name('bulk.delete');
+            Route::post('/bulk/activate', [PromotionController::class, 'bulkActivate'])->name('bulk.activate');
+            Route::post('/bulk/deactivate', [PromotionController::class, 'bulkDeactivate'])->name('bulk.deactivate');
 
-        Route::get('/products/list', [ProductController::class, 'getProductsList'])->name('products.list');
+            // Export
+            Route::get('/export/csv', [PromotionController::class, 'export'])->name('export');
+        });
 
         // ======== COUPONS MANAGEMENT ========
         Route::get('/coupons', [CouponController::class, 'adminIndex'])->name('coupons');
         Route::get('/coupons/create', [CouponController::class, 'create'])->name('coupons.create');
         Route::post('/coupons', [CouponController::class, 'store'])->name('coupons.store');
-
         Route::get('/coupons/{id}/edit', [CouponController::class, 'edit'])->name('coupons.edit');
         Route::put('/coupons/{id}', [CouponController::class, 'update'])->name('coupons.update');
-
         Route::post('/coupons/generate', [CouponController::class, 'generate'])->name('coupons.generate');
         Route::delete('/coupons/{id}', [CouponController::class, 'adminDelete'])->name('coupons.delete');
         Route::post('/coupons/{id}/toggle', [CouponController::class, 'toggleStatus'])->name('coupons.toggle');
         Route::post('/coupons/bulk-delete', [CouponController::class, 'bulkDelete'])->name('coupons.bulk-delete');
         Route::get('/coupons/export', [CouponController::class, 'export'])->name('coupons.export');
-
-
-
 
         // ======== ADMIN PROFILE & SETTINGS ========
         Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
@@ -617,12 +613,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
 
         // ======== ADMIN MESSAGES ========
-        Route::get('/messages', [MessageController::class, 'index'])->name('messages');
-        Route::get('/messages/{id}', [MessageController::class, 'show'])->name('messages.show');
-        Route::post('/messages/{id}/reply', [MessageController::class, 'reply'])->name('messages.reply');
-        Route::get('/messages/conversation/{userId}', [MessageController::class, 'getConversation'])->name('messages.conversation');
+        // Route::get('/messages', [MessageController::class, 'index'])->name('messages');
+        // Route::get('/messages/{id}', [MessageController::class, 'show'])->name('messages.show');
+        // Route::post('/messages/{id}/reply', [MessageController::class, 'reply'])->name('messages.reply');
+        // Route::get('/messages/conversation/{userId}', [MessageController::class, 'getConversation'])->name('messages.conversation');
 
-        // ======== HELP & SUPPORT ========
+
+        Route::get('/messages', [App\Http\Controllers\MessageController::class, 'index'])->name('messages');
+        Route::get('/messages/create', [App\Http\Controllers\MessageController::class, 'create'])->name('messages.create');
+        Route::post('/messages', [App\Http\Controllers\MessageController::class, 'store'])->name('messages.store');
+        Route::get('/messages/{id}', [App\Http\Controllers\MessageController::class, 'show'])->name('messages.show');
+        Route::post('/messages/send', [App\Http\Controllers\MessageController::class, 'send'])->name('messages.send');
+        Route::get('/messages/fetch/{userId}', [App\Http\Controllers\MessageController::class, 'fetchMessages'])->name('messages.fetch');
+        Route::post('/messages/mark-read/{id}', [App\Http\Controllers\MessageController::class, 'markAsRead'])->name('messages.mark-read');
+        Route::delete('/messages/{id}', [App\Http\Controllers\MessageController::class, 'destroy'])->name('messages.destroy');
+
+        
+          // Add support tickets routes
+        Route::get('/support-tickets', [AdminController::class, 'supportTickets'])->name('support-tickets');
+        Route::get('/support-tickets/{id}', [AdminController::class, 'showSupportTicket'])->name('support-tickets.show');
+        Route::post('/support-tickets/{id}/reply', [AdminController::class, 'replySupportTicket'])->name('support-tickets.reply');
+        Route::post('/support-tickets/{id}/status', [AdminController::class, 'updateSupportTicketStatus'])->name('support-tickets.status');
+   
+        // Video Tutorials
+   Route::get('/video-tutorials', [AdminController::class, 'videoTutorials'])->name('video-tutorials');
+   Route::get('/video-tutorials/{id}/details', [AdminController::class, 'getVideoDetails'])->name('video-tutorials.details');
+   Route::get('/video-tutorials/{id}/related', [AdminController::class, 'getRelatedVideos'])->name('video-tutorials.related');
+      
+   // ======== HELP & SUPPORT ========
         Route::get('/help', [AdminController::class, 'help'])->name('help');
         Route::get('/documentation', [AdminController::class, 'documentation'])->name('documentation');
         Route::get('/documentation/pdf', [AdminController::class, 'downloadDocumentationPDF'])->name('help.documentation.pdf');
@@ -680,8 +698,6 @@ Route::prefix('api')->name('api.')->group(function () {
         Route::get('/customer/wishlist', [WishlistController::class, 'apiIndex'])->name('customer.wishlist');
         Route::post('/customer/wishlist/add/{product}', [WishlistController::class, 'apiAdd'])->name('customer.wishlist.add');
         Route::delete('/customer/wishlist/remove/{product}', [WishlistController::class, 'apiRemove'])->name('customer.wishlist.remove');
-
-        // ADD THIS NEW ROUTE FOR BATCH CHECK
         Route::post('/customer/wishlist/check-batch', [WishlistController::class, 'apiCheckBatch'])->name('customer.wishlist.check-batch');
 
         // Cart API endpoints

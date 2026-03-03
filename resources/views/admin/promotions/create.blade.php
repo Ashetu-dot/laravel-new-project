@@ -836,14 +836,14 @@
                 <a href="{{ route('admin.products') }}" class="nav-item">
                     <i class="ri-shopping-cart-line"></i> Products
                 </a>
-                <a href="{{ route('admin.categories') }}" class="nav-item">
+                <a href="{{ route('admin.catalog.categories') }}" class="nav-item">
                     <i class="ri-price-tag-3-line"></i> Categories
                 </a>
             </div>
 
             <div class="nav-group">
                 <div class="nav-label">MARKETING</div>
-                <a href="{{ route('admin.promotions') }}" class="nav-item active">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item active">
                     <i class="ri-megaphone-line"></i> Promotions
                 </a>
                 <a href="{{ route('admin.coupons') }}" class="nav-item">
@@ -936,7 +936,7 @@
                     </h1>
                     <p>Create a new promotion to boost sales and engage customers</p>
                 </div>
-                <a href="{{ route('admin.promotions') }}" class="btn btn-secondary">
+                <a href="{{ route('admin.promotions.promotions') }}" class="btn btn-secondary">
                     <i class="ri-arrow-left-line"></i> Back to Promotions
                 </a>
             </div>
@@ -1349,7 +1349,7 @@
 
                     <!-- Form Actions -->
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ route('admin.promotions') }}'">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ route('admin.promotions.promotions') }}'">
                             <i class="ri-close-line"></i> Cancel
                         </button>
                         <button type="submit" class="btn btn-primary" id="submitBtn">

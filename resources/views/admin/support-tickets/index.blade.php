@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Vendora - Admin Management</title>
+    <title>Support Tickets - Admin Dashboard | Vendora</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
     <style>
         @font-face {
@@ -343,7 +343,7 @@
         /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             margin-bottom: 32px;
         }
@@ -369,6 +369,7 @@
             align-items: center;
             gap: 16px;
             transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid var(--border-color);
         }
 
         .stat-card:hover {
@@ -418,7 +419,7 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
             border: none;
             display: inline-flex;
             align-items: center;
@@ -455,6 +456,16 @@
 
         .btn-danger:hover {
             background-color: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--accent-green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
             transform: translateY(-2px);
         }
 
@@ -518,52 +529,70 @@
             background-color: rgba(184, 142, 63, 0.02);
         }
 
-        .admin-name {
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .admin-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-gold), #9c7832);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        .status-badge {
-            padding: 4px 10px;
+        /* Badges */
+        .badge {
+            padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 500;
             display: inline-block;
         }
 
-        .status-active { 
-            background-color: #d1fae5; 
-            color: #065f46; 
-        }
-        body.dark-mode .status-active {
-            background-color: rgba(16, 185, 129, 0.2);
-            color: #6ee7b7;
+        .badge-open {
+            background-color: var(--accent-blue);
+            color: white;
         }
 
-        .status-inactive { 
-            background-color: #fee2e2; 
-            color: #991b1b; 
-        }
-        body.dark-mode .status-inactive {
-            background-color: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
+        .badge-pending {
+            background-color: var(--accent-yellow);
+            color: white;
         }
 
+        .badge-resolved {
+            background-color: var(--accent-green);
+            color: white;
+        }
+
+        .badge-closed {
+            background-color: var(--text-secondary);
+            color: white;
+        }
+
+        .badge-low {
+            background-color: var(--accent-green);
+            color: white;
+        }
+
+        .badge-medium {
+            background-color: var(--accent-yellow);
+            color: white;
+        }
+
+        .badge-high {
+            background-color: var(--accent-red);
+            color: white;
+        }
+
+        .badge-urgent {
+            background-color: #7b1fa2;
+            color: white;
+        }
+
+        /* Priority indicators */
+        .priority-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .priority-low { background-color: var(--accent-green); }
+        .priority-medium { background-color: var(--accent-yellow); }
+        .priority-high { background-color: var(--accent-red); }
+        .priority-urgent { background-color: #7b1fa2; }
+
+        /* Action Buttons */
         .action-buttons {
             display: flex;
             gap: 8px;
@@ -605,6 +634,11 @@
         .action-btn.delete:hover {
             background-color: var(--accent-red);
             border-color: var(--accent-red);
+        }
+
+        .action-btn.reply:hover {
+            background-color: var(--accent-green);
+            border-color: var(--accent-green);
         }
 
         /* Pagination */
@@ -657,55 +691,60 @@
             pointer-events: none;
         }
 
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
+        /* Filters */
+        .filters-section {
             background-color: var(--card-bg);
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 24px;
+            margin-bottom: 24px;
             border: 1px solid var(--border-color);
         }
 
-        .empty-icon {
-            font-size: 64px;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-        }
-
-        .empty-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .empty-text {
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-        }
-
-        /* Logout Button */
-        .logout-btn {
-            background: none;
-            border: none;
-            color: var(--sidebar-text);
-            cursor: pointer;
-            font-size: 15px;
+        .filters-form {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .filter-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-select, .filter-input {
             width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 14px;
             transition: all 0.2s;
         }
 
-        .logout-btn:hover {
-            background-color: var(--sidebar-active-bg);
-            color: var(--accent-red);
+        .filter-select:focus, .filter-input:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(184, 142, 63, 0.1);
         }
 
-        /* Alerts */
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Alert Messages */
         .alert {
             padding: 16px;
             border-radius: 8px;
@@ -721,21 +760,72 @@
             border: 1px solid #10b981;
             color: #065f46;
         }
-        body.dark-mode .alert-success {
-            background-color: rgba(16, 185, 129, 0.2);
-            border-color: #10b981;
-            color: #6ee7b7;
-        }
 
         .alert-error {
             background-color: #fee2e2;
             border: 1px solid #ef4444;
             color: #b91c1c;
         }
+
+        .alert-warning {
+            background-color: #fffbeb;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+        }
+
+        .alert-info {
+            background-color: #dbeafe;
+            border: 1px solid #3b82f6;
+            color: #1e40af;
+        }
+
+        /* Dark mode alert overrides */
+        body.dark-mode .alert-success {
+            background-color: rgba(16, 185, 129, 0.2);
+            border-color: #10b981;
+            color: #6ee7b7;
+        }
+
         body.dark-mode .alert-error {
             background-color: rgba(239, 68, 68, 0.2);
             border-color: #ef4444;
             color: #fca5a5;
+        }
+
+        body.dark-mode .alert-warning {
+            background-color: rgba(245, 158, 11, 0.2);
+            border-color: #f59e0b;
+            color: #fcd34d;
+        }
+
+        body.dark-mode .alert-info {
+            background-color: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            color: #93c5fd;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .empty-text {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
         }
 
         /* Theme Toggle */
@@ -759,11 +849,33 @@
             border-color: var(--primary-gold);
         }
 
+        /* Logout Button */
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--sidebar-text);
+            cursor: pointer;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background-color: var(--sidebar-active-bg);
+            color: var(--accent-red);
+        }
+
+        /* Color Utilities */
         .bg-blue-light { background-color: #eff6ff; color: var(--accent-blue); }
         .bg-green-light { background-color: #ecfdf5; color: var(--accent-green); }
         .bg-yellow-light { background-color: #fffbeb; color: var(--accent-yellow); }
-        .bg-purple-light { background-color: #f5f3ff; color: var(--accent-purple); }
         .bg-red-light { background-color: #fee2e2; color: var(--accent-red); }
+        .bg-purple-light { background-color: #f5f3ff; color: var(--accent-purple); }
         .bg-gold-light { background-color: #fef3e7; color: var(--primary-gold); }
     </style>
 </head>
@@ -815,13 +927,16 @@
                     <i class="ri-settings-4-line"></i>
                     Settings
                 </a>
-                <a href="{{ route('admin.admins.list') }}" class="nav-item active">
+                <a href="{{ route('admin.admins.list') }}" class="nav-item">
                     <i class="ri-shield-user-line"></i>
                     Admins
                 </a>
-                <a href="{{ route('admin.roles') }}" class="nav-item">
-                    <i class="ri-shield-keyhole-line"></i>
-                    Roles
+                <a href="{{ route('admin.support-tickets') }}" class="nav-item active">
+                    <i class="ri-customer-service-line"></i>
+                    Support Tickets
+                    @if(isset($stats) && ($stats['open'] + $stats['pending']) > 0)
+                        <span class="badge-count" style="margin-left: auto; background-color: var(--accent-red); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">{{ $stats['open'] + $stats['pending'] }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('admin.help') }}" class="nav-item">
                     <i class="ri-question-line"></i>
@@ -847,11 +962,11 @@
 
         <div class="user-profile">
             <div class="avatar">
-                {{ substr(Auth::user()->name ?? 'AD', 0, 2) }}
+                {{ substr($user->name ?? 'AD', 0, 2) }}
             </div>
             <div class="user-info">
-                <h4>{{ Auth::user()->name ?? 'Admin User' }}</h4>
-                <p>{{ Auth::user()->role ?? 'Super Admin' }}</p>
+                <h4>{{ $user->name ?? 'Admin User' }}</h4>
+                <p>{{ $user->role ?? 'Super Admin' }}</p>
             </div>
         </div>
     </nav>
@@ -866,8 +981,8 @@
                 </div>
                 <div class="search-bar">
                     <i class="ri-search-line"></i>
-                    <form method="GET" action="{{ route('admin.admins.list') }}" style="width: 100%;">
-                        <input type="text" name="search" placeholder="Search admins by name, email or phone..." value="{{ request('search') }}">
+                    <form method="GET" action="{{ route('admin.support-tickets') }}" style="width: 100%;">
+                        <input type="text" name="search" placeholder="Search tickets by subject, ID or customer..." value="{{ request('search') }}">
                     </form>
                 </div>
             </div>
@@ -876,25 +991,16 @@
                 <button class="theme-toggle" id="themeToggle">
                     <i class="ri-moon-line"></i>
                 </button>
-                <a href="{{ route('admin.help') }}" class="icon-btn">
-                    <i class="ri-question-line"></i>
-                </a>
                 <a href="{{ route('admin.notifications') }}" class="icon-btn">
                     <i class="ri-notification-3-line"></i>
-                    @php
-                        $unreadCount = $unreadNotificationsCount ?? 0;
-                    @endphp
-                    @if($unreadCount > 0)
-                        <span class="badge-count">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+                    @if($unreadNotificationsCount > 0)
+                        <span class="badge-count">{{ $unreadNotificationsCount > 9 ? '9+' : $unreadNotificationsCount }}</span>
                     @endif
                 </a>
                 <a href="{{ route('admin.messages') }}" class="icon-btn">
                     <i class="ri-mail-line"></i>
-                    @php
-                        $messageCount = $unreadMessagesCount ?? 0;
-                    @endphp
-                    @if($messageCount > 0)
-                        <span class="badge-count">{{ $messageCount > 9 ? '9+' : $messageCount }}</span>
+                    @if($unreadMessagesCount > 0)
+                        <span class="badge-count">{{ $unreadMessagesCount > 9 ? '9+' : $unreadMessagesCount }}</span>
                     @endif
                 </a>
             </div>
@@ -905,13 +1011,8 @@
 
             <div class="page-header">
                 <div>
-                    <h1 class="page-title">Admin Management</h1>
-                    <p class="page-subtitle">Manage system administrators and their permissions</p>
-                </div>
-                <div>
-                    <a href="{{ route('admin.admins.create') }}" class="btn btn-primary">
-                        <i class="ri-add-line"></i> Add New Admin
-                    </a>
+                    <h1 class="page-title">Support Tickets</h1>
+                    <p class="page-subtitle">Manage customer support requests and inquiries</p>
                 </div>
             </div>
 
@@ -929,139 +1030,210 @@
                 </div>
             @endif
 
-            <!-- Stats Cards - Using $stats from controller -->
+            @if(session('warning'))
+                <div class="alert alert-warning">
+                    <i class="ri-alert-line"></i>
+                    {{ session('warning') }}
+                </div>
+            @endif
+
+            @if(session('info'))
+                <div class="alert alert-info">
+                    <i class="ri-information-line"></i>
+                    {{ session('info') }}
+                </div>
+            @endif
+
+            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon bg-blue-light">
-                        <i class="ri-shield-user-line"></i>
+                        <i class="ri-customer-service-line"></i>
                     </div>
                     <div class="stat-info">
-                        <div class="stat-label">Total Admins</div>
-                        <div class="stat-number">{{ $stats['total'] ?? 0 }}</div>
+                        <div class="stat-label">Total Tickets</div>
+                        <div class="stat-number">{{ $stats['open'] + $stats['pending'] + $stats['resolved'] + $stats['closed'] ?? 0 }}</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon bg-yellow-light">
+                        <i class="ri-question-answer-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-label">Open</div>
+                        <div class="stat-number">{{ $stats['open'] ?? 0 }}</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon bg-orange-light" style="background-color: #fff3e0; color: #f97316;">
+                        <i class="ri-time-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-number">{{ $stats['pending'] ?? 0 }}</div>
                     </div>
                 </div>
 
                 <div class="stat-card">
                     <div class="stat-icon bg-green-light">
-                        <i class="ri-user-star-line"></i>
+                        <i class="ri-check-double-line"></i>
                     </div>
                     <div class="stat-info">
-                        <div class="stat-label">Active</div>
-                        <div class="stat-number">{{ $stats['active'] ?? 0 }}</div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon bg-red-light">
-                        <i class="ri-user-unfollow-line"></i>
-                    </div>
-                    <div class="stat-info">
-                        <div class="stat-label">Inactive</div>
-                        <div class="stat-number">{{ $stats['inactive'] ?? 0 }}</div>
+                        <div class="stat-label">Resolved</div>
+                        <div class="stat-number">{{ $stats['resolved'] ?? 0 }}</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Filter Bar -->
-            <div class="action-bar">
-                <div>
-                    <span>Filter by status: </span>
-                    <a href="{{ route('admin.admins.list') }}" class="btn btn-secondary btn-sm {{ !request('status') ? 'active' : '' }}">All</a>
-                    <a href="{{ route('admin.admins.list', ['status' => 'active']) }}" class="btn btn-secondary btn-sm {{ request('status') == 'active' ? 'active' : '' }}">Active</a>
-                    <a href="{{ route('admin.admins.list', ['status' => 'inactive']) }}" class="btn btn-secondary btn-sm {{ request('status') == 'inactive' ? 'active' : '' }}">Inactive</a>
-                </div>
-                <div>
-                    <span class="text-secondary">Total: {{ $admins->total() ?? 0 }} admins</span>
-                </div>
+            <!-- Filters -->
+            <div class="filters-section">
+                <form method="GET" action="{{ route('admin.support-tickets') }}" class="filters-form">
+                    <div class="filter-group">
+                        <label class="filter-label">Status</label>
+                        <select name="status" class="filter-select">
+                            <option value="all" {{ $status == 'all' ? 'selected' : '' }}>All Statuses</option>
+                            <option value="open" {{ $status == 'open' ? 'selected' : '' }}>Open</option>
+                            <option value="pending" {{ $status == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="resolved" {{ $status == 'resolved' ? 'selected' : '' }}>Resolved</option>
+                            <option value="closed" {{ $status == 'closed' ? 'selected' : '' }}>Closed</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Priority</label>
+                        <select name="priority" class="filter-select">
+                            <option value="all">All Priorities</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label">Search</label>
+                        <input type="text" name="search" class="filter-input" placeholder="Search tickets..." value="{{ request('search') }}">
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ri-filter-line"></i> Apply Filters
+                        </button>
+                        <a href="{{ route('admin.support-tickets') }}" class="btn btn-secondary">
+                            <i class="ri-refresh-line"></i> Clear
+                        </a>
+                    </div>
+                </form>
             </div>
 
-            <!-- Admins Table -->
+            <!-- Tickets Table -->
             <div class="table-container">
                 <div class="table-header">
-                    <h3 class="table-title">Administrators List</h3>
-                    <span>Showing {{ $admins->firstItem() ?? 0 }} - {{ $admins->lastItem() ?? 0 }} of {{ $admins->total() ?? 0 }} admins</span>
+                    <h3 class="table-title">Support Tickets List</h3>
+                    <span>Showing {{ $tickets->firstItem() ?? 0 }} - {{ $tickets->lastItem() ?? 0 }} of {{ $tickets->total() ?? 0 }} tickets</span>
                 </div>
 
                 <table>
                     <thead>
                         <tr>
-                            <th>Admin</th>
-                            <th>Email</th>
-                            <th>Role</th>
+                            <th>Ticket #</th>
+                            <th>Customer</th>
+                            <th>Subject</th>
+                            <th>Priority</th>
                             <th>Status</th>
-                            <th>Last Login</th>
-                            <th>Joined</th>
+                            <th>Created</th>
+                            <th>Last Updated</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($admins as $admin)
+                        @forelse($tickets as $ticket)
                         <tr>
                             <td>
-                                <div class="admin-name">
-                                    <div class="admin-avatar">
-                                        {{ strtoupper(substr($admin->name, 0, 2)) }}
+                                <span style="font-weight: 600; color: var(--primary-gold);">{{ $ticket->ticket_number }}</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-gold), #9c7832); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px;">
+                                        {{ strtoupper(substr($ticket->user->name ?? 'U', 0, 2)) }}
                                     </div>
                                     <div>
-                                        <div style="font-weight: 600;">{{ $admin->name }}</div>
-                                        <div style="font-size: 12px; color: var(--text-secondary);">ID: #{{ $admin->id }}</div>
+                                        <div style="font-weight: 500;">{{ $ticket->user->name ?? 'Unknown User' }}</div>
+                                        <div style="font-size: 11px; color: var(--text-secondary);">{{ $ticket->user->email ?? 'N/A' }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ $admin->email }}</td>
                             <td>
-                                <span style="font-weight: 500;">{{ ucfirst($admin->role) }}</span>
+                                <div style="font-weight: 500;">{{ $ticket->subject }}</div>
+                                <div style="font-size: 12px; color: var(--text-secondary); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    {{ Str::limit($ticket->message, 50) }}
+                                </div>
                             </td>
                             <td>
-                                <span class="status-badge status-{{ $admin->is_active ? 'active' : 'inactive' }}">
-                                    {{ $admin->is_active ? 'Active' : 'Inactive' }}
-                                </span>
+                                @php
+                                    $priorityColors = [
+                                        'low' => ['bg' => '#ecfdf5', 'text' => '#10b981', 'dot' => 'priority-low'],
+                                        'medium' => ['bg' => '#fffbeb', 'text' => '#f59e0b', 'dot' => 'priority-medium'],
+                                        'high' => ['bg' => '#fee2e2', 'text' => '#ef4444', 'dot' => 'priority-high'],
+                                        'urgent' => ['bg' => '#f3e8ff', 'text' => '#7b1fa2', 'dot' => 'priority-urgent'],
+                                    ];
+                                    $priority = $ticket->priority ?? 'medium';
+                                    $color = $priorityColors[$priority] ?? $priorityColors['medium'];
+                                @endphp
+                                <span class="priority-dot {{ $color['dot'] }}"></span>
+                                <span style="color: {{ $color['text'] }}; font-weight: 500;">{{ ucfirst($priority) }}</span>
                             </td>
                             <td>
-                                @if($admin->last_login_at)
-                                    <div>{{ $admin->last_login_at->format('M d, Y') }}</div>
-                                    <div style="font-size: 12px; color: var(--text-secondary);">{{ $admin->last_login_at->diffForHumans() }}</div>
-                                @else
-                                    <span style="color: var(--text-secondary);">Never</span>
-                                @endif
+                                @php
+                                    $statusClasses = [
+                                        'open' => 'badge-open',
+                                        'pending' => 'badge-pending',
+                                        'resolved' => 'badge-resolved',
+                                        'closed' => 'badge-closed',
+                                    ];
+                                    $statusClass = $statusClasses[$ticket->status] ?? 'badge-pending';
+                                @endphp
+                                <span class="badge {{ $statusClass }}">{{ ucfirst($ticket->status) }}</span>
                             </td>
-                            <td>{{ $admin->created_at->format('M d, Y') }}</td>
+                            <td>
+                                <div>{{ $ticket->created_at->format('M d, Y') }}</div>
+                                <div style="font-size: 11px; color: var(--text-secondary);">{{ $ticket->created_at->diffForHumans() }}</div>
+                            </td>
+                            <td>
+                                <div>{{ $ticket->updated_at->format('M d, Y') }}</div>
+                                <div style="font-size: 11px; color: var(--text-secondary);">{{ $ticket->updated_at->diffForHumans() }}</div>
+                            </td>
                             <td>
                                 <div class="action-buttons">
-                                    <a href="{{ route('admin.admins.show', $admin->id) }}" class="action-btn view" title="View Admin">
+                                    <a href="{{ route('admin.support-tickets.show', $ticket->id) }}" class="action-btn view" title="View Ticket">
                                         <i class="ri-eye-line"></i>
                                     </a>
-                                    @if(Auth::id() !== $admin->id)
-                                        <a href="{{ route('admin.admins.edit', $admin->id) }}" class="action-btn edit" title="Edit Admin">
-                                            <i class="ri-edit-line"></i>
-                                        </a>
-                                        <form action="{{ route('admin.admins.delete', $admin->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this admin? This action cannot be undone.')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="action-btn delete" title="Delete Admin">
-                                                <i class="ri-delete-bin-line"></i>
-                                            </button>
-                                        </form>
-                                        <button class="action-btn" title="Change Status" onclick="changeStatus({{ $admin->id }}, {{ $admin->is_active ? 'false' : 'true' }})">
-                                            <i class="ri-toggle-line"></i>
+                                    <a href="{{ route('admin.support-tickets.show', $ticket->id) }}#reply" class="action-btn reply" title="Reply">
+                                        <i class="ri-reply-line"></i>
+                                    </a>
+                                    <form action="{{ route('admin.support-tickets.status', $ticket->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to mark this ticket as resolved?')">
+                                        @csrf
+                                        <input type="hidden" name="status" value="resolved">
+                                        <button type="submit" class="action-btn" title="Mark as Resolved">
+                                            <i class="ri-check-line"></i>
                                         </button>
-                                    @else
-                                        <span class="action-btn" style="opacity: 0.5; cursor: not-allowed;" title="Cannot modify your own account">
-                                            <i class="ri-lock-line"></i>
-                                        </span>
-                                    @endif
+                                    </form>
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" style="text-align: center; padding: 60px;">
-                                <i class="ri-shield-user-line" style="font-size: 48px; color: var(--text-secondary); margin-bottom: 16px; display: block;"></i>
-                                <h3 style="margin-bottom: 8px;">No admins found</h3>
-                                <p style="color: var(--text-secondary);">Get started by creating your first admin user</p>
-                                <a href="{{ route('admin.admins.create') }}" class="btn btn-primary" style="margin-top: 20px; display: inline-flex;">
-                                    <i class="ri-add-line"></i> Add New Admin
-                                </a>
+                            <td colspan="8" style="text-align: center; padding: 60px;">
+                                <i class="ri-customer-service-line" style="font-size: 64px; color: var(--text-secondary); margin-bottom: 16px; display: block; opacity: 0.5;"></i>
+                                <h3 style="margin-bottom: 8px;">No support tickets found</h3>
+                                <p style="color: var(--text-secondary);">There are no support tickets matching your criteria.</p>
+                                @if(request('search') || request('status') != 'all')
+                                    <a href="{{ route('admin.support-tickets') }}" class="btn btn-primary" style="margin-top: 20px; display: inline-flex;">
+                                        <i class="ri-refresh-line"></i> Clear Filters
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                         @endforelse
@@ -1071,25 +1243,25 @@
                 <!-- Pagination -->
                 <div class="pagination">
                     <div class="pagination-info">
-                        Showing {{ $admins->firstItem() ?? 0 }} to {{ $admins->lastItem() ?? 0 }} of {{ $admins->total() ?? 0 }} results
+                        Showing {{ $tickets->firstItem() ?? 0 }} to {{ $tickets->lastItem() ?? 0 }} of {{ $tickets->total() ?? 0 }} results
                     </div>
                     <div class="pagination-links">
-                        @if($admins->onFirstPage())
+                        @if($tickets->onFirstPage())
                             <span class="pagination-item disabled">Previous</span>
                         @else
-                            <a href="{{ $admins->previousPageUrl() }}" class="pagination-item">Previous</a>
+                            <a href="{{ $tickets->previousPageUrl() }}" class="pagination-item">Previous</a>
                         @endif
                         
-                        @foreach($admins->getUrlRange(1, $admins->lastPage()) as $page => $url)
-                            @if($page == $admins->currentPage())
+                        @foreach($tickets->getUrlRange(1, $tickets->lastPage()) as $page => $url)
+                            @if($page == $tickets->currentPage())
                                 <span class="pagination-item active">{{ $page }}</span>
                             @else
                                 <a href="{{ $url }}" class="pagination-item">{{ $page }}</a>
                             @endif
                         @endforeach
                         
-                        @if($admins->hasMorePages())
-                            <a href="{{ $admins->nextPageUrl() }}" class="pagination-item">Next</a>
+                        @if($tickets->hasMorePages())
+                            <a href="{{ $tickets->nextPageUrl() }}" class="pagination-item">Next</a>
                         @else
                             <span class="pagination-item disabled">Next</span>
                         @endif
@@ -1151,40 +1323,6 @@
                     localStorage.setItem('theme', 'light');
                 }
             });
-        }
-
-        // Change admin status
-        function changeStatus(adminId, newStatus) {
-            if (confirm('Are you sure you want to change this admin\'s status?')) {
-                fetch(`/admin/admins/${adminId}/status`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ status: newStatus })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Show success message
-                        const alertDiv = document.createElement('div');
-                        alertDiv.className = 'alert alert-success';
-                        alertDiv.innerHTML = '<i class="ri-checkbox-circle-line"></i> Admin status updated successfully.';
-                        document.querySelector('.dashboard-container').insertBefore(alertDiv, document.querySelector('.stats-grid'));
-                        
-                        setTimeout(() => {
-                            location.reload();
-                        }, 1500);
-                    } else {
-                        alert(data.message || 'Failed to update status');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while updating status.');
-                });
-            }
         }
 
         // Confirm logout

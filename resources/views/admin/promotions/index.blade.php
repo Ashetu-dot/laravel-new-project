@@ -164,6 +164,13 @@
             color: white;
             font-weight: 600;
             margin-right: 12px;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .user-info h4 {
@@ -269,6 +276,7 @@
             color: var(--text-secondary);
             transition: background 0.2s;
             position: relative;
+            text-decoration: none;
         }
 
         .icon-btn:hover {
@@ -305,6 +313,40 @@
         .page-subtitle {
             color: var(--text-secondary);
             font-size: 14px;
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid var(--accent-red);
         }
 
         /* Stats Cards */
@@ -381,7 +423,7 @@
             cursor: pointer;
             transition: all 0.2s;
             border: none;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
             text-decoration: none;
@@ -403,8 +445,8 @@
         }
 
         .btn-secondary:hover {
-            border-color: var(--text-dark);
-            color: var(--text-dark);
+            border-color: var(--primary-gold);
+            color: var(--primary-gold);
         }
 
         .filter-tabs {
@@ -501,6 +543,8 @@
         
         .type-fixed { background-color: #dbeafe; color: #1e40af; }
         .type-percentage { background-color: #fef3c7; color: #92400e; }
+        .type-bogo { background-color: #f3e8ff; color: #6b21a8; }
+        .type-free_shipping { background-color: #d1fae5; color: #065f46; }
 
         .status-badge {
             padding: 4px 10px;
@@ -637,7 +681,7 @@
                     <i class="ri-archive-line"></i>
                     Catalog
                 </a>
-                <a href="{{ route('admin.promotions') }}" class="nav-item active">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item active">
                     <i class="ri-price-tag-3-line"></i>
                     Promotions
                 </a>
@@ -665,11 +709,15 @@
 
         <div class="user-profile">
             <div class="avatar">
-                {{ substr(Auth::user()->name ?? 'AD', 0, 2) }}
+                @if(Auth::user()->avatar)
+                    <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
+                @else
+                    {{ strtoupper(substr(Auth::user()->name ?? 'AD', 0, 2)) }}
+                @endif
             </div>
             <div class="user-info">
                 <h4>{{ Auth::user()->name ?? 'Admin User' }}</h4>
-                <p>{{ Auth::user()->role ?? 'Super Admin' }}</p>
+                <p>{{ ucfirst(Auth::user()->role ?? 'administrator') }}</p>
             </div>
         </div>
     </nav>
@@ -684,7 +732,9 @@
                 </div>
                 <div class="search-bar">
                     <i class="ri-search-line"></i>
-                    <input type="text" placeholder="Search promotions...">
+                    <form action="{{ route('admin.promotions.promotions') }}" method="GET" style="width: 100%; display: flex;">
+                        <input type="text" name="search" placeholder="Search promotions..." value="{{ request('search') }}">
+                    </form>
                 </div>
             </div>
             
@@ -694,6 +744,9 @@
                 </a>
                 <a href="{{ route('admin.notifications') }}" class="icon-btn">
                     <i class="ri-notification-3-line"></i>
+                    @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
+                        <span class="badge-dot"></span>
+                    @endif
                 </a>
             </div>
         </header>
@@ -701,6 +754,21 @@
         <!-- Dashboard Content -->
         <div class="dashboard-container">
             
+            <!-- Alert Messages -->
+            @if(session('success'))
+                <div class="alert alert-success">
+                    <i class="ri-checkbox-circle-line"></i>
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-error">
+                    <i class="ri-error-warning-line"></i>
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <div class="page-header">
                 <div>
                     <h1 class="page-title">Promotions Management</h1>
@@ -729,7 +797,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-label">Active</div>
-                        <div class="stat-number">{{ number_format($promotions->where('is_active', true)->where('start_date', '<=', now())->where('end_date', '>=', now())->count() ?? 0) }}</div>
+                        <div class="stat-number">{{ number_format($activeCount ?? 0) }}</div>
                     </div>
                 </div>
                 
@@ -739,7 +807,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-label">Upcoming</div>
-                        <div class="stat-number">{{ number_format($promotions->where('start_date', '>', now())->count() ?? 0) }}</div>
+                        <div class="stat-number">{{ number_format($upcomingCount ?? 0) }}</div>
                     </div>
                 </div>
                 
@@ -749,7 +817,7 @@
                     </div>
                     <div class="stat-info">
                         <div class="stat-label">Expired</div>
-                        <div class="stat-number">{{ number_format($promotions->where('end_date', '<', now())->count() ?? 0) }}</div>
+                        <div class="stat-number">{{ number_format($expiredCount ?? 0) }}</div>
                     </div>
                 </div>
             </div>
@@ -763,10 +831,10 @@
                 </div>
                 
                 <div class="filter-tabs">
-                    <a href="{{ route('admin.promotions') }}" class="filter-tab {{ !request('status') ? 'active' : '' }}">All</a>
-                    <a href="{{ route('admin.promotions', ['status' => 'active']) }}" class="filter-tab {{ request('status') == 'active' ? 'active' : '' }}">Active</a>
-                    <a href="{{ route('admin.promotions', ['status' => 'upcoming']) }}" class="filter-tab {{ request('status') == 'upcoming' ? 'active' : '' }}">Upcoming</a>
-                    <a href="{{ route('admin.promotions', ['status' => 'expired']) }}" class="filter-tab {{ request('status') == 'expired' ? 'active' : '' }}">Expired</a>
+                    <a href="{{ route('admin.promotions.promotions') }}" class="filter-tab {{ !request('status') ? 'active' : '' }}">All</a>
+                    <a href="{{ route('admin.promotions.promotions', ['status' => 'active']) }}" class="filter-tab {{ request('status') == 'active' ? 'active' : '' }}">Active</a>
+                    <a href="{{ route('admin.promotions.promotions', ['status' => 'upcoming']) }}" class="filter-tab {{ request('status') == 'upcoming' ? 'active' : '' }}">Upcoming</a>
+                    <a href="{{ route('admin.promotions.promotions', ['status' => 'expired']) }}" class="filter-tab {{ request('status') == 'expired' ? 'active' : '' }}">Expired</a>
                 </div>
             </div>
 
@@ -806,14 +874,28 @@
                             </td>
                             <td>
                                 <span class="promotion-type type-{{ $promotion->type }}">
-                                    {{ $promotion->type == 'fixed' ? 'Fixed' : 'Percentage' }}
+                                    @if($promotion->type == 'fixed')
+                                        Fixed
+                                    @elseif($promotion->type == 'percentage')
+                                        Percentage
+                                    @elseif($promotion->type == 'bogo')
+                                        BOGO
+                                    @elseif($promotion->type == 'free_shipping')
+                                        Free Shipping
+                                    @else
+                                        {{ ucfirst($promotion->type) }}
+                                    @endif
                                 </span>
                             </td>
                             <td>
                                 @if($promotion->type == 'fixed')
-                                    ${{ number_format($promotion->value, 2) }}
-                                @else
+                                    ETB {{ number_format($promotion->value, 2) }}
+                                @elseif($promotion->type == 'percentage')
                                     {{ $promotion->value }}%
+                                @elseif($promotion->type == 'free_shipping')
+                                    Free
+                                @else
+                                    -
                                 @endif
                             </td>
                             <td>
@@ -821,7 +903,7 @@
                                 <div style="font-size: 12px; color: var(--text-secondary);">to {{ $promotion->end_date->format('M d, Y') }}</div>
                             </td>
                             <td>
-                                <div>{{ $promotion->used_count ?? 0 }} / {{ $promotion->usage_limit ?? '∞' }}</div>
+                                <div>{{ $promotion->used_count ?? 0 }} / {{ $promotion->total_usage_limit ?? '∞' }}</div>
                             </td>
                             <td>
                                 <span class="status-badge status-{{ $statusClass }}">
@@ -830,6 +912,9 @@
                             </td>
                             <td>
                                 <div class="action-buttons">
+                                    <a href="{{ route('admin.promotions.show', $promotion->id) }}" class="action-btn" title="View Promotion">
+                                        <i class="ri-eye-line"></i>
+                                    </a>
                                     <a href="{{ route('admin.promotions.edit', $promotion->id) }}" class="action-btn" title="Edit Promotion">
                                         <i class="ri-edit-line"></i>
                                     </a>
@@ -859,14 +944,19 @@
                 </table>
 
                 <!-- Pagination -->
-                <div class="pagination">
-                    {{ $promotions->links() }}
-                </div>
+                @if(method_exists($promotions, 'links'))
+                    <div class="pagination">
+                        {{ $promotions->appends(request()->query())->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </main>
 
     <script>
+        // CSRF Token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
         // Mobile menu toggle
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
@@ -896,6 +986,15 @@
                 }
             });
         });
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
     </script>
 
 </body>

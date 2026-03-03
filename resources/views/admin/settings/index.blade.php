@@ -101,7 +101,7 @@
             border-bottom: 1px solid #374151;
             letter-spacing: -0.5px;
         }
-        
+
         .brand i {
             color: var(--primary-gold);
             margin-right: 12px;
@@ -728,7 +728,7 @@
                     <i class="ri-archive-line"></i>
                     Catalog
                 </a>
-                <a href="{{ route('admin.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                     <i class="ri-price-tag-3-line"></i>
                     Promotions
                 </a>
@@ -790,7 +790,7 @@
                     <input type="text" placeholder="Search settings...">
                 </div>
             </div>
-            
+
             <div class="header-actions">
                 <a href="{{ route('admin.help') }}" class="icon-btn">
                     <i class="ri-question-line"></i>
@@ -809,7 +809,7 @@
 
         <!-- Dashboard Content -->
         <div class="dashboard-container">
-            
+
             <div class="page-header">
                 <div>
                     <h1 class="page-title">Settings</h1>
@@ -889,22 +889,22 @@
                     <!-- General Settings Section -->
                     <div id="section-general" class="settings-section active">
                         <h2 class="section-title">General Settings</h2>
-                        
+
                         <form action="{{ route('admin.settings.update') }}" method="POST">
                             @csrf
-                            
+
                             <div class="form-group">
                                 <label class="form-label">Site Name</label>
                                 <input type="text" name="site_name" class="form-input" value="Vendora Marketplace" placeholder="Enter site name">
                                 <div class="form-hint">This will appear in page titles and emails</div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="form-label">Site Description</label>
                                 <textarea name="site_description" class="form-textarea" placeholder="Enter site description">The best local vendor marketplace</textarea>
                                 <div class="form-hint">Brief description for SEO and sharing</div>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Site URL</label>
@@ -915,7 +915,7 @@
                                     <input type="email" name="site_email" class="form-input" value="info@vendora.com" placeholder="info@example.com">
                                 </div>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Timezone</label>
@@ -942,7 +942,7 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="toggle-label">
                                     <span style="flex: 1;">
@@ -955,7 +955,7 @@
                                     </label>
                                 </label>
                             </div>
-                            
+
                             <div class="form-actions">
                                 <button type="reset" class="btn btn-secondary">Reset</button>
                                 <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -966,10 +966,10 @@
                     <!-- Profile Settings Section -->
                     <div id="section-profile" class="settings-section">
                         <h2 class="section-title">Profile Settings</h2>
-                        
+
                         <form action="{{ route('admin.profile.update') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            
+
                             <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 24px;">
                                 <div style="position: relative;">
                                     <div class="avatar" style="width: 80px; height: 80px; font-size: 32px;">
@@ -986,7 +986,7 @@
                                     <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">Member since {{ Auth::user()->created_at->format('F Y') }}</p>
                                 </div>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Full Name</label>
@@ -997,7 +997,7 @@
                                     <input type="email" name="email" class="form-input" value="{{ Auth::user()->email }}" required>
                                 </div>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Phone Number</label>
@@ -1008,12 +1008,12 @@
                                     <input type="text" name="department" class="form-input" value="Administration" placeholder="Department">
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="form-label">Bio / About</label>
                                 <textarea name="bio" class="form-textarea" placeholder="Tell us a little about yourself">{{ Auth::user()->description ?? '' }}</textarea>
                             </div>
-                            
+
                             <div class="form-actions">
                                 <button type="reset" class="btn btn-secondary">Cancel</button>
                                 <button type="submit" class="btn btn-primary">Update Profile</button>
@@ -1024,10 +1024,10 @@
                     <!-- Security Section -->
                     <div id="section-security" class="settings-section">
                         <h2 class="section-title">Security Settings</h2>
-                        
+
                         <form action="{{ route('admin.password.update') }}" method="POST">
                             @csrf
-                            
+
                             <div class="info-card">
                                 <div class="info-title">
                                     <i class="ri-shield-check-line" style="color: var(--accent-green);"></i>
@@ -1040,12 +1040,12 @@
                                     <li>Include at least one special character</li>
                                 </ul>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="form-label">Current Password</label>
                                 <input type="password" name="current_password" class="form-input" placeholder="••••••••" required>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">New Password</label>
@@ -1056,7 +1056,7 @@
                                     <input type="password" name="new_password_confirmation" class="form-input" placeholder="••••••••" required>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="toggle-label">
                                     <span style="flex: 1;">
@@ -1069,17 +1069,17 @@
                                     </label>
                                 </label>
                             </div>
-                            
+
                             <div class="form-actions">
                                 <button type="reset" class="btn btn-secondary">Cancel</button>
                                 <button type="submit" class="btn btn-primary">Update Password</button>
                             </div>
                         </form>
-                        
+
                         <!-- Session Management -->
                         <div style="margin-top: 32px;">
                             <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Active Sessions</h3>
-                            
+
                             <div class="info-card">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                                     <div style="display: flex; align-items: center; gap: 12px;">
@@ -1106,7 +1106,7 @@
                                     <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px;">Terminate</button>
                                 </div>
                             </div>
-                            
+
                             <button class="btn btn-secondary" style="margin-top: 8px;">
                                 <i class="ri-logout-box-line"></i> Logout All Devices
                             </button>
@@ -1116,10 +1116,10 @@
                     <!-- Marketplace Settings -->
                     <div id="section-marketplace" class="settings-section">
                         <h2 class="section-title">Marketplace Settings</h2>
-                        
+
                         <form action="{{ route('admin.settings.update') }}" method="POST">
                             @csrf
-                            
+
                             <div class="form-group">
                                 <label class="form-label">Currency</label>
                                 <select name="currency" class="form-select">
@@ -1131,7 +1131,7 @@
                                     <option value="AUD">AUD - Australian Dollar</option>
                                 </select>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Commission Rate (%)</label>
@@ -1143,7 +1143,7 @@
                                     <input type="number" name="minimum_payout" class="form-input" value="50" min="0">
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="toggle-label">
                                     <span style="flex: 1;">
@@ -1156,7 +1156,7 @@
                                     </label>
                                 </label>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="toggle-label">
                                     <span style="flex: 1;">
@@ -1169,7 +1169,7 @@
                                     </label>
                                 </label>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="toggle-label">
                                     <span style="flex: 1;">
@@ -1182,7 +1182,7 @@
                                     </label>
                                 </label>
                             </div>
-                            
+
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">Save Marketplace Settings</button>
                             </div>
@@ -1192,7 +1192,7 @@
                     <!-- Payment Gateways -->
                     <div id="section-payment" class="settings-section">
                         <h2 class="section-title">Payment Gateways</h2>
-                        
+
                         <div style="display: grid; gap: 16px; margin-bottom: 24px;">
                             <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid var(--border-color); border-radius: 8px;">
                                 <div style="display: flex; align-items: center; gap: 16px;">
@@ -1209,7 +1209,7 @@
                                     </label>
                                 </div>
                             </div>
-                            
+
                             <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid var(--border-color); border-radius: 8px;">
                                 <div style="display: flex; align-items: center; gap: 16px;">
                                     <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/paypal.svg" alt="PayPal" style="width: 40px; height: 40px;">
@@ -1225,7 +1225,7 @@
                                     </label>
                                 </div>
                             </div>
-                            
+
                             <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid var(--border-color); border-radius: 8px;">
                                 <div style="display: flex; align-items: center; gap: 16px;">
                                     <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/square.svg" alt="Square" style="width: 40px; height: 40px;">
@@ -1242,17 +1242,17 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <button class="btn btn-primary">Configure Payment Gateways</button>
                     </div>
 
                     <!-- Email Settings -->
                     <div id="section-email" class="settings-section">
                         <h2 class="section-title">Email Settings</h2>
-                        
+
                         <form action="{{ route('admin.settings.update') }}" method="POST">
                             @csrf
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Mail Driver</label>
@@ -1269,7 +1269,7 @@
                                     <input type="text" name="mail_host" class="form-input" value="smtp.mailtrap.io">
                                 </div>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Mail Port</label>
@@ -1280,7 +1280,7 @@
                                     <input type="text" name="mail_username" class="form-input" value="">
                                 </div>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Mail Password</label>
@@ -1295,17 +1295,17 @@
                                     </select>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="form-label">From Address</label>
                                 <input type="email" name="mail_from_address" class="form-input" value="noreply@vendora.com">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="form-label">From Name</label>
                                 <input type="text" name="mail_from_name" class="form-input" value="Vendora Marketplace">
                             </div>
-                            
+
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">Save Email Settings</button>
                                 <button type="button" class="btn btn-secondary">Send Test Email</button>
@@ -1316,10 +1316,10 @@
                     <!-- Notification Preferences -->
                     <div id="section-notifications" class="settings-section">
                         <h2 class="section-title">Notification Preferences</h2>
-                        
+
                         <form action="{{ route('admin.settings.update') }}" method="POST">
                             @csrf
-                            
+
                             <div class="form-group">
                                 <label class="toggle-label">
                                     <span style="flex: 1;">
@@ -1332,7 +1332,7 @@
                                     </label>
                                 </label>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="toggle-label">
                                     <span style="flex: 1;">
@@ -1345,7 +1345,7 @@
                                     </label>
                                 </label>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="toggle-label">
                                     <span style="flex: 1;">
@@ -1358,7 +1358,7 @@
                                     </label>
                                 </label>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="toggle-label">
                                     <span style="flex: 1;">
@@ -1371,7 +1371,7 @@
                                     </label>
                                 </label>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="toggle-label">
                                     <span style="flex: 1;">
@@ -1384,7 +1384,7 @@
                                     </label>
                                 </label>
                             </div>
-                            
+
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">Save Preferences</button>
                             </div>
@@ -1394,7 +1394,7 @@
                     <!-- Backup & Restore -->
                     <div id="section-backup" class="settings-section">
                         <h2 class="section-title">Backup & Restore</h2>
-                        
+
                         <div class="info-card">
                             <div class="info-title">
                                 <i class="ri-information-line"></i>
@@ -1419,7 +1419,7 @@
                                 </li>
                             </ul>
                         </div>
-                        
+
                         <div style="display: flex; gap: 16px; margin-bottom: 32px;">
                             <button class="btn btn-primary">
                                 <i class="ri-download-line"></i> Download Backup
@@ -1431,9 +1431,9 @@
                                 <i class="ri-upload-line"></i> Restore Backup
                             </button>
                         </div>
-                        
+
                         <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Available Backups</h3>
-                        
+
                         <table style="width: 100%; border-collapse: collapse;">
                             <thead>
                                 <tr style="border-bottom: 1px solid var(--border-color);">
@@ -1469,7 +1469,7 @@
                     <!-- API Settings -->
                     <div id="section-api" class="settings-section">
                         <h2 class="section-title">API Settings</h2>
-                        
+
                         <div class="info-card">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                                 <div>
@@ -1478,7 +1478,7 @@
                                 </div>
                                 <button class="btn btn-primary">Generate New Key</button>
                             </div>
-                            
+
                             <table style="width: 100%; border-collapse: collapse;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid var(--border-color);">
@@ -1515,7 +1515,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         <div class="form-group">
                             <label class="toggle-label">
                                 <span style="flex: 1;">
@@ -1528,19 +1528,19 @@
                                 </label>
                             </label>
                         </div>
-                        
+
                         <div class="form-group">
                             <label class="form-label">Rate Limit (requests per minute)</label>
                             <input type="number" class="form-input" value="60">
                         </div>
-                        
+
                         <div class="form-group">
                             <label class="form-label">Allowed IPs</label>
                             <textarea class="form-textarea" placeholder="192.168.1.1&#10;10.0.0.0/24">192.168.1.1
 10.0.0.0/24</textarea>
                             <div class="form-hint">One IP or CIDR per line. Leave empty to allow all.</div>
                         </div>
-                        
+
                         <div class="form-actions">
                             <button class="btn btn-primary">Save API Settings</button>
                         </div>
@@ -1549,10 +1549,10 @@
                     <!-- Legal & Policies -->
                     <div id="section-legal" class="settings-section">
                         <h2 class="section-title">Legal & Policies</h2>
-                        
+
                         <form action="{{ route('admin.settings.update') }}" method="POST">
                             @csrf
-                            
+
                             <div class="form-group">
                                 <label class="form-label">Terms of Service</label>
                                 <textarea class="form-textarea" rows="10" placeholder="Enter your terms of service...">By using Vendora Marketplace, you agree to these terms...</textarea>
@@ -1561,7 +1561,7 @@
                                     <span class="form-hint">or paste content above</span>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="form-label">Privacy Policy</label>
                                 <textarea class="form-textarea" rows="10" placeholder="Enter your privacy policy...">We value your privacy and are committed to protecting your personal data...</textarea>
@@ -1570,12 +1570,12 @@
                                     <span class="form-hint">or paste content above</span>
                                 </div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="form-label">Cookie Policy</label>
                                 <textarea class="form-textarea" rows="5" placeholder="Enter your cookie policy...">This website uses cookies to improve your experience...</textarea>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label class="form-label">GDPR Compliance</label>
                                 <select class="form-select">
@@ -1584,7 +1584,7 @@
                                 </select>
                                 <div class="form-hint">Enable GDPR compliance features for EU customers</div>
                             </div>
-                            
+
                             <div class="form-actions">
                                 <button class="btn btn-primary">Save Policies</button>
                             </div>
@@ -1600,7 +1600,7 @@
                     Danger Zone
                 </h3>
                 <p style="color: var(--text-secondary); margin-bottom: 20px;">Once you delete your account or data, there is no going back. Please be certain.</p>
-                
+
                 <div style="display: flex; gap: 16px; flex-wrap: wrap;">
                     <button class="btn btn-danger" onclick="if(confirm('Are you sure you want to clear all cache? This cannot be undone.')) alert('Cache cleared!')">
                         <i class="ri-delete-bin-line"></i> Clear Cache
@@ -1621,7 +1621,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
-            
+
             if (menuToggle && sidebar) {
                 menuToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('active');
@@ -1644,15 +1644,15 @@
             document.querySelectorAll('.settings-section').forEach(section => {
                 section.classList.remove('active');
             });
-            
+
             // Remove active class from all nav items
             document.querySelectorAll('.settings-nav-item').forEach(item => {
                 item.classList.remove('active');
             });
-            
+
             // Show selected section
             document.getElementById('section-' + sectionId).classList.add('active');
-            
+
             // Add active class to clicked nav item
             event.currentTarget.classList.add('active');
         }

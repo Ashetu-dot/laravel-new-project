@@ -10,19 +10,23 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Message;
 use App\Models\Notification;
+use App\Models\VideoTutorial;
+use App\Models\SupportTicket;
+use App\Models\TicketReply;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Promotion;
 use Illuminate\Http\Request;
 use App\Http\Requests\AdminLoginRequest;
 use App\Services\Admin\AdminService;
 use App\Http\Requests\AdminCreateRequest;
-
 use App\Http\Requests\AdminUpdateRequest;
 use App\Http\Requests\AdminPasswordUpdateRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use App\Models\PromotionUsage;
 
 class AdminController extends Controller
 {
@@ -156,6 +160,17 @@ class AdminController extends Controller
         $status = $user->is_active ? 'activated' : 'deactivated';
 
         return redirect()->back()->with('success', "User {$status} successfully.");
+    }
+
+    /**
+     * Toggle generic user status via users routes.
+     *
+     * This is a small wrapper so routes that expect
+     * toggleUserStatus() continue to work.
+     */
+    public function toggleUserStatus($id)
+    {
+        return $this->toggleStatus($id);
     }
 
 
@@ -751,6 +766,22 @@ public function store(AdminLoginRequest $request)
     }
 
     /**
+     * Toggle customer status (active/inactive).
+     */
+    public function toggleCustomerStatus($id)
+    {
+        $customer = User::where('role', 'customer')->findOrFail($id);
+
+        $customer->is_active = !$customer->is_active;
+        $customer->save();
+
+        $status = $customer->is_active ? 'activated' : 'deactivated';
+
+        return redirect()->back()
+            ->with('success', "Customer {$status} successfully.");
+    }
+
+    /**
      * ========================================================================
      * VENDORS MANAGEMENT
      * ========================================================================
@@ -897,11 +928,20 @@ public function store(AdminLoginRequest $request)
         $vendor->is_active = $request->boolean('status', !$vendor->is_active);
         $vendor->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Vendor status updated successfully.',
-            'new_status' => $vendor->is_active
-        ]);
+        // If the request expects JSON (AJAX), return JSON.
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Vendor status updated successfully.',
+                'new_status' => $vendor->is_active,
+            ]);
+        }
+
+        // Otherwise, redirect back in the admin panel with a flash message.
+        $status = $vendor->is_active ? 'activated' : 'deactivated';
+
+        return redirect()->back()
+            ->with('success', "Vendor {$status} successfully.");
     }
 
     /**
@@ -2376,4 +2416,289 @@ public function downloadDocumentationPDF()
     {
         return view('admin.verify');
     }
+
+    /**
+     * ========================================================================
+     * SUPPORT TICKETS
+     * ========================================================================
+     */
+
+    /**
+     * List all support tickets with basic filters.
+     */
+    public function supportTickets(Request $request)
+    {
+        $status = $request->get('status');
+        $priority = $request->get('priority');
+        $search = $request->get('search');
+
+        $query = SupportTicket::with(['user', 'assignedTo'])
+            ->orderByDesc('created_at');
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($priority) {
+            $query->where('priority', $priority);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('ticket_number', 'like', "%{$search}%")
+                    ->orWhere('subject', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $tickets = $query->paginate(15);
+
+        // Aggregate statistics by status for header cards
+        $stats = [
+            'open' => SupportTicket::where('status', 'open')->count(),
+            'pending' => SupportTicket::where('status', 'pending')->count(),
+            'resolved' => SupportTicket::where('status', 'resolved')->count(),
+            'closed' => SupportTicket::where('status', 'closed')->count(),
+        ];
+
+        // Header context: current admin and unread counters
+        $user = Auth::user();
+
+        try {
+            $unreadNotificationsCount = Notification::where('user_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+        } catch (\Exception $e) {
+            $unreadNotificationsCount = 0;
+        }
+
+        try {
+            $unreadMessagesCount = Message::where('receiver_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+        } catch (\Exception $e) {
+            $unreadMessagesCount = 0;
+        }
+
+        return view('admin.support-tickets.index', compact(
+            'tickets',
+            'status',
+            'priority',
+            'search',
+            'stats',
+            'user',
+            'unreadNotificationsCount',
+            'unreadMessagesCount'
+        ));
+    }
+
+    /**
+     * Show a single support ticket with replies.
+     */
+    public function showSupportTicket($id)
+    {
+        $ticket = SupportTicket::with(['user', 'assignedTo', 'replies.user'])->findOrFail($id);
+
+        if (view()->exists('admin.support-tickets.show')) {
+            return view('admin.support-tickets.show', compact('ticket'));
+        }
+
+        // Fallback to a very simple view if needed later
+        return view('admin.support-tickets.index', [
+            'tickets' => collect([$ticket]),
+        ]);
+    }
+
+    /**
+     * Add a reply to a support ticket.
+     */
+    public function replySupportTicket(Request $request, $id)
+    {
+        $ticket = SupportTicket::findOrFail($id);
+
+        $request->validate([
+            'message' => 'required|string|max:2000',
+        ]);
+
+        TicketReply::create([
+            'ticket_id' => $ticket->id,
+            'user_id' => Auth::id(),
+            'message' => $request->message,
+        ]);
+
+        // Optionally update ticket status when replying
+        if ($ticket->status === 'open') {
+            $ticket->status = 'in_progress';
+            $ticket->save();
+        }
+
+        return redirect()
+            ->route('admin.support-tickets.show', $ticket->id)
+            ->with('success', 'Reply added successfully.');
+    }
+
+    /**
+     * Update support ticket status.
+     */
+    public function updateSupportTicketStatus(Request $request, $id)
+    {
+        $ticket = SupportTicket::findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|string|in:open,in_progress,resolved,closed',
+        ]);
+
+        $ticket->status = $request->status;
+        if (in_array($request->status, ['resolved', 'closed'], true)) {
+            $ticket->resolved_at = now();
+        }
+        $ticket->save();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Ticket status updated successfully.',
+                'status' => $ticket->status,
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.support-tickets.show', $ticket->id)
+            ->with('success', 'Ticket status updated successfully.');
+    }
+
+    
+
+/**
+ * ========================================================================
+ * VIDEO TUTORIALS MANAGEMENT
+ * ========================================================================
+ */
+
+/**
+ * Display video tutorials page.
+ */
+public function videoTutorials(Request $request)
+{
+    $user = Auth::user();
+    $category = $request->get('category', 'all');
+    $search = $request->get('search');
+    
+    $query = VideoTutorial::where('is_published', true);
+    
+    if ($category !== 'all') {
+        $query->where('category', $category);
+    }
+    
+    if ($search) {
+        $query->where(function($q) use ($search) {
+            $q->where('title', 'like', "%{$search}%")
+              ->orWhere('description', 'like', "%{$search}%")
+              ->orWhere('tags', 'like', "%{$search}%");
+        });
+    }
+    
+    $videos = $query->orderBy('sort_order')
+                    ->orderBy('created_at', 'desc')
+                    ->paginate(12);
+    
+    $featuredVideos = VideoTutorial::where('is_featured', true)
+                                   ->where('is_published', true)
+                                   ->orderBy('sort_order')
+                                   ->limit(6)
+                                   ->get();
+    
+    $categories = VideoTutorial::where('is_published', true)
+                               ->select('category')
+                               ->distinct()
+                               ->pluck('category');
+    
+    $stats = [
+        'total' => VideoTutorial::where('is_published', true)->count(),
+        'featured' => VideoTutorial::where('is_featured', true)->where('is_published', true)->count(),
+        'categories' => $categories->count(),
+    ];
+    
+    try {
+        $unreadNotificationsCount = Notification::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+    } catch (\Exception $e) {
+        $unreadNotificationsCount = 0;
+    }
+
+    try {
+        $unreadMessagesCount = Message::where('receiver_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+    } catch (\Exception $e) {
+        $unreadMessagesCount = 0;
+    }
+    
+    return view('admin.video-tutorials', compact(
+        'videos', 
+        'featuredVideos', 
+        'categories', 
+        'stats', 
+        'category', 
+        'search', 
+        'user', 
+        'unreadNotificationsCount', 
+        'unreadMessagesCount'
+    ));
+}
+
+/**
+ * Get video details for AJAX
+ */
+public function getVideoDetails($id)
+{
+    try {
+        $video = VideoTutorial::findOrFail($id);
+        $video->increment('views_count');
+        
+        return response()->json([
+            'success' => true,
+            'video' => $video
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Video not found'
+        ], 404);
+    }
+}
+
+/**
+ * Get related videos
+ */
+public function getRelatedVideos($id)
+{
+    try {
+        $video = VideoTutorial::findOrFail($id);
+        
+        $related = VideoTutorial::where('is_published', true)
+            ->where('id', '!=', $id)
+            ->where(function($q) use ($video) {
+                $q->where('category', $video->category)
+                  ->orWhereJsonContains('tags', $video->tags);
+            })
+            ->orderBy('views_count', 'desc')
+            ->limit(4)
+            ->get();
+        
+        return response()->json([
+            'success' => true,
+            'videos' => $related
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error loading related videos'
+        ], 500);
+    }
+}
 }

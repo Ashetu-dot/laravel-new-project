@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Categories Management - Vendora Admin | Jimma, Ethiopia</title>
+    <title>Low Stock Products - Vendora Admin | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
@@ -55,12 +55,8 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--primary-bg);
             color: var(--text-primary);
-            width: 100%;
-            max-width: 1920px;
-            margin: 0 auto;
-            min-height: 100vh;
-            overflow-x: hidden;
             display: flex;
+            min-height: 100vh;
         }
 
         /* Sidebar */
@@ -216,6 +212,7 @@
             width: 100%;
             border-radius: 8px;
             transition: all 0.2s;
+            margin-top: 8px;
         }
 
         .logout-btn:hover {
@@ -232,7 +229,6 @@
             width: calc(100% - 280px);
         }
 
-        /* Top Header */
         .top-header {
             height: 70px;
             background-color: var(--card-bg);
@@ -261,6 +257,14 @@
             .top-header {
                 padding: 0 20px;
             }
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .header-actions {
@@ -331,25 +335,25 @@
             align-items: center;
             margin-bottom: 32px;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 20px;
         }
 
-        .page-title {
+        .page-header h1 {
             font-size: 28px;
             font-weight: 700;
-            margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .page-title i {
+        .page-header h1 i {
             color: var(--primary-gold);
         }
 
-        .page-subtitle {
+        .page-header p {
             color: var(--text-secondary);
             font-size: 14px;
+            margin-top: 4px;
         }
 
         /* Alert Messages */
@@ -398,15 +402,66 @@
             border-left: 4px solid var(--accent-blue);
         }
 
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-gold);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--primary-gold-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-gold);
+            color: var(--primary-gold);
+        }
+
+        .btn-danger {
+            background-color: var(--accent-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
         /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             margin-bottom: 32px;
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 1280px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -460,66 +515,18 @@
             color: var(--text-primary);
         }
 
-        /* Action Bar */
-        .action-bar {
+        .stat-trend {
+            font-size: 12px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 16px;
+            gap: 4px;
+            margin-top: 4px;
         }
 
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
+        .trend-up { color: var(--accent-green); }
+        .trend-down { color: var(--accent-red); }
 
-        .btn-primary {
-            background-color: var(--primary-gold);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-gold-hover);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-secondary {
-            background-color: transparent;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--primary-gold);
-            color: var(--primary-gold);
-        }
-
-        .btn-danger {
-            background-color: var(--accent-red);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #dc2626;
-        }
-
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 13px;
-        }
-
+        /* Search Box */
         .search-box {
             display: flex;
             align-items: center;
@@ -547,18 +554,18 @@
         .quick-actions {
             display: flex;
             gap: 12px;
-            margin-top: 16px;
+            margin-bottom: 24px;
             flex-wrap: wrap;
         }
 
         .quick-action-btn {
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 500;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
@@ -601,6 +608,11 @@
             color: var(--primary-gold);
         }
 
+        .results-info {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -628,25 +640,40 @@
             background-color: #f9fafb;
         }
 
-        .category-name {
+        tr.low-stock {
+            background-color: #fff3e0;
+        }
+
+        tr.low-stock:hover td {
+            background-color: #ffe4bc;
+        }
+
+        .product-cell {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-weight: 600;
         }
 
-        .category-icon {
-            width: 40px;
-            height: 40px;
+        .product-image {
+            width: 48px;
+            height: 48px;
             border-radius: 8px;
+            background-color: #f3f4f6;
+            object-fit: cover;
+        }
+
+        .product-image-placeholder {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 20px;
+            color: var(--text-secondary);
         }
 
-        .status-badge {
+        .stock-badge {
             padding: 4px 10px;
             border-radius: 20px;
             font-size: 12px;
@@ -654,8 +681,9 @@
             display: inline-block;
         }
 
-        .status-active { background-color: #d1fae5; color: #065f46; }
-        .status-inactive { background-color: #fee2e2; color: #991b1b; }
+        .stock-high { background-color: #d1fae5; color: #065f46; }
+        .stock-medium { background-color: #fef3c7; color: #92400e; }
+        .stock-low { background-color: #fee2e2; color: #991b1b; }
 
         .action-buttons {
             display: flex;
@@ -683,23 +711,34 @@
             border-color: var(--primary-gold);
         }
 
-        /* Child Categories */
-        .child-categories {
-            margin-left: 52px;
-            margin-top: 8px;
-            padding-left: 12px;
-            border-left: 2px dashed var(--border-color);
-        }
-
-        .child-category-item {
+        /* Warning Banner */
+        .warning-banner {
+            background-color: #fff3cd;
+            border-left: 4px solid var(--accent-yellow);
+            padding: 16px 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 0;
-            font-size: 13px;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
-        .child-category-item i {
+        .warning-banner i {
+            font-size: 24px;
+            color: var(--accent-yellow);
+        }
+
+        .warning-banner-content {
+            flex: 1;
+        }
+
+        .warning-banner-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .warning-banner-text {
             color: var(--text-secondary);
             font-size: 14px;
         }
@@ -707,32 +746,89 @@
         /* Pagination */
         .pagination {
             display: flex;
-            justify-content: flex-end;
             align-items: center;
+            justify-content: flex-end;
             gap: 8px;
             margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
         }
 
-        .pagination-item {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background-color: var(--card-bg);
+        .pagination-info {
             color: var(--text-secondary);
-            font-size: 13px;
-            text-decoration: none;
-            transition: all 0.2s;
+            font-size: 14px;
+            margin-right: 16px;
         }
 
-        .pagination-item:hover {
+        .pagination-nav {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pagination-btn {
+            min-width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            padding: 0 8px;
+        }
+
+        .pagination-btn:hover {
             border-color: var(--primary-gold);
             color: var(--primary-gold);
+            background-color: #fff9f0;
         }
 
-        .pagination-item.active {
+        .pagination-btn.active {
             background-color: var(--primary-gold);
             color: white;
             border-color: var(--primary-gold);
+        }
+
+        .pagination-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .pagination-dots {
+            color: var(--text-secondary);
+            padding: 0 4px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 16px;
+            color: var(--border-color);
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            font-size: 14px;
         }
 
         /* Loading Spinner */
@@ -789,13 +885,13 @@
                 <a href="{{ route('admin.vendors') }}" class="nav-item">
                     <i class="ri-store-line"></i> Vendors
                 </a>
-                <a href="{{ route('admin.products') }}" class="nav-item">
+                <a href="{{ route('admin.catalog.products') }}" class="nav-item">
                     <i class="ri-shopping-cart-line"></i> Products
                 </a>
-                <a href="{{ route('admin.catalog.categories') }}" class="nav-item active">
+                <a href="{{ route('admin.catalog.categories') }}" class="nav-item">
                     <i class="ri-price-tag-3-line"></i> Categories
                 </a>
-                <a href="{{ route('admin.inventory') }}" class="nav-item">
+                <a href="{{ route('admin.inventory') }}" class="nav-item active">
                     <i class="ri-archive-line"></i> Inventory
                 </a>
             </div>
@@ -863,11 +959,8 @@
                 <div class="menu-toggle" id="menuToggle">
                     <i class="ri-menu-line"></i>
                 </div>
-                <div class="search-bar">
-                    <i class="ri-search-line"></i>
-                    <form action="{{ route('admin.catalog.categories') }}" method="GET" style="width: 100%; display: flex;">
-                        <input type="text" name="search" placeholder="Search categories..." value="{{ request('search') }}">
-                    </form>
+                <div class="page-title">
+                    <i class="ri-archive-line" style="color: var(--primary-gold);"></i> Low Stock Products
                 </div>
             </div>
 
@@ -884,10 +977,13 @@
                         <span class="badge-count">{{ $unreadMessagesCount }}</span>
                     @endif
                 </a>
+                <a href="{{ route('admin.inventory') }}" class="btn btn-secondary btn-sm" style="margin-left: 8px;">
+                    <i class="ri-arrow-left-line"></i> Back to Inventory
+                </a>
             </div>
         </header>
 
-        <!-- Dashboard Content -->
+        <!-- Dashboard Container -->
         <div class="dashboard-container">
 
             <!-- Alert Messages -->
@@ -912,219 +1008,216 @@
                 </div>
             @endif
 
+            <!-- Page Header -->
             <div class="page-header">
                 <div>
-                    <h1 class="page-title">
-                        <i class="ri-price-tag-3-line"></i>
-                        Categories Management
+                    <h1>
+                        <i class="ri-error-warning-line" style="color: var(--accent-yellow);"></i>
+                        Low Stock Products
                     </h1>
-                    <p class="page-subtitle">Organize products with categories and subcategories</p>
+                    <p>Products that need to be reordered soon</p>
                 </div>
                 <div>
-                    <span class="status-badge status-active">Last updated: {{ now()->format('M d, Y H:i') }}</span>
+                    <span class="stock-badge stock-medium">{{ $products->total() ?? 0 }} products low on stock</span>
                 </div>
             </div>
 
-            <!-- Stats Cards -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon bg-blue-light">
-                        <i class="ri-price-tag-3-line"></i>
-                    </div>
-                    <div class="stat-info">
-                        <div class="stat-label">Total Categories</div>
-                        <div class="stat-number">{{ number_format($totalCategories ?? $categories->total() ?? 0) }}</div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon bg-green-light">
-                        <i class="ri-price-tag-line"></i>
-                    </div>
-                    <div class="stat-info">
-                        <div class="stat-label">Active Categories</div>
-                        <div class="stat-number">{{ number_format($activeCategories ?? $categories->where('is_active', true)->count() ?? 0) }}</div>
+            <!-- Warning Banner -->
+            <div class="warning-banner">
+                <i class="ri-alert-line"></i>
+                <div class="warning-banner-content">
+                    <div class="warning-banner-title">Immediate Attention Required</div>
+                    <div class="warning-banner-text">
+                        These products have stock levels below the reorder threshold.
+                        Consider restocking soon to avoid stockouts.
                     </div>
                 </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon bg-purple-light">
-                        <i class="ri-product-hunt-line"></i>
-                    </div>
-                    <div class="stat-info">
-                        <div class="stat-label">Total Products</div>
-                        <div class="stat-number">{{ number_format($totalProductsInCategories ?? $categories->sum('products_count') ?? 0) }}</div>
-                    </div>
-                </div>
+                <a href="{{ route('admin.inventory.reorder.export') }}" class="btn btn-sm btn-primary">
+                    <i class="ri-download-line"></i> Export Reorder List
+                </a>
             </div>
 
-            <!-- Action Bar -->
-            <div class="action-bar">
-                <div>
-                    <a href="#" class="btn btn-primary">
-                        <i class="ri-add-line"></i> Add New Category
-                    </a>
-                </div>
-
+            <!-- Search Box -->
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
                 <div class="search-box">
                     <i class="ri-search-line"></i>
-                    <form method="GET" action="{{ route('admin.catalog.categories') }}" style="width: 100%; display: flex;">
-                        <input type="text" name="search" placeholder="Search categories..." value="{{ request('search') }}">
+                    <form action="{{ route('admin.inventory.low-stock') }}" method="GET" style="width: 100%; display: flex;">
+                        <input type="text" name="search" placeholder="Search low stock products..." value="{{ request('search') }}">
                     </form>
                 </div>
             </div>
 
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <a href="{{ route('admin.catalog.categories') }}?filter=active" class="quick-action-btn {{ request('filter') == 'active' ? 'active' : '' }}">
-                    <i class="ri-check-line"></i> Active Only
-                </a>
-                <a href="{{ route('admin.catalog.categories') }}?filter=inactive" class="quick-action-btn {{ request('filter') == 'inactive' ? 'active' : '' }}">
-                    <i class="ri-close-line"></i> Inactive Only
-                </a>
-                <a href="{{ route('admin.catalog.categories') }}?filter=parent" class="quick-action-btn {{ request('filter') == 'parent' ? 'active' : '' }}">
-                    <i class="ri-price-tag-line"></i> Parent Categories
-                </a>
-                <a href="{{ route('admin.catalog.categories') }}?filter=child" class="quick-action-btn {{ request('filter') == 'child' ? 'active' : '' }}">
-                    <i class="ri-price-tag-2-line"></i> Subcategories
-                </a>
-                <a href="{{ route('admin.catalog.categories.export') }}" class="quick-action-btn">
-                    <i class="ri-download-line"></i> Export
-                </a>
-            </div>
-
-            <!-- Categories Table -->
+            <!-- Low Stock Products Table -->
             <div class="table-container">
                 <div class="table-header">
                     <h3 class="table-title">
-                        <i class="ri-price-tag-3-line"></i>
-                        Categories List
+                        <i class="ri-error-warning-line" style="color: var(--accent-yellow);"></i>
+                        Products Below Reorder Level
                     </h3>
-                    <span>Showing {{ $categories->firstItem() ?? 0 }} - {{ $categories->lastItem() ?? 0 }} of {{ $categories->total() ?? 0 }} categories</span>
+                    <span class="results-info">Showing {{ $products->firstItem() ?? 0 }} to {{ $products->lastItem() ?? 0 }} of {{ $products->total() ?? 0 }} results</span>
                 </div>
 
                 <table>
                     <thead>
                         <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
                             <th>Category</th>
-                            <th>Slug</th>
-                            <th>Parent Category</th>
-                            <th>Products</th>
+                            <th>Vendor</th>
+                            <th class="text-right">Current Stock</th>
+                            <th class="text-right">Reorder Level</th>
+                            <th class="text-right">Suggested Order</th>
+                            <th class="text-right">Estimated Cost</th>
                             <th>Status</th>
-                            <th>Created</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($categories ?? [] as $category)
-                        <tr>
-                            <td>
-                                <div class="category-name">
-                                    <div class="category-icon" style="background: linear-gradient(135deg, {{ ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#B88E3F'][$loop->index % 6] }}, {{ ['#2563eb', '#059669', '#d97706', '#7c3aed', '#dc2626', '#9c7832'][$loop->index % 6] }});">
-                                        <i class="ri-price-tag-line"></i>
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 600;">{{ $category->name }}</div>
-                                        <div style="font-size: 12px; color: var(--text-secondary);">ID: #{{ $category->id }}</div>
-                                    </div>
-                                </div>
+                        @forelse($products ?? [] as $product)
+                            @php
+                                $stock = $product->stock ?? 0;
+                                $reorderLevel = $product->reorder_level ?? 5;
+                                $maxStock = $product->max_stock ?? 100;
+                                $costPrice = $product->cost_price ?? ($product->price * 0.7);
+                                $suggestedQty = max($maxStock - $stock, $reorderLevel * 2);
+                                $estimatedCost = $suggestedQty * $costPrice;
 
-                                <!-- Show child categories if any -->
-                                @if($category->children && $category->children->count() > 0)
-                                <div class="child-categories">
-                                    @foreach($category->children->take(3) as $child)
-                                    <div class="child-category-item">
-                                        <i class="ri-price-tag-2-line"></i>
-                                        <span>{{ $child->name }}</span>
-                                        <span style="color: var(--text-secondary); font-size: 11px;">({{ $child->products_count ?? 0 }} products)</span>
+                                $rowClass = $stock <= 0 ? 'out-of-stock' : 'low-stock';
+                                $statusClass = $stock <= 0 ? 'stock-low' : 'stock-medium';
+                                $statusText = $stock <= 0 ? 'Out of Stock' : 'Low Stock';
+                            @endphp
+                            <tr class="{{ $rowClass }}">
+                                <td>
+                                    <div class="product-cell">
+                                        @if($product->image)
+                                            <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}" class="product-image">
+                                        @else
+                                            <div class="product-image-placeholder">
+                                                <i class="ri-shopping-bag-line"></i>
+                                            </div>
+                                        @endif
+                                        <div>
+                                            <div style="font-weight: 600;">{{ $product->name }}</div>
+                                            <div style="font-size: 12px; color: var(--text-secondary);">ID: #{{ $product->id }}</div>
+                                        </div>
                                     </div>
-                                    @endforeach
-                                    @if($category->children->count() > 3)
-                                    <div class="child-category-item" style="color: var(--primary-gold);">
-                                        <i class="ri-more-line"></i>
-                                        <span>+{{ $category->children->count() - 3 }} more</span>
-                                    </div>
-                                    @endif
-                                </div>
-                                @endif
-                            </td>
-                            <td><code>{{ $category->slug }}</code></td>
-                            <td>
-                                @if($category->parent_id)
-                                    @php
-                                        $parent = \App\Models\Category::find($category->parent_id);
-                                    @endphp
-                                    <span class="badge status-active" style="background-color: #e0f2fe; color: #0369a1;">
-                                        {{ $parent->name ?? 'N/A' }}
+                                </td>
+                                <td><code>{{ $product->sku ?? 'N/A' }}</code></td>
+                                <td>{{ $product->category->name ?? 'N/A' }}</td>
+                                <td>
+                                    <a href="{{ route('admin.vendors.show', $product->vendor_id) }}" class="text-gold">
+                                        {{ $product->vendor->business_name ?? $product->vendor->name ?? 'N/A' }}
+                                    </a>
+                                </td>
+                                <td class="text-right" style="font-weight: 600; color: var(--accent-red);">
+                                    {{ number_format($stock) }}
+                                </td>
+                                <td class="text-right">{{ number_format($reorderLevel) }}</td>
+                                <td class="text-right">{{ number_format($suggestedQty) }} units</td>
+                                <td class="text-right">ETB {{ number_format($estimatedCost, 2) }}</td>
+                                <td>
+                                    <span class="stock-badge {{ $statusClass }}">
+                                        {{ $statusText }}
                                     </span>
-                                @else
-                                    <span style="color: var(--text-secondary);">—</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span style="font-weight: 600;">{{ $category->products_count ?? 0 }}</span>
-                            </td>
-                            <td>
-                                <span class="status-badge status-{{ $category->is_active ? 'active' : 'inactive' }}">
-                                    {{ $category->is_active ? 'Active' : 'Inactive' }}
-                                </span>
-                            </td>
-                            <td>
-                                @if($category->created_at)
-                                    <div>{{ $category->created_at->format('M d, Y') }}</div>
-                                    <div style="font-size: 11px; color: var(--text-secondary);">{{ $category->created_at->diffForHumans() }}</div>
-                                @else
-                                    <div>N/A</div>
-                                @endif
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <a href="{{ route('admin.catalog.categories.edit', $category->id) }}" class="action-btn" title="Edit Category">
-                                        <i class="ri-edit-line"></i>
-                                    </a>
-                                    <a href="{{ route('admin.products') }}?category={{ $category->id }}" class="action-btn" title="View Products in this Category">
-                                        <i class="ri-eye-line"></i>
-                                    </a>
-                                    <form action="{{ route('admin.catalog.categories.toggle-status', $category->id) }}" method="POST" style="display: inline;">
-                                        @csrf
-                                        <button type="submit" class="action-btn" title="{{ $category->is_active ? 'Deactivate' : 'Activate' }}">
-                                            <i class="ri-{{ $category->is_active ? 'close' : 'check' }}-line"></i>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="{{ route('admin.catalog.products.show', $product->id) }}" class="action-btn" title="View Product">
+                                            <i class="ri-eye-line"></i>
+                                        </a>
+                                        <button type="button" class="action-btn" title="Restock" onclick="showRestockModal({{ $product->id }}, '{{ $product->name }}')">
+                                            <i class="ri-add-line"></i>
                                         </button>
-                                    </form>
-                                    <form action="{{ route('admin.catalog.categories.destroy', $category->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this category? This will affect all products in this category.')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="action-btn" title="Delete Category">
-                                            <i class="ri-delete-bin-line"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
+                                        <a href="{{ route('admin.catalog.products.edit', $product->id) }}" class="action-btn" title="Edit Product">
+                                            <i class="ri-edit-line"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
                         @empty
-                        <tr>
-                            <td colspan="7" style="text-align: center; padding: 60px;">
-                                <i class="ri-price-tag-3-line" style="font-size: 64px; color: var(--text-secondary); margin-bottom: 16px; display: block;"></i>
-                                <h3 style="margin-bottom: 8px; font-size: 18px;">No categories found</h3>
-                                <p style="color: var(--text-secondary); margin-bottom: 24px;">Get started by creating your first category</p>
-                                <a href="{{ route('admin.catalog.categories.create') }}" class="btn btn-primary">
-                                    <i class="ri-add-line"></i> Add New Category
-                                </a>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td colspan="10" class="empty-state">
+                                    <i class="ri-checkbox-circle-line" style="color: var(--accent-green);"></i>
+                                    <h3>No Low Stock Products</h3>
+                                    <p>All products have sufficient stock levels.</p>
+                                    <a href="{{ route('admin.inventory') }}" class="btn btn-primary" style="margin-top: 16px;">
+                                        <i class="ri-arrow-left-line"></i> Back to Inventory
+                                    </a>
+                                </td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>
 
                 <!-- Pagination -->
-                @if(method_exists($categories, 'links') && $categories->hasPages())
-                <div class="pagination">
-                    {{ $categories->appends(request()->query())->links() }}
-                </div>
+                @if(method_exists($products, 'links') && $products->hasPages())
+                    <div class="pagination">
+                        <span class="pagination-info">
+                            Showing {{ $products->firstItem() }} to {{ $products->lastItem() }} of {{ $products->total() }} results
+                        </span>
+
+                        <div class="pagination-nav">
+                            {{-- Previous Page Link --}}
+                            @if($products->onFirstPage())
+                                <span class="pagination-btn disabled">
+                                    <i class="ri-arrow-left-s-line"></i> Previous
+                                </span>
+                            @else
+                                <a href="{{ $products->previousPageUrl() }}" class="pagination-btn">
+                                    <i class="ri-arrow-left-s-line"></i> Previous
+                                </a>
+                            @endif
+
+                            {{-- Pagination Elements --}}
+                            @foreach($products->getUrlRange(1, $products->lastPage()) as $page => $url)
+                                @if($page == $products->currentPage())
+                                    <a href="{{ $url }}" class="pagination-btn active">{{ $page }}</a>
+                                @elseif($page >= $products->currentPage() - 2 && $page <= $products->currentPage() + 2)
+                                    <a href="{{ $url }}" class="pagination-btn">{{ $page }}</a>
+                                @elseif($page == 1 || $page == $products->lastPage())
+                                    <a href="{{ $url }}" class="pagination-btn">{{ $page }}</a>
+                                @elseif($page == $products->currentPage() - 3 || $page == $products->currentPage() + 3)
+                                    <span class="pagination-dots">...</span>
+                                @endif
+                            @endforeach
+
+                            {{-- Next Page Link --}}
+                            @if($products->hasMorePages())
+                                <a href="{{ $products->nextPageUrl() }}" class="pagination-btn">
+                                    Next <i class="ri-arrow-right-s-line"></i>
+                                </a>
+                            @else
+                                <span class="pagination-btn disabled">
+                                    Next <i class="ri-arrow-right-s-line"></i>
+                                </span>
+                            @endif
+                        </div>
+                    </div>
                 @endif
             </div>
         </div>
     </main>
+
+    <!-- Restock Modal -->
+    <div id="restockModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; padding: 24px; width: 400px; max-width: 90%; box-shadow: var(--shadow-lg);">
+            <h3 style="margin-bottom: 16px;">Restock Product</h3>
+            <p id="restockProductName" style="margin-bottom: 20px; color: var(--text-secondary);"></p>
+
+            <form id="restockForm" method="POST" action="">
+                @csrf
+                <div style="margin-bottom: 20px;">
+                    <label for="quantity" style="display: block; margin-bottom: 8px; font-weight: 600;">Quantity to Add</label>
+                    <input type="number" name="quantity" id="quantity" min="1" value="10" class="form-control" style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;" required>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="hideRestockModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Restock</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         // CSRF Token
@@ -1149,18 +1242,29 @@
                     }
                 });
             }
+        });
 
-            // Highlight quick action buttons based on current filter
-            const urlParams = new URLSearchParams(window.location.search);
-            const filter = urlParams.get('filter');
-            if (filter) {
-                document.querySelectorAll('.quick-action-btn').forEach(btn => {
-                    if (btn.href.includes(`filter=${filter}`)) {
-                        btn.style.backgroundColor = 'var(--primary-gold)';
-                        btn.style.color = 'white';
-                        btn.style.borderColor = 'var(--primary-gold)';
-                    }
-                });
+        // Restock Modal Functions
+        function showRestockModal(productId, productName) {
+            const modal = document.getElementById('restockModal');
+            const productNameEl = document.getElementById('restockProductName');
+            const form = document.getElementById('restockForm');
+
+            productNameEl.textContent = `Add stock to: ${productName}`;
+            form.action = `{{ url('admin/inventory') }}/${productId}/restock`;
+
+            modal.style.display = 'flex';
+        }
+
+        function hideRestockModal() {
+            document.getElementById('restockModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('restockModal');
+            if (event.target === modal) {
+                hideRestockModal();
             }
         });
 

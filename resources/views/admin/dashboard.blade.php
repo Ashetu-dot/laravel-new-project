@@ -1065,7 +1065,7 @@
                     <i class="ri-archive-line"></i>
                     Inventory
                 </a>
-                <a href="{{ route('admin.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                     <i class="ri-megaphone-line"></i>
                     Promotions
                 </a>

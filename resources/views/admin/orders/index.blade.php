@@ -98,7 +98,7 @@
             border-bottom: 1px solid #374151;
             letter-spacing: -0.5px;
         }
-        
+
         .brand i {
             color: var(--primary-gold);
             margin-right: 12px;
@@ -514,7 +514,7 @@
             font-weight: 500;
             display: inline-block;
         }
-        
+
         .status-pending { background-color: #fef3c7; color: #92400e; }
         .status-processing { background-color: #e0f2fe; color: #0369a1; }
         .status-completed { background-color: #d1fae5; color: #065f46; }
@@ -656,7 +656,7 @@
                     <i class="ri-archive-line"></i>
                     Catalog
                 </a>
-                <a href="{{ route('admin.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                     <i class="ri-price-tag-3-line"></i>
                     Promotions
                 </a>
@@ -706,7 +706,7 @@
                     <input type="text" placeholder="Search orders...">
                 </div>
             </div>
-            
+
             <div class="header-actions">
                 <a href="{{ route('admin.help') }}" class="icon-btn">
                     <i class="ri-question-line"></i>
@@ -719,7 +719,7 @@
 
         <!-- Dashboard Content -->
         <div class="dashboard-container">
-            
+
             <div class="page-header">
                 <div>
                     <h1 class="page-title">Orders Management</h1>
@@ -823,7 +823,7 @@
                     <h3 class="table-title">Orders List</h3>
                     <span>Showing {{ $orders->firstItem() ?? 0 }} - {{ $orders->lastItem() ?? 0 }} of {{ $orders->total() ?? 0 }} orders</span>
                 </div>
-                
+
                 <table>
                     <thead>
                         <tr>
@@ -925,7 +925,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
-            
+
             if (menuToggle && sidebar) {
                 menuToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('active');
@@ -947,11 +947,11 @@
             const modal = document.getElementById('statusModal');
             const form = document.getElementById('statusForm');
             form.action = `/admin/orders/${orderId}/status`;
-            
+
             // Set current status
             const select = form.querySelector('select[name="status"]');
             select.value = currentStatus;
-            
+
             modal.style.display = 'flex';
         }
 

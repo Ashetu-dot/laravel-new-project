@@ -98,7 +98,7 @@
             border-bottom: 1px solid #374151;
             letter-spacing: -0.5px;
         }
-        
+
         .brand i {
             color: var(--primary-gold);
             margin-right: 12px;
@@ -508,7 +508,7 @@
             font-weight: 500;
             display: inline-block;
         }
-        
+
         .status-active { background-color: #d1fae5; color: #065f46; }
         .status-inactive { background-color: #fee2e2; color: #991b1b; }
 
@@ -648,7 +648,7 @@
                     <i class="ri-archive-line"></i>
                     Catalog
                 </a>
-                <a href="{{ route('admin.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                     <i class="ri-price-tag-3-line"></i>
                     Promotions
                 </a>
@@ -698,7 +698,7 @@
                     <input type="text" placeholder="Search customers...">
                 </div>
             </div>
-            
+
             <div class="header-actions">
                 <a href="{{ route('admin.help') }}" class="icon-btn">
                     <i class="ri-question-line"></i>
@@ -711,7 +711,7 @@
 
         <!-- Dashboard Content -->
         <div class="dashboard-container">
-            
+
             <div class="page-header">
                 <div>
                     <h1 class="page-title">Customers Management</h1>
@@ -795,7 +795,7 @@
                     <h3 class="table-title">Customers List</h3>
                     <span>Showing {{ $customers->firstItem() ?? 0 }} - {{ $customers->lastItem() ?? 0 }} of {{ $customers->total() ?? 0 }} customers</span>
                 </div>
-                
+
                 <table>
                     <thead>
                         <tr>
@@ -872,7 +872,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
-            
+
             if (menuToggle && sidebar) {
                 menuToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('active');

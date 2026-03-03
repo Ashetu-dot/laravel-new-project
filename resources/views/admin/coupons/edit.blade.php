@@ -396,7 +396,7 @@
             border-color: var(--danger-color);
         }
 
-        .form-control[type="date"], 
+        .form-control[type="date"],
         .form-control[type="datetime-local"] {
             color-scheme: light;
         }
@@ -727,7 +727,7 @@
 
             <div class="nav-group">
                 <div class="nav-label">MARKETING</div>
-                <a href="{{ route('admin.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                     <i class="ri-megaphone-line"></i> Promotions
                 </a>
                 <a href="{{ route('admin.coupons') }}" class="nav-item active">
@@ -851,10 +851,10 @@
                                 <i class="ri-coupon-line"></i> Coupon Code
                             </label>
                             <div class="input-group">
-                                <input type="text" 
-                                       id="code" 
-                                       name="code" 
-                                       class="form-control @error('code') error @enderror" 
+                                <input type="text"
+                                       id="code"
+                                       name="code"
+                                       class="form-control @error('code') error @enderror"
                                        placeholder="e.g., SUMMER2024"
                                        value="{{ old('code', $coupon->code) }}"
                                        required>
@@ -892,10 +892,10 @@
                                 <i class="ri-percent-line"></i> Discount Value (%)
                             </label>
                             <div class="input-group">
-                                <input type="number" 
-                                       id="value" 
-                                       name="value" 
-                                       class="form-control @error('value') error @enderror" 
+                                <input type="number"
+                                       id="value"
+                                       name="value"
+                                       class="form-control @error('value') error @enderror"
                                        placeholder="20"
                                        min="0.01"
                                        step="0.01"
@@ -917,10 +917,10 @@
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">ETB</span>
-                                <input type="number" 
-                                       id="max_discount_amount" 
-                                       name="max_discount_amount" 
-                                       class="form-control" 
+                                <input type="number"
+                                       id="max_discount_amount"
+                                       name="max_discount_amount"
+                                       class="form-control"
                                        placeholder="1000"
                                        min="0"
                                        step="0.01"
@@ -941,10 +941,10 @@
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">ETB</span>
-                                <input type="number" 
-                                       id="min_order_amount" 
-                                       name="min_order_amount" 
-                                       class="form-control" 
+                                <input type="number"
+                                       id="min_order_amount"
+                                       name="min_order_amount"
+                                       class="form-control"
                                        placeholder="0 for no minimum"
                                        min="0"
                                        step="0.01"
@@ -963,10 +963,10 @@
                             <label for="expires_at" class="form-label">
                                 <i class="ri-calendar-line"></i> Expiry Date
                             </label>
-                            <input type="datetime-local" 
-                                   id="expires_at" 
-                                   name="expires_at" 
-                                   class="form-control @error('expires_at') error @enderror" 
+                            <input type="datetime-local"
+                                   id="expires_at"
+                                   name="expires_at"
+                                   class="form-control @error('expires_at') error @enderror"
                                    value="{{ old('expires_at', $coupon->expires_at ? $coupon->expires_at->format('Y-m-d\TH:i') : now()->addDays(30)->format('Y-m-d\TH:i')) }}"
                                    required>
                             <small class="help-text">When this coupon expires</small>
@@ -1007,10 +1007,10 @@
                             <label for="max_uses" class="form-label">
                                 <i class="ri-group-line"></i> Maximum Total Uses
                             </label>
-                            <input type="number" 
-                                   id="max_uses" 
-                                   name="max_uses" 
-                                   class="form-control" 
+                            <input type="number"
+                                   id="max_uses"
+                                   name="max_uses"
+                                   class="form-control"
                                    placeholder="0 for unlimited"
                                    min="0"
                                    value="{{ old('max_uses', $coupon->max_uses) }}">
@@ -1027,10 +1027,10 @@
                             <label for="per_user_limit" class="form-label">
                                 <i class="ri-user-line"></i> Uses Per Customer
                             </label>
-                            <input type="number" 
-                                   id="per_user_limit" 
-                                   name="per_user_limit" 
-                                   class="form-control" 
+                            <input type="number"
+                                   id="per_user_limit"
+                                   name="per_user_limit"
+                                   class="form-control"
                                    placeholder="1"
                                    min="0"
                                    value="{{ old('per_user_limit', $coupon->per_user_limit ?? 1) }}">
@@ -1093,9 +1093,9 @@
                             <label class="form-label">
                                 <i class="ri-user-line"></i> Assign to Specific User (Optional)
                             </label>
-                            <input type="text" 
-                                   id="user_search" 
-                                   class="form-control" 
+                            <input type="text"
+                                   id="user_search"
+                                   class="form-control"
                                    placeholder="Search for a user by email or name..."
                                    autocomplete="off"
                                    value="{{ $coupon->user ? $coupon->user->name . ' (' . $coupon->user->email . ')' : '' }}">
@@ -1115,9 +1115,9 @@
                             <label for="description" class="form-label">
                                 <i class="ri-file-text-line"></i> Description
                             </label>
-                            <textarea id="description" 
-                                      name="description" 
-                                      class="form-control @error('description') error @enderror" 
+                            <textarea id="description"
+                                      name="description"
+                                      class="form-control @error('description') error @enderror"
                                       placeholder="Describe what this coupon is for...">{{ old('description', $coupon->description) }}</textarea>
                             <small class="help-text">Internal description (not visible to customers)</small>
                             @error('description')
@@ -1180,7 +1180,7 @@
             const valueLabel = document.getElementById('valueLabel');
             const valueSuffix = document.getElementById('valueSuffix');
             const maxDiscountField = document.getElementById('maxDiscountField');
-            
+
             if (type === 'percentage') {
                 valueLabel.innerHTML = '<i class="ri-percent-line"></i> Discount Value (%)';
                 valueSuffix.textContent = '%';
@@ -1196,7 +1196,7 @@
         function toggleVendorSelection() {
             const scope = document.querySelector('input[name="vendor_scope"]:checked').value;
             const vendorSelection = document.getElementById('vendorSelection');
-            
+
             vendorSelection.style.display = scope === 'specific' ? 'block' : 'none';
         }
 
@@ -1207,7 +1207,7 @@
             for (let i = 0; i < 8; i++) {
                 code += characters.charAt(Math.floor(Math.random() * characters.length));
             }
-            
+
             // Add prefix based on type
             const type = document.getElementById('type').value;
             if (type === 'percentage') {
@@ -1215,7 +1215,7 @@
             } else {
                 code = 'FIX' + code;
             }
-            
+
             document.getElementById('code').value = code;
         }
 
@@ -1224,12 +1224,12 @@
         document.getElementById('user_search').addEventListener('input', function() {
             clearTimeout(searchTimeout);
             const query = this.value;
-            
+
             if (query.length < 2) {
                 document.getElementById('user_search_results').style.display = 'none';
                 return;
             }
-            
+
             searchTimeout = setTimeout(() => {
                 fetch(`/admin/users/search?q=${encodeURIComponent(query)}`, {
                     headers: {
@@ -1279,12 +1279,12 @@
         // Form submission
         document.getElementById('couponForm').addEventListener('submit', function(e) {
             const submitBtn = document.getElementById('submitBtn');
-            
+
             if (submitBtn.disabled) {
                 e.preventDefault();
                 return;
             }
-            
+
             // Validate value
             const value = document.getElementById('value').value;
             if (!value || value <= 0) {
@@ -1292,7 +1292,7 @@
                 alert('Please enter a valid discount value');
                 return;
             }
-            
+
             // Validate expiry
             const expiresAt = new Date(document.getElementById('expires_at').value);
             if (expiresAt <= new Date()) {
@@ -1300,7 +1300,7 @@
                 alert('Expiry date must be in the future');
                 return;
             }
-            
+
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Updating...';
             document.getElementById('loadingOverlay').style.display = 'flex';

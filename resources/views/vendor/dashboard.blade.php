@@ -1225,7 +1225,7 @@
         .bg-purple-light { background-color: #f5f3ff; color: var(--accent-purple); }
         .bg-red-light { background-color: #fee2e2; color: var(--accent-red); }
         .bg-gold-light { background-color: #fef3e7; color: var(--primary-gold); }
-        
+
         /* Alert Styles */
         .alert {
             padding: 16px;
@@ -1566,14 +1566,14 @@
 
             @if(session('success'))
                 <div class="alert alert-success">
-                    <i class="ri-checkbox-circle-line"></i> 
+                    <i class="ri-checkbox-circle-line"></i>
                     {{ session('success') }}
                 </div>
             @endif
 
             @if(session('error'))
                 <div class="alert alert-error">
-                    <i class="ri-error-warning-line"></i> 
+                    <i class="ri-error-warning-line"></i>
                     {{ session('error') }}
                 </div>
             @endif
@@ -1803,7 +1803,7 @@
             <div class="pagination">
                 {{ $recentOrders->links() }}
             </div>
-            @endif  
+            @endif
 
             <!-- Recent Followers -->
             <div class="followers-section" style="margin-top: 40px;">
@@ -1880,7 +1880,7 @@
             document.getElementById('addProductModal').classList.add('active');
             document.body.style.overflow = 'hidden';
             resetForm();
-            
+
             // Load categories if needed
             loadCategories();
         }
@@ -1903,7 +1903,7 @@
         // Load categories for dropdown
         function loadCategories() {
             const categorySelect = document.getElementById('productCategory');
-            
+
             // Only load if empty
             if (categorySelect.options.length <= 1) {
                 fetch('{{ route("vendor.categories.list") }}')
@@ -2004,7 +2004,7 @@
                     previewItem.style.overflow = 'hidden';
                     previewItem.style.aspectRatio = '1';
                     previewItem.style.border = '1px solid var(--border-color)';
-                    
+
                     previewItem.innerHTML = `
                         <img src="${e.target.result}" alt="Preview ${index + 1}" style="width: 100%; height: 100%; object-fit: cover;">
                         <button type="button" class="image-preview-remove" onclick="removeImage(${index})" style="position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; border-radius: 50%; background-color: rgba(0,0,0,0.5); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
@@ -2106,19 +2106,19 @@
             const dt = new DataTransfer();
             const fileInput = document.getElementById('fileInput');
             const files = Array.from(fileInput.files);
-            
+
             files.splice(index, 1);
-            
+
             files.forEach(file => {
                 dt.items.add(file);
             });
-            
+
             fileInput.files = dt.files;
-            
+
             // Refresh preview
             const previewContainer = document.getElementById('imagePreviewContainer');
             previewContainer.innerHTML = '';
-            
+
             Array.from(fileInput.files).forEach((file, i) => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -2129,7 +2129,7 @@
                     previewItem.style.overflow = 'hidden';
                     previewItem.style.aspectRatio = '1';
                     previewItem.style.border = '1px solid var(--border-color)';
-                    
+
                     previewItem.innerHTML = `
                         <img src="${e.target.result}" alt="Preview ${i + 1}" style="width: 100%; height: 100%; object-fit: cover;">
                         <button type="button" class="image-preview-remove" onclick="removeImage(${i})" style="position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; border-radius: 50%; background-color: rgba(0,0,0,0.5); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
@@ -2211,7 +2211,7 @@
                 if (data.success) {
                     showToast('Success!', `Order #${orderId} status updated to ${newStatus}`, 'success');
                     closeStatusModal();
-                    
+
                     // Update the status in the table
                     const row = event.target.closest('tr');
                     if (row) {
@@ -2222,7 +2222,7 @@
                             row.dataset.status = newStatus;
                         }
                     }
-                    
+
                     // Reload after 1 second to refresh data
                     setTimeout(() => {
                         location.reload();
@@ -2241,7 +2241,7 @@
             if (e.key === 'Enter') {
                 const searchTerm = this.value.toLowerCase();
                 const rows = document.querySelectorAll('.order-row');
-                
+
                 rows.forEach(row => {
                     const text = row.textContent.toLowerCase();
                     if (text.includes(searchTerm) || searchTerm === '') {

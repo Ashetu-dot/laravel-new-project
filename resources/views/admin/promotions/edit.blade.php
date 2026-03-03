@@ -747,7 +747,7 @@
 
             <div class="nav-group">
                 <div class="nav-label">MARKETING</div>
-                <a href="{{ route('admin.promotions') }}" class="nav-item active">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item active">
                     <i class="ri-megaphone-line"></i> Promotions
                 </a>
                 <a href="{{ route('admin.coupons') }}" class="nav-item">
@@ -827,9 +827,9 @@
                     </h1>
                     <p>Update promotion details and settings</p>
                 </div>
-                <a href="{{ route('admin.promotions') }}" class="btn btn-secondary">
+                {{--  <a href="{{ route('admin.promotions') }}" class="btn btn-secondary">
                     <i class="ri-arrow-left-line"></i> Back to Promotions
-                </a>
+                </a>  --}}
             </div>
 
             <!-- Alert Messages -->
@@ -1237,7 +1237,7 @@
 
                     <!-- Form Actions -->
                     <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ route('admin.promotions') }}'">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ route('admin.promotions.promotions') }}'">
                             <i class="ri-close-line"></i> Cancel
                         </button>
                         <button type="submit" class="btn btn-primary" id="submitBtn">
@@ -1336,7 +1336,7 @@
         function loadProducts() {
             const productsList = document.getElementById('productsList');
             
-            fetch('{{ route("admin.products.list") }}', {
+            fetch('{{ route("admin.promotions.products.list.promotions") }}', {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json'
