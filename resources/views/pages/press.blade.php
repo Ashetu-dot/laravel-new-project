@@ -1470,8 +1470,7 @@
                 'help_center' => 'Help Center',
                 'invite_friends' => 'Invite Friends',
                 'list_service' => 'List your service',
-                'vendor_resources' => 'Vendor Resources',
-                'success_stories' => 'Success Stories',
+
                 'community' => 'Community',
                 'rights_reserved' => 'All rights reserved',
             ],
@@ -1535,8 +1534,7 @@
                 'help_center' => 'የእርዳታ ማዕከል',
                 'invite_friends' => 'ጓደኞችን ይጋብዙ',
                 'list_service' => 'አገልግሎትዎን ይዘርዝሩ',
-                'vendor_resources' => 'የነጋዴ መርጃዎች',
-                'success_stories' => 'የስኬት ታሪኮች',
+
                 'community' => 'ማህበረሰብ',
                 'rights_reserved' => 'መብቱ በህግ የተጠበቀ ነው',
             ],
@@ -1600,8 +1598,7 @@
                 'help_center' => 'Gargaarsa Giddugala',
                 'invite_friends' => 'Hiriyoota waami',
                 'list_service' => 'Tajaajila kee galmeessi',
-                'vendor_resources' => 'Qabeenya Gurgurtaa',
-                'success_stories' => 'Seenaa Milkaa\'inaa',
+                
                 'community' => 'Hawaasa',
                 'rights_reserved' => 'Mirgiwwan hundi eegaman',
             ],
@@ -2166,25 +2163,24 @@
                         <li><a href="{{ route('about') }}">{{ $t['about_us'] }}</a></li>
                         <li><a href="{{ route('careers') }}">{{ $t['careers'] }}</a></li>
                         <li><a href="{{ route('press') }}">{{ $t['press'] }}</a></li>
-                        <li><a href="#">{{ $t['blog'] ?? 'Blog' }}</a></li>
+                        <li><a href="{{ route('blog') }}">{{ $t['blog'] ?? 'Blog' }}</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
                     <h4>{{ $t['discover'] }}</h4>
                     <ul>
                         <li><a href="{{ route('how-it-works') }}">{{ $t['how_it_works'] }}</a></li>
-                        <li><a href="#">{{ $t['trust_safety'] }}</a></li>
-                        <li><a href="#">{{ $t['help_center'] }}</a></li>
-                        <li><a href="#">{{ $t['invite_friends'] }}</a></li>
+                        <li><a href="{{ route('trust-safety') }}">{{ $t['trust_safety'] }}</a></li>
+                        <li><a href="{{ route('help-center') }}">{{ $t['help_center'] }}</a></li>
+                        <li><a href="{{ route('invite') }}">{{ $t['invite_friends'] }}</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
                     <h4>{{ $t['for_vendors_title'] }}</h4>
                     <ul>
                         <li><a href="{{ route('list-service') }}">{{ $t['list_service'] }}</a></li>
-                        <li><a href="#">{{ $t['vendor_resources'] }}</a></li>
-                        <li><a href="#">{{ $t['success_stories'] }}</a></li>
-                        <li><a href="#">{{ $t['community'] }}</a></li>
+
+                        <li><a href="{{ route('community') }}">{{ $t['community'] }}</a></li>
                     </ul>
                 </div>
             </div>
@@ -2211,9 +2207,9 @@
                 profileTrigger.addEventListener('click', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
-                    
+
                     profileDropdown.classList.toggle('active');
-                    
+
                     if (dropdownArrow) {
                         dropdownArrow.style.transform = profileDropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
                     }
@@ -2242,9 +2238,9 @@
                 languageToggle.addEventListener('click', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
-                    
+
                     languageSubmenu.classList.toggle('show');
-                    
+
                     if (languageArrow) {
                         languageArrow.style.transform = languageSubmenu.classList.contains('show') ? 'rotate(90deg)' : 'rotate(0deg)';
                     }
@@ -2308,12 +2304,12 @@
                 .then(data => {
                     if (data.success) {
                         document.body.setAttribute('data-theme', data.theme);
-                        
+
                         const themeText = document.getElementById('themeText');
                         if (themeText) {
                             themeText.textContent = data.theme === 'dark' ? '{{ $t["light_mode"] }}' : '{{ $t["dark_mode"] }}';
                         }
-                        
+
                         document.querySelectorAll('.theme-toggle i, [onclick="toggleTheme()"] i').forEach(icon => {
                             icon.className = data.theme === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
                         });

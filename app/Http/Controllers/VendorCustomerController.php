@@ -463,7 +463,8 @@ class VendorCustomerController extends Controller
         try {
             $vendorCount = User::where('role', 'vendor')->where('is_active', true)->count();
             $customerCount = User::where('role', 'customer')->where('is_active', true)->count();
-            $bookingCount = 5000; // Example data
+            // use Order model to calculate real booking count
+            $bookingCount = Order::count();
             $cityCount = User::where('role', 'vendor')
                             ->whereNotNull('city')
                             ->distinct('city')
@@ -481,7 +482,7 @@ class VendorCustomerController extends Controller
 
             $vendorCount = 500;
             $customerCount = 10000;
-            $bookingCount = 5000;
+            $bookingCount = Order::count() ?: 5000;
             $cityCount = 15;
 
             return view('pages.how-it-works', compact(
@@ -530,52 +531,52 @@ class VendorCustomerController extends Controller
         }
     }
 
-    /**
-     * Display vendor resources page.
-     */
-    public function vendorResources()
-    {
-        $telegramMembers = 2500;
-        $whatsappMembers = 1800;
+    // /**
+    //  * Display vendor resources page.
+    //  */
+    // public function vendorResources()
+    // {
+    //     $telegramMembers = 2500;
+    //     $whatsappMembers = 1800;
 
-        return view('pages.vendor-resources', compact('telegramMembers', 'whatsappMembers'));
-    }
+    //     return view('pages.vendor-resources', compact('telegramMembers', 'whatsappMembers'));
+    // }
 
-    /**
-     * Display success stories page.
-     */
-    public function successStories()
-    {
-        try {
-            $vendorCount = User::where('role', 'vendor')->where('is_active', true)->count();
-            $totalEarnings = Order::whereIn('status', ['completed', 'delivered'])->sum('total_amount');
-            $totalEarningsFormatted = $totalEarnings > 0 ? number_format($totalEarnings) . '+' : '5M+';
-            $happyCustomers = User::where('role', 'customer')->where('is_active', true)->count();
-            $avgGrowth = '150%';
+    // /**
+    //  * Display success stories page.
+    //  */
+    // public function successStories()
+    // {
+    //     try {
+    //         $vendorCount = User::where('role', 'vendor')->where('is_active', true)->count();
+    //         $totalEarnings = Order::whereIn('status', ['completed', 'delivered'])->sum('total_amount');
+    //         $totalEarningsFormatted = $totalEarnings > 0 ? number_format($totalEarnings) . '+' : '5M+';
+    //         $happyCustomers = User::where('role', 'customer')->where('is_active', true)->count();
+    //         $avgGrowth = '150%';
 
-            return view('pages.success-stories', compact(
-                'vendorCount',
-                'avgGrowth',
-                'totalEarningsFormatted',
-                'happyCustomers'
-            ));
+    //         return view('pages.success-stories', compact(
+    //             'vendorCount',
+    //             'avgGrowth',
+    //             'totalEarningsFormatted',
+    //             'happyCustomers'
+    //         ));
 
-        } catch (\Exception $e) {
-            Log::error('Success stories page error: ' . $e->getMessage());
+    //     } catch (\Exception $e) {
+    //         Log::error('Success stories page error: ' . $e->getMessage());
 
-            $vendorCount = 500;
-            $avgGrowth = '150%';
-            $totalEarningsFormatted = '5M+';
-            $happyCustomers = 10000;
+    //         $vendorCount = 500;
+    //         $avgGrowth = '150%';
+    //         $totalEarningsFormatted = '5M+';
+    //         $happyCustomers = 10000;
 
-            return view('pages.success-stories', compact(
-                'vendorCount',
-                'avgGrowth',
-                'totalEarningsFormatted',
-                'happyCustomers'
-            ));
-        }
-    }
+    //         return view('pages.success-stories', compact(
+    //             'vendorCount',
+    //             'avgGrowth',
+    //             'totalEarningsFormatted',
+    //             'happyCustomers'
+    //         ));
+    //     }
+    // }
 
     /**
      * Display community page.
@@ -2028,7 +2029,7 @@ public function searchVendors(Request $request)
         $rating = $vendor->rating ?? 0;
         $fullStars = floor($rating);
         $halfStar = ($rating - $fullStars) >= 0.5;
-        
+
         $stars = '';
         for ($i = 1; $i <= 5; $i++) {
             if ($i <= $fullStars) {
@@ -2094,7 +2095,7 @@ public function searchVendors(Request $request)
 
 
 
-    
+
 
     /**
      * Get vendor by ID for AJAX.
@@ -2209,7 +2210,7 @@ public function contactSubmit(Request $request)
     try {
         // Here you would send email or save to database
         // Mail::to('support@vendora.com')->send(new ContactFormMail($request->all()));
-        
+
         // Log the contact submission
         Log::info('Contact form submission', [
             'name' => $request->name,
@@ -2232,7 +2233,7 @@ public function contactSubmit(Request $request)
 
 
 
-    
+
 
     // API Methods
     public function apiVendors(Request $request)

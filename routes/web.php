@@ -98,11 +98,11 @@ Route::get('/features', [VendorCustomerController::class, 'features'])->name('fe
 // List Service
 Route::get('/list-service', [VendorCustomerController::class, 'listService'])->name('list-service');
 
-// Vendor Resources
-Route::get('/vendor-resources', [VendorCustomerController::class, 'vendorResources'])->name('vendor-resources');
+// // Vendor Resources
+// Route::get('/vendor-resources', [VendorCustomerController::class, 'vendorResources'])->name('vendor-resources');
 
-// Success Stories
-Route::get('/success-stories', [VendorCustomerController::class, 'successStories'])->name('success-stories');
+// // Success Stories
+// Route::get('/success-stories', [VendorCustomerController::class, 'successStories'])->name('success-stories');
 
 // Community
 Route::get('/community', [VendorCustomerController::class, 'community'])->name('community');
@@ -303,7 +303,9 @@ Route::middleware(['auth', 'verified', 'role:vendor'])->prefix('vendor')->name('
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
-    Route::get('/categories-list', [CategoryController::class, 'getCategories'])->name('categories.list.vendor');
+    // AJAX endpoint for fetching categories (used in vendor dashboard)
+    // kept naming consistent with other vendor list routes
+    Route::get('/categories-list', [CategoryController::class, 'getCategories'])->name('categories.list');
 
 
 
@@ -624,22 +626,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/messages', [App\Http\Controllers\MessageController::class, 'store'])->name('messages.store');
         Route::get('/messages/{id}', [App\Http\Controllers\MessageController::class, 'show'])->name('messages.show');
         Route::post('/messages/send', [App\Http\Controllers\MessageController::class, 'send'])->name('messages.send');
+        // AJAX conversation endpoint used by admin interface
+        Route::get('/messages/conversation/{userId}', [App\Http\Controllers\MessageController::class, 'getConversation'])->name('messages.conversation');
+        Route::get('/messages/unread/count', [App\Http\Controllers\MessageController::class, 'getUnreadCount'])->name('messages.unread.count');
         Route::get('/messages/fetch/{userId}', [App\Http\Controllers\MessageController::class, 'fetchMessages'])->name('messages.fetch');
         Route::post('/messages/mark-read/{id}', [App\Http\Controllers\MessageController::class, 'markAsRead'])->name('messages.mark-read');
         Route::delete('/messages/{id}', [App\Http\Controllers\MessageController::class, 'destroy'])->name('messages.destroy');
 
-        
+
           // Add support tickets routes
         Route::get('/support-tickets', [AdminController::class, 'supportTickets'])->name('support-tickets');
         Route::get('/support-tickets/{id}', [AdminController::class, 'showSupportTicket'])->name('support-tickets.show');
         Route::post('/support-tickets/{id}/reply', [AdminController::class, 'replySupportTicket'])->name('support-tickets.reply');
         Route::post('/support-tickets/{id}/status', [AdminController::class, 'updateSupportTicketStatus'])->name('support-tickets.status');
-   
+
         // Video Tutorials
    Route::get('/video-tutorials', [AdminController::class, 'videoTutorials'])->name('video-tutorials');
    Route::get('/video-tutorials/{id}/details', [AdminController::class, 'getVideoDetails'])->name('video-tutorials.details');
    Route::get('/video-tutorials/{id}/related', [AdminController::class, 'getRelatedVideos'])->name('video-tutorials.related');
-      
+
    // ======== HELP & SUPPORT ========
         Route::get('/help', [AdminController::class, 'help'])->name('help');
         Route::get('/documentation', [AdminController::class, 'documentation'])->name('documentation');

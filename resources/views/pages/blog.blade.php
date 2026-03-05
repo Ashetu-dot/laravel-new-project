@@ -1473,26 +1473,26 @@
             .navbar { padding: 16px 30px; }
             .brand { font-size: 22px; }
             .nav-links { gap: 30px; }
-            
+
             .blog-layout {
                 grid-template-columns: 1fr;
             }
-            
+
             .blog-sidebar {
                 position: static;
                 margin-top: 40px;
             }
-            
+
             .featured-post {
                 grid-template-columns: 1fr;
             }
-            
+
             .footer-links { gap: 50px; }
         }
 
         @media screen and (max-width: 900px) {
             .hero h1 { font-size: 40px; }
-            
+
             .blog-grid {
                 grid-template-columns: 1fr;
             }
@@ -1519,7 +1519,7 @@
             .featured-content {
                 padding: 30px;
             }
-            
+
             .featured-title {
                 font-size: 24px;
             }
@@ -1648,8 +1648,8 @@
                 'help_center' => 'Help Center',
                 'invite_friends' => 'Invite Friends',
                 'list_service' => 'List your service',
-                'vendor_resources' => 'Vendor Resources',
-                'success_stories' => 'Success Stories',
+
+
                 'community' => 'Community',
                 'rights_reserved' => 'All rights reserved',
             ],
@@ -1712,8 +1712,7 @@
                 'help_center' => 'የእርዳታ ማዕከል',
                 'invite_friends' => 'ጓደኞችን ይጋብዙ',
                 'list_service' => 'አገልግሎትዎን ይዘርዝሩ',
-                'vendor_resources' => 'የነጋዴ መርጃዎች',
-                'success_stories' => 'የስኬት ታሪኮች',
+
                 'community' => 'ማህበረሰብ',
                 'rights_reserved' => 'መብቱ በህግ የተጠበቀ ነው',
             ],
@@ -1776,8 +1775,6 @@
                 'help_center' => 'Gargaarsa Giddugala',
                 'invite_friends' => 'Hiriyoota waami',
                 'list_service' => 'Tajaajila kee galmeessi',
-                'vendor_resources' => 'Qabeenya Gurgurtaa',
-                'success_stories' => 'Seenaa Milkaa\'inaa',
                 'community' => 'Hawaasa',
                 'rights_reserved' => 'Mirgiwwan hundi eegaman',
             ],
@@ -2344,7 +2341,7 @@
                     <!-- Popular Posts Widget -->
                     <div class="sidebar-widget">
                         <h3 class="widget-title">{{ $t['popular_posts'] }}</h3>
-                        
+
                         @if(isset($popularPosts) && $popularPosts->count() > 0)
                             @foreach($popularPosts as $popular)
                             <div class="popular-post">
@@ -2487,18 +2484,17 @@
                     <h4>{{ $t['discover'] }}</h4>
                     <ul>
                         <li><a href="{{ route('how-it-works') }}">{{ $t['how_it_works'] }}</a></li>
-                        <li><a href="#">{{ $t['trust_safety'] }}</a></li>
-                        <li><a href="#">{{ $t['help_center'] }}</a></li>
-                        <li><a href="#">{{ $t['invite_friends'] }}</a></li>
+                        <li><a href="{{ route('trust-safety') }}">{{ $t['trust_safety'] }}</a></li>
+                        <li><a href="{{ route('help-center') }}">{{ $t['help_center'] }}</a></li>
+                        <li><a href="{{ route('invite') }}">{{ $t['invite_friends'] }}</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
                     <h4>{{ $t['for_vendors_title'] }}</h4>
                     <ul>
                         <li><a href="{{ route('list-service') }}">{{ $t['list_service'] }}</a></li>
-                        <li><a href="#">{{ $t['vendor_resources'] }}</a></li>
-                        <li><a href="#">{{ $t['success_stories'] }}</a></li>
-                        <li><a href="#">{{ $t['community'] }}</a></li>
+                       
+                        <li><a href="{{ route('community') }}">{{ $t['community'] }}</a></li>
                     </ul>
                 </div>
             </div>
@@ -2516,7 +2512,7 @@
 
     <script>
         // ==================== COMPLETE BACKEND INTEGRATION ====================
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             // Profile dropdown toggle
             const profileTrigger = document.getElementById('profileTrigger');
@@ -2527,9 +2523,9 @@
                 profileTrigger.addEventListener('click', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
-                    
+
                     profileDropdown.classList.toggle('active');
-                    
+
                     if (dropdownArrow) {
                         dropdownArrow.style.transform = profileDropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
                     }
@@ -2558,9 +2554,9 @@
                 languageToggle.addEventListener('click', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
-                    
+
                     languageSubmenu.classList.toggle('show');
-                    
+
                     if (languageArrow) {
                         languageArrow.style.transform = languageSubmenu.classList.contains('show') ? 'rotate(90deg)' : 'rotate(0deg)';
                     }
@@ -2624,12 +2620,12 @@
                 .then(data => {
                     if (data.success) {
                         document.body.setAttribute('data-theme', data.theme);
-                        
+
                         const themeText = document.getElementById('themeText');
                         if (themeText) {
                             themeText.textContent = data.theme === 'dark' ? '{{ $t["light_mode"] }}' : '{{ $t["dark_mode"] }}';
                         }
-                        
+
                         document.querySelectorAll('.theme-toggle i, [onclick="toggleTheme()"] i').forEach(icon => {
                             icon.className = data.theme === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
                         });
@@ -2638,7 +2634,7 @@
                         if (mobileThemeText && mobileThemeText.nodeType === Node.TEXT_NODE) {
                             mobileThemeText.textContent = data.theme === 'dark' ? '{{ $t["light_mode"] }}' : '{{ $t["dark_mode"] }}';
                         }
-                        
+
                         showNotification('Theme updated successfully', 'success');
                     }
                 })
@@ -2726,16 +2722,16 @@
         });
 
         // ==================== NOTIFICATION SYSTEM ====================
-        
+
         function showNotification(message, type = 'success') {
             // Remove existing notifications
             document.querySelectorAll('.notification').forEach(n => n.remove());
-            
+
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
-            
+
             const icon = type === 'success' ? 'ri-checkbox-circle-line' : (type === 'error' ? 'ri-error-warning-line' : 'ri-information-line');
-            
+
             notification.innerHTML = `
                 <div class="notification-content">
                     <i class="${icon}"></i>
@@ -2743,9 +2739,9 @@
                     <i class="ri-close-line notification-close" onclick="this.closest('.notification').remove()"></i>
                 </div>
             `;
-            
+
             document.body.appendChild(notification);
-            
+
             setTimeout(() => {
                 notification.style.animation = 'slideOutRight 0.3s ease';
                 setTimeout(() => notification.remove(), 300);
@@ -2753,17 +2749,17 @@
         }
 
         // ==================== BLOG FUNCTIONALITY ====================
-        
+
         // Handle search
         window.handleSearch = function(e) {
             e.preventDefault();
             const query = document.getElementById('searchInput').value.trim();
-            
+
             if (query) {
                 // In a real implementation, this would redirect to search results
                 // window.location.href = '/blog/search?q=' + encodeURIComponent(query);
                 showNotification('Searching for: ' + query, 'info');
-                
+
                 // Simulate search results
                 setTimeout(() => {
                     showNotification('Found 5 articles matching "' + query + '"', 'success');
@@ -2776,7 +2772,7 @@
         // Handle read more clicks
         window.handleReadMore = function(e, slug) {
             e.preventDefault();
-            
+
             if (slug) {
                 // In a real implementation, this would go to the post page
                 // window.location.href = '/blog/' + slug;
@@ -2789,7 +2785,7 @@
         // Handle category clicks
         window.handleCategory = function(e, slug) {
             e.preventDefault();
-            
+
             if (slug) {
                 // In a real implementation, this would filter by category
                 // window.location.href = '/blog/category/' + slug;
@@ -2800,7 +2796,7 @@
         // Handle tag clicks
         window.handleTag = function(e, slug) {
             e.preventDefault();
-            
+
             if (slug) {
                 // In a real implementation, this would filter by tag
                 // window.location.href = '/blog/tag/' + slug;
@@ -2811,13 +2807,13 @@
         // Handle pagination
         window.handlePagination = function(e, page) {
             e.preventDefault();
-            
+
             if (page === 'next') {
                 showNotification('Loading next page...', 'info');
             } else {
                 showNotification('Loading page ' + page + '...', 'info');
             }
-            
+
             // Simulate page load
             setTimeout(() => {
                 showNotification('Page ' + page + ' loaded', 'success');
@@ -2828,23 +2824,23 @@
         window.handleNewsletter = function(e) {
             e.preventDefault();
             const email = document.getElementById('newsletterEmail').value.trim();
-            
+
             if (!email) {
                 showNotification('Please enter your email address', 'error');
                 return;
             }
-            
+
             if (!isValidEmail(email)) {
                 showNotification('Please enter a valid email address', 'error');
                 return;
             }
-            
+
             // Show loading state
             const btn = e.target.querySelector('button[type="submit"]');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<span class="spinner"></span> Submitting...';
             btn.disabled = true;
-            
+
             // Simulate API call
             setTimeout(() => {
                 // In a real implementation, this would send to the server
@@ -2872,7 +2868,7 @@
                 //     btn.innerHTML = originalText;
                 //     btn.disabled = false;
                 // });
-                
+
                 // Simulated success
                 showNotification('{{ $currentLang == 'am' ? 'ለብሎግ ጋዜጣችን ስለተመዘገቡ እናመሰግናለን!' : ($currentLang == 'om' ? 'Gaazexaa bilogii keenyaaf galmeessaniif galatoomi!' : 'Thank you for subscribing to our blog newsletter!') }}', 'success');
                 e.target.reset();
@@ -2890,7 +2886,7 @@
         // Load more posts (infinite scroll simulation)
         window.loadMorePosts = function() {
             showNotification('Loading more articles...', 'info');
-            
+
             setTimeout(() => {
                 showNotification('3 more articles loaded', 'success');
             }, 1500);

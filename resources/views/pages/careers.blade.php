@@ -1929,8 +1929,8 @@
                                 <div class="requirements-title">{{ $t['requirements'] }}:</div>
                                 <ul class="requirements-list">
                                     @php
-                                        $requirements = is_string($position->requirements) 
-                                            ? json_decode($position->requirements, true) 
+                                        $requirements = is_string($position->requirements)
+                                            ? json_decode($position->requirements, true)
                                             : (is_array($position->requirements) ? $position->requirements : []);
                                     @endphp
                                     @foreach($requirements as $requirement)
@@ -2254,8 +2254,7 @@
                     <h4>For Vendors</h4>
                     <ul>
                         <li><a href="{{ route('list-service') }}">List your service</a></li>
-                        <li><a href="{{ route('vendor-resources') }}">Vendor Resources</a></li>
-                        <li><a href="{{ route('success-stories') }}">Success Stories</a></li>
+
                         <li><a href="{{ route('community') }}">Community</a></li>
                     </ul>
                 </div>
@@ -2283,9 +2282,9 @@
                 profileTrigger.addEventListener('click', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
-                    
+
                     profileDropdown.classList.toggle('active');
-                    
+
                     if (dropdownArrow) {
                         dropdownArrow.style.transform = profileDropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
                     }
@@ -2314,9 +2313,9 @@
                 languageToggle.addEventListener('click', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
-                    
+
                     languageSubmenu.classList.toggle('show');
-                    
+
                     if (languageArrow) {
                         languageArrow.style.transform = languageSubmenu.classList.contains('show') ? 'rotate(90deg)' : 'rotate(0deg)';
                     }
@@ -2380,12 +2379,12 @@
                 .then(data => {
                     if (data.success) {
                         document.body.setAttribute('data-theme', data.theme);
-                        
+
                         const themeText = document.getElementById('themeText');
                         if (themeText) {
                             themeText.textContent = data.theme === 'dark' ? '{{ $t["light_mode"] }}' : '{{ $t["dark_mode"] }}';
                         }
-                        
+
                         document.querySelectorAll('.theme-toggle i, [onclick="toggleTheme()"] i').forEach(icon => {
                             icon.className = data.theme === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
                         });

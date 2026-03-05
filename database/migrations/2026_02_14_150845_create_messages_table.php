@@ -6,7 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
@@ -18,13 +21,23 @@ return new class extends Migration
             $table->timestamp('read_at')->nullable();
             $table->foreignId('parent_id')->nullable()->constrained('messages')->onDelete('cascade');
             $table->timestamps();
+            $table->softDeletes(); // Adds deleted_at column for soft deletes
             
+            // Indexes for better performance
             $table->index(['receiver_id', 'is_read']);
             $table->index('created_at');
+            $table->index('deleted_at');
+            
+            // Composite indexes for common queries
+            $table->index(['sender_id', 'receiver_id', 'deleted_at']);
+            $table->index(['parent_id', 'deleted_at']);
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
         Schema::dropIfExists('messages');
     }

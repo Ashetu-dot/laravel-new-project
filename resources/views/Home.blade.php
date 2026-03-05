@@ -2187,8 +2187,8 @@
                     <h4>{{ $t['for_vendors_title'] }}</h4>
                     <ul>
                         <li><a href="{{ route('list-service') }}">{{ $t['list_service'] }}</a></li>
-                        <li><a href="{{ route('vendor-resources') }}">{{ $t['vendor_resources'] }}</a></li>
-                        <li><a href="{{ route('success-stories') }}">{{ $t['success_stories'] }}</a></li>
+                      
+
                         <li><a href="{{ route('community') }}">{{ $t['community'] }}</a></li>
                     </ul>
                 </div>

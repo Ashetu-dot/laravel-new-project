@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ session('locale', 'en') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -47,6 +47,24 @@
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
+            --transition: all 0.3s ease;
+        }
+
+        /* Dark mode variables */
+        body.dark-mode {
+            --primary-color: #B88E3F;
+            --primary-hover: #9c7832;
+            --text-dark: #f1f5f9;
+            --text-light: #cbd5e1;
+            --bg-light: #0f172a;
+            --white: #1e293b;
+            --border-color: #334155;
+            --error-color: #f87171;
+            --success-color: #4ade80;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 8px 30px rgba(184, 142, 63, 0.25);
         }
 
         * {
@@ -72,6 +90,12 @@
 
         main {
             flex: 1;
+        }
+
+        /* Language-specific adjustments */
+        [lang="am"], [lang="om"] {
+            font-family: 'Noto Sans Ethiopic', 'Inter', sans-serif;
+            line-height: 1.8;
         }
 
         /* Ethiopian Flag Colors Accent */
@@ -128,6 +152,80 @@
             background-color: #dbeafe;
             color: #1e40af;
             border: 1px solid #bfdbfe;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .theme-lang-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: var(--light-gray);
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 20px;
+        }
+
+        .toggle-btn-icon:hover {
+            background-color: var(--primary-gold);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .language-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-hover);
+            min-width: 150px;
+            display: none;
+            z-index: 100;
+        }
+
+        /* allow opening on click via .open class (JS toggles this) */
+        .language-selector.open .language-dropdown {
+            display: block;
+        }
+
+        /* keep hover as graceful fallback */
+        .language-selector:hover .language-dropdown {
+            display: block;
+        }
+
+        .language-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .language-option:hover {
+            background-color: var(--light-gray);
+            color: var(--primary-gold);
         }
 
         /* Navigation */
@@ -260,6 +358,29 @@
 
         .mobile-menu .nav-item:last-child {
             border-bottom: none;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .lang-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .lang-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
         }
 
         /* Page Header */
@@ -1002,6 +1123,125 @@
             .footer-links { flex-direction: column; gap: 30px; }
             .bottom-bar { flex-direction: column; gap: 16px; align-items: flex-start; }
         }
+
+        /* Hero / Page Header improvements */
+        .page-header {
+            position: relative;
+            min-height: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            background-size: cover;
+            background-position: center center;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.45));
+            pointer-events: none;
+        }
+
+        .page-header-inner {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 60px 24px;
+            max-width: 980px;
+        }
+
+        .page-header h1 {
+            font-size: 44px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+            line-height: 1.05;
+        }
+
+        .page-header h1 span { color: var(--primary-color); }
+
+        .page-header p {
+            font-size: 16px;
+            opacity: 0.95;
+            max-width: 820px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .hero-cta {
+            display: inline-block;
+            margin-top: 20px;
+            background: rgba(255,255,255,0.12);
+            color: white;
+            padding: 12px 26px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: background 0.25s, transform 0.15s;
+        }
+
+        .hero-cta:hover { background: rgba(255,255,255,0.22); transform: translateY(-3px); }
+
+        /* subtle background movement */
+        @keyframes bgShift {
+            0% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.03) translateY(-6px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+
+        .page-header .bg-img {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center center;
+            filter: saturate(1.05) contrast(1.02) brightness(0.85);
+            transform-origin: center;
+            animation: bgShift 18s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        /* Mirror home/careers hero styles */
+        .hero {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px;
+            text-align: center;
+            min-height: 480px;
+            overflow: hidden;
+            color: white;
+        }
+
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 1s ease-in-out;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.35) 100%);
+            z-index: -1;
+        }
+
+        .hero h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 800; margin-bottom: 16px; text-shadow: 2px 2px 6px rgba(0,0,0,0.35); }
+        .hero p { font-size: 18px; color: rgba(255,255,255,0.95); max-width: 760px; margin: 0 auto; text-shadow: 1px 1px 2px rgba(0,0,0,0.25); }
     </style>
 </head>
 <body>
@@ -1031,6 +1271,211 @@
         </div>
     @endif
 
+    @php
+        $currentLang = session('locale', 'en');
+        $currentTheme = session('theme', 'light');
+        $translations = [
+            'en' => [
+                'categories' => 'Categories',
+                'features' => 'Features',
+                'for_vendors' => 'For Vendors',
+                'log_in' => 'Log In',
+                'sign_up' => 'Sign Up',
+                'language' => 'Language',
+                'english' => 'English',
+                'amharic' => 'Amharic',
+                'oromo' => 'Afan Oromo',
+                'dark_mode' => 'Dark Mode',
+                'light_mode' => 'Light Mode',
+                'dashboard' => 'Dashboard',
+                'logout' => 'Logout',
+                'admin_dashboard' => 'Admin Dashboard',
+                'my_profile' => 'My Profile',
+                'settings' => 'Settings',
+                'orders' => 'Orders',
+                'my_orders' => 'My Orders',
+                'for_customers' => 'For Customers',
+                'for_vendors_tab' => 'For Vendors',
+                'how_it_works' => 'How',
+                'vendora' => 'Vendora',
+                'works' => 'Works',
+                'how_it_works_subtext' => 'A simple, secure platform connecting you with trusted local vendors in Jimma and across Ethiopia',
+                'overview_header' => 'Your Path to Change',
+                'local_services' => 'Local Services',
+                'overview_image_title' => 'Simple. Fast. Trusted.',
+                'overview_image_text' => 'Find the right professional for any job in just a few clicks',
+                'verified_vendors' => 'Verified Vendors',
+                'happy_customers' => 'Happy Customers',
+                'successful_bookings' => 'Successful Bookings',
+                'cities_served' => 'Cities Served',
+                'find_book_header' => 'How to <span>Find & Book</span> Services',
+                'step_search_title' => 'Search',
+                'step_search_desc' => 'Browse categories or search for specific services. Filter by location, rating, price, and availability.',
+                'step_compare_title' => 'Compare',
+                'step_compare_desc' => 'View vendor profiles, read reviews, check ratings, and compare prices to find the perfect match.',
+                'step_book_title' => 'Book',
+                'step_book_desc' => 'Select your preferred date and time, confirm details, and book securely through our platform.',
+                'step_review_title' => 'Review',
+                'step_review_desc' => 'After service completion, leave a review to help others and earn rewards for your feedback.',
+                'find_services_now' => 'Find Services Now',
+                'how_to_start_header' => 'How to <span>Start & Grow</span> Your Business',
+                'create_account' => 'Create Account',
+                'get_verified' => 'Get Verified',
+                'set_up_profile' => 'Set Up Profile',
+                'receive_bookings' => 'Receive Bookings',
+                'deliver_service' => 'Deliver Service',
+                'get_paid' => 'Get Paid',
+                'grow' => 'Grow',
+                'become_vendor' => 'Become a Vendor',
+                'secure_payment_header' => 'Secure Payment Options',
+                'secure_payments' => 'Secure Payments',
+                'chapa' => 'Chapa',
+                'cash_on_delivery' => 'Cash on Delivery',
+                'trust_safety_header' => 'Trust & Safety',
+                'support_24_7' => '24/7 Support',
+                'faq_header' => 'Frequently Asked Questions',
+                'cta_title' => 'Ready to Get Started?',
+                'cta_text' => 'Join thousands of customers and vendors already using Vendora to connect and grow.',
+                'sign_up_as_customer' => 'Sign Up as Customer',
+                'explore_vendors' => 'Explore Vendors',
+                'copy_right' => '© ' . date('Y') . ' Vendora. All rights reserved. Jimma, Ethiopia',
+            ],
+            'am' => [
+                'categories' => 'ምድቦች',
+                'features' => 'ገፅታዎች',
+                'for_vendors' => 'ለነጋዴዎች',
+                'log_in' => 'ግባ',
+                'sign_up' => 'ተመዝገብ',
+                'language' => 'ቋንቋ',
+                'english' => 'እንግሊዝኛ',
+                'amharic' => 'አማርኛ',
+                'oromo' => 'Afan Oromo',
+                'dark_mode' => 'ጨለማ ሁኔታ',
+                'light_mode' => 'ብርሃን ሁኔታ',
+                'dashboard' => 'ዳሽቦርድ',
+                'logout' => 'ውጣ',
+                'admin_dashboard' => 'የአስተዳደር ዳሽቦርድ',
+                'my_profile' => 'ቅጥያዬ',
+                'settings' => 'ቅንብሮች',
+                'orders' => 'ትዕዛዞች',
+                'my_orders' => 'ትዕዛዞቼ',
+                'for_customers' => 'ለደንበኞች',
+                'for_vendors_tab' => 'ለነጋዴዎች',
+                'how_it_works' => 'እንዴት',
+                'vendora' => 'ቬንዶራ',
+                'works' => 'ይሰራል',
+                'how_it_works_subtext' => 'ቀላል፣ ደህንነታማ መድረክ የሚያኖረው በጅማ እና በኢትዮጵያ ውስጥ ታማኝ አካባቢ ነጋዴዎችን ከማግኘት',
+                'overview_header' => 'የእርስዎ መንገድ ወደ ለውጥ',
+                'local_services' => 'የአካባቢ አገልግሎቶች',
+                'overview_image_title' => 'ቀላል፣ ፈጣን፣ ታማኝ',
+                'overview_image_text' => 'ለማንኛውም ሥራ በጥቂት ጥረት ትዛዝ የሚሰጥ ሙዚቃ ይፈልጉ',
+                'verified_vendors' => 'የተረጋገጡ ነጋዴዎች',
+                'happy_customers' => 'ደስተኛ ደንበኞች',
+                'successful_bookings' => 'የተሳካ ቦታዎች',
+                'cities_served' => 'የተደረገ ከተሞች',
+                'overview_paragraph' => 'ቬንዶራ ኢትዮጵያውያንን የታማኝ አካባቢ ሙያዎችን ለማግኘት የሚረዳ ዋና ገበያ ነው። እሱንም ከፍለህ ወይም ከስፖርት ስራዎች፣ ከእንቁላል ሰርተር፣ ከካተር ወዘተ ግዴታዎችን እንዲያገኙ ይረዳዋል።',
+                'find_book_header' => 'እንዴት <span>ይፈልጉ & ቦታዎችን</span> ትያዙ',
+                'step_search_title' => 'ፈልግ',
+                'step_search_desc' => 'ምድቦችን ይሳርዩ ወይም ለሚፈለጉት አገልግሎቶች ፍለጋ ይሂዱ።',
+                'step_compare_title' => 'እረጋግጥ',
+                'step_compare_desc' => 'የነጋዴ መግለጫዎችን ይመልከቱ፣ ግምገማዎችን ይነብቡ፣ ዋጋዎችን ይንገሩ።',
+                'step_book_title' => 'ቦታ ይያዙ',
+                'step_book_desc' => 'ቀኑን እና ሰዓቱን ይምረጡ፣ ዝርዝሩን እና ክፍያን ያረጋግጡ፣ እና በመስክ እዚህ ይያዙ።',
+                'step_review_title' => 'ግምገማ',
+                'step_review_desc' => 'አገልግሎቱን ከጨረሳ በኋላ፣ ለሌሎች ርዕስ ተጨማሪ ግምገማ እንዲያስፈጥሩ እና ቅናሽ ተሰጥቷል።',
+                'find_services_now' => 'አገልግሎቶችን አሁን ፈልጉ',
+                'how_to_start_header' => 'እንዴት <span>መጀመር & እድገት</span> እንደሚያደርጉ ቢያወሩ',
+                'create_account' => 'መለያ ይፍጠሩ',
+                'get_verified' => 'ይረጋግጡ',
+                'set_up_profile' => 'መገለጫ ይከናወኑ',
+                'receive_bookings' => 'ቦታዎችን ይቀበሉ',
+                'deliver_service' => 'አገልግሎት ይሰጡ',
+                'get_paid' => 'ክፍያ ይቀበሉ',
+                'grow' => 'እድገት',
+                'become_vendor' => 'ነጋዴ ይሁኑ',
+                'secure_payment_header' => 'የደህንነት የክፍያ አማራጮች',
+                'secure_payments' => 'የደህንነት ክፍያዎች',
+                'chapa' => 'ቻፓ',
+                'cash_on_delivery' => 'ገንዘብ በጭነት',
+                'trust_safety_header' => 'እምነት እና ደህንነት',
+                'support_24_7' => '24/7 ድጋፍ',
+                'faq_header' => 'ብዙ ጥያቄዎች',
+                'cta_title' => 'ጀምር ዝግጅት?',
+                'cta_text' => 'በቬንዶራ የተጠቀሙ ሺህ ደንበኞችና ነጋዴዎች ውስጥ ይቀላቀሉ።',
+                'sign_up_as_customer' => 'እንደ ደንበኛ ይመዝገቡ',
+                'explore_vendors' => 'ነጋዴዎችን ይወቅ',
+                'copy_right' => '© ' . date('Y') . ' ቬንዶራ. ሁሉም መብቶች የተይዙላቸዋል።',
+            ],
+            'om' => [
+                // fallback to english for brevity
+                'categories' => 'Categories',
+                'features' => 'Features',
+                'for_vendors' => 'For Vendors',
+                'log_in' => 'Log In',
+                'sign_up' => 'Sign Up',
+                'language' => 'Language',
+                'english' => 'English',
+                'amharic' => 'Amharic',
+                'oromo' => 'Afan Oromo',
+                'dark_mode' => 'Dark Mode',
+                'light_mode' => 'Light Mode',
+                'dashboard' => 'Dashboard',
+                'logout' => 'Logout',
+                'admin_dashboard' => 'Admin Dashboard',
+                'my_profile' => 'My Profile',
+                'settings' => 'Settings',
+                'orders' => 'Orders',
+                'my_orders' => 'My Orders',
+                'for_customers' => 'For Customers',
+                'for_vendors_tab' => 'For Vendors',
+                'how_it_works' => 'How',
+                'vendora' => 'Vendora',
+                'works' => 'Works',
+                'how_it_works_subtext' => 'A simple, secure platform connecting you with trusted local vendors in Jimma and across Ethiopia',
+                'overview_header' => 'Your Path to Change',
+                'local_services' => 'Local Services',
+                'overview_image_title' => 'Simple. Fast. Trusted.',
+                'overview_image_text' => 'Find the right professional for any job in just a few clicks',
+                'verified_vendors' => 'Verified Vendors',
+                'happy_customers' => 'Happy Customers',
+                'successful_bookings' => 'Successful Bookings',
+                'cities_served' => 'Cities Served',
+                'overview_paragraph' => 'Vendora is Ethiopia\'s premier marketplace for finding trusted local professionals. Whether you need a plumber, photographer, caterer, or any other service, we make it easy to find, book, and pay verified vendors in your area.',
+                'find_book_header' => 'How to <span>Find & Book</span> Services',
+                'step_search_title' => 'Search',
+                'step_search_desc' => 'Browse categories or search for specific services. Filter by location, rating, price, and availability.',
+                'step_compare_title' => 'Compare',
+                'step_compare_desc' => 'View vendor profiles, read reviews, check ratings, and compare prices to find the perfect match.',
+                'step_book_title' => 'Book',
+                'step_book_desc' => 'Select your preferred date and time, confirm details, and book securely through our platform.',
+                'step_review_title' => 'Review',
+                'step_review_desc' => 'After service completion, leave a review to help others and earn rewards for your feedback.',
+                'find_services_now' => 'Find Services Now',
+                'how_to_start_header' => 'How to <span>Start & Grow</span> Your Business',
+                'create_account' => 'Create Account',
+                'get_verified' => 'Get Verified',
+                'set_up_profile' => 'Set Up Profile',
+                'receive_bookings' => 'Receive Bookings',
+                'deliver_service' => 'Deliver Service',
+                'get_paid' => 'Get Paid',
+                'grow' => 'Grow',
+                'become_vendor' => 'Become a Vendor',
+                'secure_payment_header' => 'Secure Payment Options',
+                'chapa' => 'Chapa',
+                'cash_on_delivery' => 'Cash on Delivery',
+                'trust_safety_header' => 'Trust & Safety',
+                'support_24_7' => '24/7 Support',
+                'faq_header' => 'Frequently Asked Questions',
+                'cta_title' => 'Ready to Get Started?',
+                'cta_text' => 'Join thousands of customers and vendors already using Vendora to connect and grow.',
+                'sign_up_as_customer' => 'Sign Up as Customer',
+                'explore_vendors' => 'Explore Vendors',
+                'copy_right' => '© ' . date('Y') . ' Vendora. All rights reserved. Jimma, Ethiopia',
+            ],
+        ];
+        $t = $translations[$currentLang] ?? $translations['en'];
+    @endphp
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="brand-badge">
@@ -1042,33 +1487,38 @@
                 <i class="ri-map-pin-line"></i> Jimma, Ethiopia
             </span>
         </div>
+
         <div class="nav-links">
-            <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
-            <a href="{{ route('home') }}#features" class="nav-item">Features</a>
-            <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
-            {{--  <a href="{{ route('about') }}" class="nav-item">About Us</a>
-            <a href="{{ route('how-it-works') }}" class="nav-item active">How It Works</a>  --}}
+            <a href="{{ route('home') }}#categories" class="nav-item {{ request()->routeIs('home') ? 'active' : '' }}">{{ $t['categories'] }}</a>
+            <a href="{{ route('home') }}#features" class="nav-item {{ request()->routeIs('home') ? 'active' : '' }}">{{ $t['features'] }}</a>
+            <!-- include how-it-works link and highlight when on this page -->
+            <a href="{{ route('how-it-works') }}" class="nav-item {{ request()->routeIs('how-it-works') ? 'active' : '' }}">{{ $t['how_it_works'] }}</a>
+            <a href="{{ route('register') }}" class="nav-item">{{ $t['for_vendors'] }}</a>
+
             @guest
-                <a href="{{ route('login') }}" class="nav-item">Log In</a>
-                <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
-            @else
-                {{--  <span class="nav-item" style="color: var(--primary-color); font-weight: 600;">
-                    <i class="ri-user-line"></i> {{ Auth::user()->name }}
-                </span>
-                <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>  --}}
-                @if(Auth::user()->role === 'vendor')
-                    <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
-                @elseif(Auth::user()->role === 'customer')
-                    <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
-                @elseif(Auth::user()->role === 'admin')
-                    <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
-                @endif
-                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-                </form>
+                <a href="{{ route('login') }}" class="nav-item">{{ $t['log_in'] }}</a>
+                <a href="{{ route('register') }}" class="nav-item btn-signup">{{ $t['sign_up'] }}</a>
             @endguest
         </div>
+
+        <div class="nav-actions">
+            <div class="theme-lang-toggle">
+                <button class="toggle-btn-icon" id="themeToggle" title="{{ $t['dark_mode'] }}">
+                    <i class="ri-moon-line"></i>
+                </button>
+                <div class="language-selector" id="languageSelector">
+                    <button class="toggle-btn-icon" id="languageToggle" onclick="toggleLanguageDropdown(event)" aria-haspopup="true" aria-expanded="false" title="{{ $t['language'] }}">
+                        <i class="ri-translate-2"></i>
+                    </button>
+                    <div class="language-dropdown">
+                        <div class="language-option" onclick="changeLanguage('en')">{{ $t['english'] }}</div>
+                        <div class="language-option" onclick="changeLanguage('am')">{{ $t['amharic'] }}</div>
+                        <div class="language-option" onclick="changeLanguage('om')">{{ $t['oromo'] }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="menu-btn" id="menuToggle">
             <i class="ri-menu-line"></i>
         </div>
@@ -1076,34 +1526,45 @@
 
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
-        <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
-        <a href="{{ route('home') }}#features" class="nav-item">Features</a>
-        <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
-        {{--  <a href="{{ route('about') }}" class="nav-item">About Us</a>
-        <a href="{{ route('how-it-works') }}" class="nav-item active">How It Works</a>  --}}
+        <a href="{{ route('home') }}#categories" class="nav-item">{{ $t['categories'] }}</a>
+        <a href="{{ route('home') }}#features" class="nav-item">{{ $t['features'] }}</a>
+        <a href="{{ route('how-it-works') }}" class="nav-item">{{ $t['how_it_works'] }}</a>
+        <a href="{{ route('register') }}" class="nav-item">{{ $t['for_vendors'] }}</a>
         @guest
-            <a href="{{ route('login') }}" class="nav-item">Log In</a>
-            <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
-        @else
-            {{--  <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>  --}}
-            @if(Auth::user()->role === 'vendor')
-                <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
-            @elseif(Auth::user()->role === 'customer')
-                <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
-            @elseif(Auth::user()->role === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
-            @endif
-            <form method="POST" action="{{ route('logout') }}" style="margin-top: 12px;">
-                @csrf
-                <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-            </form>
+            <a href="{{ route('login') }}" class="nav-item">{{ $t['log_in'] }}</a>
+            <a href="{{ route('register') }}" class="nav-item btn-signup">{{ $t['sign_up'] }}</a>
         @endguest
+
+        <div style="padding: 15px 0; border-top:1px solid var(--border-color);">
+            <div style="margin-bottom:8px; font-weight:600;">{{ $t['language'] }}</div>
+            <div style="display:flex; gap:8px;">
+                <button class="lang-btn {{ $currentLang=='en'?'active':'' }}" onclick="changeLanguage('en')">EN</button>
+                <button class="lang-btn {{ $currentLang=='am'?'active':'' }}" onclick="changeLanguage('am')">አማ</button>
+                <button class="lang-btn {{ $currentLang=='om'?'active':'' }}" onclick="changeLanguage('om')">OM</button>
+            </div>
+        </div>
+        <div style="padding: 15px 0; border-top:1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center;">
+            <span>{{ $currentTheme=='dark' ? $t['light_mode'] : $t['dark_mode'] }}</span>
+            <button class="theme-toggle" onclick="toggleTheme()" style="position:static;">
+                <i class="ri-{{ $currentTheme=='dark'?'sun':'moon' }}-line"></i>
+            </button>
+        </div>
     </div>
 
-    <!-- Page Header -->
-    <section class="page-header">
-        <h1>How <span>Vendora</span> Works</h1>
-        <p>A simple, secure platform connecting you with trusted local vendors in Jimma and across Ethiopia</p>
+    <!-- Hero (match home page style) -->
+    <section class="hero">
+        <div class="hero-background" style="background-image: url('{{ isset($heroImage) ? asset($heroImage) : asset('images/hero-home.jpg') }}');"></div>
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1>{{ $t['how_it_works'] }} <span>{{ $t['vendora'] }}</span> {{ $t['works'] }}</h1>
+            <p>{{ $t['how_it_works_subtext'] }}</p>
+            <div style="margin-top:18px;">
+                <a href="{{ route('search.results') }}" class="hero-cta">
+                    <i class="ri-search-line" style="margin-right:8px"></i>
+                    {{ $t['find_services_now'] }}
+                </a>
+            </div>
+        </div>
     </section>
 
     <main>
@@ -1111,32 +1572,33 @@
             <!-- Overview Section -->
             <section class="overview-section">
                 <div class="overview-content">
-                    <h2>Your Gateway to <span>Local Services</span></h2>
-                    <p>Vendora is Ethiopia's premier marketplace for finding trusted local professionals. Whether you need a plumber, photographer, caterer, or any other service, we make it easy to find, book, and pay verified vendors in your area.</p>
+                    <h2>{{ $t['overview_header'] }} <span>{{ $t['local_services'] }}</span></h2>
+                    <p>{{ $t['overview_paragraph'] ?? 'Vendora is Ethiopia\'s premier marketplace for finding trusted local professionals. Whether you need a plumber, photographer, caterer, or any other service, we make it easy to find, book, and pay verified vendors in your area.' }}</p>
 
                     <div class="overview-stats">
                         <div class="overview-stat">
-                            <div class="overview-stat-value">{{ $vendorCount ?? '500+' }}</div>
-                            <div class="overview-stat-label">Verified Vendors</div>
+                            <!-- values provided by VendorCustomerController (see howItWorks) -->
+                            <div class="overview-stat-value">{{ number_format($vendorCount ?? 0) }}+</div>
+                            <div class="overview-stat-label">{{ $t['verified_vendors'] }}</div>
                         </div>
                         <div class="overview-stat">
-                            <div class="overview-stat-value">{{ $customerCount ?? '10k+' }}</div>
-                            <div class="overview-stat-label">Happy Customers</div>
+                            <div class="overview-stat-value">{{ number_format($customerCount ?? 0) }}+</div>
+                            <div class="overview-stat-label">{{ $t['happy_customers'] }}</div>
                         </div>
                         <div class="overview-stat">
-                            <div class="overview-stat-value">{{ $bookingCount ?? '5k+' }}</div>
-                            <div class="overview-stat-label">Successful Bookings</div>
+                            <div class="overview-stat-value">{{ number_format($bookingCount ?? 0) }}+</div>
+                            <div class="overview-stat-label">{{ $t['successful_bookings'] }}</div>
                         </div>
                         <div class="overview-stat">
-                            <div class="overview-stat-value">{{ $cityCount ?? '15+' }}</div>
-                            <div class="overview-stat-label">Cities Served</div>
+                            <div class="overview-stat-value">{{ $cityCount ?? 0 }}+</div>
+                            <div class="overview-stat-label">{{ $t['cities_served'] }}</div>
                         </div>
                     </div>
                 </div>
                 <div class="overview-image">
                     <div class="overview-image-content">
-                        <h3>Simple. Fast. Trusted.</h3>
-                        <p>Find the right professional for any job in just a few clicks</p>
+                        <h3>{{ $t['overview_image_title'] ?? 'Simple. Fast. Trusted.' }}</h3>
+                        <p>{{ $t['overview_image_text'] ?? 'Find the right professional for any job in just a few clicks' }}</p>
                     </div>
                     <i class="ri-store-3-line"></i>
                 </div>
@@ -1144,59 +1606,59 @@
 
             <!-- Role Tabs -->
             <div class="role-tabs">
-                <div class="role-tab active" onclick="showCustomerSteps()" id="customerTab">For Customers</div>
-                <div class="role-tab" onclick="showVendorSteps()" id="vendorTab">For Vendors</div>
+                <div class="role-tab active" onclick="showCustomerSteps()" id="customerTab">{{ $t['for_customers'] }}</div>
+                <div class="role-tab" onclick="showVendorSteps()" id="vendorTab">{{ $t['for_vendors_tab'] }}</div>
             </div>
 
             <!-- For Customers Section -->
             <section id="customerSteps" class="customer-section">
-                <h2 class="section-title">How to <span>Find & Book</span> Services</h2>
+                <h2 class="section-title">{!! $t['find_book_header'] !!}</h2>
                 <div class="steps-grid">
                     <div class="step-card">
                         <div class="step-number">1</div>
                         <div class="step-icon">
                             <i class="ri-search-line"></i>
                         </div>
-                        <h3 class="step-title">Search</h3>
-                        <p class="step-description">Browse categories or search for specific services. Filter by location, rating, price, and availability.</p>
+                        <h3 class="step-title">{{ $t['step_search_title'] }}</h3>
+                        <p class="step-description">{{ $t['step_search_desc'] }}</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">2</div>
                         <div class="step-icon">
                             <i class="ri-file-copy-line"></i>
                         </div>
-                        <h3 class="step-title">Compare</h3>
-                        <p class="step-description">View vendor profiles, read reviews, check ratings, and compare prices to find the perfect match.</p>
+                        <h3 class="step-title">{{ $t['step_compare_title'] }}</h3>
+                        <p class="step-description">{{ $t['step_compare_desc'] }}</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">3</div>
                         <div class="step-icon">
                             <i class="ri-calendar-check-line"></i>
                         </div>
-                        <h3 class="step-title">Book</h3>
-                        <p class="step-description">Select your preferred date and time, confirm details, and book securely through our platform.</p>
+                        <h3 class="step-title">{{ $t['step_book_title'] }}</h3>
+                        <p class="step-description">{{ $t['step_book_desc'] }}</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">4</div>
                         <div class="step-icon">
                             <i class="ri-star-line"></i>
                         </div>
-                        <h3 class="step-title">Review</h3>
-                        <p class="step-description">After service completion, leave a review to help others and earn rewards for your feedback.</p>
+                        <h3 class="step-title">{{ $t['step_review_title'] }}</h3>
+                        <p class="step-description">{{ $t['step_review_desc'] }}</p>
                     </div>
                 </div>
 
                 <div style="text-align: center; margin-top: 30px;">
                     <a href="{{ route('search.results') }}" class="cta-btn" style="background: var(--primary-color); color: white; display: inline-flex;">
                         <i class="ri-search-line"></i>
-                        Find Services Now
+                        {{ $t['find_services_now'] }}
                     </a>
                 </div>
             </section>
 
             <!-- For Vendors Section -->
             <section id="vendorSteps" class="vendor-section" style="display: none;">
-                <h2 class="section-title">How to <span>Start & Grow</span> Your Business</h2>
+                <h2 class="section-title">{!! $t['how_to_start_header'] !!}</h2>
 
                 <div class="vendor-process">
                     <div class="process-grid">
@@ -1204,23 +1666,23 @@
                             <div class="process-icon">
                                 <i class="ri-user-add-line"></i>
                             </div>
-                            <h3 class="process-title">1. Create Account</h3>
-                            <p class="process-description">Sign up as a vendor and provide your basic business information. It's free and takes just 5 minutes.</p>
+                            <h3 class="process-title">1. {{ $t['create_account'] }}</h3>
+                            <p class="process-description">{{ $t['step_search_desc'] /* reuse description or could add new key */ }}</p>
                         </div>
                         <div class="process-card">
                             <div class="process-icon">
                                 <i class="ri-shield-check-line"></i>
                             </div>
-                            <h3 class="process-title">2. Get Verified</h3>
-                            <p class="process-description">Submit your business license, ID, and other documents. Our team verifies within 24-48 hours.</p>
+                            <h3 class="process-title">2. {{ $t['get_verified'] }}</h3>
+                            <p class="process-description">{{ $t['step_compare_desc'] /* placeholder */ }}</p>
                             <span class="verification-badge">Verified Badge</span>
                         </div>
                         <div class="process-card">
                             <div class="process-icon">
                                 <i class="ri-store-line"></i>
                             </div>
-                            <h3 class="process-title">3. Set Up Profile</h3>
-                            <p class="process-description">Create your profile, add photos, list your services, set prices, and define your availability.</p>
+                            <h3 class="process-title">3. {{ $t['set_up_profile'] }}</h3>
+                            <p class="process-description">{{ $t['step_book_desc'] /* placeholder */ }}</p>
                         </div>
                     </div>
                 </div>
@@ -1231,59 +1693,59 @@
                         <div class="step-icon">
                             <i class="ri-message-line"></i>
                         </div>
-                        <h3 class="step-title">Receive Bookings</h3>
-                        <p class="step-description">Get notified when customers book your services. Communicate through our secure messaging system.</p>
+                        <h3 class="step-title">{{ $t['receive_bookings'] }}</h3>
+                        <p class="step-description">{{ $t['step_review_desc'] /* placeholder */ }}</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">5</div>
                         <div class="step-icon">
                             <i class="ri-customer-service-line"></i>
                         </div>
-                        <h3 class="step-title">Deliver Service</h3>
-                        <p class="step-description">Provide excellent service to your customers. Build your reputation with every job.</p>
+                        <h3 class="step-title">{{ $t['deliver_service'] }}</h3>
+                        <p class="step-description">{{ $t['step_search_desc'] /* placeholder */ }}</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">6</div>
                         <div class="step-icon">
                             <i class="ri-bank-card-line"></i>
                         </div>
-                        <h3 class="step-title">Get Paid</h3>
-                        <p class="step-description">Receive payments securely through Chapa or cash on delivery. Withdraw anytime.</p>
+                        <h3 class="step-title">{{ $t['get_paid'] }}</h3>
+                        <p class="step-description">{{ $t['step_book_desc'] /* placeholder */ }}</p>
                     </div>
                     <div class="step-card">
                         <div class="step-number">7</div>
                         <div class="step-icon">
                             <i class="ri-bar-chart-line"></i>
                         </div>
-                        <h3 class="step-title">Grow</h3>
-                        <p class="step-description">Get more visibility with good ratings, access analytics, and grow your customer base.</p>
+                        <h3 class="step-title">{{ $t['grow'] }}</h3>
+                        <p class="step-description">{{ $t['step_compare_desc'] /* placeholder */ }}</p>
                     </div>
                 </div>
 
                 <div style="text-align: center; margin-top: 30px;">
                     <a href="{{ route('register') }}" class="cta-btn" style="background: var(--primary-color); color: white; display: inline-flex;">
                         <i class="ri-store-line"></i>
-                        Become a Vendor
+                        {{ $t['become_vendor'] }}
                     </a>
                 </div>
             </section>
 
             <!-- Payment Methods -->
             <section class="payment-section">
-                <h2 class="section-title">Secure <span>Payment</span> Options</h2>
+                <h2 class="section-title">{{ $t['secure_payment_header'] }}</h2>
                 <div class="payment-grid">
                     <div class="payment-card">
                         <div class="payment-icon">
                             <i class="ri-bank-card-line"></i>
                         </div>
-                        <h3 class="payment-title">Chapa</h3>
+                        <h3 class="payment-title">{{ $t['chapa'] }}</h3>
                         <p class="payment-description">Secure online payments with Ethiopia's trusted payment gateway. Pay with cards or mobile money.</p>
                     </div>
                     <div class="payment-card">
                         <div class="payment-icon">
                             <i class="ri-money-dollar-circle-line"></i>
                         </div>
-                        <h3 class="payment-title">Cash on Delivery</h3>
+                        <h3 class="payment-title">{{ $t['cash_on_delivery'] }}</h3>
                         <p class="payment-description">Pay in cash when the service is delivered. Available for eligible services.</p>
                     </div>
                 </div>
@@ -1291,27 +1753,27 @@
 
             <!-- Trust & Safety -->
             <section class="trust-section">
-                <h2 class="section-title" style="color: white;">Trust & <span style="color: white;">Safety</span></h2>
+                <h2 class="section-title" style="color: white;">{{ $t['trust_safety_header'] }}</h2>
                 <div class="trust-grid">
                     <div class="trust-item">
                         <div class="trust-icon">
                             <i class="ri-shield-check-line"></i>
                         </div>
-                        <h3 class="trust-title">Verified Vendors</h3>
+                        <h3 class="trust-title">{{ $t['verified_vendors'] }}</h3>
                         <p class="trust-text">All vendors undergo strict identity and business verification before joining</p>
                     </div>
                     <div class="trust-item">
                         <div class="trust-icon">
                             <i class="ri-lock-line"></i>
                         </div>
-                        <h3 class="trust-title">Secure Payments</h3>
+                        <h3 class="trust-title">{{ $t['secure_payments'] ?? 'Secure Payments' }}</h3>
                         <p class="trust-text">Your payment information is encrypted and never shared with third parties</p>
                     </div>
                     <div class="trust-item">
                         <div class="trust-icon">
                             <i class="ri-customer-service-line"></i>
                         </div>
-                        <h3 class="trust-title">24/7 Support</h3>
+                        <h3 class="trust-title">{{ $t['support_24_7'] }}</h3>
                         <p class="trust-text">Our support team is always available to help with any issues or questions</p>
                     </div>
                 </div>
@@ -1319,7 +1781,7 @@
 
             <!-- FAQ Section -->
             <section class="faq-section">
-                <h2 class="section-title">Frequently Asked <span>Questions</span></h2>
+                <h2 class="section-title">{{ $t['faq_header'] }}</h2>
 
                 <div class="faq-item">
                     <div class="faq-question" onclick="toggleFAQ(this)">
@@ -1384,17 +1846,17 @@
 
             <!-- CTA Section -->
             <section class="cta-section">
-                <h2 class="cta-title">Ready to Get Started?</h2>
-                <p class="cta-text">Join thousands of customers and vendors already using Vendora to connect and grow.</p>
+                <h2 class="cta-title">{{ $t['cta_title'] }}</h2>
+                <p class="cta-text">{{ $t['cta_text'] }}</p>
                 <div class="cta-buttons">
                     @guest
                         <a href="{{ route('register') }}" class="cta-btn">
                             <i class="ri-user-line"></i>
-                            Sign Up as Customer
+                            {{ $t['sign_up_as_customer'] }}
                         </a>
                         <a href="{{ route('register') }}?type=vendor" class="cta-btn cta-btn-outline">
                             <i class="ri-store-line"></i>
-                            Become a Vendor
+                            {{ $t['become_vendor'] }}
                         </a>
                     @else
                         @if(Auth::user()->role === 'vendor')
@@ -1415,7 +1877,7 @@
                         @endif
                         <a href="{{ route('search.results') }}" class="cta-btn cta-btn-outline">
                             <i class="ri-search-line"></i>
-                            Explore Vendors
+                            {{ $t['explore_vendors'] }}
                         </a>
                     @endguest
                 </div>
@@ -1458,15 +1920,13 @@
                     <h4>For Vendors</h4>
                     <ul>
                         <li><a href="{{ route('register') }}">List your service</a></li>
-                        <li><a href="#">Vendor Resources</a></li>
-                        <li><a href="#">Success Stories</a></li>
-                        <li><a href="#">Community</a></li>
+                        <li><a href="{{ route('community') }}">Community</a></li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="bottom-bar">
-            <span>&copy; {{ date('Y') }} Vendora. All rights reserved. Jimma, Ethiopia</span>
+            <span>{!! $t['copy_right'] !!}</span>
             <div class="social-icons">
                 <a href="#" target="_blank"><i class="ri-twitter-fill"></i></a>
                 <a href="#" target="_blank"><i class="ri-instagram-fill"></i></a>
@@ -1566,6 +2026,106 @@
             });
         }, 5000);
 
+        // Apply saved theme from localStorage
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            const icon = document.querySelector('#themeToggle i');
+            if (icon) icon.className = 'ri-sun-line';
+        }
+
+        // initialize mobile menu theme text/icon
+        const mobileThemeSpan = document.querySelector('.mobile-menu div span:first-child');
+        if (mobileThemeSpan) {
+            mobileThemeSpan.textContent = document.body.classList.contains('dark-mode') ? '{{ $t['light_mode'] }}' : '{{ $t['dark_mode'] }}';
+        }
+        const mobileIcon = document.querySelector('.mobile-menu .theme-toggle i');
+        if (mobileIcon) {
+            mobileIcon.className = document.body.classList.contains('dark-mode') ? 'ri-sun-line' : 'ri-moon-line';
+        }
+
+        // Theme Toggle
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const icon = this.querySelector('i');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.className = 'ri-sun-line';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                icon.className = 'ri-moon-line';
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Language Change
+        function changeLanguage(locale) {
+            fetch('/switch-language', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ locale: locale })
+            }).then(() => {
+                window.location.reload();
+            }).catch(error => {
+                console.error('Failed to change language', error);
+            });
+        }
+
+        // Helper for mobile theme toggle and updating text
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const themeBtn = document.getElementById('themeToggle');
+            if (themeBtn) {
+                const icon = themeBtn.querySelector('i');
+                if (document.body.classList.contains('dark-mode')) {
+                    icon.className = 'ri-sun-line';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    icon.className = 'ri-moon-line';
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+            // update mobile menu text/icon
+            const mobileThemeText = document.querySelector('.mobile-menu div span:first-child');
+            if (mobileThemeText && mobileThemeText.nodeType === Node.TEXT_NODE) {
+                mobileThemeText.textContent = document.body.classList.contains('dark-mode') ? '{{ $t['light_mode'] }}' : '{{ $t['dark_mode'] }}';
+            }
+            const mobileIcon = document.querySelector('.mobile-menu .theme-toggle i');
+            if (mobileIcon) {
+                mobileIcon.className = document.body.classList.contains('dark-mode') ? 'ri-sun-line' : 'ri-moon-line';
+            }
+        }
+
+        // Toggle language dropdown on click
+        function toggleLanguageDropdown(e) {
+            e.stopPropagation();
+            const sel = document.getElementById('languageSelector');
+            if (!sel) return;
+            const expanded = sel.classList.toggle('open');
+            const btn = document.getElementById('languageToggle');
+            if (btn) btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        }
+
+        // Close language dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const sel = document.getElementById('languageSelector');
+            const toggle = document.getElementById('languageToggle');
+            if (sel && !sel.contains(event.target)) {
+                sel.classList.remove('open');
+                if (toggle) toggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Close on ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' || event.key === 'Esc') {
+                const sel = document.getElementById('languageSelector');
+                const toggle = document.getElementById('languageToggle');
+                if (sel) sel.classList.remove('open');
+                if (toggle) toggle.setAttribute('aria-expanded', 'false');
+            }
+        });
 
     </script>
 

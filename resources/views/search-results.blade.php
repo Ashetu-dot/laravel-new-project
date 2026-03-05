@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ session('locale','en') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -183,6 +183,14 @@
             color: white;
             transform: translateY(-2px);
         }
+
+        /* dark-mode adjustments */
+        body.dark-mode .toggle-btn-icon {
+            background-color: #0b1220;
+            border-color: #1f2937;
+            color: #cbd5e1;
+        }
+        body.dark-mode .theme-lang-toggle { color: #cbd5e1; }
 
         .language-selector {
             position: relative;
@@ -1692,26 +1700,26 @@
             </div>
 
             <div class="nav-actions">
-                <!-- Theme Toggle -->
+                <!-- Theme and language controls -->
                 <div class="theme-lang-toggle">
                     <button class="toggle-btn-icon" id="themeToggle" title="{{ __('Toggle theme') }}">
                         <i class="ri-moon-line"></i>
                     </button>
 
                     <!-- Language Selector -->
-                    <div class="language-selector">
-                        <button class="toggle-btn-icon" title="{{ __('Change language') }}">
+                    <div class="language-selector" id="languageSelector">
+                        <button class="toggle-btn-icon" id="languageToggle" onclick="toggleLanguageDropdown(event)" aria-haspopup="true" aria-expanded="false" title="{{ __('Change language') }}">
                             <i class="ri-translate-2"></i>
                         </button>
                         <div class="language-dropdown">
-                            <div class="language-option" onclick="changeLanguage('en')">
-                                <i class="ri-english-input"></i> English
+                            <div class="language-option" data-locale="en" onclick="changeLanguage('en')">
+                                <i class="ri-english-input"></i> English @if(session('locale','en')==='en')<i class="ri-check-line" style="float:right"></i>@endif
                             </div>
-                            <div class="language-option" onclick="changeLanguage('am')">
-                                <i class="ri-translate"></i> አማርኛ
+                            <div class="language-option" data-locale="am" onclick="changeLanguage('am')">
+                                <i class="ri-translate"></i> አማርኛ @if(session('locale','en')==='am')<i class="ri-check-line" style="float:right"></i>@endif
                             </div>
-                            <div class="language-option" onclick="changeLanguage('om')">
-                                <i class="ri-translate"></i> Afaan Oromoo
+                            <div class="language-option" data-locale="om" onclick="changeLanguage('om')">
+                                <i class="ri-translate"></i> Afaan Oromoo @if(session('locale','en')==='om')<i class="ri-check-line" style="float:right"></i>@endif
                             </div>
                         </div>
                     </div>
@@ -2216,7 +2224,7 @@
                                         $isFollowing = Auth::user()->following()->where('vendor_id', $vendor->id)->exists();
                                     @endphp
                                     @if($isFollowing)
-                                        <form action="{{ route('vendor.unfollow', $vendor->id) }}" method="POST" style="flex:1;">
+                                        <form action="{{ route('user.vendor.unfollow', $vendor->id) }}" method="POST" style="flex:1;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn-following">
@@ -2224,7 +2232,7 @@
                                             </button>
                                         </form>
                                     @else
-                                        <form action="{{ route('vendor.follow', $vendor->id) }}" method="POST" style="flex:1;">
+                                        <form action="{{ route('user.vendor.follow', $vendor->id) }}" method="POST" style="flex:1;">
                                             @csrf
                                             <button type="submit" class="btn-primary">
                                                 <i class="ri-user-follow-line"></i> {{ __('Follow') }}
@@ -2403,28 +2411,98 @@
         let savedVendors = new Set();
         let currentView = localStorage.getItem('viewMode') || 'grid';
 
-        // Initialize theme from localStorage
-        const theme = localStorage.getItem('theme') || 'light';
-        if (theme === 'dark') {
-            document.body.classList.add('dark-mode');
-            document.querySelector('#themeToggle i').className = 'ri-sun-line';
+        // Theme toggle - sync with backend and localStorage
+        function applyTheme(theme) {
+            document.body.classList.toggle('dark-mode', theme === 'dark');
+            const ico = document.querySelector('#themeToggle i') || document.querySelector('#themeToggleMobile i');
+            if (ico) ico.className = theme === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
         }
 
-        // Theme Toggle
-        document.getElementById('themeToggle').addEventListener('click', function() {
-            document.body.classList.toggle('dark-mode');
-            const icon = this.querySelector('i');
-            if (document.body.classList.contains('dark-mode')) {
-                icon.className = 'ri-sun-line';
-                localStorage.setItem('theme', 'dark');
-            } else {
-                icon.className = 'ri-moon-line';
-                localStorage.setItem('theme', 'light');
-            }
+        function updateTheme(theme) {
+            applyTheme(theme);
+            localStorage.setItem('theme', theme);
+            fetch('/toggle-theme', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ theme: theme })
+            });
+        }
+
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const themeToggleBtnMobile = document.getElementById('themeToggleMobile');
+        [themeToggleBtn, themeToggleBtnMobile].forEach(btn => {
+            if (!btn) return;
+            btn.addEventListener('click', function() {
+                const isDark = document.body.classList.toggle('dark-mode');
+                const theme = isDark ? 'dark' : 'light';
+                const icon = this.querySelector('i');
+                if (icon) icon.className = isDark ? 'ri-sun-line' : 'ri-moon-line';
+                updateTheme(theme);
+            });
         });
 
-        // Language Change
-        function changeLanguage(locale) {
+        // initialize theme on load from server or storage
+        (function() {
+            let theme = localStorage.getItem('theme');
+            if (theme) {
+                applyTheme(theme);
+            } else {
+                fetch('/get-theme').then(r=>r.json()).then(data=>{
+                    if (data.success && data.theme) {
+                        applyTheme(data.theme);
+                        try { localStorage.setItem('theme', data.theme); } catch(e) {}
+                    }
+                }).catch(()=>{});
+            }
+        })();
+
+        // Language dropdown toggle and switch
+        function toggleLanguageDropdown(e, isMobile = false) {
+            e.stopPropagation();
+            const selId = isMobile ? 'languageSelectorMobile' : 'languageSelector';
+            const sel = document.getElementById(selId);
+            if (!sel) return;
+            const dd = sel.querySelector('.language-dropdown');
+            const expanded = dd.style.display !== 'block';
+            dd.style.display = expanded ? 'block' : 'none';
+            const btn = document.getElementById(isMobile ? 'languageToggleMobile' : 'languageToggle');
+            if (btn) btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        }
+
+        function changeLanguage(locale, isMobile = false) {
+            document.querySelectorAll('.language-option').forEach(opt => {
+                if (opt.dataset.locale === locale) {
+                    if (!opt.querySelector('i')) {
+                        const icon = document.createElement('i');
+                        icon.className = 'ri-check-line';
+                        icon.style.float = 'right';
+                        opt.appendChild(icon);
+                    }
+                } else {
+                    const icon = opt.querySelector('i');
+                    if (icon) icon.remove();
+                }
+            });
+            const desktopSel = document.getElementById('languageSelector');
+            if (desktopSel) {
+                const dd = desktopSel.querySelector('.language-dropdown');
+                if (dd) dd.style.display = 'none';
+                const btn = document.getElementById('languageToggle');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
+            if (isMobile) {
+                const mobileSel = document.getElementById('languageSelectorMobile');
+                if (mobileSel) {
+                    const dd = mobileSel.querySelector('.language-dropdown');
+                    if (dd) dd.style.display = 'none';
+                    const btn = document.getElementById('languageToggleMobile');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                }
+            }
+            try { localStorage.setItem('locale', locale); } catch{};
             fetch('/switch-language', {
                 method: 'POST',
                 headers: {
@@ -2434,10 +2512,32 @@
                 body: JSON.stringify({ locale: locale })
             }).then(() => {
                 window.location.reload();
-            }).catch(error => {
-                showToast('Error', 'Failed to change language', 'error');
-            });
+            }).catch(err => console.error('Failed to change language', err));
         }
+
+        // Close language dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            ['languageSelector','languageSelectorMobile'].forEach(id => {
+                const sel = document.getElementById(id);
+                if (!sel) return;
+                const dd = sel.querySelector('.language-dropdown');
+                if (dd && !sel.contains(event.target)) {
+                    dd.style.display = 'none';
+                    const btn = sel.querySelector('button');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+
+        // set html lang from localStorage as soon as possible
+        (function() {
+            try {
+                const storedLocale = localStorage.getItem('locale');
+                if (storedLocale && document.documentElement.lang !== storedLocale) {
+                    document.documentElement.lang = storedLocale;
+                }
+            } catch(e) { }
+        })();
 
         // Set initial view
         document.addEventListener('DOMContentLoaded', function() {

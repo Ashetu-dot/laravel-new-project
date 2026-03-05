@@ -765,7 +765,7 @@
 
         .team-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-top: 20px;
         }
@@ -1004,6 +1004,10 @@
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media screen and (max-width: 768px) {
@@ -1035,7 +1039,7 @@
             }
 
             .team-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: 1fr;
             }
 
             .testimonial-grid {
@@ -1055,10 +1059,6 @@
             .navbar { padding: 12px 16px; }
             .brand { font-size: 20px; }
             .brand i { font-size: 24px; }
-
-            .team-grid {
-                grid-template-columns: 1fr;
-            }
 
             .footer-content {
                 padding: 0 20px;
@@ -1569,7 +1569,7 @@
                 </div>
             </div>
 
-            <!-- Team Card with Images -->
+            <!-- Team Card with New Members -->
             <div class="card">
                 <h2>
                     <i class="ri-team-line"></i>
@@ -1578,31 +1578,45 @@
                 <div class="team-grid">
                     <div class="team-member">
                         <div class="member-avatar">
-                            <img src="https://ui-avatars.com/api/?name=Abebe+Tadesse&background=B88E3F&color=fff&size=120" alt="Abebe Tadesse">
+                            <img src="https://ui-avatars.com/api/?name=Ashetu+Bedada&background=B88E3F&color=fff&size=120" alt="Ashetu Bedada">
                         </div>
-                        <div class="member-name">Abebe Tadesse</div>
+                        <div class="member-name">Ashetu Bedada</div>
                         <div class="member-role">Founder & CEO</div>
                     </div>
                     <div class="team-member">
                         <div class="member-avatar">
-                            <img src="https://ui-avatars.com/api/?name=Mekdes+Kebede&background=B88E3F&color=fff&size=120" alt="Mekdes Kebede">
+                            <img src="https://ui-avatars.com/api/?name=Lewi+Teddese&background=B88E3F&color=fff&size=120" alt="Lewi Teddese">
                         </div>
-                        <div class="member-name">Mekdes Kebede</div>
+                        <div class="member-name">Lewi Teddese</div>
+                        <div class="member-role">Chief Technology Officer</div>
+                    </div>
+                    <div class="team-member">
+                        <div class="member-avatar">
+                            <img src="https://ui-avatars.com/api/?name=Hiwot+Tariku&background=B88E3F&color=fff&size=120" alt="Hiwot Tariku">
+                        </div>
+                        <div class="member-name">Hiwot Tariku</div>
                         <div class="member-role">Operations Manager</div>
                     </div>
                     <div class="team-member">
                         <div class="member-avatar">
-                            <img src="https://ui-avatars.com/api/?name=Tekle+Berhan&background=B88E3F&color=fff&size=120" alt="Tekle Berhan">
+                            <img src="https://ui-avatars.com/api/?name=Hasset+Mulgeta&background=B88E3F&color=fff&size=120" alt="Hasset Mulgeta">
                         </div>
-                        <div class="member-name">Tekle Berhan</div>
-                        <div class="member-role">Tech Lead</div>
+                        <div class="member-name">Hasset Mulgeta</div>
+                        <div class="member-role">Marketing Director</div>
                     </div>
                     <div class="team-member">
                         <div class="member-avatar">
-                            <img src="https://ui-avatars.com/api/?name=Azeb+G/Hiwot&background=B88E3F&color=fff&size=120" alt="Azeb G/Hiwot">
+                            <img src="https://ui-avatars.com/api/?name=Mamo+Obse&background=B88E3F&color=fff&size=120" alt="Mamo Obse">
                         </div>
-                        <div class="member-name">Azeb G/Hiwot</div>
+                        <div class="member-name">Mamo Obse</div>
                         <div class="member-role">Community Manager</div>
+                    </div>
+                    <div class="team-member">
+                        <div class="member-avatar">
+                            <img src="https://ui-avatars.com/api/?name=Samuel+Gizahew&background=B88E3F&color=fff&size=120" alt="Samuel Gizahew">
+                        </div>
+                        <div class="member-name">Samuel Gizahew</div>
+                        <div class="member-role">Lead Developer</div>
                     </div>
                 </div>
             </div>
@@ -1705,8 +1719,7 @@
                     <h4>For Vendors</h4>
                     <ul>
                         <li><a href="{{ route('list-service') }}">List your service</a></li>
-                        <li><a href="{{ route('vendor-resources') }}">Vendor Resources</a></li>
-                        <li><a href="{{ route('success-stories') }}">Success Stories</a></li>
+
                         <li><a href="{{ route('community') }}">Community</a></li>
                     </ul>
                 </div>
@@ -1734,9 +1747,9 @@
                 profileTrigger.addEventListener('click', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
-                    
+
                     profileDropdown.classList.toggle('active');
-                    
+
                     if (dropdownArrow) {
                         dropdownArrow.style.transform = profileDropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
                     }
@@ -1765,9 +1778,9 @@
                 languageToggle.addEventListener('click', function(e) {
                     e.stopPropagation();
                     e.preventDefault();
-                    
+
                     languageSubmenu.classList.toggle('show');
-                    
+
                     if (languageArrow) {
                         languageArrow.style.transform = languageSubmenu.classList.contains('show') ? 'rotate(90deg)' : 'rotate(0deg)';
                     }
@@ -1822,18 +1835,18 @@
                 .then(data => {
                     if (data.success) {
                         document.body.setAttribute('data-theme', data.theme);
-                        
+
                         // Update theme text
                         const themeText = document.getElementById('themeText');
                         if (themeText) {
                             themeText.textContent = data.theme === 'dark' ? '{{ $t["light_mode"] }}' : '{{ $t["dark_mode"] }}';
                         }
-                        
+
                         // Update icons
                         document.querySelectorAll('.theme-toggle i, [onclick="toggleTheme()"] i').forEach(icon => {
                             icon.className = data.theme === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
                         });
-                        
+
                         // Update mobile theme text
                         const mobileThemeText = document.querySelector('.mobile-menu div span:first-child');
                         if (mobileThemeText && mobileThemeText.nodeType === Node.TEXT_NODE) {
@@ -1871,7 +1884,7 @@
                         const target = document.querySelector(href);
                         if (target) {
                             target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            
+
                             if (mobileMenu && mobileMenu.classList.contains('active')) {
                                 mobileMenu.classList.remove('active');
                                 const icon = menuToggle?.querySelector('i');

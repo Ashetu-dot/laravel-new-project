@@ -210,6 +210,15 @@
             width: 100%;
         }
 
+        .nav-item.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .nav-item.active::after {
+            width: 100%;
+        }
+
         .btn-signup {
             background: var(--primary-color);
             color: white !important;
@@ -846,63 +855,6 @@
             transform: translateY(-2px);
         }
 
-        /* Marketplace */
-        .marketplace-section {
-            margin-bottom: 60px;
-        }
-
-        .marketplace-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-
-        .marketplace-card {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            text-align: center;
-            box-shadow: var(--shadow);
-            transition: all 0.3s;
-            text-decoration: none;
-            color: var(--text-dark);
-        }
-
-        .marketplace-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .marketplace-icon {
-            width: 60px;
-            height: 60px;
-            background: rgba(184, 142, 63, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            color: var(--primary-color);
-            font-size: 28px;
-        }
-
-        .marketplace-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .marketplace-price {
-            color: var(--primary-color);
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .marketplace-seller {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
         /* Mentorship */
         .mentorship-section {
             background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
@@ -991,133 +943,6 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
-        /* Success Stories Preview */
-        .stories-preview {
-            margin-bottom: 60px;
-        }
-
-        .stories-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-        }
-
-        .story-card {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            transition: transform 0.3s;
-        }
-
-        .story-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .story-image {
-            height: 120px;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 40px;
-        }
-
-        .story-content {
-            padding: 20px;
-        }
-
-        .story-name {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .story-business {
-            color: var(--primary-color);
-            font-size: 13px;
-            margin-bottom: 10px;
-        }
-
-        .story-excerpt {
-            color: var(--text-light);
-            font-size: 13px;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-
-        .story-link {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        /* CTA Section */
-        .cta-section {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-            border-radius: var(--radius-lg);
-            padding: 60px;
-            text-align: center;
-            color: white;
-        }
-
-        .cta-title {
-            font-size: 36px;
-            font-weight: 800;
-            margin-bottom: 20px;
-        }
-
-        .cta-text {
-            font-size: 18px;
-            opacity: 0.9;
-            margin-bottom: 30px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .cta-btn {
-            background: white;
-            color: var(--primary-color);
-            text-decoration: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .cta-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        .cta-btn-outline {
-            background: transparent;
-            border: 2px solid white;
-            color: white;
-        }
-
-        .cta-btn-outline:hover {
-            background: white;
-            color: var(--primary-color);
-        }
-
         /* Footer */
         footer {
             background-color: var(--white);
@@ -1204,6 +1029,22 @@
             color: var(--primary-color);
         }
 
+        /* View All Link */
+        .view-all {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: gap 0.3s;
+        }
+
+        .view-all:hover {
+            gap: 10px;
+        }
+
         /* Responsive */
         @media screen and (max-width: 1280px) {
             .navbar { padding: 20px 40px; }
@@ -1231,16 +1072,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .marketplace-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
             .mentorship-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .stories-grid {
-                grid-template-columns: repeat(2, 1fr);
             }
 
             .footer-links { gap: 50px; }
@@ -1267,14 +1100,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .marketplace-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stories-grid {
-                grid-template-columns: 1fr;
-            }
-
             .forum-section {
                 padding: 30px 20px;
             }
@@ -1292,12 +1117,13 @@
                 padding: 40px 20px;
             }
 
-            .cta-section {
-                padding: 40px 20px;
+            .group-header {
+                flex-direction: column;
+                text-align: center;
             }
 
-            .cta-title {
-                font-size: 28px;
+            .group-footer {
+                flex-direction: column;
             }
 
             .footer-content { flex-direction: column; gap: 40px; }
@@ -1312,28 +1138,12 @@
             .page-header h1 { font-size: 32px; }
             .section-title { font-size: 28px; }
 
-            .group-header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .group-footer {
-                flex-direction: column;
-            }
-
-            .cta-buttons {
-                flex-direction: column;
-            }
-
             .footer-links { flex-direction: column; gap: 30px; }
             .bottom-bar { flex-direction: column; gap: 16px; align-items: flex-start; }
         }
     </style>
 </head>
 <body>
-
-    <div class="bg-circle circle-1"></div>
-    <div class="bg-circle circle-2"></div>
 
     <!-- Session Messages -->
     @if(session('success'))
@@ -1371,23 +1181,11 @@
         <div class="nav-links">
             <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
             <a href="{{ route('home') }}#features" class="nav-item">Features</a>
-            <a href="{{ route('list-service') }}" class="nav-item">List Your Service</a>
             <a href="{{ route('community') }}" class="nav-item active">Community</a>
             @guest
                 <a href="{{ route('login') }}" class="nav-item">Log In</a>
                 <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
             @else
-                <span class="nav-item" style="color: var(--primary-color); font-weight: 600;">
-                    <i class="ri-user-line"></i> {{ Auth::user()->name }}
-                </span>
-                <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
-                @if(Auth::user()->role === 'vendor')
-                    <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
-                @elseif(Auth::user()->role === 'customer')
-                    <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
-                @elseif(Auth::user()->role === 'admin')
-                    <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
-                @endif
                 <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                     @csrf
                     <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
@@ -1403,20 +1201,11 @@
     <div class="mobile-menu" id="mobileMenu">
         <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
         <a href="{{ route('home') }}#features" class="nav-item">Features</a>
-        <a href="{{ route('list-service') }}" class="nav-item">List Your Service</a>
         <a href="{{ route('community') }}" class="nav-item active">Community</a>
         @guest
             <a href="{{ route('login') }}" class="nav-item">Log In</a>
             <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
         @else
-            <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
-            @if(Auth::user()->role === 'vendor')
-                <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
-            @elseif(Auth::user()->role === 'customer')
-                <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
-            @elseif(Auth::user()->role === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
-            @endif
             <form method="POST" action="{{ route('logout') }}" style="margin-top: 12px;">
                 @csrf
                 <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
@@ -1611,7 +1400,7 @@
                             <h3>Recent Discussions</h3>
                             <a href="#" class="view-all-link">View All <i class="ri-arrow-right-line"></i></a>
                         </div>
-                        
+
                         <div class="topic-item">
                             <div class="topic-avatar">AT</div>
                             <div class="topic-content">
@@ -1727,48 +1516,6 @@
                 </div>
             </section>
 
-            <!-- Marketplace Section -->
-            <section class="marketplace-section">
-                <h2 class="section-title">Community <span>Marketplace</span></h2>
-                <div class="marketplace-grid">
-                    <a href="#" class="marketplace-card">
-                        <div class="marketplace-icon">
-                            <i class="ri-camera-line"></i>
-                        </div>
-                        <h3 class="marketplace-title">Used Camera for Sale</h3>
-                        <div class="marketplace-price">ETB 15,000</div>
-                        <div class="marketplace-seller">by Dawit H.</div>
-                    </a>
-                    <a href="#" class="marketplace-card">
-                        <div class="marketplace-icon">
-                            <i class="ri-tools-line"></i>
-                        </div>
-                        <h3 class="marketplace-title">Plumbing Tools Set</h3>
-                        <div class="marketplace-price">ETB 5,500</div>
-                        <div class="marketplace-seller">by Berhanu T.</div>
-                    </a>
-                    <a href="#" class="marketplace-card">
-                        <div class="marketplace-icon">
-                            <i class="ri-cake-line"></i>
-                        </div>
-                        <h3 class="marketplace-title">Baking Equipment</h3>
-                        <div class="marketplace-price">ETB 8,200</div>
-                        <div class="marketplace-seller">by Mekdes A.</div>
-                    </a>
-                    <a href="#" class="marketplace-card">
-                        <div class="marketplace-icon">
-                            <i class="ri-laptop-line"></i>
-                        </div>
-                        <h3 class="marketplace-title">Laptop for Business</h3>
-                        <div class="marketplace-price">ETB 22,000</div>
-                        <div class="marketplace-seller">by Yonas A.</div>
-                    </a>
-                </div>
-                <div style="text-align: center; margin-top: 30px;">
-                    <a href="#" class="view-all">Browse Marketplace <i class="ri-arrow-right-line"></i></a>
-                </div>
-            </section>
-
             <!-- Mentorship Program -->
             <section class="mentorship-section">
                 <h2 class="section-title" style="color: white;">Mentorship <span style="color: white;">Program</span></h2>
@@ -1815,76 +1562,6 @@
                     </div>
                 </div>
             </section>
-
-            <!-- Success Stories Preview -->
-            <section class="stories-preview">
-                <h2 class="section-title">Community <span>Success</span> Stories</h2>
-                <div class="stories-grid">
-                    <div class="story-card">
-                        <div class="story-image">
-                            <i class="ri-restaurant-line"></i>
-                        </div>
-                        <div class="story-content">
-                            <h3 class="story-name">Azeb Tadesse</h3>
-                            <p class="story-business">Azeb's Catering</p>
-                            <p class="story-excerpt">"From home kitchen to full catering business - the community support was incredible."</p>
-                            <a href="#" class="story-link">Read Story <i class="ri-arrow-right-line"></i></a>
-                        </div>
-                    </div>
-                    <div class="story-card">
-                        <div class="story-image">
-                            <i class="ri-camera-line"></i>
-                        </div>
-                        <div class="story-content">
-                            <h3 class="story-name">Dawit Haile</h3>
-                            <p class="story-business">Dawit Photography</p>
-                            <p class="story-excerpt">"Found my first clients through the community and never looked back."</p>
-                            <a href="#" class="story-link">Read Story <i class="ri-arrow-right-line"></i></a>
-                        </div>
-                    </div>
-                    <div class="story-card">
-                        <div class="story-image">
-                            <i class="ri-home-gear-line"></i>
-                        </div>
-                        <div class="story-content">
-                            <h3 class="story-name">Berhanu Tesfaye</h3>
-                            <p class="story-business">Berhanu Plumbing</p>
-                            <p class="story-excerpt">"The mentorship program helped me scale my business from solo to team."</p>
-                            <a href="#" class="story-link">Read Story <i class="ri-arrow-right-line"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div style="text-align: center; margin-top: 30px;">
-                    <a href="{{ route('success-stories') }}" class="view-all">View All Stories <i class="ri-arrow-right-line"></i></a>
-                </div>
-            </section>
-
-            <!-- CTA Section -->
-            <section class="cta-section">
-                <h2 class="cta-title">Join Our Thriving Community</h2>
-                <p class="cta-text">Connect with thousands of vendors and customers. Share, learn, and grow together.</p>
-                <div class="cta-buttons">
-                    @guest
-                        <a href="{{ route('register') }}" class="cta-btn">
-                            <i class="ri-group-line"></i>
-                            Join Community
-                        </a>
-                        <a href="{{ route('login') }}" class="cta-btn cta-btn-outline">
-                            <i class="ri-login-circle-line"></i>
-                            Sign In
-                        </a>
-                    @else
-                        <a href="#" class="cta-btn">
-                            <i class="ri-message-line"></i>
-                            Visit Forum
-                        </a>
-                        <a href="#" class="cta-btn cta-btn-outline">
-                            <i class="ri-calendar-line"></i>
-                            View Events
-                        </a>
-                    @endguest
-                </div>
-            </section>
         </div>
     </main>
 
@@ -1923,15 +1600,13 @@
                     <h4>For Vendors</h4>
                     <ul>
                         <li><a href="{{ route('list-service') }}">List your service</a></li>
-                        <li><a href="{{ route('vendor-resources') }}">Vendor Resources</a></li>
-                        <li><a href="{{ route('success-stories') }}">Success Stories</a></li>
                         <li><a href="{{ route('community') }}">Community</a></li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="bottom-bar">
-            <span>&copy; {{ date('Y') }} Vendora Inc. All rights reserved. Made with ❤️ in Jimma, Ethiopia</span>
+            <span>&copy; {{ date('Y') }} Vendora. All rights reserved. Jimma, Ethiopia</span>
             <div class="social-icons">
                 <a href="#" target="_blank"><i class="ri-twitter-fill"></i></a>
                 <a href="#" target="_blank"><i class="ri-instagram-fill"></i></a>

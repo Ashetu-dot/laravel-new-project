@@ -98,7 +98,7 @@
             border-bottom: 1px solid #374151;
             letter-spacing: -0.5px;
         }
-        
+
         .brand i {
             color: var(--primary-gold);
             margin-right: 12px;
@@ -581,7 +581,7 @@
                     <i class="ri-archive-line"></i>
                     Catalog
                 </a>
-                <a href="{{ route('admin.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                     <i class="ri-price-tag-3-line"></i>
                     Promotions
                 </a>
@@ -639,7 +639,7 @@
                     <input type="text" placeholder="Search notifications...">
                 </div>
             </div>
-            
+
             <div class="header-actions">
                 <a href="{{ route('admin.help') }}" class="icon-btn">
                     <i class="ri-question-line"></i>
@@ -655,7 +655,7 @@
 
         <!-- Dashboard Content -->
         <div class="dashboard-container">
-            
+
             <div class="page-header">
                 <div>
                     <h1 class="page-title">Notifications</h1>
@@ -678,7 +678,7 @@
                         </button>
                     </form>
                 </div>
-                
+
                 <div class="filter-tabs">
                     <a href="{{ route('admin.notifications') }}" class="btn btn-secondary">All</a>
                     <a href="{{ route('admin.notifications') }}?unread=1" class="btn btn-secondary">Unread</a>
@@ -696,20 +696,20 @@
                             $title = $data['title'] ?? 'Notification';
                             $message = $data['message'] ?? 'You have a new notification.';
                         @endphp
-                        
+
                         <div class="notification-item {{ $notification->read_at ? '' : 'unread' }}" id="notification-{{ $notification->id }}">
                             @if(!$notification->read_at)
                                 <div class="notification-badge"></div>
                             @endif
-                            
+
                             <div class="notification-icon {{ $color }}">
                                 <i class="{{ $icon }}"></i>
                             </div>
-                            
+
                             <div class="notification-content">
                                 <div class="notification-title">{{ $title }}</div>
                                 <div class="notification-message">{{ $message }}</div>
-                                
+
                                 <div class="notification-meta">
                                     <span class="notification-time">
                                         <i class="ri-time-line"></i> {{ $notification->created_at->diffForHumans() }}
@@ -718,7 +718,7 @@
                                         <i class="ri-calendar-line"></i> {{ $notification->created_at->format('M d, Y h:i A') }}
                                     </span>
                                 </div>
-                                
+
                                 <div class="notification-actions">
                                     @if(!$notification->read_at)
                                         <form method="POST" action="{{ route('admin.notifications.read', $notification->id) }}" style="display: inline;">
@@ -754,7 +754,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
-            
+
             if (menuToggle && sidebar) {
                 menuToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('active');

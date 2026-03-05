@@ -1273,7 +1273,7 @@
                     @auth
                         @if(Auth::id() !== $vendor->id)
                             @if($isFollowing)
-                                <form action="{{ route('vendor.unfollow', $vendor->id) }}" method="POST" style="display: inline;" id="unfollowForm">
+                                <form action="{{ route('user.vendor.unfollow', $vendor->id) }}" method="POST" style="display: inline;" id="unfollowForm">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-following" onclick="return confirm('Are you sure you want to unfollow this vendor?')">
@@ -1281,7 +1281,7 @@
                                     </button>
                                 </form>
                             @else
-                                <form action="{{ route('vendor.follow', $vendor->id) }}" method="POST" style="display: inline;" id="followForm">
+                                <form action="{{ route('user.vendor.follow', $vendor->id) }}" method="POST" style="display: inline;" id="followForm">
                                     @csrf
                                     <button type="submit" class="btn btn-primary">
                                         <i class="ri-user-follow-line"></i> Follow Vendor
@@ -1310,7 +1310,7 @@
         <div class="products-section">
             <div class="section-header">
                 <h2>Products by {{ $vendor->business_name ?? 'this vendor' }}</h2>
-                <a href="{{ route('vendor.products', $vendor->id) }}" class="view-all-link">
+                <a href="{{ route('search.results', ['vendor' => $vendor->id]) }}" class="view-all-link">
                     View All <i class="ri-arrow-right-line"></i>
                 </a>
             </div>

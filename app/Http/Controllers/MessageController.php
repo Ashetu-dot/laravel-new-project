@@ -18,30 +18,30 @@ class MessageController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
         // Get all conversations for the current user (using parent-child relationship)
         $conversations = $this->getUserConversations($user->id);
-        
+
         // Get unread count
         $unreadCount = Message::where('receiver_id', $user->id)
             ->where('is_read', false)
             ->count();
-        
+
         // Get all users for new message modal (excluding current user)
         $users = User::where('id', '!=', $user->id)
             ->select('id', 'name', 'email', 'role', 'is_active')
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
-        
+
         // Get notification counts
         $unreadNotificationsCount = $this->getUnreadNotificationsCount($user->id);
         $unreadMessagesCount = $unreadCount;
-        
+
         return view('admin.messages.index', compact(
-            'conversations', 
-            'unreadCount', 
-            'users', 
+            'conversations',
+            'unreadCount',
+            'users',
             'user',
             'unreadNotificationsCount',
             'unreadMessagesCount'
@@ -54,15 +54,15 @@ class MessageController extends Controller
     public function customerMessages()
     {
         $user = Auth::user();
-        
+
         // Get all conversations for the customer
         $conversations = $this->getUserConversations($user->id);
-        
+
         // Get unread count
         $unreadCount = Message::where('receiver_id', $user->id)
             ->where('is_read', false)
             ->count();
-        
+
         // Get admin users for customer to message
         $admins = User::where('role', 'admin')
             ->orWhere('role', 'super_admin')
@@ -70,7 +70,7 @@ class MessageController extends Controller
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
-        
+
         return view('customer.messages', compact('conversations', 'unreadCount', 'admins', 'user'));
     }
 
@@ -80,10 +80,10 @@ class MessageController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        
+
         // Find the message
         $message = Message::with(['sender', 'receiver'])->findOrFail($id);
-        
+
         // Check if user is part of this conversation
         if ($message->sender_id != $user->id && $message->receiver_id != $user->id) {
             if (request()->expectsJson()) {
@@ -91,22 +91,22 @@ class MessageController extends Controller
             }
             abort(403, 'Unauthorized access to this conversation.');
         }
-        
+
         // Get the entire conversation thread
         // This gets the root message (parent_id is null) and all its replies
         $rootMessage = $message->parent_id ? Message::find($message->parent_id) : $message;
-        
+
         if (!$rootMessage) {
             $rootMessage = $message;
         }
-        
+
         // Get all messages in this thread
         $conversation = Message::with(['sender', 'receiver', 'replies'])
             ->where('id', $rootMessage->id)
             ->orWhere('parent_id', $rootMessage->id)
             ->orderBy('created_at', 'asc')
             ->get();
-        
+
         // Mark unread messages as read
         Message::whereIn('id', $conversation->pluck('id'))
             ->where('receiver_id', $user->id)
@@ -115,15 +115,15 @@ class MessageController extends Controller
                 'is_read' => true,
                 'read_at' => now()
             ]);
-        
+
         // Get other user in conversation
         $otherUser = $message->sender_id == $user->id ? $message->receiver : $message->sender;
-        
+
         // Get unread count for header
         $unreadCount = Message::where('receiver_id', $user->id)
             ->where('is_read', false)
             ->count();
-        
+
         // Check if this is an API request
         if (request()->expectsJson()) {
             return response()->json([
@@ -132,24 +132,24 @@ class MessageController extends Controller
                 'other_user' => $otherUser
             ]);
         }
-        
+
         // Determine which view to return based on user role
         if ($user->role === 'admin' || $user->role === 'super_admin') {
             $unreadNotificationsCount = $this->getUnreadNotificationsCount($user->id);
-            
+
             return view('admin.messages.show', compact(
-                'conversation', 
-                'otherUser', 
-                'user', 
+                'conversation',
+                'otherUser',
+                'user',
                 'unreadCount',
                 'unreadNotificationsCount',
                 'rootMessage'
             ));
         } else {
             return view('customer.messages-show', compact(
-                'conversation', 
-                'otherUser', 
-                'user', 
+                'conversation',
+                'otherUser',
+                'user',
                 'unreadCount',
                 'rootMessage'
             ));
@@ -169,9 +169,9 @@ class MessageController extends Controller
 
         try {
             DB::beginTransaction();
-            
+
             $user = Auth::user();
-            
+
             // Create the message
             $message = new Message();
             $message->sender_id = $user->id;
@@ -211,14 +211,14 @@ class MessageController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Message send error: ' . $e->getMessage());
-            
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to send message: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return back()->with('error', 'Failed to send message. Please try again.');
         }
     }
@@ -234,12 +234,12 @@ class MessageController extends Controller
 
         try {
             DB::beginTransaction();
-            
+
             $user = Auth::user();
-            
+
             // Find the original message to reply to
             $parentMessage = Message::findOrFail($id);
-            
+
             // Check if user is part of this conversation
             if ($parentMessage->sender_id != $user->id && $parentMessage->receiver_id != $user->id) {
                 if ($request->expectsJson()) {
@@ -247,15 +247,15 @@ class MessageController extends Controller
                 }
                 return back()->with('error', 'You are not authorized to reply to this message.');
             }
-            
+
             // Determine receiver (the other user in the conversation)
-            $receiverId = $parentMessage->sender_id == $user->id 
-                ? $parentMessage->receiver_id 
+            $receiverId = $parentMessage->sender_id == $user->id
+                ? $parentMessage->receiver_id
                 : $parentMessage->sender_id;
-            
+
             // Determine the root parent ID (if this is a reply to a reply)
             $rootParentId = $parentMessage->parent_id ?? $parentMessage->id;
-            
+
             // Create reply message
             $message = new Message();
             $message->sender_id = $user->id;
@@ -287,14 +287,14 @@ class MessageController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Message reply error: ' . $e->getMessage());
-            
+
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to send reply: ' . $e->getMessage()
                 ], 500);
             }
-            
+
             return back()->with('error', 'Failed to send reply. Please try again.');
         }
     }
@@ -306,7 +306,7 @@ class MessageController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // Get all messages between these two users
             $messages = Message::with(['sender', 'receiver'])
                 ->where(function($q) use ($user, $userId) {
@@ -320,7 +320,7 @@ class MessageController extends Controller
                 })
                 ->orderBy('created_at', 'asc')
                 ->get();
-            
+
             // Mark received messages as read
             Message::whereIn('id', $messages->pluck('id'))
                 ->where('receiver_id', $user->id)
@@ -329,24 +329,24 @@ class MessageController extends Controller
                     'is_read' => true,
                     'read_at' => now()
                 ]);
-            
-            // Get other user info
-            $otherUser = User::findOrFail($userId);
-            
+
+            // Get other user info (do not fail if deleted)
+            $otherUser = User::find($userId);
+
             return response()->json([
                 'success' => true,
                 'messages' => $messages,
-                'other_user' => [
+                'other_user' => $otherUser ? [
                     'id' => $otherUser->id,
                     'name' => $otherUser->name,
                     'email' => $otherUser->email,
                     'role' => $otherUser->role
-                ]
+                ] : null
             ]);
 
         } catch (\Exception $e) {
             Log::error('Get conversation error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to load conversation'
@@ -361,19 +361,19 @@ class MessageController extends Controller
     {
         try {
             $message = Message::findOrFail($id);
-            
+
             // Only receiver can mark as read
             if ($message->receiver_id == Auth::id()) {
                 $message->is_read = true;
                 $message->read_at = now();
                 $message->save();
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Message marked as read'
                 ]);
             }
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized'
@@ -381,7 +381,7 @@ class MessageController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Mark as read error: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to mark message as read'
@@ -396,14 +396,14 @@ class MessageController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             $message = Message::findOrFail($id);
-            
+
             // Only sender or receiver can delete
             if ($message->sender_id == Auth::id() || $message->receiver_id == Auth::id()) {
                 // Check if this message has replies
                 $hasReplies = Message::where('parent_id', $message->id)->exists();
-                
+
                 if ($hasReplies) {
                     // If it has replies, just mark as deleted by user but keep for conversation
                     $message->content = '[This message has been deleted]';
@@ -412,42 +412,42 @@ class MessageController extends Controller
                     // No replies, safe to delete
                     $message->delete();
                 }
-                
+
                 DB::commit();
-                
+
                 if (request()->expectsJson()) {
                     return response()->json([
                         'success' => true,
                         'message' => 'Message deleted successfully'
                     ]);
                 }
-                
+
                 return redirect()->route('admin.messages')
                     ->with('success', 'Message deleted successfully.');
             }
-            
+
             DB::rollBack();
-            
+
             if (request()->expectsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unauthorized'
                 ], 403);
             }
-            
+
             return back()->with('error', 'You are not authorized to delete this message.');
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Message delete error: ' . $e->getMessage());
-            
+
             if (request()->expectsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to delete message'
                 ], 500);
             }
-            
+
             return back()->with('error', 'Failed to delete message.');
         }
     }
@@ -460,7 +460,7 @@ class MessageController extends Controller
         $count = Message::where('receiver_id', Auth::id())
             ->where('is_read', false)
             ->count();
-        
+
         return response()->json([
             'success' => true,
             'count' => $count
@@ -481,9 +481,9 @@ class MessageController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->get();
-        
+
         $conversations = collect();
-        
+
         foreach ($rootMessages as $root) {
             // Get the latest message in this thread (either the root or the latest reply)
             $latestMessage = Message::where(function($q) use ($root) {
@@ -492,7 +492,7 @@ class MessageController extends Controller
                 })
                 ->orderBy('created_at', 'desc')
                 ->first();
-            
+
             if ($latestMessage) {
                 // Count unread replies in this thread
                 $unreadCount = Message::where(function($q) use ($root) {
@@ -502,20 +502,20 @@ class MessageController extends Controller
                     ->where('receiver_id', $userId)
                     ->where('is_read', false)
                     ->count();
-                
+
                 $latestMessage->unread_count = $unreadCount;
                 $latestMessage->reply_count = Message::where('parent_id', $root->id)->count();
                 $conversations->push($latestMessage);
             }
         }
-        
+
         // Sort by latest message
         $conversations = $conversations->sortByDesc('created_at')->values();
-        
+
         if ($limit) {
             $conversations = $conversations->take($limit);
         }
-        
+
         return $conversations;
     }
 
@@ -573,7 +573,7 @@ class MessageController extends Controller
         } catch (\Exception $e) {
             // Ignore if notifications table doesn't exist
         }
-        
+
         return 0;
     }
 }

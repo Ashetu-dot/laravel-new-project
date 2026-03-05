@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ session('locale', 'en') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -47,6 +47,7 @@
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
+            --overlay-dark: rgba(0, 0, 0, 0.6);
         }
 
         * {
@@ -69,6 +70,9 @@
             display: flex;
             flex-direction: column;
         }
++
++        /* dark mode preferences persisted */
++        body.dark-mode .toggle-btn-icon { background-color: #0b1220; border-color: #1f2937; color: #cbd5e1; }
 
         main {
             flex: 1;
@@ -111,6 +115,8 @@
             gap: 12px;
             font-size: 14px;
             animation: slideDown 0.3s ease;
+            position: relative;
+            z-index: 1000;
         }
 
         @keyframes slideDown {
@@ -204,6 +210,15 @@
             width: 100%;
         }
 
+        .nav-item.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .nav-item.active::after {
+            width: 100%;
+        }
+
         .btn-signup {
             background: var(--primary-color);
             color: white !important;
@@ -239,6 +254,62 @@
             background-color: rgba(0,0,0,0.05);
         }
 
+        /* toggle icon buttons (theme & language) */
+        .toggle-btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 20px;
+        }
+
+        .toggle-btn-icon:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .language-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-hover);
+            min-width: 150px;
+            display: none;
+            z-index: 100;
+        }
+
+        .language-selector.open .language-dropdown {
+            display: block;
+        }
+
+        .language-selector:hover .language-dropdown {
+            display: block;
+        }
+
+        .language-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .language-option:hover {
+            background: var(--bg-light);
+        }
+
         /* Mobile Menu */
         .mobile-menu {
             display: none;
@@ -268,25 +339,43 @@
             border-bottom: none;
         }
 
-        /* Page Header */
+        /* Page Header with Dynamic Background */
         .page-header {
-            background: linear-gradient(135deg, rgba(184, 142, 63, 0.05) 0%, rgba(248, 250, 252, 0) 100%);
-            padding: 60px 20px 80px;
-            text-align: center;
             position: relative;
+            padding: 100px 20px 120px;
+            text-align: center;
+            color: white;
+            background-image: linear-gradient(var(--overlay-dark), var(--overlay-dark)), url('{{ $heroImage ?? asset('images/help-center-bg.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            isolation: isolate;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(184, 142, 63, 0.3), rgba(0, 0, 0, 0.7));
+            z-index: -1;
         }
 
         .page-header h1 {
-            font-size: 48px;
+            font-size: 56px;
             font-weight: 800;
-            color: var(--text-dark);
             margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease;
         }
 
         .page-header h1 span {
             color: var(--primary-color);
             position: relative;
             display: inline-block;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
         .page-header h1 span::after {
@@ -296,29 +385,44 @@
             left: 0;
             width: 100%;
             height: 12px;
-            background-color: rgba(184, 142, 63, 0.2);
+            background-color: rgba(184, 142, 63, 0.3);
             z-index: -1;
             border-radius: 4px;
         }
 
         .page-header p {
-            font-size: 18px;
-            color: var(--text-light);
-            max-width: 600px;
-            margin: 0 auto 30px;
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            opacity: 0.95;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Search Container */
         .search-container {
             max-width: 600px;
             margin: 0 auto;
-            background: var(--white);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 60px;
-            box-shadow: var(--shadow-hover);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             display: flex;
             align-items: center;
             padding: 5px;
-            border: 1px solid var(--border-color);
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 1s ease 0.4s both;
         }
 
         .search-icon {
@@ -337,7 +441,7 @@
         }
 
         .search-input::placeholder {
-            color: #aaa;
+            color: #999;
         }
 
         .search-btn {
@@ -355,11 +459,12 @@
         .search-btn:hover {
             background: var(--primary-hover);
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(184, 142, 63, 0.4);
         }
 
         .container {
             max-width: 1200px;
-            margin: -30px auto 60px;
+            margin: -50px auto 60px;
             padding: 0 20px;
             position: relative;
             z-index: 10;
@@ -382,11 +487,13 @@
             transition: all 0.3s;
             text-decoration: none;
             color: var(--text-dark);
+            border: 1px solid transparent;
         }
 
         .quick-help-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
             box-shadow: var(--shadow-hover);
+            border-color: var(--primary-color);
         }
 
         .quick-icon {
@@ -405,6 +512,8 @@
 
         .quick-help-card:hover .quick-icon {
             transform: scale(1.1);
+            background: var(--primary-color);
+            color: white;
         }
 
         .quick-title {
@@ -421,11 +530,28 @@
 
         /* Help Categories */
         .section-title {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             color: var(--text-dark);
             margin-bottom: 40px;
             text-align: center;
+        }
+
+        .section-title span {
+            color: var(--primary-color);
+            position: relative;
+        }
+
+        .section-title span::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background-color: rgba(184, 142, 63, 0.2);
+            z-index: -1;
+            border-radius: 4px;
         }
 
         .categories-grid {
@@ -525,6 +651,79 @@
 
         .view-all-link:hover {
             gap: 10px;
+        }
+
+        /* Payment Methods Section */
+        .payment-section {
+            margin: 40px 0 60px;
+        }
+
+        .payment-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .payment-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .payment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-color);
+        }
+
+        .payment-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(184, 142, 63, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            color: var(--primary-color);
+            font-size: 40px;
+            transition: all 0.3s;
+        }
+
+        .payment-card:hover .payment-icon {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .payment-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+        }
+
+        .payment-description {
+            color: var(--text-light);
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .payment-badge {
+            display: inline-block;
+            background: rgba(184, 142, 63, 0.1);
+            color: var(--primary-color);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
         }
 
         /* Featured Articles */
@@ -785,13 +984,14 @@
         }
 
         .help-footer h3 {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             margin-bottom: 15px;
         }
 
         .help-footer p {
-            opacity: 0.9;
+            opacity: 0.95;
+            font-size: 18px;
             margin-bottom: 30px;
             max-width: 500px;
             margin-left: auto;
@@ -809,9 +1009,10 @@
             background: white;
             color: var(--primary-color);
             text-decoration: none;
-            padding: 15px 35px;
+            padding: 15px 40px;
             border-radius: 50px;
             font-weight: 600;
+            font-size: 16px;
             transition: all 0.3s;
             display: inline-flex;
             align-items: center;
@@ -819,8 +1020,8 @@
         }
 
         .help-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .help-btn-outline {
@@ -930,33 +1131,33 @@
             .navbar { padding: 18px 30px; }
             .brand { font-size: 22px; }
             .nav-links { gap: 30px; }
-            
+
             .quick-help-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
+
             .categories-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
+
             .support-section {
                 grid-template-columns: 1fr;
             }
-            
+
             .contact-methods {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
+
             .faq-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .footer-links { gap: 50px; }
         }
 
         @media screen and (max-width: 900px) {
             .page-header h1 { font-size: 40px; }
-            
+
             .featured-grid {
                 grid-template-columns: 1fr;
             }
@@ -968,60 +1169,71 @@
             .menu-btn { display: flex; }
             .mobile-menu { display: block; }
 
-            .page-header { padding: 50px 20px 70px; }
-            .page-header h1 { font-size: 36px; }
-            
+            .page-header {
+                padding: 80px 20px 100px;
+            }
+
+            .page-header h1 {
+                font-size: 36px;
+            }
+
             .quick-help-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .categories-grid {
                 grid-template-columns: 1fr;
             }
-            
+
+            .payment-grid {
+                grid-template-columns: 1fr;
+            }
+
             .contact-methods {
                 grid-template-columns: 1fr;
             }
-            
+
             .featured-section {
                 padding: 30px 20px;
             }
-            
+
             .featured-article {
                 flex-direction: column;
                 text-align: center;
             }
-            
+
             .featured-icon {
                 margin: 0 auto;
             }
-            
+
             .support-card {
                 padding: 30px 20px;
             }
-            
+
             .help-footer {
                 padding: 40px 20px;
             }
-            
+
             .search-container {
                 flex-direction: column;
                 border-radius: 30px;
                 padding: 20px;
+                background: white;
             }
-            
+
             .search-icon {
                 display: none;
             }
-            
+
             .search-input {
                 width: 100%;
                 padding: 15px;
                 border: 1px solid var(--border-color);
                 border-radius: 30px;
                 margin-bottom: 15px;
+                background: white;
             }
-            
+
             .search-btn {
                 width: 100%;
                 margin-right: 0;
@@ -1038,20 +1250,17 @@
 
             .page-header h1 { font-size: 32px; }
             .section-title { font-size: 28px; }
-            
+
             .help-footer-buttons {
                 flex-direction: column;
             }
-            
+
             .footer-links { flex-direction: column; gap: 30px; }
             .bottom-bar { flex-direction: column; gap: 16px; align-items: flex-start; }
         }
     </style>
 </head>
 <body>
-
-    <div class="bg-circle circle-1"></div>
-    <div class="bg-circle circle-2"></div>
 
     <!-- Session Messages -->
     @if(session('success'))
@@ -1083,28 +1292,37 @@
             <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
             <a href="{{ route('home') }}#features" class="nav-item">Features</a>
             <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
-            <a href="{{ route('about') }}" class="nav-item">About Us</a>
-            <a href="{{ route('help-center') }}" class="nav-item active">Help Center</a>
-            @guest
-                <a href="{{ route('login') }}" class="nav-item">Log In</a>
-                <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
-            @else
-                <span class="nav-item" style="color: var(--primary-color); font-weight: 600;">
-                    <i class="ri-user-line"></i> {{ Auth::user()->name }}
-                </span>
-                <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
-                @if(Auth::user()->role === 'vendor')
-                    <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
-                @elseif(Auth::user()->role === 'customer')
-                    <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
-                @elseif(Auth::user()->role === 'admin')
-                    <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
-                @endif
-                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-                </form>
-            @endguest
+            <!-- removed extraneous Help Center and logout links per request -->
+        </div>
+
+        <div class="nav-actions">
+            <div class="theme-lang-toggle" style="display:flex; align-items:center; gap:8px;">
+                <button class="toggle-btn-icon" id="themeToggle" title="Toggle Theme">
+                    <i class="ri-moon-line"></i>
+                </button>
+                <div class="language-selector" id="languageSelector">
+                    <button class="toggle-btn-icon" id="languageToggle" onclick="toggleLanguageDropdown(event)" aria-haspopup="true" aria-expanded="false" title="Language">
+                        <i class="ri-translate-2"></i>
+                    </button>
+                    <div class="language-dropdown" style="display:none; position:absolute; right:24px; background:white; box-shadow:var(--shadow); border-radius:8px; overflow:hidden;">
+                        <div class="language-option" data-locale="en" onclick="changeLanguage('en')">
+                            English @if(session('locale','en') === 'en') <i class="ri-check-line" style="float:right"></i> @endif
+                        </div>
+                        <div class="language-option" data-locale="am" onclick="changeLanguage('am')">
+                            አማርኛ @if(session('locale','en') === 'am') <i class="ri-check-line" style="float:right"></i> @endif
+                        </div>
+                        <div class="language-option" data-locale="om" onclick="changeLanguage('om')">
+                            Oromiffa @if(session('locale','en') === 'om') <i class="ri-check-line" style="float:right"></i> @endif
+                        </div>
+                    </div>
+                </div>
+
+                @guest
+                    <a href="{{ route('login') }}" class="nav-item">Log In</a>
+                    <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
+                @endguest
+            </div>
+        </div>
         </div>
         <div class="menu-btn" id="menuToggle">
             <i class="ri-menu-line"></i>
@@ -1116,32 +1334,40 @@
         <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
         <a href="{{ route('home') }}#features" class="nav-item">Features</a>
         <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
-        <a href="{{ route('about') }}" class="nav-item">About Us</a>
-        <a href="{{ route('help-center') }}" class="nav-item active">Help Center</a>
+        <!-- removed help center & logout links -->
         @guest
             <a href="{{ route('login') }}" class="nav-item">Log In</a>
             <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
-        @else
-            <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
-            @if(Auth::user()->role === 'vendor')
-                <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
-            @elseif(Auth::user()->role === 'customer')
-                <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
-            @elseif(Auth::user()->role === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
-            @endif
-            <form method="POST" action="{{ route('logout') }}" style="margin-top: 12px;">
-                @csrf
-                <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-            </form>
         @endguest
+        <!-- mobile toggles -->
+        <div style="padding:12px 0; border-top:1px solid var(--border-color); display:flex; gap:8px; align-items:center;">
+            <button class="toggle-btn-icon" id="themeToggleMobile" title="Toggle Theme">
+                <i class="ri-moon-line"></i>
+            </button>
+            <div class="language-selector" id="languageSelectorMobile" style="position:relative;">
+                <button class="toggle-btn-icon" id="languageToggleMobile" onclick="toggleLanguageDropdown(event, 'mobile')" aria-haspopup="true" aria-expanded="false" title="Language">
+                    <i class="ri-translate-2"></i>
+                </button>
+                <div class="language-dropdown" style="display:none; right:0;">
+                    <div class="language-option" data-locale="en" onclick="changeLanguage('en', true)">
+                        English @if(session('locale','en')==='en') <i class="ri-check-line" style="float:right"></i> @endif
+                    </div>
+                    <div class="language-option" data-locale="am" onclick="changeLanguage('am', true)">
+                        አማርኛ @if(session('locale','en')==='am') <i class="ri-check-line" style="float:right"></i> @endif
+                    </div>
+                    <div class="language-option" data-locale="om" onclick="changeLanguage('om', true)">
+                        Oromiffa @if(session('locale','en')==='om') <i class="ri-check-line" style="float:right"></i> @endif
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Page Header -->
-    <section class="page-header">
+    <!-- Page Header with Dynamic Background -->
+    <section class="page-header" style="background-image: linear-gradient(var(--overlay-dark), var(--overlay-dark)), url('{{ $heroImage ?? asset('images/help-center-bg.jpg') }}');">
         <h1>How can we <span>help</span> you?</h1>
         <p>Search our help center or browse topics below to find answers to your questions.</p>
-        
+
         <!-- Search Bar -->
         <div class="search-container">
             <span class="search-icon"><i class="ri-search-line"></i></span>
@@ -1184,6 +1410,33 @@
                 </a>
             </div>
 
+            <!-- Payment Methods Section -->
+            <section class="payment-section">
+                <h2 class="section-title">Accepted <span>Payment</span> Methods</h2>
+                <div class="payment-grid">
+                    <div class="payment-card">
+                        <div class="payment-icon">
+                            <i class="ri-bank-card-line"></i>
+                        </div>
+                        <h3 class="payment-title">Chapa</h3>
+                        <p class="payment-description">
+                            Secure online payments with Ethiopia's trusted payment gateway. Pay instantly with your bank account, card, or mobile money.
+                        </p>
+                        <span class="payment-badge">Instant & Secure</span>
+                    </div>
+                    <div class="payment-card">
+                        <div class="payment-icon">
+                            <i class="ri-money-dollar-circle-line"></i>
+                        </div>
+                        <h3 class="payment-title">Cash on Delivery</h3>
+                        <p class="payment-description">
+                            Pay in cash when the service is delivered. Available for eligible local services. Verify with vendor before booking.
+                        </p>
+                        <span class="payment-badge">Pay at Service</span>
+                    </div>
+                </div>
+            </section>
+
             <!-- Help Categories -->
             <section>
                 <h2 class="section-title">Browse Help Topics</h2>
@@ -1217,19 +1470,19 @@
                             </li>
                             <li class="topic-item">
                                 <a href="#" class="topic-link">
-                                    <span>Payment methods</span>
+                                    <span>Payment with Chapa</span>
+                                    <i class="ri-arrow-right-s-line"></i>
+                                </a>
+                            </li>
+                            <li class="topic-item">
+                                <a href="#" class="topic-link">
+                                    <span>Cash on delivery process</span>
                                     <i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
                                 <a href="#" class="topic-link">
                                     <span>Cancellation policy</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Leaving a review</span>
                                     <i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
@@ -1274,13 +1527,13 @@
                             </li>
                             <li class="topic-item">
                                 <a href="#" class="topic-link">
-                                    <span>Getting paid</span>
+                                    <span>Getting paid via Chapa</span>
                                     <i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
                                 <a href="#" class="topic-link">
-                                    <span>Responding to reviews</span>
+                                    <span>Cash on delivery setup</span>
                                     <i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
@@ -1301,25 +1554,19 @@
                         <ul class="topic-list">
                             <li class="topic-item">
                                 <a href="#" class="topic-link">
-                                    <span>Accepted payment methods</span>
+                                    <span>How to pay with Chapa</span>
                                     <i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
                                 <a href="#" class="topic-link">
-                                    <span>Telebirr payments</span>
+                                    <span>Setting up cash on delivery</span>
                                     <i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
                                 <a href="#" class="topic-link">
-                                    <span>Bank transfers</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Cash on delivery</span>
+                                    <span>Payment security</span>
                                     <i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
@@ -1331,160 +1578,13 @@
                             </li>
                             <li class="topic-item">
                                 <a href="#" class="topic-link">
+                                    <span>Payment confirmation</span>
+                                    <i class="ri-arrow-right-s-line"></i>
+                                </a>
+                            </li>
+                            <li class="topic-item">
+                                <a href="#" class="topic-link">
                                     <span>Invoices and receipts</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                        </ul>
-                        <a href="#" class="view-all-link">
-                            View All <i class="ri-arrow-right-line"></i>
-                        </a>
-                    </div>
-
-                    <!-- Account & Security -->
-                    <div class="category-card">
-                        <div class="category-header">
-                            <div class="category-icon">
-                                <i class="ri-shield-user-line"></i>
-                            </div>
-                            <h3 class="category-title">Account & Security</h3>
-                        </div>
-                        <ul class="topic-list">
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Login issues</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Changing password</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Two-factor authentication</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Privacy settings</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Deleting account</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Reporting suspicious activity</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                        </ul>
-                        <a href="#" class="view-all-link">
-                            View All <i class="ri-arrow-right-line"></i>
-                        </a>
-                    </div>
-
-                    <!-- Technical Support -->
-                    <div class="category-card">
-                        <div class="category-header">
-                            <div class="category-icon">
-                                <i class="ri-customer-service-line"></i>
-                            </div>
-                            <h3 class="category-title">Technical Support</h3>
-                        </div>
-                        <ul class="topic-list">
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>App not working</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Browser compatibility</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Mobile app help</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Notification issues</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Loading errors</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Report a bug</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                        </ul>
-                        <a href="#" class="view-all-link">
-                            View All <i class="ri-arrow-right-line"></i>
-                        </a>
-                    </div>
-
-                    <!-- Policies -->
-                    <div class="category-card">
-                        <div class="category-header">
-                            <div class="category-icon">
-                                <i class="ri-file-text-line"></i>
-                            </div>
-                            <h3 class="category-title">Policies</h3>
-                        </div>
-                        <ul class="topic-list">
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Terms of service</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Privacy policy</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Cancellation policy</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Refund policy</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Community guidelines</span>
-                                    <i class="ri-arrow-right-s-line"></i>
-                                </a>
-                            </li>
-                            <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Cookie policy</span>
                                     <i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
@@ -1516,7 +1616,7 @@
                         </div>
                         <div class="featured-content">
                             <h4>Understanding our payment system</h4>
-                            <p>Learn about payment methods, processing times, and security.</p>
+                            <p>Learn about Chapa payments, cash on delivery, and transaction security.</p>
                             <a href="#" class="read-more">Read more <i class="ri-arrow-right-line"></i></a>
                         </div>
                     </div>
@@ -1616,7 +1716,16 @@
                             <i class="ri-arrow-down-s-line"></i>
                         </div>
                         <div class="faq-answer">
-                            We accept Telebirr, bank transfers, cash on delivery (for eligible services), and major credit/debit cards. All payments are secure and encrypted.
+                            We accept Chapa (secure online payments) and Cash on Delivery for eligible services. All payments are secure and encrypted.
+                        </div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFAQ(this)">
+                        <div class="faq-question">
+                            <span>How does Chapa payment work?</span>
+                            <i class="ri-arrow-down-s-line"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Chapa is Ethiopia's trusted payment gateway. You can pay using your bank account, card, or mobile money. Payments are processed instantly and securely.
                         </div>
                     </div>
                     <div class="faq-item" onclick="toggleFAQ(this)">
@@ -1635,15 +1744,6 @@
                         </div>
                         <div class="faq-answer">
                             Yes, you can cancel bookings through your dashboard. Cancellation policies vary by vendor. Check the vendor's cancellation policy before booking.
-                        </div>
-                    </div>
-                    <div class="faq-item" onclick="toggleFAQ(this)">
-                        <div class="faq-question">
-                            <span>How do I leave a review?</span>
-                            <i class="ri-arrow-down-s-line"></i>
-                        </div>
-                        <div class="faq-answer">
-                            After a completed booking, you'll receive an email with a link to leave a review. You can also go to "My Bookings" in your dashboard and leave a review there.
                         </div>
                     </div>
                     <div class="faq-item" onclick="toggleFAQ(this)">
@@ -1704,22 +1804,20 @@
                         <li><a href="{{ route('search.results') }}">How it works</a></li>
                         <li><a href="{{ route('trust-safety') }}">Trust & Safety</a></li>
                         <li><a href="{{ route('help-center') }}">Help Center</a></li>
-                        <li><a href="#">Invite Friends</a></li>
+                        <li><a href="{{ route('invite') }}">Invite Friends</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
                     <h4>For Vendors</h4>
                     <ul>
                         <li><a href="{{ route('register') }}">List your service</a></li>
-                        <li><a href="#">Vendor Resources</a></li>
-                        <li><a href="#">Success Stories</a></li>
-                        <li><a href="#">Community</a></li>
+                        <li><a href="{{ route('community') }}">Community</a></li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="bottom-bar">
-            <span>&copy; {{ date('Y') }} Vendora Inc. All rights reserved. Made with ❤️ in Jimma, Ethiopia</span>
+            <span>&copy; {{ date('Y') }} Vendora. All rights reserved. Jimma, Ethiopia</span>
             <div class="social-icons">
                 <a href="#" target="_blank"><i class="ri-twitter-fill"></i></a>
                 <a href="#" target="_blank"><i class="ri-instagram-fill"></i></a>
@@ -1738,7 +1836,7 @@
             menuToggle.addEventListener('click', function(e) {
                 e.stopPropagation();
                 mobileMenu.classList.toggle('active');
-                
+
                 // Change icon
                 const icon = this.querySelector('i');
                 if (mobileMenu.classList.contains('active')) {
@@ -1810,6 +1908,135 @@
                 }
             });
         });
+
+        // Theme toggle - sync with backend and localStorage
+        function applyTheme(theme) {
+            document.body.classList.toggle('dark-mode', theme === 'dark');
+            const ico = document.querySelector('#themeToggle i') || document.querySelector('#themeToggleMobile i');
+            if (ico) ico.className = theme === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
+        }
+
+        function updateTheme(theme) {
+            applyTheme(theme);
+            localStorage.setItem('theme', theme);
+            // send to server
+            fetch('/toggle-theme', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ theme: theme })
+            });
+        }
+
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const themeToggleBtnMobile = document.getElementById('themeToggleMobile');
+        [themeToggleBtn, themeToggleBtnMobile].forEach(btn => {
+            if (!btn) return;
+            btn.addEventListener('click', function() {
+                const isDark = document.body.classList.toggle('dark-mode');
+                const theme = isDark ? 'dark' : 'light';
+                const icon = this.querySelector('i');
+                if (icon) icon.className = isDark ? 'ri-sun-line' : 'ri-moon-line';
+                updateTheme(theme);
+            });
+        });
+
+        // initialize theme on load from server or storage
+        (function() {
+            let theme = localStorage.getItem('theme');
+            if (theme) {
+                applyTheme(theme);
+            } else {
+                fetch('/get-theme').then(r=>r.json()).then(data=>{
+                    if (data.success && data.theme) {
+                        applyTheme(data.theme);
+                        try { localStorage.setItem('theme', data.theme); } catch(e) {}
+                    }
+                }).catch(()=>{});
+            }
+        })();
+
+        // Language dropdown toggle and switch
+        function toggleLanguageDropdown(e, isMobile = false) {
+            e.stopPropagation();
+            const selId = isMobile ? 'languageSelectorMobile' : 'languageSelector';
+            const sel = document.getElementById(selId);
+            if (!sel) return;
+            const dd = sel.querySelector('.language-dropdown');
+            const expanded = dd.style.display !== 'block';
+            dd.style.display = expanded ? 'block' : 'none';
+            const btn = document.getElementById(isMobile ? 'languageToggleMobile' : 'languageToggle');
+            if (btn) btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        }
+
+        function changeLanguage(locale, isMobile = false) {
+            document.querySelectorAll('.language-option').forEach(opt => {
+                if (opt.dataset.locale === locale) {
+                    if (!opt.querySelector('i')) {
+                        const icon = document.createElement('i');
+                        icon.className = 'ri-check-line';
+                        icon.style.float = 'right';
+                        opt.appendChild(icon);
+                    }
+                } else {
+                    const icon = opt.querySelector('i');
+                    if (icon) icon.remove();
+                }
+            });
+            const desktopSel = document.getElementById('languageSelector');
+            if (desktopSel) {
+                const dd = desktopSel.querySelector('.language-dropdown');
+                if (dd) dd.style.display = 'none';
+                const btn = document.getElementById('languageToggle');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
+            if (isMobile) {
+                const mobileSel = document.getElementById('languageSelectorMobile');
+                if (mobileSel) {
+                    const dd = mobileSel.querySelector('.language-dropdown');
+                    if (dd) dd.style.display = 'none';
+                    const btn = document.getElementById('languageToggleMobile');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                }
+            }
+            try { localStorage.setItem('locale', locale); } catch{};
+            fetch('/switch-language', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ locale: locale })
+            }).then(() => {
+                window.location.reload();
+            }).catch(err => console.error('Failed to change language', err));
+        }
+
+        // Close language dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            ['languageSelector','languageSelectorMobile'].forEach(id => {
+                const sel = document.getElementById(id);
+                if (!sel) return;
+                const dd = sel.querySelector('.language-dropdown');
+                if (dd && !sel.contains(event.target)) {
+                    dd.style.display = 'none';
+                    const btn = sel.querySelector('button');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+
+        // set html lang from localStorage as soon as possible
+        (function() {
+            try {
+                const storedLocale = localStorage.getItem('locale');
+                if (storedLocale && document.documentElement.lang !== storedLocale) {
+                    document.documentElement.lang = storedLocale;
+                }
+            } catch(e) { }
+        })();
 
         // Search functionality (placeholder)
         document.querySelector('.search-btn').addEventListener('click', function() {

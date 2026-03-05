@@ -25,7 +25,7 @@ class NotificationController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             if (!$user) {
                 return redirect()->route('login')->with('error', 'Please login to view notifications.');
             }
@@ -92,7 +92,8 @@ class NotificationController extends Controller
                     'typeCounts'
                 ));
             } elseif ($user->role === 'admin') {
-                return view('admin.notifications', compact(
+                // admin template lives in a subdirectory with "index" filename
+                return view('admin.notifications.index', compact(
                     'notifications',
                     'totalCount',
                     'unreadCount',
@@ -123,7 +124,7 @@ class NotificationController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             if (!$user) {
                 if (request()->wantsJson()) {
                     return response()->json([
@@ -153,7 +154,7 @@ class NotificationController extends Controller
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             Log::error('Notification not found: ' . $e->getMessage());
-            
+
             if (request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -162,10 +163,10 @@ class NotificationController extends Controller
             }
 
             return redirect()->back()->with('error', 'Notification not found');
-            
+
         } catch (\Exception $e) {
             Log::error('Show notification error: ' . $e->getMessage());
-            
+
             if (request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -184,7 +185,7 @@ class NotificationController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             if (!$user) {
                 return response()->json(['count' => 0]);
             }
@@ -208,7 +209,7 @@ class NotificationController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             if (!$user) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
@@ -272,7 +273,7 @@ class NotificationController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             if (!$user) {
                 if (request()->wantsJson()) {
                     return response()->json(['success' => false, 'error' => 'Unauthorized'], 401);
@@ -282,7 +283,7 @@ class NotificationController extends Controller
 
             $notification = Notification::where('user_id', $user->id)
                                         ->findOrFail($id);
-            
+
             $notification->is_read = true;
             $notification->read_at = now();
             $notification->save();
@@ -298,14 +299,14 @@ class NotificationController extends Controller
                 return response()->json(['success' => false, 'error' => 'Notification not found'], 404);
             }
             return back()->with('error', 'Notification not found.');
-            
+
         } catch (\Exception $e) {
             Log::error('Mark as read error: ' . $e->getMessage());
-            
+
             if (request()->wantsJson()) {
                 return response()->json(['success' => false, 'error' => 'Failed to mark as read'], 500);
             }
-            
+
             return back()->with('error', 'Failed to mark notification as read.');
         }
     }
@@ -317,7 +318,7 @@ class NotificationController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             if (!$user) {
                 if (request()->wantsJson()) {
                     return response()->json(['success' => false, 'error' => 'Unauthorized'], 401);
@@ -340,11 +341,11 @@ class NotificationController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Mark all as read error: ' . $e->getMessage());
-            
+
             if (request()->wantsJson()) {
                 return response()->json(['success' => false, 'error' => 'Failed to mark all as read'], 500);
             }
-            
+
             return back()->with('error', 'Failed to mark all notifications as read.');
         }
     }
@@ -356,7 +357,7 @@ class NotificationController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             if (!$user) {
                 if (request()->wantsJson()) {
                     return response()->json(['success' => false, 'error' => 'Unauthorized'], 401);
@@ -366,7 +367,7 @@ class NotificationController extends Controller
 
             $notification = Notification::where('user_id', $user->id)
                                         ->findOrFail($id);
-            
+
             $notification->delete();
 
             if (request()->wantsJson()) {
@@ -380,14 +381,14 @@ class NotificationController extends Controller
                 return response()->json(['success' => false, 'error' => 'Notification not found'], 404);
             }
             return back()->with('error', 'Notification not found.');
-            
+
         } catch (\Exception $e) {
             Log::error('Delete notification error: ' . $e->getMessage());
-            
+
             if (request()->wantsJson()) {
                 return response()->json(['success' => false, 'error' => 'Failed to delete notification'], 500);
             }
-            
+
             return back()->with('error', 'Failed to delete notification.');
         }
     }
@@ -399,7 +400,7 @@ class NotificationController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             if (!$user) {
                 if (request()->wantsJson()) {
                     return response()->json(['success' => false, 'error' => 'Unauthorized'], 401);
@@ -417,11 +418,11 @@ class NotificationController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Clear all notifications error: ' . $e->getMessage());
-            
+
             if (request()->wantsJson()) {
                 return response()->json(['success' => false, 'error' => 'Failed to clear notifications'], 500);
             }
-            
+
             return back()->with('error', 'Failed to clear notifications.');
         }
     }

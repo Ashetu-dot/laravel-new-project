@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ session('locale', 'en') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -47,6 +47,26 @@
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
+            --gradient-gold: linear-gradient(135deg, #B88E3F, #9c7832);
+        }
+
+        /* Dark Mode Variables */
+        body.dark-mode {
+            --primary-gold: #D4A55A;
+            --primary-hover: #C1934A;
+            --text-dark: #E5E7EB;
+            --text-gray: #9CA3AF;
+            --border-color: #374151;
+            --white: #1F2937;
+            --light-gray: #111827;
+            --bg-primary: #1f2937;
+            --bg-secondary: #111827;
+            --text-primary: #f3f4f6;
+            --accent: #D4A55A;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-hover: 0 8px 24px rgba(0,0,0,0.4);
+            --error: #F87171;
+            --success: #34D399;
         }
 
         * {
@@ -111,6 +131,8 @@
             gap: 12px;
             font-size: 14px;
             animation: slideDown 0.3s ease;
+            position: relative;
+            z-index: 1000;
         }
 
         @keyframes slideDown {
@@ -191,6 +213,72 @@
             position: relative;
         }
 
+        /* theme / language toggles */
+        .theme-lang-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: var(--light-gray);
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 20px;
+        }
+
+        .toggle-btn-icon:hover {
+            background-color: var(--primary-gold);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        body.dark-mode .toggle-btn-icon {
+            background-color: #0b1220;
+            border-color: #1f2937;
+            color: #cbd5e1;
+        }
+        body.dark-mode .theme-lang-toggle { color: #cbd5e1; }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .language-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-hover);
+            min-width: 150px;
+            display: none;
+            z-index: 100;
+        }
+
+        .language-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .language-option:hover {
+            background-color: var(--light-gray);
+            color: var(--primary-gold);
+        }
+
         .nav-item:hover {
             color: var(--primary-color);
         }
@@ -207,6 +295,15 @@
         }
 
         .nav-item:hover::after {
+            width: 100%;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .nav-item.active::after {
             width: 100%;
         }
 
@@ -274,25 +371,44 @@
             border-bottom: none;
         }
 
-        /* Page Header */
+        /* Page Header with Dynamic Background */
         .page-header {
-            background: linear-gradient(135deg, rgba(184, 142, 63, 0.05) 0%, rgba(248, 250, 252, 0) 100%);
-            padding: 60px 20px;
-            text-align: center;
             position: relative;
+            padding: 80px 20px 100px;
+            text-align: center;
+            color: white;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                        url('{{ $heroImage ?? asset('images/invite-bg.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            isolation: isolate;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(184, 142, 63, 0.4), rgba(0, 0, 0, 0.7));
+            z-index: -1;
         }
 
         .page-header h1 {
-            font-size: 48px;
+            font-size: 56px;
             font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease;
         }
 
         .page-header h1 span {
             color: var(--primary-color);
             position: relative;
             display: inline-block;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
         .page-header h1 span::after {
@@ -302,22 +418,37 @@
             left: 0;
             width: 100%;
             height: 12px;
-            background-color: rgba(184, 142, 63, 0.2);
+            background-color: rgba(184, 142, 63, 0.3);
             z-index: -1;
             border-radius: 4px;
         }
 
         .page-header p {
-            font-size: 18px;
-            color: var(--text-light);
-            max-width: 600px;
+            font-size: 20px;
+            max-width: 700px;
             margin: 0 auto;
+            opacity: 0.95;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .container {
             max-width: 1200px;
-            margin: 60px auto;
+            margin: -30px auto 60px;
             padding: 0 20px;
+            position: relative;
+            z-index: 10;
         }
 
         /* Referral Stats */
@@ -335,11 +466,13 @@
             text-align: center;
             box-shadow: var(--shadow);
             transition: transform 0.3s;
+            border: 1px solid transparent;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-hover);
+            border-color: var(--primary-color);
         }
 
         .stat-icon {
@@ -353,6 +486,13 @@
             margin: 0 auto 20px;
             color: var(--primary-color);
             font-size: 32px;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover .stat-icon {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
         }
 
         .stat-value {
@@ -377,6 +517,7 @@
             text-align: center;
             position: relative;
             overflow: hidden;
+            box-shadow: var(--shadow-hover);
         }
 
         .referral-hero::before {
@@ -388,6 +529,7 @@
             height: 200px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
+            animation: pulse 4s infinite;
         }
 
         .referral-hero::after {
@@ -399,6 +541,18 @@
             height: 200px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
+            animation: pulse 4s infinite 2s;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
         }
 
         .referral-hero-content {
@@ -407,13 +561,14 @@
         }
 
         .referral-hero h2 {
-            font-size: 42px;
+            font-size: 48px;
             font-weight: 800;
             margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         .referral-hero p {
-            font-size: 18px;
+            font-size: 20px;
             opacity: 0.95;
             margin-bottom: 30px;
             max-width: 600px;
@@ -431,16 +586,18 @@
             display: flex;
             align-items: center;
             border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .referral-code {
             flex: 1;
             padding: 15px 25px;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             color: white;
             text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .copy-btn {
@@ -456,11 +613,16 @@
             align-items: center;
             gap: 8px;
             margin-right: 5px;
+            font-size: 16px;
         }
 
         .copy-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .copy-btn i {
+            font-size: 18px;
         }
 
         /* How It Works */
@@ -469,11 +631,28 @@
         }
 
         .section-title {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             color: var(--text-dark);
             margin-bottom: 40px;
             text-align: center;
+        }
+
+        .section-title span {
+            color: var(--primary-color);
+            position: relative;
+        }
+
+        .section-title span::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background-color: rgba(184, 142, 63, 0.2);
+            z-index: -1;
+            border-radius: 4px;
         }
 
         .steps-grid {
@@ -489,12 +668,14 @@
             text-align: center;
             box-shadow: var(--shadow);
             position: relative;
-            transition: transform 0.3s;
+            transition: all 0.3s;
+            border: 1px solid transparent;
         }
 
         .step-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
             box-shadow: var(--shadow-hover);
+            border-color: var(--primary-color);
         }
 
         .step-number {
@@ -515,6 +696,11 @@
             font-size: 48px;
             color: var(--primary-color);
             margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+
+        .step-card:hover .step-icon {
+            transform: scale(1.1);
         }
 
         .step-title {
@@ -553,25 +739,34 @@
             gap: 20px;
             align-items: center;
             box-shadow: var(--shadow);
-            transition: transform 0.3s;
+            transition: all 0.3s;
+            border: 1px solid transparent;
         }
 
         .reward-card:hover {
-            transform: translateX(5px);
+            transform: translateX(10px);
             box-shadow: var(--shadow-hover);
+            border-color: var(--primary-color);
         }
 
         .reward-icon {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             background: rgba(184, 142, 63, 0.1);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--primary-color);
-            font-size: 32px;
+            font-size: 36px;
             flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .reward-card:hover .reward-icon {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
         }
 
         .reward-content {
@@ -592,7 +787,7 @@
         }
 
         .reward-value {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 800;
             color: var(--primary-color);
         }
@@ -604,6 +799,7 @@
             padding: 50px;
             box-shadow: var(--shadow);
             margin-bottom: 60px;
+            border: 1px solid var(--border-color);
         }
 
         .invite-form {
@@ -612,10 +808,15 @@
         }
 
         .form-title {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             margin-bottom: 30px;
             text-align: center;
+            color: var(--text-dark);
+        }
+
+        .form-title span {
+            color: var(--primary-color);
         }
 
         .form-group {
@@ -645,6 +846,11 @@
             box-shadow: 0 0 0 3px rgba(184, 142, 63, 0.1);
         }
 
+        .form-input[readonly] {
+            background-color: var(--bg-light);
+            cursor: not-allowed;
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -653,10 +859,10 @@
 
         .invite-btn {
             width: 100%;
-            background: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
             color: white;
             border: none;
-            padding: 16px;
+            padding: 18px;
             border-radius: 50px;
             font-size: 18px;
             font-weight: 600;
@@ -670,9 +876,12 @@
         }
 
         .invite-btn:hover {
-            background: var(--primary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(184, 142, 63, 0.3);
+            box-shadow: 0 8px 20px rgba(184, 142, 63, 0.4);
+        }
+
+        .invite-btn i {
+            font-size: 20px;
         }
 
         /* Share Section */
@@ -682,33 +891,41 @@
         }
 
         .share-title {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            color: var(--text-dark);
+        }
+
+        .share-title span {
+            color: var(--primary-color);
         }
 
         .share-buttons {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             justify-content: center;
             flex-wrap: wrap;
+            margin-bottom: 30px;
         }
 
         .share-btn {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 28px;
+            font-size: 32px;
             transition: all 0.3s;
             text-decoration: none;
+            box-shadow: var(--shadow);
         }
 
         .share-btn:hover {
-            transform: translateY(-5px) scale(1.1);
+            transform: translateY(-8px) scale(1.1);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
         }
 
         .share-btn.telegram {
@@ -735,6 +952,37 @@
             background: var(--text-light);
         }
 
+        .share-btn.copy:hover {
+            background: var(--primary-color);
+        }
+
+        .referral-link-box {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .referral-link-box p {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .referral-link-code {
+            background: var(--white);
+            padding: 12px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            font-family: monospace;
+            font-size: 16px;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            word-break: break-all;
+        }
+
         /* Referral History */
         .history-section {
             background: var(--white);
@@ -742,6 +990,7 @@
             padding: 40px;
             box-shadow: var(--shadow);
             margin-bottom: 60px;
+            border: 1px solid var(--border-color);
         }
 
         .history-header {
@@ -756,6 +1005,12 @@
         .history-title {
             font-size: 24px;
             font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .history-title i {
+            color: var(--primary-color);
+            margin-right: 8px;
         }
 
         .view-all-link {
@@ -765,6 +1020,11 @@
             display: flex;
             align-items: center;
             gap: 4px;
+            transition: gap 0.3s;
+        }
+
+        .view-all-link:hover {
+            gap: 8px;
         }
 
         .history-table {
@@ -789,7 +1049,7 @@
 
         .status-badge {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 6px 15px;
             border-radius: 50px;
             font-size: 12px;
             font-weight: 600;
@@ -812,14 +1072,26 @@
 
         .empty-state {
             text-align: center;
-            padding: 40px;
+            padding: 60px 20px;
             color: var(--text-light);
         }
 
         .empty-icon {
-            font-size: 48px;
+            font-size: 64px;
             color: var(--text-light);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h4 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .empty-state p {
+            font-size: 14px;
         }
 
         /* Terms */
@@ -838,17 +1110,27 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            color: var(--text-dark);
+        }
+
+        .terms-title i {
+            color: var(--primary-color);
+            font-size: 22px;
         }
 
         .terms-list {
             color: var(--text-light);
             font-size: 14px;
-            line-height: 1.7;
+            line-height: 1.8;
             padding-left: 20px;
         }
 
         .terms-list li {
             margin-bottom: 8px;
+        }
+
+        .terms-list li::marker {
+            color: var(--primary-color);
         }
 
         /* Footer */
@@ -930,6 +1212,7 @@
 
         .social-icons a {
             color: #999;
+            font-size: 18px;
             transition: color 0.2s;
         }
 
@@ -947,31 +1230,31 @@
             .navbar { padding: 18px 30px; }
             .brand { font-size: 22px; }
             .nav-links { gap: 30px; }
-            
+
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
+
             .steps-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
+
             .rewards-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .footer-links { gap: 50px; }
         }
 
         @media screen and (max-width: 900px) {
-            .page-header h1 { font-size: 40px; }
-            
+            .page-header h1 { font-size: 48px; }
+
             .referral-hero {
                 padding: 40px 20px;
             }
-            
+
             .referral-hero h2 {
-                font-size: 32px;
+                font-size: 36px;
             }
         }
 
@@ -981,46 +1264,47 @@
             .menu-btn { display: flex; }
             .mobile-menu { display: block; }
 
-            .page-header { padding: 40px 20px; }
-            .page-header h1 { font-size: 36px; }
-            
+            .page-header { padding: 60px 20px 80px; }
+            .page-header h1 { font-size: 40px; }
+
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .steps-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .rewards-section {
                 padding: 30px 20px;
             }
-            
+
             .invite-section {
                 padding: 30px 20px;
             }
-            
+
             .form-row {
                 grid-template-columns: 1fr;
             }
-            
+
             .history-section {
                 padding: 20px;
                 overflow-x: auto;
             }
-            
+
             .referral-code-box {
                 flex-direction: column;
                 background: transparent;
                 gap: 15px;
             }
-            
+
             .referral-code {
                 background: rgba(255, 255, 255, 0.2);
                 border-radius: 50px;
                 width: 100%;
+                font-size: 24px;
             }
-            
+
             .copy-btn {
                 width: 100%;
                 justify-content: center;
@@ -1038,30 +1322,27 @@
 
             .page-header h1 { font-size: 32px; }
             .section-title { font-size: 28px; }
-            
+
             .referral-hero h2 {
                 font-size: 28px;
             }
-            
+
             .share-buttons {
-                gap: 10px;
+                gap: 12px;
             }
-            
+
             .share-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 24px;
+                width: 55px;
+                height: 55px;
+                font-size: 26px;
             }
-            
+
             .footer-links { flex-direction: column; gap: 30px; }
             .bottom-bar { flex-direction: column; gap: 16px; align-items: flex-start; }
         }
     </style>
 </head>
 <body>
-
-    <div class="bg-circle circle-1"></div>
-    <div class="bg-circle circle-2"></div>
 
     <!-- Session Messages -->
     @if(session('success'))
@@ -1100,31 +1381,36 @@
             <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
             <a href="{{ route('home') }}#features" class="nav-item">Features</a>
             <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
-            <a href="{{ route('about') }}" class="nav-item">About Us</a>
-            <a href="{{ route('invite') }}" class="nav-item active">Invite Friends</a>
             @guest
                 <a href="{{ route('login') }}" class="nav-item">Log In</a>
                 <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
-            @else
-                <span class="nav-item" style="color: var(--primary-color); font-weight: 600;">
-                    <i class="ri-user-line"></i> {{ Auth::user()->name }}
-                </span>
-                <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
-                @if(Auth::user()->role === 'vendor')
-                    <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
-                @elseif(Auth::user()->role === 'customer')
-                    <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
-                @elseif(Auth::user()->role === 'admin')
-                    <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
-                @endif
-                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-                </form>
             @endguest
         </div>
         <div class="menu-btn" id="menuToggle">
             <i class="ri-menu-line"></i>
+        </div>
+        <div class="nav-actions">
+            <div class="theme-lang-toggle">
+                <button class="toggle-btn-icon" id="themeToggle" title="Toggle Theme">
+                    <i class="ri-moon-line"></i>
+                </button>
+                <div class="language-selector" id="languageSelector">
+                    <button class="toggle-btn-icon" id="languageToggle" onclick="toggleLanguageDropdown(event)" aria-haspopup="true" aria-expanded="false" title="Language">
+                        <i class="ri-translate-2"></i>
+                    </button>
+                    <div class="language-dropdown" style="display:none; position:absolute; right:24px; background:white; box-shadow:var(--shadow); border-radius:8px; overflow:hidden;">
+                        <div class="language-option" data-locale="en" onclick="changeLanguage('en')">
+                            English @if(session('locale','en') === 'en') <i class="ri-check-line" style="float:right"></i> @endif
+                        </div>
+                        <div class="language-option" data-locale="am" onclick="changeLanguage('am')">
+                            አማርኛ @if(session('locale','en') === 'am') <i class="ri-check-line" style="float:right"></i> @endif
+                        </div>
+                        <div class="language-option" data-locale="om" onclick="changeLanguage('om')">
+                            Oromiffa @if(session('locale','en') === 'om') <i class="ri-check-line" style="float:right"></i> @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -1133,29 +1419,35 @@
         <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
         <a href="{{ route('home') }}#features" class="nav-item">Features</a>
         <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
-        <a href="{{ route('about') }}" class="nav-item">About Us</a>
-        <a href="{{ route('invite') }}" class="nav-item active">Invite Friends</a>
         @guest
             <a href="{{ route('login') }}" class="nav-item">Log In</a>
             <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
-        @else
-            <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
-            @if(Auth::user()->role === 'vendor')
-                <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
-            @elseif(Auth::user()->role === 'customer')
-                <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
-            @elseif(Auth::user()->role === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
-            @endif
-            <form method="POST" action="{{ route('logout') }}" style="margin-top: 12px;">
-                @csrf
-                <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-            </form>
         @endguest
+        <div class="mobile-nav-actions" style="margin-top:16px; display:flex; gap:16px; align-items:center;">
+            <button class="toggle-btn-icon" id="themeToggleMobile" title="Toggle Theme">
+                <i class="ri-moon-line"></i>
+            </button>
+            <div class="language-selector" id="languageSelectorMobile" style="position:relative;">
+                <button class="toggle-btn-icon" id="languageToggleMobile" onclick="toggleLanguageDropdown(event, true)" aria-haspopup="true" aria-expanded="false" title="Language">
+                    <i class="ri-translate-2"></i>
+                </button>
+                <div class="language-dropdown" style="display:none; position:absolute; right:0; background:white; box-shadow:var(--shadow); border-radius:8px; overflow:hidden;">
+                    <div class="language-option" data-locale="en" onclick="changeLanguage('en', true)">
+                        English @if(session('locale','en') === 'en') <i class="ri-check-line" style="float:right"></i> @endif
+                    </div>
+                    <div class="language-option" data-locale="am" onclick="changeLanguage('am', true)">
+                        አማርኛ @if(session('locale','en') === 'am') <i class="ri-check-line" style="float:right"></i> @endif
+                    </div>
+                    <div class="language-option" data-locale="om" onclick="changeLanguage('om', true)">
+                        Oromiffa @if(session('locale','en') === 'om') <i class="ri-check-line" style="float:right"></i> @endif
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Page Header -->
-    <section class="page-header">
+    <!-- Page Header with Dynamic Background -->
+    <section class="page-header" style="background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('{{ $heroImage ?? asset('images/invite-bg.jpg') }}');">
         <h1>Invite <span>Friends</span></h1>
         <p>Share Vendora with your friends and earn rewards together!</p>
     </section>
@@ -1194,7 +1486,7 @@
                 <div class="referral-hero-content">
                     <h2>Share & Earn Together</h2>
                     <p>Get ETB 50 for every friend who signs up and ETB 100 more when they make their first booking!</p>
-                    
+
                     @auth
                     <div class="referral-code-box">
                         <div class="referral-code" id="referralCode">{{ Auth::user()->referral_code ?? 'VENDORA' . rand(1000, 9999) }}</div>
@@ -1213,7 +1505,7 @@
 
             <!-- How It Works -->
             <section class="how-it-works">
-                <h2 class="section-title">How It Works</h2>
+                <h2 class="section-title">How It <span>Works</span></h2>
                 <div class="steps-grid">
                     <div class="step-card">
                         <div class="step-number">1</div>
@@ -1244,7 +1536,7 @@
 
             <!-- Rewards Section -->
             <section class="rewards-section">
-                <h2 class="section-title">Rewards</h2>
+                <h2 class="section-title">Rewards & <span>Bonuses</span></h2>
                 <div class="rewards-grid">
                     <div class="reward-card">
                         <div class="reward-icon">
@@ -1292,19 +1584,19 @@
             <!-- Invite Form (visible when logged in) -->
             @auth
             <section class="invite-section">
-                <h2 class="form-title">Invite Friends via Email</h2>
+                <h2 class="form-title">Invite via <span>Email</span></h2>
                 <form class="invite-form" action="{{ route('invite.send') }}" method="POST">
                     @csrf
                     <div class="form-group">
                         <label class="form-label">Friend's Name</label>
                         <input type="text" name="friend_name" class="form-input" placeholder="Enter your friend's name" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label">Friend's Email</label>
                         <input type="email" name="friend_email" class="form-input" placeholder="Enter your friend's email" required>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Your Name</label>
@@ -1315,12 +1607,12 @@
                             <input type="email" name="your_email" class="form-input" value="{{ Auth::user()->email }}" readonly>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label">Personal Message (Optional)</label>
                         <textarea name="message" class="form-input" rows="3" placeholder="Add a personal message to your friend...">Hey! I've been using Vendora to find amazing local services in Jimma. You should try it too! Use my referral code {{ Auth::user()->referral_code ?? 'VENDORA' . rand(1000, 9999) }} to get ETB 25 bonus on signup!</textarea>
                     </div>
-                    
+
                     <button type="submit" class="invite-btn">
                         <i class="ri-mail-send-line"></i>
                         Send Invitation
@@ -1331,31 +1623,31 @@
 
             <!-- Share Section -->
             <section class="share-section">
-                <h3 class="share-title">Share Your Referral Link</h3>
+                <h3 class="share-title">Share Your <span>Referral Link</span></h3>
                 <div class="share-buttons">
-                    <a href="#" class="share-btn telegram" onclick="shareOnTelegram()">
+                    <a href="#" class="share-btn telegram" onclick="shareOnTelegram()" title="Share on Telegram">
                         <i class="ri-telegram-line"></i>
                     </a>
-                    <a href="#" class="share-btn facebook" onclick="shareOnFacebook()">
+                    <a href="#" class="share-btn facebook" onclick="shareOnFacebook()" title="Share on Facebook">
                         <i class="ri-facebook-line"></i>
                     </a>
-                    <a href="#" class="share-btn twitter" onclick="shareOnTwitter()">
+                    <a href="#" class="share-btn twitter" onclick="shareOnTwitter()" title="Share on Twitter">
                         <i class="ri-twitter-line"></i>
                     </a>
-                    <a href="#" class="share-btn whatsapp" onclick="shareOnWhatsApp()">
+                    <a href="#" class="share-btn whatsapp" onclick="shareOnWhatsApp()" title="Share on WhatsApp">
                         <i class="ri-whatsapp-line"></i>
                     </a>
-                    <a href="#" class="share-btn email" onclick="shareOnEmail()">
+                    <a href="#" class="share-btn email" onclick="shareOnEmail()" title="Share via Email">
                         <i class="ri-mail-line"></i>
                     </a>
-                    <button class="share-btn copy" onclick="copyReferralLink()">
+                    <button class="share-btn copy" onclick="copyReferralLink()" title="Copy Link">
                         <i class="ri-link"></i>
                     </button>
                 </div>
                 @auth
-                <div style="margin-top: 20px; background: var(--bg-light); padding: 15px; border-radius: var(--radius-md);">
-                    <p style="font-size: 14px; color: var(--text-light); margin-bottom: 5px;">Your referral link:</p>
-                    <code style="background: var(--white); padding: 8px 15px; border-radius: 50px; display: inline-block;">{{ url('/register?ref=' . (Auth::user()->referral_code ?? 'VENDORA' . rand(1000, 9999))) }}</code>
+                <div class="referral-link-box">
+                    <p>Your unique referral link:</p>
+                    <code class="referral-link-code">{{ url('/register?ref=' . (Auth::user()->referral_code ?? 'VENDORA' . rand(1000, 9999))) }}</code>
                 </div>
                 @endauth
             </section>
@@ -1364,10 +1656,13 @@
             @auth
             <section class="history-section">
                 <div class="history-header">
-                    <h3 class="history-title">Your Referrals</h3>
+                    <h3 class="history-title">
+                        <i class="ri-history-line"></i>
+                        Your Referrals
+                    </h3>
                     <a href="#" class="view-all-link">View All <i class="ri-arrow-right-line"></i></a>
                 </div>
-                
+
                 @if(isset($referrals) && count($referrals) > 0)
                 <table class="history-table">
                     <thead>
@@ -1382,13 +1677,13 @@
                         @foreach($referrals as $referral)
                         <tr>
                             <td>{{ $referral->friend_name ?? 'Abebe Kebede' }}</td>
-                            <td>{{ $referral->created_at ?? 'Feb 15, 2025' }}</td>
+                            <td>{{ $referral->created_at ? $referral->created_at->format('M d, Y') : 'Feb 15, 2025' }}</td>
                             <td>
                                 <span class="status-badge status-{{ $referral->status ?? 'success' }}">
                                     {{ ucfirst($referral->status ?? 'Success') }}
                                 </span>
                             </td>
-                            <td>ETB {{ $referral->reward ?? '150' }}</td>
+                            <td><strong>ETB {{ $referral->reward ?? '150' }}</strong></td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -1408,7 +1703,7 @@
             <!-- Terms and Conditions -->
             <section class="terms-section">
                 <h4 class="terms-title">
-                    <i class="ri-file-text-line" style="color: var(--primary-color);"></i>
+                    <i class="ri-file-text-line"></i>
                     Terms & Conditions
                 </h4>
                 <ul class="terms-list">
@@ -1418,7 +1713,7 @@
                     <li>Maximum referral bonus per month: ETB 2,000</li>
                     <li>Referral program is valid for customers only (vendors can participate in vendor referral program)</li>
                     <li>Vendora reserves the right to void referrals found to be fraudulent or in violation of terms</li>
-                    <li>Rewards can be used for future bookings or withdrawn to mobile money (Telebirr)</li>
+                    <li>Rewards can be used for future bookings or withdrawn to mobile money</li>
                 </ul>
             </section>
         </div>
@@ -1458,16 +1753,14 @@
                 <div class="link-group">
                     <h4>For Vendors</h4>
                     <ul>
-                        <li><a href="{{ route('register') }}">List your service</a></li>
-                        <li><a href="#">Vendor Resources</a></li>
-                        <li><a href="#">Success Stories</a></li>
-                        <li><a href="#">Community</a></li>
+                        <li><a href="{{ route('list-service') }}">List your service</a></li>
+                        <li><a href="{{ route('community') }}">Community</a></li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="bottom-bar">
-            <span>&copy; {{ date('Y') }} Vendora Inc. All rights reserved. Made with ❤️ in Jimma, Ethiopia</span>
+            <span>&copy; {{ date('Y') }} Vendora. All rights reserved. Jimma, Ethiopia</span>
             <div class="social-icons">
                 <a href="#" target="_blank"><i class="ri-twitter-fill"></i></a>
                 <a href="#" target="_blank"><i class="ri-instagram-fill"></i></a>
@@ -1486,7 +1779,7 @@
             menuToggle.addEventListener('click', function(e) {
                 e.stopPropagation();
                 mobileMenu.classList.toggle('active');
-                
+
                 // Change icon
                 const icon = this.querySelector('i');
                 if (mobileMenu.classList.contains('active')) {
@@ -1519,22 +1812,22 @@
         function copyReferralCode() {
             const codeElement = document.getElementById('referralCode');
             const code = codeElement.textContent;
-            
+
             navigator.clipboard.writeText(code).then(function() {
-                alert('Referral code copied to clipboard: ' + code);
+                showNotification('Referral code copied to clipboard: ' + code, 'success');
             }, function() {
-                alert('Failed to copy code. Please select and copy manually.');
+                showNotification('Failed to copy code. Please select and copy manually.', 'error');
             });
         }
 
         // Copy referral link function
         function copyReferralLink() {
             const link = '{{ url("/register?ref=" . (Auth::user()->referral_code ?? "VENDORA" . rand(1000, 9999))) }}';
-            
+
             navigator.clipboard.writeText(link).then(function() {
-                alert('Referral link copied to clipboard!');
+                showNotification('Referral link copied to clipboard!', 'success');
             }, function() {
-                alert('Failed to copy link. Please select and copy manually.');
+                showNotification('Failed to copy link. Please select and copy manually.', 'error');
             });
         }
 
@@ -1568,12 +1861,41 @@
             window.location.href = `mailto:?subject=${subject}&body=${body}`;
         }
 
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                max-width: 400px;
+            `;
+
+            const icon = type === 'success' ? 'ri-checkbox-circle-line' :
+                        type === 'error' ? 'ri-error-warning-line' :
+                        'ri-information-line';
+
+            notification.innerHTML = `<i class="${icon}"></i> ${message}`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.transition = 'opacity 0.5s';
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
         // Auto-hide alerts after 5 seconds
         setTimeout(() => {
             document.querySelectorAll('.alert').forEach(alert => {
-                alert.style.transition = 'opacity 0.5s';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500);
+                if (!alert.style.position) {
+                    alert.style.transition = 'opacity 0.5s';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                }
             });
         }, 5000);
 
@@ -1585,6 +1907,132 @@
                 }
             });
         });
+
+        // theme toggling helpers
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+        function updateTheme(theme) {
+            fetch('/toggle-theme', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ theme: theme })
+            }).catch(()=>{});
+        }
+
+        document.getElementById('themeToggle')?.addEventListener('click', function() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            const theme = isDark ? 'dark' : 'light';
+            const icon = this.querySelector('i');
+            if (icon) icon.className = isDark ? 'ri-sun-line' : 'ri-moon-line';
+            updateTheme(theme);
+        });
+        document.getElementById('themeToggleMobile')?.addEventListener('click', function() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            const theme = isDark ? 'dark' : 'light';
+            const icon = this.querySelector('i');
+            if (icon) icon.className = isDark ? 'ri-sun-line' : 'ri-moon-line';
+            updateTheme(theme);
+        });
+
+        (function() {
+            let theme = localStorage.getItem('theme');
+            if (theme) {
+                applyTheme(theme);
+            } else {
+                fetch('/get-theme').then(r=>r.json()).then(data=>{
+                    if (data.success && data.theme) {
+                        applyTheme(data.theme);
+                        try { localStorage.setItem('theme', data.theme); } catch(e) {}
+                    }
+                }).catch(()=>{});
+            }
+        })();
+
+        // Language dropdown toggle and switch
+        function toggleLanguageDropdown(e, isMobile = false) {
+            e.stopPropagation();
+            const selId = isMobile ? 'languageSelectorMobile' : 'languageSelector';
+            const sel = document.getElementById(selId);
+            if (!sel) return;
+            const dd = sel.querySelector('.language-dropdown');
+            const expanded = dd.style.display !== 'block';
+            dd.style.display = expanded ? 'block' : 'none';
+            const btn = document.getElementById(isMobile ? 'languageToggleMobile' : 'languageToggle');
+            if (btn) btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        }
+
+        function changeLanguage(locale, isMobile = false) {
+            document.querySelectorAll('.language-option').forEach(opt => {
+                if (opt.dataset.locale === locale) {
+                    if (!opt.querySelector('i')) {
+                        const icon = document.createElement('i');
+                        icon.className = 'ri-check-line';
+                        icon.style.float = 'right';
+                        opt.appendChild(icon);
+                    }
+                } else {
+                    const icon = opt.querySelector('i');
+                    if (icon) icon.remove();
+                }
+            });
+            const desktopSel = document.getElementById('languageSelector');
+            if (desktopSel) {
+                const dd = desktopSel.querySelector('.language-dropdown');
+                if (dd) dd.style.display = 'none';
+                const btn = document.getElementById('languageToggle');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
+            if (isMobile) {
+                const mobileSel = document.getElementById('languageSelectorMobile');
+                if (mobileSel) {
+                    const dd = mobileSel.querySelector('.language-dropdown');
+                    if (dd) dd.style.display = 'none';
+                    const btn = document.getElementById('languageToggleMobile');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                }
+            }
+            try { localStorage.setItem('locale', locale); } catch{};
+            fetch('/switch-language', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ locale: locale })
+            }).then(() => {
+                window.location.reload();
+            }).catch(err => console.error('Failed to change language', err));
+        }
+
+        document.addEventListener('click', function(event) {
+            ['languageSelector','languageSelectorMobile'].forEach(id => {
+                const sel = document.getElementById(id);
+                if (!sel) return;
+                const dd = sel.querySelector('.language-dropdown');
+                if (dd && !sel.contains(event.target)) {
+                    dd.style.display = 'none';
+                    const btn = sel.querySelector('button');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+
+        (function() {
+            try {
+                const storedLocale = localStorage.getItem('locale');
+                if (storedLocale && document.documentElement.lang !== storedLocale) {
+                    document.documentElement.lang = storedLocale;
+                }
+            } catch(e) { }
+        })();
     </script>
 
     @if(app()->environment('local'))

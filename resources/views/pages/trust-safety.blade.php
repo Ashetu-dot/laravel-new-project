@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ session('locale', 'en') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
@@ -238,6 +238,101 @@
         .menu-btn:hover {
             background-color: rgba(0,0,0,0.05);
         }
+
+        /* toggle icon buttons (theme & language) */
+        .toggle-btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 20px;
+        }
+
+        .toggle-btn-icon:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .language-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-hover);
+            min-width: 150px;
+            display: none;
+            z-index: 100;
+        }
+
+        .language-selector.open .language-dropdown {
+            display: block;
+        }
+
+        .language-selector:hover .language-dropdown {
+            display: block;
+        }
+
+        .language-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .language-option:hover {
+            background: var(--bg-light);
+        }
+
+        /* Hero (matching home page) */
+        .hero {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px;
+            text-align: center;
+            min-height: 480px;
+            overflow: hidden;
+            color: white;
+        }
+
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 1s ease-in-out;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.35) 100%);
+            z-index: -1;
+        }
+
+        .hero h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 800; margin-bottom: 16px; text-shadow: 2px 2px 6px rgba(0,0,0,0.35); }
+        .hero p { font-size: 18px; color: rgba(255,255,255,0.95); max-width: 760px; margin: 0 auto; text-shadow: 1px 1px 2px rgba(0,0,0,0.25); }
 
         /* Mobile Menu */
         .mobile-menu {
@@ -870,33 +965,33 @@
             .navbar { padding: 18px 30px; }
             .brand { font-size: 22px; }
             .nav-links { gap: 30px; }
-            
+
             .trust-badges {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
+
             .verification-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
+
             .report-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .footer-links { gap: 50px; }
         }
 
         @media screen and (max-width: 900px) {
             .page-header h1 { font-size: 40px; }
-            
+
             .features-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .guidelines-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .safety-contacts {
                 flex-direction: column;
                 align-items: center;
@@ -911,24 +1006,24 @@
 
             .page-header { padding: 60px 20px; }
             .page-header h1 { font-size: 36px; }
-            
+
             .trust-badges {
                 grid-template-columns: 1fr;
             }
-            
+
             .verification-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .feature-card {
                 flex-direction: column;
                 text-align: center;
             }
-            
+
             .feature-icon {
                 margin: 0 auto;
             }
-            
+
             .report-section {
                 padding: 30px 20px;
             }
@@ -944,10 +1039,41 @@
 
             .page-header h1 { font-size: 32px; }
             .section-title { font-size: 28px; }
-            
+
             .footer-links { flex-direction: column; gap: 30px; }
             .bottom-bar { flex-direction: column; gap: 16px; align-items: flex-start; }
         }
+
+        /* Dark mode overrides */
+        body.dark-mode {
+            background-color: #0b1220;
+            color: #e6eef8;
+        }
+
+        body.dark-mode .navbar,
+        body.dark-mode footer,
+        body.dark-mode .badge-card,
+        body.dark-mode .feature-card,
+        body.dark-mode .guideline-card,
+        body.dark-mode .report-section,
+        body.dark-mode .faq-item,
+        body.dark-mode .contact-safety,
+        body.dark-mode .mobile-menu {
+            background-color: #0f1724;
+            color: #cbd5e1;
+            border-color: #1f2937;
+            box-shadow: none;
+        }
+
+        body.dark-mode .brand { color: #f8fafc; }
+        body.dark-mode .nav-item { color: #cbd5e1; }
+        body.dark-mode .nav-item:hover { color: #ffffff; }
+        body.dark-mode .btn-signup { background: #2563eb; box-shadow: none; }
+        body.dark-mode .hero-overlay { background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.45) 100%); }
+        body.dark-mode .footer-text, body.dark-mode .badge-text, body.dark-mode .feature-description, body.dark-mode .method-desc, body.dark-mode .guideline-list li { color: #9ca3af; }
+        body.dark-mode a { color: #93c5fd; }
+        body.dark-mode .ethiopia-badge { background: linear-gradient(135deg, #078930 0%, #FCDD09 50%, #DA121A 100%); color: white; }
+        body.dark-mode .toggle-btn-icon { background-color: #0b1220; border-color: #1f2937; color: #cbd5e1; }
     </style>
 </head>
 <body>
@@ -981,33 +1107,42 @@
                 <i class="ri-map-pin-line"></i> Jimma, Ethiopia
             </span>
         </div>
+
         <div class="nav-links">
             <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
             <a href="{{ route('home') }}#features" class="nav-item">Features</a>
             <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
-            <a href="{{ route('about') }}" class="nav-item">About Us</a>
-            <a href="{{ route('trust-safety') }}" class="nav-item active">Trust & Safety</a>
-            @guest
-                <a href="{{ route('login') }}" class="nav-item">Log In</a>
-                <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
-            @else
-                <span class="nav-item" style="color: var(--primary-color); font-weight: 600;">
-                    <i class="ri-user-line"></i> {{ Auth::user()->name }}
-                </span>
-                <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
-                @if(Auth::user()->role === 'vendor')
-                    <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
-                @elseif(Auth::user()->role === 'customer')
-                    <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
-                @elseif(Auth::user()->role === 'admin')
-                    <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
-                @endif
-                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-                </form>
-            @endguest
         </div>
+
+        <div class="nav-actions">
+            <div class="theme-lang-toggle" style="display:flex; align-items:center; gap:8px;">
+                <button class="toggle-btn-icon" id="themeToggle" title="Toggle Theme">
+                    <i class="ri-moon-line"></i>
+                </button>
+                <div class="language-selector" id="languageSelector">
+                    <button class="toggle-btn-icon" id="languageToggle" onclick="toggleLanguageDropdown(event)" aria-haspopup="true" aria-expanded="false" title="Language">
+                        <i class="ri-translate-2"></i>
+                    </button>
+                    <div class="language-dropdown" style="display:none; position:absolute; right:24px; background:white; box-shadow:var(--shadow); border-radius:8px; overflow:hidden;">
+                        <div class="language-option" data-locale="en" onclick="changeLanguage('en')">
+                            English @if(session('locale','en') === 'en') <i class="ri-check-line" style="float:right"></i> @endif
+                        </div>
+                        <div class="language-option" data-locale="am" onclick="changeLanguage('am')">
+                            አማርኛ @if(session('locale','en') === 'am') <i class="ri-check-line" style="float:right"></i> @endif
+                        </div>
+                        <div class="language-option" data-locale="om" onclick="changeLanguage('om')">
+                            Oromiffa @if(session('locale','en') === 'om') <i class="ri-check-line" style="float:right"></i> @endif
+                        </div>
+                    </div>
+                </div>
+
+                @guest
+                    <a href="{{ route('login') }}" class="nav-item">Log In</a>
+                    <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
+                @endguest
+            </div>
+        </div>
+
         <div class="menu-btn" id="menuToggle">
             <i class="ri-menu-line"></i>
         </div>
@@ -1018,31 +1153,44 @@
         <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
         <a href="{{ route('home') }}#features" class="nav-item">Features</a>
         <a href="{{ route('register') }}" class="nav-item">For Vendors</a>
-        <a href="{{ route('about') }}" class="nav-item">About Us</a>
-        <a href="{{ route('trust-safety') }}" class="nav-item active">Trust & Safety</a>
+        <!-- theme & language controls mobile -->
+        <div style="padding:12px 0; border-top:1px solid var(--border-color); display:flex; gap:8px; align-items:center;">
+            <button class="toggle-btn-icon" id="themeToggleMobile" title="Toggle Theme">
+                <i class="ri-moon-line"></i>
+            </button>
+            <div class="language-selector" id="languageSelectorMobile" style="position:relative;">
+                <button class="toggle-btn-icon" id="languageToggleMobile" onclick="toggleLanguageDropdown(event, 'mobile')" aria-haspopup="true" aria-expanded="false" title="Language">
+                    <i class="ri-translate-2"></i>
+                </button>
+                <div class="language-dropdown" style="display:none; right:0;">
+                    <div class="language-option" data-locale="en" onclick="changeLanguage('en', true)">
+                        English @if(session('locale','en')==='en') <i class="ri-check-line" style="float:right"></i> @endif
+                    </div>
+                    <div class="language-option" data-locale="am" onclick="changeLanguage('am', true)">
+                        አማርኛ @if(session('locale','en')==='am') <i class="ri-check-line" style="float:right"></i> @endif
+                    </div>
+                    <div class="language-option" data-locale="om" onclick="changeLanguage('om', true)">
+                        Oromiffa @if(session('locale','en')==='om') <i class="ri-check-line" style="float:right"></i> @endif
+                    </div>
+                </div>
+            </div>
+        </div>
         @guest
             <a href="{{ route('login') }}" class="nav-item">Log In</a>
             <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
         @else
-            <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">Profile</a>
-            @if(Auth::user()->role === 'vendor')
-                <a href="{{ route('vendor.dashboard') }}" class="nav-item">Dashboard</a>
-            @elseif(Auth::user()->role === 'customer')
-                <a href="{{ route('customer.dashboard') }}" class="nav-item">Dashboard</a>
-            @elseif(Auth::user()->role === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="nav-item">Admin</a>
-            @endif
-            <form method="POST" action="{{ route('logout') }}" style="margin-top: 12px;">
-                @csrf
-                <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-            </form>
+            <!-- authenticated menu items intentionally removed from navbar per request -->
         @endguest
     </div>
 
-    <!-- Page Header -->
-    <section class="page-header">
-        <h1>Trust & <span>Safety</span></h1>
-        <p>Your safety is our priority. Learn how we protect our community and ensure secure transactions between vendors and customers.</p>
+    <!-- Hero (dynamic background, multilingual-ready) -->
+    <section class="hero">
+        <div class="hero-background" style="background-image: url('{{ isset($heroImage) ? asset($heroImage) : asset('images/hero-home.jpg') }}');"></div>
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <h1>{{ __('Trust &') }} <span>{{ __('Safety') }}</span></h1>
+            <p>{{ __('Your safety is our priority. Learn how we protect our community and ensure secure transactions between vendors and customers.') }}</p>
+        </div>
     </section>
 
     <main>
@@ -1185,7 +1333,7 @@
                     <div class="report-content">
                         <h3>Report a Concern</h3>
                         <p>If you encounter any suspicious activity, harassment, or safety concerns, please report it immediately. Our safety team reviews all reports within 24 hours.</p>
-                        
+
                         <div class="report-methods">
                             <div class="report-method">
                                 <div class="method-icon">
@@ -1294,7 +1442,7 @@
             <section class="contact-safety">
                 <h3>Contact Our Safety Team</h3>
                 <p>Our dedicated safety team is available 24/7 to address your concerns and ensure a secure experience for everyone.</p>
-                
+
                 <div class="safety-contacts">
                     <div class="safety-contact-item">
                         <div class="contact-icon">
@@ -1361,23 +1509,21 @@
                     <ul>
                         <li><a href="{{ route('search.results') }}">How it works</a></li>
                         <li><a href="{{ route('trust-safety') }}">Trust & Safety</a></li>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Invite Friends</a></li>
+                        <li><a href="{{ route('help-center') }}">Help Center</a></li>
+                        <li><a href="{{ route('invite') }}">Invite Friends</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
                     <h4>For Vendors</h4>
                     <ul>
                         <li><a href="{{ route('register') }}">List your service</a></li>
-                        <li><a href="#">Vendor Resources</a></li>
-                        <li><a href="#">Success Stories</a></li>
-                        <li><a href="#">Community</a></li>
+                        <li><a href="{{ route('community') }}">Community</a></li>
                     </ul>
                 </div>
             </div>
         </div>
         <div class="bottom-bar">
-            <span>&copy; {{ date('Y') }} Vendora Inc. All rights reserved. Made with ❤️ in Jimma, Ethiopia</span>
+            <span>&copy; {{ date('Y') }} Vendora. All rights reserved. Jimma, Ethiopia</span>
             <div class="social-icons">
                 <a href="#" target="_blank"><i class="ri-twitter-fill"></i></a>
                 <a href="#" target="_blank"><i class="ri-instagram-fill"></i></a>
@@ -1396,7 +1542,7 @@
             menuToggle.addEventListener('click', function(e) {
                 e.stopPropagation();
                 mobileMenu.classList.toggle('active');
-                
+
                 // Change icon
                 const icon = this.querySelector('i');
                 if (mobileMenu.classList.contains('active')) {
@@ -1470,6 +1616,138 @@
                 }
             });
         });
+
+        // Theme toggle - sync with backend and localStorage
+        function applyTheme(theme) {
+            document.body.classList.toggle('dark-mode', theme === 'dark');
+            const ico = document.querySelector('#themeToggle i') || document.querySelector('#themeToggleMobile i');
+            if (ico) ico.className = theme === 'dark' ? 'ri-sun-line' : 'ri-moon-line';
+        }
+
+        function updateTheme(theme) {
+            applyTheme(theme);
+            localStorage.setItem('theme', theme);
+            // send to server
+            fetch('/toggle-theme', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ theme: theme })
+            });
+        }
+
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const themeToggleBtnMobile = document.getElementById('themeToggleMobile');
+        [themeToggleBtn, themeToggleBtnMobile].forEach(btn => {
+            if (!btn) return;
+            btn.addEventListener('click', function() {
+                const isDark = document.body.classList.toggle('dark-mode');
+                const theme = isDark ? 'dark' : 'light';
+                const icon = this.querySelector('i');
+                if (icon) icon.className = isDark ? 'ri-sun-line' : 'ri-moon-line';
+                updateTheme(theme);
+            });
+        });
+
+        // initialize theme on load from server or storage
+        (function() {
+            let theme = localStorage.getItem('theme');
+            if (theme) {
+                applyTheme(theme);
+            } else {
+                // fetch preferred theme from server once and apply (do NOT re-post)
+                fetch('/get-theme').then(r=>r.json()).then(data=>{
+                    if (data.success && data.theme) {
+                        applyTheme(data.theme);
+                        try { localStorage.setItem('theme', data.theme); } catch(e) {}
+                    }
+                }).catch(()=>{});
+            }
+        })();
+
+        // Language dropdown toggle and switch
+        function toggleLanguageDropdown(e) {
+            e.stopPropagation();
+            const sel = document.getElementById('languageSelector');
+            if (!sel) return;
+            const dd = sel.querySelector('.language-dropdown');
+            const expanded = dd.style.display !== 'block';
+            dd.style.display = expanded ? 'block' : 'none';
+            const btn = document.getElementById('languageToggle');
+            if (btn) btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        }
+
+        function changeLanguage(locale, isMobile = false) {
+            // optimistically update the UI (check marks) before reload
+            document.querySelectorAll('.language-option').forEach(opt => {
+                if (opt.dataset.locale === locale) {
+                    if (!opt.querySelector('i')) {
+                        const icon = document.createElement('i');
+                        icon.className = 'ri-check-line';
+                        icon.style.float = 'right';
+                        opt.appendChild(icon);
+                    }
+                } else {
+                    const icon = opt.querySelector('i');
+                    if (icon) icon.remove();
+                }
+            });
+
+            // close dropdowns
+            const desktopSel = document.getElementById('languageSelector');
+            if (desktopSel) {
+                const dd = desktopSel.querySelector('.language-dropdown');
+                if (dd) dd.style.display = 'none';
+                const btn = document.getElementById('languageToggle');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
+            if (isMobile) {
+                const mobileSel = document.getElementById('languageSelectorMobile');
+                if (mobileSel) {
+                    const dd = mobileSel.querySelector('.language-dropdown');
+                    if (dd) dd.style.display = 'none';
+                    const btn = document.getElementById('languageToggleMobile');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                }
+            }
+
+            // remember choice in localStorage as a quick fallback/UI hint
+            try { localStorage.setItem('locale', locale); } catch{};
+            fetch('/switch-language', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ locale: locale })
+            }).then(() => {
+                // reload after server updates session
+                window.location.reload();
+            }).catch(err => console.error('Failed to change language', err));
+        }
+
+        // Close language dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const sel = document.getElementById('languageSelector');
+            if (!sel) return;
+            const dd = sel.querySelector('.language-dropdown');
+            if (dd && !sel.contains(event.target)) {
+                dd.style.display = 'none';
+                const btn = document.getElementById('languageToggle'); if (btn) btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // set html lang from localStorage as soon as possible
+        (function() {
+            try {
+                const storedLocale = localStorage.getItem('locale');
+                if (storedLocale && document.documentElement.lang !== storedLocale) {
+                    document.documentElement.lang = storedLocale;
+                }
+            } catch(e) { /* ignore */ }
+        })();
     </script>
 
     @if(app()->environment('local'))
