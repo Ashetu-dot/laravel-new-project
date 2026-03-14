@@ -516,7 +516,7 @@
                     <i class="ri-archive-line"></i>
                     Catalog
                 </a>
-                <a href="{{ route('admin.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                     <i class="ri-price-tag-3-line"></i>
                     Promotions
                 </a>

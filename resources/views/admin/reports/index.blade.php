@@ -817,14 +817,14 @@
                 <a href="{{ route('admin.products') }}" class="nav-item">
                     <i class="ri-shopping-cart-line"></i> Products
                 </a>
-                <a href="{{ route('admin.categories') }}" class="nav-item">
+                <a href="{{ route('admin.catalog.categories') }}" class="nav-item">
                     <i class="ri-price-tag-3-line"></i> Categories
                 </a>
             </div>
 
             <div class="nav-group">
                 <div class="nav-label">MARKETING</div>
-                <a href="{{ route('admin.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                     <i class="ri-megaphone-line"></i> Promotions
                 </a>
                 <a href="{{ route('admin.coupons') }}" class="nav-item">

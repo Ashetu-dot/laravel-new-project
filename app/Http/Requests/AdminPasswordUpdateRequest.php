@@ -22,9 +22,8 @@ class AdminPasswordUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email|exists:admins,email',
             'current_password' => 'required|min:6',
-            'new_password' => 'required|min:6|confirmed|different:current_password',
+            'new_password' => 'required|min:8|confirmed|different:current_password',
         ];
     }
 

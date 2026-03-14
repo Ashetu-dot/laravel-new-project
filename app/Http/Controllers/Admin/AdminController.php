@@ -26,6 +26,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 use App\Models\PromotionUsage;
 
 class AdminController extends Controller
@@ -2615,40 +2620,36 @@ public function downloadDocumentationPDF()
         }
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:admins,email,' . $admin->id,
-            'mobile' => 'nullable|string|max:20',
-            'current_password' => 'required_with:new_password',
-            'new_password' => 'nullable|min:6|confirmed',
+            'name'   => 'required|string|max:255',
+            'email'  => 'required|email|unique:users,email,' . $admin->id,
+            'phone'  => 'nullable|string|max:20',
+            'avatar' => 'nullable|image|max:2048',
         ]);
 
         $updateData = [
-            'name' => $request->name,
+            'name'  => $request->name,
             'email' => $request->email,
-            'mobile' => $request->mobile,
+            'phone' => $request->phone,
         ];
 
-        // Handle password change
-        if ($request->filled('new_password')) {
-            // Verify current password
-            if (!$this->adminService->verifyPassword($admin->id, $request->current_password)) {
-                return back()
-                    ->withErrors(['current_password' => 'The current password is incorrect.'])
-                    ->withInput($request->except('current_password', 'new_password', 'new_password_confirmation'));
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar
+            if ($admin->avatar) {
+                Storage::disk('public')->delete($admin->avatar);
             }
-
-            $updateData['password'] = Hash::make($request->new_password);
+            $updateData['avatar'] = $request->file('avatar')->store('avatars', 'public');
         }
 
         $result = $this->adminService->updateAdmin($admin->id, $updateData);
 
         if ($result === 1) {
-            return back()->with('success', 'Profile updated successfully.');
+            return redirect()->route('admin.settings', ['section' => 'profile'])
+                ->with('success', 'Profile updated successfully.');
         }
 
         return back()
             ->with('error', 'Failed to update profile. Please try again.')
-            ->withInput($request->except('current_password', 'new_password', 'new_password_confirmation'));
+            ->withInput($request->except('avatar'));
     }
 
     /**
@@ -2669,7 +2670,7 @@ public function downloadDocumentationPDF()
     /**
      * Update the admin password.
      */
-    public function updatePassword(AdminPasswordUpdateRequest $request)
+    public function updatePassword(Request $request)
     {
         $admin = $this->adminService->getCurrentAdmin();
 
@@ -2678,33 +2679,36 @@ public function downloadDocumentationPDF()
                 ->with('error', 'Please login to update your password.');
         }
 
+        $request->validate([
+            'current_password'      => 'required|min:6',
+            'new_password'          => 'required|min:8|confirmed|different:current_password',
+        ]);
+
         // Verify current password
         if (!$this->adminService->verifyPassword($admin->id, $request->current_password)) {
             return back()
                 ->withErrors(['current_password' => 'The current password is incorrect.'])
-                ->withInput($request->only('email'));
+                ->with('active_section', 'security');
         }
 
         // Update password
         $result = $this->adminService->updatePassword($admin->id, $request->new_password);
 
         if ($result === 1) {
-            // Logout and redirect to login page with success message
             $this->adminService->logout();
-
             return redirect()->route('admin.login')
                 ->with('success', 'Password updated successfully. Please login with your new password.');
         }
 
         return back()
             ->with('error', 'Failed to update password. Please try again.')
-            ->withInput($request->only('email'));
+            ->with('active_section', 'security');
     }
 
     /**
      * Show admin settings page
      */
-    public function settings()
+    public function settings(Request $request)
     {
         $admin = $this->adminService->getCurrentAdmin();
 
@@ -2713,7 +2717,10 @@ public function downloadDocumentationPDF()
                 ->with('error', 'Please login to access settings.');
         }
 
-        return view('admin.settings.index', compact('admin'));
+        $settings = session('admin_settings', []);
+        $activeSection = $request->get('section', 'general');
+
+        return view('admin.settings.index', compact('admin', 'settings', 'activeSection'));
     }
 
     /**
@@ -2728,20 +2735,448 @@ public function downloadDocumentationPDF()
                 ->with('error', 'Please login to update settings.');
         }
 
+        $section = $request->input('section', 'general');
+
+        // Persist all submitted settings into session keyed by section
+        $current = session('admin_settings', []);
+        $current[$section] = $request->except(['_token', 'section']);
+        session(['admin_settings' => $current]);
+
+        return redirect()->route('admin.settings', ['section' => $section])
+            ->with('success', 'Settings saved successfully.');
+    }
+
+    /**
+     * ============================
+     * SETTINGS AJAX ENDPOINTS
+     * ============================
+     */
+
+    /**
+     * Simple backup info for the settings page.
+     */
+    public function backupInfo()
+    {
+        try {
+            $disk = Storage::disk('local');
+            $disk->makeDirectory('backups');
+
+            $files = collect($disk->files('backups'))
+                ->filter(fn ($file) => Str::endsWith($file, ['.zip', '.sql', '.json', '.txt']))
+                ->sortByDesc(fn ($file) => $disk->lastModified($file));
+
+            if ($files->isEmpty()) {
+                return response()->json([
+                    'success' => true,
+                    'last_backup' => null,
+                    'size' => '0 MB',
+                    'next_backup' => null,
+                    'location' => 'Local (storage/app/backups)',
+                ]);
+            }
+
+            $latest = $files->first();
+            $sizeBytes = $disk->size($latest) ?: 0;
+            $sizeMb = round($sizeBytes / 1024 / 1024, 2);
+
+            return response()->json([
+                'success' => true,
+                'last_backup' => Carbon::createFromTimestamp($disk->lastModified($latest))->toDayDateTimeString(),
+                'size' => $sizeMb . ' MB',
+                'next_backup' => null,
+                'location' => 'Local (storage/app/backups)',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('backupInfo error: ' . $e->getMessage());
+            return response()->json(['success' => false], 500);
+        }
+    }
+
+    /**
+     * List available backup files.
+     */
+    public function backups()
+    {
+        try {
+            $disk = Storage::disk('local');
+            $disk->makeDirectory('backups');
+
+            $files = collect($disk->files('backups'))
+                ->filter(fn ($file) => Str::endsWith($file, ['.zip', '.sql', '.json', '.txt']))
+                ->sortByDesc(fn ($file) => $disk->lastModified($file))
+                ->map(function ($file) use ($disk) {
+                    $name = basename($file);
+                    $sizeBytes = $disk->size($file) ?: 0;
+                    $sizeMb = round($sizeBytes / 1024 / 1024, 2);
+
+                    return [
+                        'filename' => $name,
+                        'date' => Carbon::createFromTimestamp($disk->lastModified($file))->toDayDateTimeString(),
+                        'size' => $sizeMb . ' MB',
+                    ];
+                })
+                ->values()
+                ->all();
+
+            return response()->json([
+                'success' => true,
+                'backups' => $files,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('backups list error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'backups' => []], 500);
+        }
+    }
+
+    /**
+     * Create a very simple backup placeholder file.
+     */
+    public function createBackup()
+    {
+        try {
+            $disk = Storage::disk('local');
+            $disk->makeDirectory('backups');
+
+            $filename = 'backup-' . now()->format('Y-m-d-H-i-s') . '.json';
+            $payload = [
+                'created_at' => now()->toDateTimeString(),
+                'note' => 'Placeholder backup file. Implement full DB/files backup as needed.',
+            ];
+
+            $disk->put('backups/' . $filename, json_encode($payload, JSON_PRETTY_PRINT));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Backup created successfully.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('createBackup error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create backup.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Download latest backup.
+     */
+    public function downloadLatestBackup()
+    {
+        $disk = Storage::disk('local');
+        $disk->makeDirectory('backups');
+
+        $files = collect($disk->files('backups'))
+            ->filter(fn ($file) => Str::endsWith($file, ['.zip', '.sql', '.json', '.txt']))
+            ->sortByDesc(fn ($file) => $disk->lastModified($file));
+
+        if ($files->isEmpty()) {
+            return redirect()->back()->with('error', 'No backups found.');
+        }
+
+        $latest = $files->first();
+        return response()->download(storage_path('app/' . $latest));
+    }
+
+    /**
+     * Download a specific backup file.
+     */
+    public function downloadBackupFile($filename)
+    {
+        $path = 'backups/' . $filename;
+        if (!Storage::disk('local')->exists($path)) {
+            return redirect()->back()->with('error', 'Backup file not found.');
+        }
+
+        return response()->download(storage_path('app/' . $path));
+    }
+
+    /**
+     * Restore from an uploaded backup file (placeholder).
+     */
+    public function restoreBackup(Request $request)
+    {
         $request->validate([
-            'theme' => 'nullable|in:light,dark',
-            'language' => 'nullable|in:en,es,fr',
-            'notifications' => 'nullable|boolean',
+            'backup' => 'required|file',
         ]);
 
-        // Store settings in database or session
-        session([
-            'admin.theme' => $request->theme,
-            'admin.language' => $request->language,
-            'admin.notifications' => $request->boolean('notifications', true),
+        try {
+            $file = $request->file('backup');
+            $stored = $file->storeAs('backups/restored', $file->getClientOriginalName(), 'local');
+
+            Log::info('Backup file uploaded for restore', ['path' => $stored]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Backup uploaded. Implement full restore logic as needed.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('restoreBackup error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to restore backup.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Restore from an existing backup file (placeholder).
+     */
+    public function restoreBackupFile($filename)
+    {
+        $path = 'backups/' . $filename;
+        if (!Storage::disk('local')->exists($path)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Backup file not found.',
+            ], 404);
+        }
+
+        Log::info('Requested restore from backup file', ['path' => $path]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Backup restore request received. Implement full restore as needed.',
+        ]);
+    }
+
+    /**
+     * List API keys (simple in-memory store via cache).
+     */
+    public function listApiKeys()
+    {
+        $admin = Auth::user();
+        $key = 'admin_api_keys_' . $admin->id;
+        $keys = Cache::get($key, []);
+
+        $formatted = collect($keys)->map(function ($item) {
+            $preview = $item['key'];
+            if (strlen($preview) > 12) {
+                $preview = substr($preview, 0, 4) . '••••' . substr($preview, -4);
+            }
+
+            return [
+                'id' => $item['id'],
+                'name' => $item['name'],
+                'preview' => $preview,
+                'created_at' => $item['created_at'],
+                'last_used' => $item['last_used'] ?? null,
+            ];
+        })->values()->all();
+
+        return response()->json([
+            'success' => true,
+            'keys' => $formatted,
+        ]);
+    }
+
+    /**
+     * Generate a new API key (stored in cache only).
+     */
+    public function generateApiKey()
+    {
+        $admin = Auth::user();
+        $cacheKey = 'admin_api_keys_' . $admin->id;
+        $keys = Cache::get($cacheKey, []);
+
+        $rawKey = Str::random(40);
+        $id = (string) Str::uuid();
+
+        $keys[] = [
+            'id' => $id,
+            'name' => 'Key ' . (count($keys) + 1),
+            'key' => $rawKey,
+            'created_at' => now()->toDateTimeString(),
+            'last_used' => null,
+        ];
+
+        Cache::put($cacheKey, $keys, now()->addDays(7));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'API key generated.',
+        ]);
+    }
+
+    /**
+     * Revoke an API key.
+     */
+    public function revokeApiKey($id)
+    {
+        $admin = Auth::user();
+        $cacheKey = 'admin_api_keys_' . $admin->id;
+        $keys = Cache::get($cacheKey, []);
+
+        $filtered = collect($keys)
+            ->reject(fn ($item) => $item['id'] == $id)
+            ->values()
+            ->all();
+
+        Cache::put($cacheKey, $filtered, now()->addDays(7));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'API key revoked.',
+        ]);
+    }
+
+    /**
+     * List active sessions (current device only placeholder).
+     */
+    public function sessions()
+    {
+        $user = Auth::user();
+
+        $sessions = [
+            [
+                'id' => session()->getId(),
+                'device' => 'This device',
+                'icon' => 'ri-computer-line',
+                'last_active' => now()->toDayDateTimeString(),
+                'is_current' => true,
+            ],
+        ];
+
+        return response()->json([
+            'success' => true,
+            'sessions' => $sessions,
+        ]);
+    }
+
+    /**
+     * Terminate a session (placeholder, no-op for now).
+     */
+    public function terminateSession($id)
+    {
+        Log::info('Terminate session requested', [
+            'requested_id' => $id,
+            'current_session_id' => session()->getId(),
         ]);
 
-        return back()->with('success', 'Settings updated successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Session terminated (placeholder).',
+        ]);
+    }
+
+    /**
+     * Logout from all other devices (placeholder).
+     */
+    public function logoutAllOtherSessions()
+    {
+        Log::info('Logout from all other devices requested', [
+            'user_id' => Auth::id(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Logged out from other devices (placeholder).',
+        ]);
+    }
+
+    /**
+     * Send a test email using current mail settings.
+     */
+    public function sendTestEmail()
+    {
+        try {
+            $user = Auth::user();
+            $to = $user->email ?? config('mail.from.address');
+
+            if (!$to) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No recipient email available.',
+                ], 400);
+            }
+
+            Mail::raw('This is a Vendora admin test email.', function ($message) use ($to) {
+                $message->to($to)
+                    ->subject('Vendora Test Email');
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Test email sent to ' . $to,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('sendTestEmail error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send test email: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Clear application caches.
+     */
+    public function clearCache()
+    {
+        try {
+            Artisan::call('optimize:clear');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Application cache cleared.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('clearCache error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to clear cache.',
+            ], 500);
+        }
+    }
+
+    /**
+     * Reset stored admin settings (session-based).
+     */
+    public function resetAllSettings()
+    {
+        session()->forget('admin_settings');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Settings reset to defaults (session cleared).',
+        ]);
+    }
+
+    /**
+     * Delete current admin account after password confirmation.
+     */
+    public function deleteAccount(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password is incorrect.',
+            ], 422);
+        }
+
+        $userId = $user->id;
+        Auth::logout();
+
+        try {
+            User::where('id', $userId)->delete();
+        } catch (\Exception $e) {
+            Log::error('deleteAccount error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete account.',
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Account deleted successfully.',
+        ]);
     }
 
     /**

@@ -533,6 +533,7 @@
             border-radius: 50%;
             background-color: #e5e7eb;
             object-fit: cover;
+            display: block;
         }
 
         .action-buttons {
@@ -683,8 +684,14 @@
         </div>
 
         <div class="user-profile">
-            <div class="avatar">
-                {{ substr(Auth::user()->name ?? 'AD', 0, 2) }}
+            <div class="avatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                @if(Auth::user() && Auth::user()->avatar)
+                    <img src="{{ Storage::url(Auth::user()->avatar) }}"
+                         alt="{{ Auth::user()->name ?? 'Admin User' }}"
+                         style="width: 100%; height: 100%; object-fit: cover;">
+                @else
+                    {{ substr(Auth::user()->name ?? 'AD', 0, 2) }}
+                @endif
             </div>
             <div class="user-info">
                 <h4>{{ Auth::user()->name ?? 'Admin User' }}</h4>
@@ -843,7 +850,15 @@
                             </td>
                             <td>
                                 <div class="customer-cell">
-                                    <img src="{{ $order->user->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($order->user->name ?? 'User') . '&background=B88E3F&color=fff' }}" alt="Avatar" class="customer-avatar">
+                                    @php
+                                        $customer = $order->user;
+                                        $avatarUrl = ($customer && $customer->avatar)
+                                            ? Storage::url($customer->avatar)
+                                            : 'https://ui-avatars.com/api/?name=' . urlencode($customer->name ?? 'User') . '&background=B88E3F&color=fff';
+                                    @endphp
+                                    <img src="{{ $avatarUrl }}"
+                                         alt="{{ $customer->name ?? 'Customer' }}"
+                                         class="customer-avatar">
                                     <div>
                                         <div style="font-weight: 600;">{{ $order->user->name ?? 'N/A' }}</div>
                                         <div style="font-size: 12px; color: var(--text-secondary);">{{ $order->user->email ?? '' }}</div>

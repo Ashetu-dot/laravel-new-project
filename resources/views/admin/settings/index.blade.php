@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Vendora - Admin Settings</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
     <style>
         @font-face {
@@ -167,6 +168,13 @@
             color: white;
             font-weight: 600;
             margin-right: 12px;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .user-info h4 {
@@ -272,6 +280,7 @@
             color: var(--text-secondary);
             transition: background 0.2s;
             position: relative;
+            text-decoration: none;
         }
 
         .icon-btn:hover {
@@ -690,6 +699,22 @@
         .bg-purple-light { background-color: #f5f3ff; color: var(--accent-purple); }
         .bg-red-light { background-color: #fee2e2; color: var(--accent-red); }
         .bg-gold-light { background-color: #fef3e7; color: var(--primary-gold); }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -744,9 +769,9 @@
                     <i class="ri-shield-user-line"></i>
                     Admins
                 </a>
-                <a href="{{ route('admin.help') }}" class="nav-item">
+                <a href="{{ route('admin.support-tickets') }}" class="nav-item">
                     <i class="ri-question-line"></i>
-                    Help
+                    Support
                 </a>
                 <a href="{{ route('admin.notifications') }}" class="nav-item">
                     <i class="ri-notification-3-line"></i>
@@ -755,6 +780,10 @@
                 <a href="{{ route('admin.messages') }}" class="nav-item">
                     <i class="ri-mail-line"></i>
                     Messages
+                </a>
+                <a href="{{ route('admin.video-tutorials') }}" class="nav-item">
+                    <i class="ri-video-line"></i>
+                    Tutorials
                 </a>
                 <form method="POST" action="{{ route('admin.logout') }}" style="display: block; margin-top: 8px;">
                     @csrf
@@ -768,11 +797,15 @@
 
         <div class="user-profile">
             <div class="avatar">
-                {{ substr(Auth::user()->name ?? 'AD', 0, 2) }}
+                @if(Auth::user()->avatar)
+                    <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
+                @else
+                    {{ substr(Auth::user()->name ?? 'AD', 0, 2) }}
+                @endif
             </div>
             <div class="user-info">
                 <h4>{{ Auth::user()->name ?? 'Admin User' }}</h4>
-                <p>{{ Auth::user()->role ?? 'Super Admin' }}</p>
+                <p>Administrator</p>
             </div>
         </div>
     </nav>
@@ -787,7 +820,7 @@
                 </div>
                 <div class="search-bar">
                     <i class="ri-search-line"></i>
-                    <input type="text" placeholder="Search settings...">
+                    <input type="text" placeholder="Search settings..." id="settingsSearch">
                 </div>
             </div>
 
@@ -803,6 +836,9 @@
                 </a>
                 <a href="{{ route('admin.messages') }}" class="icon-btn">
                     <i class="ri-mail-line"></i>
+                    @if(isset($unreadMessagesCount) && $unreadMessagesCount > 0)
+                        <span class="badge-count">{{ $unreadMessagesCount }}</span>
+                    @endif
                 </a>
             </div>
         </header>
@@ -836,48 +872,59 @@
                 </div>
             @endif
 
+            @if($errors->any())
+                <div class="alert alert-error">
+                    <i class="ri-error-warning-line"></i>
+                    <ul style="margin-left: 20px;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <!-- Settings Container -->
             <div class="settings-container">
                 <!-- Settings Sidebar -->
                 <div class="settings-sidebar">
                     <div class="settings-nav">
-                        <button class="settings-nav-item active" onclick="showSection('general')">
+                        <button class="settings-nav-item {{ $activeSection == 'general' ? 'active' : '' }}" onclick="showSection('general')">
                             <i class="ri-settings-4-line"></i>
                             General Settings
                         </button>
-                        <button class="settings-nav-item" onclick="showSection('profile')">
+                        <button class="settings-nav-item {{ $activeSection == 'profile' ? 'active' : '' }}" onclick="showSection('profile')">
                             <i class="ri-user-settings-line"></i>
                             Profile Settings
                         </button>
-                        <button class="settings-nav-item" onclick="showSection('security')">
+                        <button class="settings-nav-item {{ $activeSection == 'security' ? 'active' : '' }}" onclick="showSection('security')">
                             <i class="ri-shield-keyhole-line"></i>
                             Security
                         </button>
-                        <button class="settings-nav-item" onclick="showSection('marketplace')">
+                        <button class="settings-nav-item {{ $activeSection == 'marketplace' ? 'active' : '' }}" onclick="showSection('marketplace')">
                             <i class="ri-store-3-line"></i>
                             Marketplace
                         </button>
-                        <button class="settings-nav-item" onclick="showSection('payment')">
+                        <button class="settings-nav-item {{ $activeSection == 'payment' ? 'active' : '' }}" onclick="showSection('payment')">
                             <i class="ri-bank-card-line"></i>
                             Payment Gateways
                         </button>
-                        <button class="settings-nav-item" onclick="showSection('email')">
+                        <button class="settings-nav-item {{ $activeSection == 'email' ? 'active' : '' }}" onclick="showSection('email')">
                             <i class="ri-mail-settings-line"></i>
                             Email Settings
                         </button>
-                        <button class="settings-nav-item" onclick="showSection('notifications')">
+                        <button class="settings-nav-item {{ $activeSection == 'notifications' ? 'active' : '' }}" onclick="showSection('notifications')">
                             <i class="ri-notification-4-line"></i>
                             Notification Preferences
                         </button>
-                        <button class="settings-nav-item" onclick="showSection('backup')">
+                        <button class="settings-nav-item {{ $activeSection == 'backup' ? 'active' : '' }}" onclick="showSection('backup')">
                             <i class="ri-database-2-line"></i>
                             Backup & Restore
                         </button>
-                        <button class="settings-nav-item" onclick="showSection('api')">
+                        <button class="settings-nav-item {{ $activeSection == 'api' ? 'active' : '' }}" onclick="showSection('api')">
                             <i class="ri-code-box-line"></i>
                             API Settings
                         </button>
-                        <button class="settings-nav-item" onclick="showSection('legal')">
+                        <button class="settings-nav-item {{ $activeSection == 'legal' ? 'active' : '' }}" onclick="showSection('legal')">
                             <i class="ri-file-text-line"></i>
                             Legal & Policies
                         </button>
@@ -887,21 +934,22 @@
                 <!-- Settings Content -->
                 <div class="settings-content">
                     <!-- General Settings Section -->
-                    <div id="section-general" class="settings-section active">
+                    <div id="section-general" class="settings-section {{ $activeSection == 'general' ? 'active' : '' }}">
                         <h2 class="section-title">General Settings</h2>
 
                         <form action="{{ route('admin.settings.update') }}" method="POST">
                             @csrf
+                            <input type="hidden" name="section" value="general">
 
                             <div class="form-group">
                                 <label class="form-label">Site Name</label>
-                                <input type="text" name="site_name" class="form-input" value="Vendora Marketplace" placeholder="Enter site name">
+                                <input type="text" name="site_name" class="form-input" value="{{ config('app.name', 'Vendora Marketplace') }}" placeholder="Enter site name">
                                 <div class="form-hint">This will appear in page titles and emails</div>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Site Description</label>
-                                <textarea name="site_description" class="form-textarea" placeholder="Enter site description">The best local vendor marketplace</textarea>
+                                <textarea name="site_description" class="form-textarea" placeholder="Enter site description">{{ config('app.description', 'The best local vendor marketplace') }}</textarea>
                                 <div class="form-hint">Brief description for SEO and sharing</div>
                             </div>
 
@@ -912,7 +960,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Site Email</label>
-                                    <input type="email" name="site_email" class="form-input" value="info@vendora.com" placeholder="info@example.com">
+                                    <input type="email" name="site_email" class="form-input" value="{{ config('mail.from.address', 'info@vendora.com') }}" placeholder="info@example.com">
                                 </div>
                             </div>
 
@@ -920,25 +968,33 @@
                                 <div class="form-group">
                                     <label class="form-label">Timezone</label>
                                     <select name="timezone" class="form-select">
-                                        <option value="UTC" selected>UTC</option>
-                                        <option value="America/New_York">Eastern Time</option>
-                                        <option value="America/Chicago">Central Time</option>
-                                        <option value="America/Denver">Mountain Time</option>
-                                        <option value="America/Los_Angeles">Pacific Time</option>
-                                        <option value="Europe/London">London</option>
-                                        <option value="Europe/Paris">Paris</option>
-                                        <option value="Asia/Tokyo">Tokyo</option>
-                                        <option value="Asia/Shanghai">Shanghai</option>
-                                        <option value="Australia/Sydney">Sydney</option>
+                                        @php
+                                            $timezones = [
+                                                'UTC' => 'UTC',
+                                                'America/New_York' => 'Eastern Time',
+                                                'America/Chicago' => 'Central Time',
+                                                'America/Denver' => 'Mountain Time',
+                                                'America/Los_Angeles' => 'Pacific Time',
+                                                'Europe/London' => 'London',
+                                                'Europe/Paris' => 'Paris',
+                                                'Asia/Tokyo' => 'Tokyo',
+                                                'Asia/Shanghai' => 'Shanghai',
+                                                'Australia/Sydney' => 'Sydney',
+                                                'Africa/Addis_Ababa' => 'Addis Ababa (Ethiopia)',
+                                            ];
+                                        @endphp
+                                        @foreach($timezones as $value => $label)
+                                            <option value="{{ $value }}" {{ config('app.timezone', 'UTC') == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Date Format</label>
                                     <select name="date_format" class="form-select">
-                                        <option value="Y-m-d">2024-01-01</option>
-                                        <option value="m/d/Y">01/01/2024</option>
-                                        <option value="d/m/Y">01/01/2024</option>
-                                        <option value="F j, Y">January 1, 2024</option>
+                                        <option value="Y-m-d" {{ config('app.date_format', 'Y-m-d') == 'Y-m-d' ? 'selected' : '' }}>2024-01-01</option>
+                                        <option value="m/d/Y" {{ config('app.date_format') == 'm/d/Y' ? 'selected' : '' }}>01/01/2024</option>
+                                        <option value="d/m/Y" {{ config('app.date_format') == 'd/m/Y' ? 'selected' : '' }}>01/01/2024</option>
+                                        <option value="F j, Y" {{ config('app.date_format') == 'F j, Y' ? 'selected' : '' }}>January 1, 2024</option>
                                     </select>
                                 </div>
                             </div>
@@ -950,7 +1006,7 @@
                                         <div class="form-hint">Temporarily disable the site for maintenance</div>
                                     </span>
                                     <label class="toggle-switch">
-                                        <input type="checkbox" name="maintenance_mode">
+                                        <input type="checkbox" name="maintenance_mode" {{ app()->isDownForMaintenance() ? 'checked' : '' }}>
                                         <span class="toggle-slider"></span>
                                     </label>
                                 </label>
@@ -964,21 +1020,25 @@
                     </div>
 
                     <!-- Profile Settings Section -->
-                    <div id="section-profile" class="settings-section">
+                    <div id="section-profile" class="settings-section {{ $activeSection == 'profile' ? 'active' : '' }}">
                         <h2 class="section-title">Profile Settings</h2>
 
                         <form action="{{ route('admin.profile.update') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
-                            <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 24px;">
+                            <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 24px; flex-wrap: wrap;">
                                 <div style="position: relative;">
                                     <div class="avatar" style="width: 80px; height: 80px; font-size: 32px;">
-                                        {{ substr(Auth::user()->name ?? 'AD', 0, 2) }}
+                                        @if(Auth::user()->avatar)
+                                            <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="Avatar" id="avatarPreview">
+                                        @else
+                                            <span id="avatarInitials">{{ substr(Auth::user()->name ?? 'AD', 0, 2) }}</span>
+                                        @endif
                                     </div>
                                     <button type="button" class="btn btn-secondary" style="position: absolute; bottom: -10px; right: -10px; width: 32px; height: 32px; padding: 0; border-radius: 50%;" onclick="document.getElementById('avatarInput').click();">
                                         <i class="ri-edit-line"></i>
                                     </button>
-                                    <input type="file" id="avatarInput" name="avatar" style="display: none;" accept="image/*">
+                                    <input type="file" id="avatarInput" name="avatar" style="display: none;" accept="image/*" onchange="previewAvatar(this)">
                                 </div>
                                 <div>
                                     <h3 style="font-size: 18px; margin-bottom: 4px;">{{ Auth::user()->name }}</h3>
@@ -1001,11 +1061,11 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Phone Number</label>
-                                    <input type="tel" name="phone" class="form-input" value="{{ Auth::user()->phone ?? '' }}" placeholder="+1 (555) 123-4567">
+                                    <input type="tel" name="phone" class="form-input" value="{{ Auth::user()->phone ?? '' }}" placeholder="+251 91 234 5678">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Department</label>
-                                    <input type="text" name="department" class="form-input" value="Administration" placeholder="Department">
+                                    <input type="text" name="department" class="form-input" value="{{ Auth::user()->department ?? 'Administration' }}" placeholder="Department">
                                 </div>
                             </div>
 
@@ -1022,7 +1082,7 @@
                     </div>
 
                     <!-- Security Section -->
-                    <div id="section-security" class="settings-section">
+                    <div id="section-security" class="settings-section {{ $activeSection == 'security' ? 'active' : '' }}">
                         <h2 class="section-title">Security Settings</h2>
 
                         <form action="{{ route('admin.password.update') }}" method="POST">
@@ -1064,7 +1124,7 @@
                                         <div class="form-hint">Add an extra layer of security to your account</div>
                                     </span>
                                     <label class="toggle-switch">
-                                        <input type="checkbox" name="two_factor">
+                                        <input type="checkbox" name="two_factor" {{ Auth::user()->two_factor_enabled ?? false ? 'checked' : '' }}>
                                         <span class="toggle-slider"></span>
                                     </label>
                                 </label>
@@ -1080,67 +1140,46 @@
                         <div style="margin-top: 32px;">
                             <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Active Sessions</h3>
 
-                            <div class="info-card">
-                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                                    <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="width: 32px; height: 32px; background-color: #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="ri-window-line"></i>
-                                        </div>
-                                        <div>
-                                            <div style="font-weight: 600;">Chrome on Windows</div>
-                                            <div style="font-size: 12px; color: var(--text-secondary);">Last active: Just now</div>
-                                        </div>
-                                    </div>
-                                    <span class="badge" style="background-color: var(--accent-green); color: white; padding: 4px 8px; border-radius: 20px; font-size: 12px;">Current</span>
-                                </div>
-                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                                    <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="width: 32px; height: 32px; background-color: #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="ri-smartphone-line"></i>
-                                        </div>
-                                        <div>
-                                            <div style="font-weight: 600;">Safari on iPhone</div>
-                                            <div style="font-size: 12px; color: var(--text-secondary);">Last active: 2 hours ago</div>
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px;">Terminate</button>
+                            <div class="info-card" id="sessions-list">
+                                <div style="text-align: center; padding: 20px;">
+                                    <div class="spinner"></div>
+                                    <p>Loading sessions...</p>
                                 </div>
                             </div>
 
-                            <button class="btn btn-secondary" style="margin-top: 8px;">
+                            <button class="btn btn-secondary" onclick="logoutAllDevices()" style="margin-top: 8px;">
                                 <i class="ri-logout-box-line"></i> Logout All Devices
                             </button>
                         </div>
                     </div>
 
                     <!-- Marketplace Settings -->
-                    <div id="section-marketplace" class="settings-section">
+                    <div id="section-marketplace" class="settings-section {{ $activeSection == 'marketplace' ? 'active' : '' }}">
                         <h2 class="section-title">Marketplace Settings</h2>
 
                         <form action="{{ route('admin.settings.update') }}" method="POST">
                             @csrf
+                            <input type="hidden" name="section" value="marketplace">
 
                             <div class="form-group">
                                 <label class="form-label">Currency</label>
                                 <select name="currency" class="form-select">
-                                    <option value="USD" selected>USD - US Dollar</option>
-                                    <option value="EUR">EUR - Euro</option>
-                                    <option value="GBP">GBP - British Pound</option>
-                                    <option value="JPY">JPY - Japanese Yen</option>
-                                    <option value="CAD">CAD - Canadian Dollar</option>
-                                    <option value="AUD">AUD - Australian Dollar</option>
+                                    <option value="USD" {{ config('marketplace.currency', 'USD') == 'USD' ? 'selected' : '' }}>USD - US Dollar</option>
+                                    <option value="EUR" {{ config('marketplace.currency') == 'EUR' ? 'selected' : '' }}>EUR - Euro</option>
+                                    <option value="GBP" {{ config('marketplace.currency') == 'GBP' ? 'selected' : '' }}>GBP - British Pound</option>
+                                    <option value="ETB" {{ config('marketplace.currency') == 'ETB' ? 'selected' : '' }}>ETB - Ethiopian Birr</option>
                                 </select>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Commission Rate (%)</label>
-                                    <input type="number" name="commission_rate" class="form-input" value="10" min="0" max="100" step="0.1">
+                                    <input type="number" name="commission_rate" class="form-input" value="{{ config('marketplace.commission_rate', 10) }}" min="0" max="100" step="0.1">
                                     <div class="form-hint">Percentage taken from each sale</div>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Minimum Payout ($)</label>
-                                    <input type="number" name="minimum_payout" class="form-input" value="50" min="0">
+                                    <input type="number" name="minimum_payout" class="form-input" value="{{ config('marketplace.minimum_payout', 50) }}" min="0">
                                 </div>
                             </div>
 
@@ -1151,7 +1190,7 @@
                                         <div class="form-hint">Customers can checkout without creating an account</div>
                                     </span>
                                     <label class="toggle-switch">
-                                        <input type="checkbox" name="guest_checkout" checked>
+                                        <input type="checkbox" name="guest_checkout" {{ config('marketplace.guest_checkout', true) ? 'checked' : '' }}>
                                         <span class="toggle-slider"></span>
                                     </label>
                                 </label>
@@ -1164,7 +1203,7 @@
                                         <div class="form-hint">Vendors must verify their identity before selling</div>
                                     </span>
                                     <label class="toggle-switch">
-                                        <input type="checkbox" name="vendor_verification" checked>
+                                        <input type="checkbox" name="vendor_verification" {{ config('marketplace.vendor_verification', true) ? 'checked' : '' }}>
                                         <span class="toggle-slider"></span>
                                     </label>
                                 </label>
@@ -1177,7 +1216,7 @@
                                         <div class="form-hint">Allow customers to review products and vendors</div>
                                     </span>
                                     <label class="toggle-switch">
-                                        <input type="checkbox" name="enable_reviews" checked>
+                                        <input type="checkbox" name="enable_reviews" {{ config('marketplace.enable_reviews', true) ? 'checked' : '' }}>
                                         <span class="toggle-slider"></span>
                                     </label>
                                 </label>
@@ -1190,200 +1229,150 @@
                     </div>
 
                     <!-- Payment Gateways -->
-                    <div id="section-payment" class="settings-section">
+                    <div id="section-payment" class="settings-section {{ $activeSection == 'payment' ? 'active' : '' }}">
                         <h2 class="section-title">Payment Gateways</h2>
 
-                        <div style="display: grid; gap: 16px; margin-bottom: 24px;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid var(--border-color); border-radius: 8px;">
-                                <div style="display: flex; align-items: center; gap: 16px;">
-                                    <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/stripe.svg" alt="Stripe" style="width: 40px; height: 40px;">
+                        <form action="{{ route('admin.settings.update') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="section" value="payment">
+
+                            <div style="display: grid; gap: 16px; margin-bottom: 24px;">
+                                @php
+                                    $gateways = [
+                                        'chapa' => ['name' => 'Chapa', 'icon' => 'ri-bank-line', 'description' => 'Ethiopian online payment gateway'],
+                                        'cash_on_delivery' => ['name' => 'Cash on Delivery', 'icon' => 'ri-money-dollar-circle-line', 'description' => 'Customers pay in cash when orders are delivered'],
+                                    ];
+                                @endphp
+
+                                @foreach($gateways as $key => $gateway)
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid var(--border-color); border-radius: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <div style="width: 40px; height: 40px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="{{ $gateway['icon'] }}" style="font-size: 24px; color: var(--primary-gold);"></i>
+                                        </div>
+                                        <div>
+                                            <h4 style="font-weight: 600;">{{ $gateway['name'] }}</h4>
+                                            <p style="font-size: 13px; color: var(--text-secondary);">{{ $gateway['description'] }}</p>
+                                        </div>
+                                    </div>
                                     <div>
-                                        <h4 style="font-weight: 600;">Stripe</h4>
-                                        <p style="font-size: 13px; color: var(--text-secondary);">Credit cards, Apple Pay, Google Pay</p>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" name="gateways[{{ $key }}]" {{ config("payment.gateways.{$key}.enabled", in_array($key, ['chapa', 'cash_on_delivery'])) ? 'checked' : '' }}>
+                                            <span class="toggle-slider"></span>
+                                        </label>
                                     </div>
                                 </div>
-                                <div>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
+                                @endforeach
                             </div>
 
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid var(--border-color); border-radius: 8px;">
-                                <div style="display: flex; align-items: center; gap: 16px;">
-                                    <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/paypal.svg" alt="PayPal" style="width: 40px; height: 40px;">
-                                    <div>
-                                        <h4 style="font-weight: 600;">PayPal</h4>
-                                        <p style="font-size: 13px; color: var(--text-secondary);">PayPal accounts and credit cards</p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Payment Settings</button>
                             </div>
-
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border: 1px solid var(--border-color); border-radius: 8px;">
-                                <div style="display: flex; align-items: center; gap: 16px;">
-                                    <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/square.svg" alt="Square" style="width: 40px; height: 40px;">
-                                    <div>
-                                        <h4 style="font-weight: 600;">Square</h4>
-                                        <p style="font-size: 13px; color: var(--text-secondary);">Credit cards and in-person payments</p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button class="btn btn-primary">Configure Payment Gateways</button>
+                        </form>
                     </div>
 
                     <!-- Email Settings -->
-                    <div id="section-email" class="settings-section">
+                    <div id="section-email" class="settings-section {{ $activeSection == 'email' ? 'active' : '' }}">
                         <h2 class="section-title">Email Settings</h2>
 
                         <form action="{{ route('admin.settings.update') }}" method="POST">
                             @csrf
+                            <input type="hidden" name="section" value="email">
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Mail Driver</label>
                                     <select name="mail_driver" class="form-select">
-                                        <option value="smtp" selected>SMTP</option>
-                                        <option value="sendmail">Sendmail</option>
-                                        <option value="mailgun">Mailgun</option>
-                                        <option value="ses">Amazon SES</option>
-                                        <option value="postmark">Postmark</option>
+                                        <option value="smtp" {{ config('mail.default', 'smtp') == 'smtp' ? 'selected' : '' }}>SMTP</option>
+                                        <option value="sendmail" {{ config('mail.default') == 'sendmail' ? 'selected' : '' }}>Sendmail</option>
+                                        <option value="mailgun" {{ config('mail.default') == 'mailgun' ? 'selected' : '' }}>Mailgun</option>
+                                        <option value="ses" {{ config('mail.default') == 'ses' ? 'selected' : '' }}>Amazon SES</option>
+                                        <option value="postmark" {{ config('mail.default') == 'postmark' ? 'selected' : '' }}>Postmark</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Mail Host</label>
-                                    <input type="text" name="mail_host" class="form-input" value="smtp.mailtrap.io">
+                                    <input type="text" name="mail_host" class="form-input" value="{{ config('mail.mailers.smtp.host', 'smtp.mailtrap.io') }}">
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Mail Port</label>
-                                    <input type="text" name="mail_port" class="form-input" value="2525">
+                                    <input type="text" name="mail_port" class="form-input" value="{{ config('mail.mailers.smtp.port', 2525) }}">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Mail Username</label>
-                                    <input type="text" name="mail_username" class="form-input" value="">
+                                    <input type="text" name="mail_username" class="form-input" value="{{ config('mail.mailers.smtp.username', '') }}">
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Mail Password</label>
-                                    <input type="password" name="mail_password" class="form-input" placeholder="••••••••">
+                                    <input type="password" name="mail_password" class="form-input" placeholder="••••••••" value="{{ config('mail.mailers.smtp.password', '') }}">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Mail Encryption</label>
                                     <select name="mail_encryption" class="form-select">
-                                        <option value="tls">TLS</option>
-                                        <option value="ssl">SSL</option>
-                                        <option value="">None</option>
+                                        <option value="tls" {{ config('mail.mailers.smtp.encryption', 'tls') == 'tls' ? 'selected' : '' }}>TLS</option>
+                                        <option value="ssl" {{ config('mail.mailers.smtp.encryption') == 'ssl' ? 'selected' : '' }}>SSL</option>
+                                        <option value="" {{ config('mail.mailers.smtp.encryption') == '' ? 'selected' : '' }}>None</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">From Address</label>
-                                <input type="email" name="mail_from_address" class="form-input" value="noreply@vendora.com">
+                                <input type="email" name="mail_from_address" class="form-input" value="{{ config('mail.from.address', 'noreply@vendora.com') }}">
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">From Name</label>
-                                <input type="text" name="mail_from_name" class="form-input" value="Vendora Marketplace">
+                                <input type="text" name="mail_from_name" class="form-input" value="{{ config('mail.from.name', 'Vendora Marketplace') }}">
                             </div>
 
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">Save Email Settings</button>
-                                <button type="button" class="btn btn-secondary">Send Test Email</button>
+                                <button type="button" class="btn btn-secondary" onclick="sendTestEmail()">Send Test Email</button>
                             </div>
                         </form>
                     </div>
 
                     <!-- Notification Preferences -->
-                    <div id="section-notifications" class="settings-section">
+                    <div id="section-notifications" class="settings-section {{ $activeSection == 'notifications' ? 'active' : '' }}">
                         <h2 class="section-title">Notification Preferences</h2>
 
                         <form action="{{ route('admin.settings.update') }}" method="POST">
                             @csrf
+                            <input type="hidden" name="section" value="notifications">
 
+                            @php
+                                $notificationTypes = [
+                                    'new_order' => ['label' => 'New Order Notifications', 'desc' => 'Get notified when a new order is placed'],
+                                    'new_vendor' => ['label' => 'New Vendor Registration', 'desc' => 'Get notified when a vendor registers'],
+                                    'new_customer' => ['label' => 'New Customer Registration', 'desc' => 'Get notified when a new customer signs up'],
+                                    'low_stock' => ['label' => 'Low Stock Alerts', 'desc' => 'Get notified when products are running low'],
+                                    'system' => ['label' => 'System Updates', 'desc' => 'Get notified about system maintenance and updates'],
+                                    'vendor_verification' => ['label' => 'Vendor Verification Requests', 'desc' => 'Get notified when a vendor requests verification'],
+                                    'refund_request' => ['label' => 'Refund Requests', 'desc' => 'Get notified when a customer requests a refund'],
+                                ];
+                            @endphp
+
+                            @foreach($notificationTypes as $key => $type)
                             <div class="form-group">
                                 <label class="toggle-label">
                                     <span style="flex: 1;">
-                                        <strong>New Order Notifications</strong>
-                                        <div class="form-hint">Get notified when a new order is placed</div>
+                                        <strong>{{ $type['label'] }}</strong>
+                                        <div class="form-hint">{{ $type['desc'] }}</div>
                                     </span>
                                     <label class="toggle-switch">
-                                        <input type="checkbox" name="notify_new_order" checked>
+                                        <input type="checkbox" name="notifications[{{ $key }}]" {{ config("notifications.{$key}", true) ? 'checked' : '' }}>
                                         <span class="toggle-slider"></span>
                                     </label>
                                 </label>
                             </div>
-
-                            <div class="form-group">
-                                <label class="toggle-label">
-                                    <span style="flex: 1;">
-                                        <strong>New Vendor Registration</strong>
-                                        <div class="form-hint">Get notified when a vendor registers</div>
-                                    </span>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" name="notify_new_vendor" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </label>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="toggle-label">
-                                    <span style="flex: 1;">
-                                        <strong>New Customer Registration</strong>
-                                        <div class="form-hint">Get notified when a new customer signs up</div>
-                                    </span>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" name="notify_new_customer">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </label>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="toggle-label">
-                                    <span style="flex: 1;">
-                                        <strong>Low Stock Alerts</strong>
-                                        <div class="form-hint">Get notified when products are running low</div>
-                                    </span>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" name="notify_low_stock" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </label>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="toggle-label">
-                                    <span style="flex: 1;">
-                                        <strong>System Updates</strong>
-                                        <div class="form-hint">Get notified about system maintenance and updates</div>
-                                    </span>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" name="notify_system" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </label>
-                            </div>
+                            @endforeach
 
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">Save Preferences</button>
@@ -1392,201 +1381,185 @@
                     </div>
 
                     <!-- Backup & Restore -->
-                    <div id="section-backup" class="settings-section">
+                    <div id="section-backup" class="settings-section {{ $activeSection == 'backup' ? 'active' : '' }}">
                         <h2 class="section-title">Backup & Restore</h2>
 
-                        <div class="info-card">
+                        <div class="info-card" id="backup-info">
                             <div class="info-title">
                                 <i class="ri-information-line"></i>
                                 Backup Information
                             </div>
-                            <ul class="info-list">
+                            <ul class="info-list" id="backup-details">
                                 <li>
                                     <span class="info-label">Last Backup</span>
-                                    <span class="info-value">2024-02-13 03:00 AM</span>
+                                    <span class="info-value" id="last-backup">Loading...</span>
                                 </li>
                                 <li>
                                     <span class="info-label">Backup Size</span>
-                                    <span class="info-value">2.4 GB</span>
+                                    <span class="info-value" id="backup-size">Loading...</span>
                                 </li>
                                 <li>
                                     <span class="info-label">Next Scheduled</span>
-                                    <span class="info-value">2024-02-14 03:00 AM</span>
+                                    <span class="info-value" id="next-backup">Loading...</span>
                                 </li>
                                 <li>
                                     <span class="info-label">Backup Location</span>
-                                    <span class="info-value">Amazon S3</span>
+                                    <span class="info-value" id="backup-location">Loading...</span>
                                 </li>
                             </ul>
                         </div>
 
-                        <div style="display: flex; gap: 16px; margin-bottom: 32px;">
-                            <button class="btn btn-primary">
+                        <div style="display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="downloadBackup()">
                                 <i class="ri-download-line"></i> Download Backup
                             </button>
-                            <button class="btn btn-success">
+                            <button class="btn btn-success" onclick="createBackup()">
                                 <i class="ri-refresh-line"></i> Create Backup Now
                             </button>
-                            <button class="btn btn-secondary">
+                            <button class="btn btn-secondary" onclick="document.getElementById('restoreBackup').click()">
                                 <i class="ri-upload-line"></i> Restore Backup
                             </button>
+                            <input type="file" id="restoreBackup" style="display: none;" accept=".sql,.zip" onchange="restoreBackup(this)">
                         </div>
 
                         <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Available Backups</h3>
 
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="border-bottom: 1px solid var(--border-color);">
-                                    <th style="text-align: left; padding: 12px;">Backup File</th>
-                                    <th style="text-align: left; padding: 12px;">Date</th>
-                                    <th style="text-align: left; padding: 12px;">Size</th>
-                                    <th style="text-align: left; padding: 12px;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="padding: 12px;">backup-2024-02-13.sql</td>
-                                    <td style="padding: 12px;">2024-02-13 03:00</td>
-                                    <td style="padding: 12px;">2.4 GB</td>
-                                    <td style="padding: 12px;">
-                                        <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">Download</button>
-                                        <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">Restore</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px;">backup-2024-02-12.sql</td>
-                                    <td style="padding: 12px;">2024-02-12 03:00</td>
-                                    <td style="padding: 12px;">2.3 GB</td>
-                                    <td style="padding: 12px;">
-                                        <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">Download</button>
-                                        <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;">Restore</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- API Settings -->
-                    <div id="section-api" class="settings-section">
-                        <h2 class="section-title">API Settings</h2>
-
-                        <div class="info-card">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                                <div>
-                                    <h4 style="font-weight: 600;">API Keys</h4>
-                                    <p style="font-size: 13px; color: var(--text-secondary);">Manage your API access keys</p>
-                                </div>
-                                <button class="btn btn-primary">Generate New Key</button>
-                            </div>
-
-                            <table style="width: 100%; border-collapse: collapse;">
+                        <div class="table-responsive" style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid var(--border-color);">
-                                        <th style="text-align: left; padding: 12px;">Name</th>
-                                        <th style="text-align: left; padding: 12px;">API Key</th>
-                                        <th style="text-align: left; padding: 12px;">Created</th>
-                                        <th style="text-align: left; padding: 12px;">Last Used</th>
+                                        <th style="text-align: left; padding: 12px;">Backup File</th>
+                                        <th style="text-align: left; padding: 12px;">Date</th>
+                                        <th style="text-align: left; padding: 12px;">Size</th>
                                         <th style="text-align: left; padding: 12px;">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="backups-list">
                                     <tr>
-                                        <td style="padding: 12px;">Production</td>
-                                        <td style="padding: 12px;">
-                                            <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px;">sk_live_••••••••••</code>
-                                        </td>
-                                        <td style="padding: 12px;">2024-01-01</td>
-                                        <td style="padding: 12px;">2024-02-13</td>
-                                        <td style="padding: 12px;">
-                                            <button class="btn btn-secondary" style="padding: 4px 8px;">Revoke</button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding: 12px;">Development</td>
-                                        <td style="padding: 12px;">
-                                            <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px;">sk_test_••••••••••</code>
-                                        </td>
-                                        <td style="padding: 12px;">2024-01-15</td>
-                                        <td style="padding: 12px;">2024-02-12</td>
-                                        <td style="padding: 12px;">
-                                            <button class="btn btn-secondary" style="padding: 4px 8px;">Revoke</button>
+                                        <td colspan="4" style="text-align: center; padding: 40px;">
+                                            <div class="spinner"></div>
+                                            <p style="margin-top: 16px;">Loading backups...</p>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-
-                        <div class="form-group">
-                            <label class="toggle-label">
-                                <span style="flex: 1;">
-                                    <strong>Enable API Access</strong>
-                                    <div class="form-hint">Allow third-party applications to access the API</div>
-                                </span>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </label>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Rate Limit (requests per minute)</label>
-                            <input type="number" class="form-input" value="60">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Allowed IPs</label>
-                            <textarea class="form-textarea" placeholder="192.168.1.1&#10;10.0.0.0/24">192.168.1.1
-10.0.0.0/24</textarea>
-                            <div class="form-hint">One IP or CIDR per line. Leave empty to allow all.</div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button class="btn btn-primary">Save API Settings</button>
-                        </div>
                     </div>
 
-                    <!-- Legal & Policies -->
-                    <div id="section-legal" class="settings-section">
-                        <h2 class="section-title">Legal & Policies</h2>
+                    <!-- API Settings -->
+                    <div id="section-api" class="settings-section {{ $activeSection == 'api' ? 'active' : '' }}">
+                        <h2 class="section-title">API Settings</h2>
+
+                        <div class="info-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 16px;">
+                                <div>
+                                    <h4 style="font-weight: 600;">API Keys</h4>
+                                    <p style="font-size: 13px; color: var(--text-secondary);">Manage your API access keys</p>
+                                </div>
+                                <button class="btn btn-primary" onclick="generateApiKey()">Generate New Key</button>
+                            </div>
+
+                            <div class="table-responsive" style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                                    <thead>
+                                        <tr style="border-bottom: 1px solid var(--border-color);">
+                                            <th style="text-align: left; padding: 12px;">Name</th>
+                                            <th style="text-align: left; padding: 12px;">API Key</th>
+                                            <th style="text-align: left; padding: 12px;">Created</th>
+                                            <th style="text-align: left; padding: 12px;">Last Used</th>
+                                            <th style="text-align: left; padding: 12px;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="api-keys-list">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; padding: 40px;">
+                                                <div class="spinner"></div>
+                                                <p style="margin-top: 16px;">Loading API keys...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
                         <form action="{{ route('admin.settings.update') }}" method="POST">
                             @csrf
+                            <input type="hidden" name="section" value="api">
+
+                            <div class="form-group">
+                                <label class="toggle-label">
+                                    <span style="flex: 1;">
+                                        <strong>Enable API Access</strong>
+                                        <div class="form-hint">Allow third-party applications to access the API</div>
+                                    </span>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" name="api_enabled" {{ config('api.enabled', true) ? 'checked' : '' }}>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Rate Limit (requests per minute)</label>
+                                <input type="number" name="api_rate_limit" class="form-input" value="{{ config('api.rate_limit', 60) }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Allowed IPs</label>
+                                <textarea name="api_allowed_ips" class="form-textarea" placeholder="192.168.1.1&#10;10.0.0.0/24">{{ implode("\n", config('api.allowed_ips', [])) }}</textarea>
+                                <div class="form-hint">One IP or CIDR per line. Leave empty to allow all.</div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save API Settings</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Legal & Policies -->
+                    <div id="section-legal" class="settings-section {{ $activeSection == 'legal' ? 'active' : '' }}">
+                        <h2 class="section-title">Legal & Policies</h2>
+
+                        <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <input type="hidden" name="section" value="legal">
 
                             <div class="form-group">
                                 <label class="form-label">Terms of Service</label>
-                                <textarea class="form-textarea" rows="10" placeholder="Enter your terms of service...">By using Vendora Marketplace, you agree to these terms...</textarea>
+                                <textarea name="terms_of_service" class="form-textarea" rows="8" placeholder="Enter your terms of service...">{{ config('legal.terms_of_service', 'By using Vendora Marketplace, you agree to these terms...') }}</textarea>
                                 <div class="form-actions" style="justify-content: flex-start; padding-top: 8px;">
-                                    <button class="btn btn-secondary">Upload PDF</button>
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('terms_pdf').click()">Upload PDF</button>
+                                    <input type="file" id="terms_pdf" name="terms_pdf" style="display: none;" accept=".pdf">
                                     <span class="form-hint">or paste content above</span>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Privacy Policy</label>
-                                <textarea class="form-textarea" rows="10" placeholder="Enter your privacy policy...">We value your privacy and are committed to protecting your personal data...</textarea>
+                                <textarea name="privacy_policy" class="form-textarea" rows="8" placeholder="Enter your privacy policy...">{{ config('legal.privacy_policy', 'We value your privacy and are committed to protecting your personal data...') }}</textarea>
                                 <div class="form-actions" style="justify-content: flex-start; padding-top: 8px;">
-                                    <button class="btn btn-secondary">Upload PDF</button>
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('privacy_pdf').click()">Upload PDF</button>
+                                    <input type="file" id="privacy_pdf" name="privacy_pdf" style="display: none;" accept=".pdf">
                                     <span class="form-hint">or paste content above</span>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Cookie Policy</label>
-                                <textarea class="form-textarea" rows="5" placeholder="Enter your cookie policy...">This website uses cookies to improve your experience...</textarea>
+                                <textarea name="cookie_policy" class="form-textarea" rows="5" placeholder="Enter your cookie policy...">{{ config('legal.cookie_policy', 'This website uses cookies to improve your experience...') }}</textarea>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">GDPR Compliance</label>
-                                <select class="form-select">
-                                    <option>Enabled</option>
-                                    <option>Disabled</option>
+                                <select name="gdpr_enabled" class="form-select">
+                                    <option value="1" {{ config('legal.gdpr_enabled', true) ? 'selected' : '' }}>Enabled</option>
+                                    <option value="0" {{ !config('legal.gdpr_enabled', true) ? 'selected' : '' }}>Disabled</option>
                                 </select>
                                 <div class="form-hint">Enable GDPR compliance features for EU customers</div>
                             </div>
 
                             <div class="form-actions">
-                                <button class="btn btn-primary">Save Policies</button>
+                                <button type="submit" class="btn btn-primary">Save Policies</button>
                             </div>
                         </form>
                     </div>
@@ -1602,13 +1575,13 @@
                 <p style="color: var(--text-secondary); margin-bottom: 20px;">Once you delete your account or data, there is no going back. Please be certain.</p>
 
                 <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-                    <button class="btn btn-danger" onclick="if(confirm('Are you sure you want to clear all cache? This cannot be undone.')) alert('Cache cleared!')">
+                    <button class="btn btn-danger" onclick="clearCache()">
                         <i class="ri-delete-bin-line"></i> Clear Cache
                     </button>
-                    <button class="btn btn-danger" onclick="if(confirm('Are you sure you want to reset all settings? This cannot be undone.')) alert('Settings reset!')">
+                    <button class="btn btn-danger" onclick="resetSettings()">
                         <i class="ri-reset-left-line"></i> Reset All Settings
                     </button>
-                    <button class="btn btn-danger" onclick="if(confirm('Are you sure you want to delete your account? This cannot be undone.')) alert('Account deletion request submitted!')">
+                    <button class="btn btn-danger" onclick="deleteAccount()">
                         <i class="ri-user-unfollow-line"></i> Delete Account
                     </button>
                 </div>
@@ -1616,7 +1589,24 @@
         </div>
     </main>
 
+    <!-- Toast Notification -->
+    <div id="toast" style="position: fixed; top: 20px; right: 20px; background: white; border-radius: 8px; padding: 16px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; align-items: center; gap: 12px; z-index: 2000; border-left: 4px solid var(--success-color); min-width: 300px;">
+        <div id="toastIcon" style="font-size: 24px;">
+            <i class="ri-checkbox-circle-line" style="color: var(--success-color);"></i>
+        </div>
+        <div style="flex: 1;">
+            <div id="toastTitle" style="font-weight: 600; margin-bottom: 4px;">Success</div>
+            <div id="toastMessage" style="font-size: 13px; color: var(--text-secondary);">Action completed successfully!</div>
+        </div>
+        <button onclick="hideToast()" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-secondary);">
+            <i class="ri-close-line"></i>
+        </button>
+    </div>
+
     <script>
+        // CSRF Token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
         // Mobile menu toggle
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
@@ -1636,7 +1626,48 @@
                     }
                 }
             });
+
+            // Load dynamic data
+            loadBackupInfo();
+            loadBackups();
+            loadApiKeys();
+            loadSessions();
+
+            // Check URL hash for section
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                showSection(hash);
+            }
         });
+
+        // Toast functions
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+
+            if (type === 'success') {
+                toastIcon.innerHTML = '<i class="ri-checkbox-circle-line" style="color: var(--success-color);"></i>';
+                toast.style.borderLeftColor = 'var(--success-color)';
+            } else if (type === 'error') {
+                toastIcon.innerHTML = '<i class="ri-error-warning-line" style="color: var(--accent-red);"></i>';
+                toast.style.borderLeftColor = 'var(--accent-red)';
+            } else if (type === 'warning') {
+                toastIcon.innerHTML = '<i class="ri-alert-line" style="color: var(--warning-color);"></i>';
+                toast.style.borderLeftColor = 'var(--warning-color)';
+            }
+
+            toast.style.display = 'flex';
+            setTimeout(hideToast, 3000);
+        }
+
+        function hideToast() {
+            document.getElementById('toast').style.display = 'none';
+        }
 
         // Show settings section
         function showSection(sectionId) {
@@ -1655,22 +1686,510 @@
 
             // Add active class to clicked nav item
             event.currentTarget.classList.add('active');
+
+            // Update URL hash
+            window.location.hash = sectionId;
         }
 
         // Avatar upload preview
-        document.getElementById('avatarInput')?.addEventListener('change', function(e) {
-            if (e.target.files && e.target.files[0]) {
+        function previewAvatar(input) {
+            if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // You can update avatar preview here
-                    console.log('Avatar selected:', e.target.result);
+                    const avatar = document.querySelector('.avatar');
+                    const initials = document.getElementById('avatarInitials');
+                    const preview = document.getElementById('avatarPreview');
+                    
+                    if (!preview) {
+                        // Create img element if it doesn't exist
+                        const img = document.createElement('img');
+                        img.id = 'avatarPreview';
+                        img.src = e.target.result;
+                        img.alt = 'Avatar';
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'cover';
+                        
+                        // Clear avatar and append img
+                        avatar.innerHTML = '';
+                        avatar.appendChild(img);
+                    } else {
+                        preview.src = e.target.result;
+                    }
+                    
+                    if (initials) {
+                        initials.style.display = 'none';
+                    }
                 }
-                reader.readAsDataURL(e.target.files[0]);
+                reader.readAsDataURL(input.files[0]);
             }
+        }
+
+        // Load backup info
+        function loadBackupInfo() {
+            fetch('/admin/backup/info', {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('last-backup').textContent = data.last_backup || 'Never';
+                    document.getElementById('backup-size').textContent = data.size || '0 MB';
+                    document.getElementById('next-backup').textContent = data.next_backup || 'Not scheduled';
+                    document.getElementById('backup-location').textContent = data.location || 'Local';
+                }
+            })
+            .catch(error => console.error('Error loading backup info:', error));
+        }
+
+        // Load backups list
+        function loadBackups() {
+            fetch('/admin/backups', {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('backups-list');
+                if (data.success && data.backups.length > 0) {
+                    let html = '';
+                    data.backups.forEach(backup => {
+                        html += `
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 12px;">${backup.filename}</td>
+                                <td style="padding: 12px;">${backup.date}</td>
+                                <td style="padding: 12px;">${backup.size}</td>
+                                <td style="padding: 12px;">
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="downloadBackupFile('${backup.filename}')">Download</button>
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="restoreBackupFile('${backup.filename}')">Restore</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    tbody.innerHTML = html;
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                <i class="ri-database-2-line" style="font-size: 48px; opacity: 0.5;"></i>
+                                <p style="margin-top: 16px;">No backups found</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            })
+            .catch(error => console.error('Error loading backups:', error));
+        }
+
+        // Load API keys
+        function loadApiKeys() {
+            fetch('/admin/api/keys', {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('api-keys-list');
+                if (data.success && data.keys.length > 0) {
+                    let html = '';
+                    data.keys.forEach(key => {
+                        html += `
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 12px;">${key.name}</td>
+                                <td style="padding: 12px;">
+                                    <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px;">${key.preview}</code>
+                                </td>
+                                <td style="padding: 12px;">${key.created_at}</td>
+                                <td style="padding: 12px;">${key.last_used || 'Never'}</td>
+                                <td style="padding: 12px;">
+                                    <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="revokeApiKey('${key.id}')">Revoke</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    tbody.innerHTML = html;
+                } else {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                <i class="ri-key-line" style="font-size: 48px; opacity: 0.5;"></i>
+                                <p style="margin-top: 16px;">No API keys found</p>
+                            </td>
+                        </tr>
+                    `;
+                }
+            })
+            .catch(error => console.error('Error loading API keys:', error));
+        }
+
+        // Load active sessions
+        function loadSessions() {
+            fetch('/admin/sessions', {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const sessionsList = document.getElementById('sessions-list');
+                if (data.success && data.sessions.length > 0) {
+                    let html = '';
+                    data.sessions.forEach(session => {
+                        const isCurrent = session.is_current ? '<span class="badge" style="background-color: var(--accent-green); color: white; padding: 4px 8px; border-radius: 20px; font-size: 12px;">Current</span>' : '';
+                        html += `
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 8px; border-radius: 8px; background: white;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 32px; height: 32px; background-color: #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="${session.icon}"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600;">${session.device}</div>
+                                        <div style="font-size: 12px; color: var(--text-secondary);">Last active: ${session.last_active}</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    ${isCurrent}
+                                    ${!session.is_current ? `<button class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px;" onclick="terminateSession('${session.id}')">Terminate</button>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    sessionsList.innerHTML = html;
+                } else {
+                    sessionsList.innerHTML = '<p style="text-align: center; padding: 20px;">No active sessions found</p>';
+                }
+            })
+            .catch(error => console.error('Error loading sessions:', error));
+        }
+
+        // Generate API key
+        function generateApiKey() {
+            if (!confirm('Generate a new API key? This will create a new key that can be used for API access.')) return;
+
+            fetch('/admin/api/keys/generate', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Success', 'API key generated successfully');
+                    loadApiKeys();
+                } else {
+                    showToast('Error', data.message || 'Failed to generate API key', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error', 'Failed to generate API key', 'error');
+            });
+        }
+
+        // Revoke API key
+        function revokeApiKey(id) {
+            if (!confirm('Revoke this API key? This will immediately disable access for any applications using this key.')) return;
+
+            fetch(`/admin/api/keys/${id}/revoke`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Success', 'API key revoked successfully');
+                    loadApiKeys();
+                } else {
+                    showToast('Error', data.message || 'Failed to revoke API key', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error', 'Failed to revoke API key', 'error');
+            });
+        }
+
+        // Terminate session
+        function terminateSession(id) {
+            if (!confirm('Terminate this session? The user will be logged out from this device.')) return;
+
+            fetch(`/admin/sessions/${id}/terminate`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Success', 'Session terminated successfully');
+                    loadSessions();
+                } else {
+                    showToast('Error', data.message || 'Failed to terminate session', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error', 'Failed to terminate session', 'error');
+            });
+        }
+
+        // Logout all devices
+        function logoutAllDevices() {
+            if (!confirm('Logout from all devices? This will log you out everywhere except this current session.')) return;
+
+            fetch('/admin/sessions/logout-all', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Success', 'Logged out from all other devices');
+                    loadSessions();
+                } else {
+                    showToast('Error', data.message || 'Failed to logout all devices', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error', 'Failed to logout all devices', 'error');
+            });
+        }
+
+        // Send test email
+        function sendTestEmail() {
+            fetch('/admin/settings/test-email', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Success', 'Test email sent successfully');
+                } else {
+                    showToast('Error', data.message || 'Failed to send test email', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error', 'Failed to send test email', 'error');
+            });
+        }
+
+        // Create backup
+        function createBackup() {
+            if (!confirm('Create a new backup? This may take a few moments.')) return;
+
+            fetch('/admin/backup/create', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Success', 'Backup created successfully');
+                    loadBackupInfo();
+                    loadBackups();
+                } else {
+                    showToast('Error', data.message || 'Failed to create backup', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error', 'Failed to create backup', 'error');
+            });
+        }
+
+        // Download backup
+        function downloadBackup() {
+            window.location.href = '/admin/backup/download';
+        }
+
+        // Download specific backup file
+        function downloadBackupFile(filename) {
+            window.location.href = `/admin/backup/download/${filename}`;
+        }
+
+        // Restore backup
+        function restoreBackup(input) {
+            if (!input.files || !input.files[0]) return;
+
+            const formData = new FormData();
+            formData.append('backup', input.files[0]);
+
+            if (!confirm('Restore from this backup? This will replace your current data and cannot be undone.')) return;
+
+            fetch('/admin/backup/restore', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Success', 'Backup restored successfully');
+                    input.value = '';
+                } else {
+                    showToast('Error', data.message || 'Failed to restore backup', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error', 'Failed to restore backup', 'error');
+            });
+        }
+
+        // Restore backup file
+        function restoreBackupFile(filename) {
+            if (!confirm(`Restore from ${filename}? This will replace your current data and cannot be undone.`)) return;
+
+            fetch(`/admin/backup/restore/${filename}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Success', 'Backup restored successfully');
+                } else {
+                    showToast('Error', data.message || 'Failed to restore backup', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error', 'Failed to restore backup', 'error');
+            });
+        }
+
+        // Clear cache
+        function clearCache() {
+            if (!confirm('Clear all cache? This may temporarily slow down the site while caches rebuild.')) return;
+
+            fetch('/admin/cache/clear', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Success', 'Cache cleared successfully');
+                } else {
+                    showToast('Error', data.message || 'Failed to clear cache', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error', 'Failed to clear cache', 'error');
+            });
+        }
+
+        // Reset settings
+        function resetSettings() {
+            if (!confirm('Reset all settings to default? This cannot be undone.')) return;
+
+            fetch('/admin/settings/reset', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Success', 'Settings reset successfully');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast('Error', data.message || 'Failed to reset settings', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error', 'Failed to reset settings', 'error');
+            });
+        }
+
+        // Delete account
+        function deleteAccount() {
+            if (!confirm('Are you absolutely sure you want to delete your account? This cannot be undone.')) return;
+
+            const password = prompt('Please enter your password to confirm:');
+            if (!password) return;
+
+            fetch('/admin/account/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ password: password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Success', 'Account deleted successfully');
+                    setTimeout(() => window.location.href = '/admin/login', 2000);
+                } else {
+                    showToast('Error', data.message || 'Failed to delete account', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Error', 'Failed to delete account', 'error');
+            });
+        }
+
+        // Settings search
+        document.getElementById('settingsSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            document.querySelectorAll('.settings-nav-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         });
 
-        
-    </script>
+        // Confirm before leaving unsaved changes
+        let formChanged = false;
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('change', () => {
+                formChanged = true;
+            });
+            
+            form.addEventListener('submit', () => {
+                formChanged = false;
+            });
+        });
 
+        window.addEventListener('beforeunload', function(e) {
+            if (formChanged) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+            }
+        });
+    </script>
 </body>
 </html>

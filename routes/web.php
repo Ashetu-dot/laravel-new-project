@@ -612,6 +612,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
         Route::post('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
 
+        // Settings AJAX helpers (used by admin settings Blade)
+        Route::get('/backup/info', [AdminController::class, 'backupInfo'])->name('backup.info');
+        Route::get('/backups', [AdminController::class, 'backups'])->name('backups.list');
+        Route::post('/backup/create', [AdminController::class, 'createBackup'])->name('backup.create');
+        Route::get('/backup/download', [AdminController::class, 'downloadLatestBackup'])->name('backup.download.latest');
+        Route::get('/backup/download/{filename}', [AdminController::class, 'downloadBackupFile'])->name('backup.download.file');
+        Route::post('/backup/restore', [AdminController::class, 'restoreBackup'])->name('backup.restore.upload');
+        Route::post('/backup/restore/{filename}', [AdminController::class, 'restoreBackupFile'])->name('backup.restore.file');
+
+        Route::get('/api/keys', [AdminController::class, 'listApiKeys'])->name('api.keys');
+        Route::post('/api/keys/generate', [AdminController::class, 'generateApiKey'])->name('api.keys.generate');
+        Route::post('/api/keys/{id}/revoke', [AdminController::class, 'revokeApiKey'])->name('api.keys.revoke');
+
+        Route::get('/sessions', [AdminController::class, 'sessions'])->name('sessions');
+        Route::post('/sessions/{id}/terminate', [AdminController::class, 'terminateSession'])->name('sessions.terminate');
+        Route::post('/sessions/logout-all', [AdminController::class, 'logoutAllOtherSessions'])->name('sessions.logout-all');
+
+        Route::post('/settings/test-email', [AdminController::class, 'sendTestEmail'])->name('settings.test-email');
+        Route::post('/cache/clear', [AdminController::class, 'clearCache'])->name('cache.clear');
+        Route::post('/settings/reset', [AdminController::class, 'resetAllSettings'])->name('settings.reset-all');
+        Route::post('/account/delete', [AdminController::class, 'deleteAccount'])->name('account.delete');
+
         // ======== ADMIN NOTIFICATIONS ========
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
         Route::get('/notifications/{id}', [NotificationController::class, 'show'])->name('notifications.show');
