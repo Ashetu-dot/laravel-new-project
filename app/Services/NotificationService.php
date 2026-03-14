@@ -127,4 +127,45 @@ class NotificationService
         
         return $this->send($vendorId, $title, $message, 'review', ['reviewer_name' => $reviewerName, 'rating' => $rating]);
     }
+
+    /**
+     * Notify all admins about new user registration.
+     */
+    public function notifyAdminsNewUser($user)
+    {
+        // Get all admin users
+        $admins = User::where('role', 'admin')->where('is_active', true)->get();
+        
+        if ($admins->isEmpty()) {
+            Log::warning('No active admins found to notify about new user registration');
+            return;
+        }
+
+        $userType = ucfirst($user->role);
+        $title = 'New ' . $userType . ' Registration';
+        
+        if ($user->role === 'vendor') {
+            $message = 'New vendor "' . $user->business_name . '" (' . $user->name . ') has registered and requires verification.';
+        } else {
+            $message = 'New customer "' . $user->name . '" has registered and requires email verification.';
+        }
+        
+        $data = [
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'user_email' => $user->email,
+            'user_role' => $user->role,
+            'business_name' => $user->business_name ?? null,
+            'requires_approval' => $user->role === 'vendor',
+        ];
+
+        $adminIds = $admins->pluck('id')->toArray();
+        $this->sendBulk($adminIds, $title, $message, 'user_registration', $data);
+        
+        Log::info('Notified admins about new user registration', [
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'admin_count' => count($adminIds)
+        ]);
+    }
 }

@@ -586,6 +586,28 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -849,7 +871,9 @@
             })
             .then(response => response.json())
             .then(data => {
+                document.getElementById('loadingOverlay').style.display = 'none';
                 if (data.success) {
+                    showToast('Success', 'Item removed from wishlist', 'success');
                     const element = document.getElementById(`wishlist-item-${wishlistId}`);
                     if (element) {
                         element.style.transition = 'opacity 0.3s';
@@ -863,14 +887,13 @@
                         }, 300);
                     }
                 } else {
-                    alert('Failed to remove item: ' + (data.message || 'Unknown error'));
+                    showToast('Error', data.message || 'Failed to remove item', 'error');
                 }
-                document.getElementById('loadingOverlay').style.display = 'none';
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Failed to remove item');
                 document.getElementById('loadingOverlay').style.display = 'none';
+                showToast('Error', 'Failed to remove item', 'error');
             });
         }
 
@@ -881,24 +904,82 @@
             fetch(`/customer/cart/add/${productId}`, {
                 method: 'POST',
                 headers: {
+                    'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
-                }
+                },
+                body: JSON.stringify({
+                    quantity: 1,
+                    options: {}
+                })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    alert('Product added to cart successfully!');
-                } else {
-                    alert('Failed to add to cart: ' + (data.message || 'Unknown error'));
-                }
                 document.getElementById('loadingOverlay').style.display = 'none';
+                if (data.success) {
+                    showToast('Success', 'Product added to cart successfully!', 'success');
+                } else {
+                    showToast('Error', data.message || 'Failed to add to cart', 'error');
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Failed to add to cart');
                 document.getElementById('loadingOverlay').style.display = 'none';
+                showToast('Error', 'Failed to add to cart', 'error');
             });
+        }
+
+        // Show toast notification
+        function showToast(title, message, type = 'info') {
+            // Remove existing toasts
+            const existing = document.querySelectorAll('.toast-notification');
+            existing.forEach(n => n.remove());
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : type === 'info' ? '#3b82f6' : '#f59e0b'};
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10001;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                max-width: 400px;
+                animation: slideInRight 0.3s ease;
+            `;
+            
+            const iconMap = {
+                success: 'check-line',
+                error: 'error-warning-line',
+                info: 'information-line',
+                warning: 'alert-line'
+            };
+            
+            toast.innerHTML = `
+                <i class="ri-${iconMap[type] || 'information-line'}" style="font-size: 24px;"></i>
+                <div>
+                    <div style="font-weight: 600; margin-bottom: 4px;">${title}</div>
+                    <div style="font-size: 14px; opacity: 0.9;">${message}</div>
+                </div>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; padding: 4px; margin-left: 8px;">
+                    <i class="ri-close-line" style="font-size: 20px;"></i>
+                </button>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         }
 
         // Clear wishlist
@@ -916,17 +997,18 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Failed to clear wishlist: ' + (data.message || 'Unknown error'));
-                }
                 document.getElementById('loadingOverlay').style.display = 'none';
+                if (data.success) {
+                    showToast('Success', 'Wishlist cleared successfully', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('Error', data.message || 'Failed to clear wishlist', 'error');
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Failed to clear wishlist');
                 document.getElementById('loadingOverlay').style.display = 'none';
+                showToast('Error', 'Failed to clear wishlist', 'error');
             });
         }
     </script>

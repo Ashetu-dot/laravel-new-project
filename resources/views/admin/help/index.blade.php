@@ -516,7 +516,7 @@
                     <i class="ri-archive-line"></i>
                     Catalog
                 </a>
-                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions') }}" class="nav-item">
                     <i class="ri-price-tag-3-line"></i>
                     Promotions
                 </a>
@@ -721,14 +721,7 @@
             }
         }
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+
     </script>
 
 </body>

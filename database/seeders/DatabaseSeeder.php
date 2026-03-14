@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             CategorySeeder::class,
+            VendorSeeder::class,
             HomePageDataSeeder::class,  // Add your custom seeder here
         ]);
     }

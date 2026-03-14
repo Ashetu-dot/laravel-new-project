@@ -117,6 +117,7 @@ Route::get('/vendors/{vendor}/quick-view', [VendorCustomerController::class, 'qu
 Route::get('/search', [VendorCustomerController::class, 'search'])->name('search.results');
 Route::get('/vendors/search', [VendorCustomerController::class, 'searchVendors'])->name('vendors.search');
 Route::get('/vendors/{id}', [VendorCustomerController::class, 'showVendor'])->name('vendor.show');
+Route::get('/vendors/{id}/products', [ProductController::class, 'vendorProducts'])->name('vendor.products');
 Route::get('/vendors/{id}/details', [VendorCustomerController::class, 'getVendor'])->name('vendors.get');
 
 // =========================================================================
@@ -410,6 +411,11 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::delete('/cart/remove/{cart}', [CartController::class, 'remove'])->name('cart.remove');
     Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
+    // ======== CHECKOUT ========
+    Route::get('/checkout', [\App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/process', [\App\Http\Controllers\CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/checkout/success', [\App\Http\Controllers\CheckoutController::class, 'success'])->name('orders.success');
+
     // ======== CUSTOMER ORDERS ========
     Route::get('/orders', [OrderController::class, 'customerOrders'])->name('orders');
     Route::get('/orders/{id}', [OrderController::class, 'customerOrderShow'])->name('orders.show');
@@ -507,6 +513,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/customers/{id}', [AdminController::class, 'deleteCustomer'])->name('customers.delete');
 
         Route::post('/customers/{id}/toggle-status', [AdminController::class, 'toggleCustomerStatus'])->name('customers.toggle-status'); // ✅ FIXED: using toggleCustomerStatus
+        Route::post('/customers/{id}/verify-email', [AdminController::class, 'verifyCustomerEmail'])->name('customers.verify-email');
 
         Route::get('/customers-stats', [AdminController::class, 'getCustomerStats'])->name('customers.stats');
 

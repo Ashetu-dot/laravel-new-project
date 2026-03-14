@@ -34,7 +34,7 @@ class CartController extends Controller
             $tax = $subtotal * 0.15; // 15% VAT (Ethiopia)
             $total = $subtotal + $tax;
 
-            return view('cart.index', compact('cartItems', 'subtotal', 'tax', 'total'));
+            return view('customer.cart.index', compact('cartItems', 'subtotal', 'tax', 'total'));
 
         } catch (\Exception $e) {
             Log::error('Cart index error: ' . $e->getMessage());
@@ -45,7 +45,7 @@ class CartController extends Controller
     /**
      * Add item to cart.
      */
-    public function add(Request $request, Product $product)
+    public function add(Request $request, $productId)
     {
         try {
             $user = Auth::user();
@@ -57,10 +57,41 @@ class CartController extends Controller
                 return redirect()->route('login')->with('error', 'Please login to add items to cart.');
             }
 
+            // Find the product
+            $product = Product::where('id', $productId)
+                ->where('is_active', true)
+                ->first();
+
+            if (!$product) {
+                if ($request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Product not found or unavailable'], 404);
+                }
+                return redirect()->back()->with('error', 'Product not found or unavailable.');
+            }
+
+            // Check stock
+            if ($product->stock <= 0) {
+                if ($request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Product is out of stock'], 400);
+                }
+                return redirect()->back()->with('error', 'Product is out of stock.');
+            }
+
             $request->validate([
-                'quantity' => 'required|integer|min:1|max:' . ($product->stock_quantity ?? 100),
+                'quantity' => 'required|integer|min:1|max:' . ($product->stock ?? 100),
                 'options' => 'nullable|array',
             ]);
+
+            // Check if requested quantity is available
+            if ($request->quantity > $product->stock) {
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => "Only {$product->stock} items available in stock"
+                    ], 400);
+                }
+                return redirect()->back()->with('error', "Only {$product->stock} items available in stock.");
+            }
 
             // Check if product already in cart
             $existingCart = Cart::where('user_id', $user->id)
@@ -68,8 +99,20 @@ class CartController extends Controller
                 ->first();
 
             if ($existingCart) {
+                // Check if total quantity would exceed stock
+                $newQuantity = $existingCart->quantity + $request->quantity;
+                if ($newQuantity > $product->stock) {
+                    if ($request->wantsJson()) {
+                        return response()->json([
+                            'success' => false, 
+                            'message' => "Cannot add more. Only {$product->stock} items available (you already have {$existingCart->quantity} in cart)"
+                        ], 400);
+                    }
+                    return redirect()->back()->with('error', "Cannot add more. Only {$product->stock} items available.");
+                }
+                
                 // Update quantity
-                $existingCart->quantity += $request->quantity;
+                $existingCart->quantity = $newQuantity;
                 $existingCart->save();
                 $message = 'Cart updated successfully.';
             } else {
@@ -120,7 +163,7 @@ class CartController extends Controller
             }
 
             $request->validate([
-                'quantity' => 'required|integer|min:1|max:' . ($cart->product->stock_quantity ?? 100),
+                'quantity' => 'required|integer|min:1|max:' . ($cart->product->stock ?? 100),
             ]);
 
             $cart->quantity = $request->quantity;

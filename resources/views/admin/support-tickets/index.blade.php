@@ -1251,7 +1251,7 @@
                         @else
                             <a href="{{ $tickets->previousPageUrl() }}" class="pagination-item">Previous</a>
                         @endif
-                        
+
                         @foreach($tickets->getUrlRange(1, $tickets->lastPage()) as $page => $url)
                             @if($page == $tickets->currentPage())
                                 <span class="pagination-item active">{{ $page }}</span>
@@ -1259,7 +1259,7 @@
                                 <a href="{{ $url }}" class="pagination-item">{{ $page }}</a>
                             @endif
                         @endforeach
-                        
+
                         @if($tickets->hasMorePages())
                             <a href="{{ $tickets->nextPageUrl() }}" class="pagination-item">Next</a>
                         @else
@@ -1325,14 +1325,7 @@
             });
         }
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+        
     </script>
 </body>
 </html>

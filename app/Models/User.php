@@ -55,6 +55,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'twitter_url',
         'business_hours',
         'theme_preference',
+        'language_preference',
         'email_verified_at',
     ];
 
@@ -192,6 +193,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function writtenReviews()
     {
         return $this->hasMany(Review::class, 'user_id');
+    }
+
+    /**
+     * Get the wishlist items for this user.
+     */
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class, 'user_id');
     }
 
     /**

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1035,7 +1036,13 @@
 
         <div class="user-profile">
             <div class="avatar">
-                {{ substr($vendor->business_name ?? $vendor->name, 0, 2) }}
+                @if($vendor->profile_image)
+                    <img src="{{ Storage::url($vendor->profile_image) }}" alt="{{ $vendor->business_name ?? $vendor->name }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                @elseif($vendor->main_image)
+                    <img src="{{ Storage::url($vendor->main_image) }}" alt="{{ $vendor->business_name ?? $vendor->name }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                @else
+                    {{ strtoupper(substr($vendor->business_name ?? $vendor->name, 0, 2)) }}
+                @endif
             </div>
             <div class="user-info">
                 <h4>{{ $vendor->business_name ?? $vendor->name }}</h4>
@@ -1134,10 +1141,10 @@
                     <div class="category-header">
                         <div class="category-name">
                             @if($category->image)
-                                <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="category-image">
+                                <img src="{{ Storage::url($category->image) }}" alt="{{ $category->name }}" class="category-image">
                             @else
                                 <div class="category-icon">
-                                    <i class="ri-price-tag-line"></i>
+                                    <i class="{{ $category->icon ?? 'ri-price-tag-line' }}"></i>
                                 </div>
                             @endif
                             {{ $category->name }}
@@ -1255,8 +1262,9 @@
                         
                         if (category.image) {
                             const preview = document.getElementById('imagePreview');
+                            const imageUrl = category.image.startsWith('http') ? category.image : `/storage/${category.image}`;
                             preview.innerHTML = `
-                                <img src="/storage/${category.image}" alt="Preview">
+                                <img src="${imageUrl}" alt="Preview">
                                 <div class="preview-info">
                                     <div>Current Image</div>
                                     <button type="button" onclick="deleteCurrentImage()" style="background: none; border: none; color: var(--accent-red); cursor: pointer; font-size: 12px;">Remove</button>

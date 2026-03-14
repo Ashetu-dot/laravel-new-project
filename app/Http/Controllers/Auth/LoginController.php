@@ -25,15 +25,11 @@ class LoginController extends Controller
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
-            'role' => 'sometimes|in:customer,vendor,admin'
         ]);
 
+        // Always authenticate purely by email & password.
+        // The user's role is determined from the database after successful login.
         $credentials = $request->only('email', 'password');
-
-        // Add role to credentials if specified
-        if ($request->has('role')) {
-            $credentials['role'] = $request->role;
-        }
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();

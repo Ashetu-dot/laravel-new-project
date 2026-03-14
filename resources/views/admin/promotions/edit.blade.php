@@ -390,7 +390,7 @@
             border-color: var(--danger-color);
         }
 
-        .form-control[type="date"], 
+        .form-control[type="date"],
         .form-control[type="datetime-local"] {
             color-scheme: light;
         }
@@ -870,10 +870,10 @@
                             <label for="name" class="form-label">
                                 <i class="ri-megaphone-line"></i> Promotion Name
                             </label>
-                            <input type="text" 
-                                   id="name" 
-                                   name="name" 
-                                   class="form-control @error('name') error @enderror" 
+                            <input type="text"
+                                   id="name"
+                                   name="name"
+                                   class="form-control @error('name') error @enderror"
                                    placeholder="e.g., Summer Sale 2024"
                                    value="{{ old('name', $promotion->name) }}"
                                    required>
@@ -890,10 +890,10 @@
                                 <i class="ri-coupon-line"></i> Promotion Code
                             </label>
                             <div class="input-group">
-                                <input type="text" 
-                                       id="code" 
-                                       name="code" 
-                                       class="form-control @error('code') error @enderror" 
+                                <input type="text"
+                                       id="code"
+                                       name="code"
+                                       class="form-control @error('code') error @enderror"
                                        placeholder="SUMMER2024"
                                        value="{{ old('code', $promotion->code) }}"
                                        required>
@@ -933,12 +933,12 @@
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">%</span>
-                                <input type="number" 
-                                       id="discount_percentage" 
-                                       name="discount_percentage" 
-                                       class="form-control" 
+                                <input type="number"
+                                       id="discount_percentage"
+                                       name="discount_percentage"
+                                       class="form-control"
                                        placeholder="20"
-                                       min="1" 
+                                       min="1"
                                        max="100"
                                        step="1"
                                        value="{{ old('discount_percentage', $promotion->type == 'percentage' ? $promotion->value : '') }}">
@@ -957,10 +957,10 @@
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">ETB</span>
-                                <input type="number" 
-                                       id="discount_amount" 
-                                       name="discount_amount" 
-                                       class="form-control" 
+                                <input type="number"
+                                       id="discount_amount"
+                                       name="discount_amount"
+                                       class="form-control"
                                        placeholder="500"
                                        min="1"
                                        step="1"
@@ -978,10 +978,10 @@
                             <label for="start_date" class="form-label">
                                 <i class="ri-calendar-line"></i> Start Date
                             </label>
-                            <input type="datetime-local" 
-                                   id="start_date" 
-                                   name="start_date" 
-                                   class="form-control @error('start_date') error @enderror" 
+                            <input type="datetime-local"
+                                   id="start_date"
+                                   name="start_date"
+                                   class="form-control @error('start_date') error @enderror"
                                    value="{{ old('start_date', \Carbon\Carbon::parse($promotion->start_date)->format('Y-m-d\TH:i')) }}"
                                    required>
                             @error('start_date')
@@ -995,10 +995,10 @@
                             <label for="end_date" class="form-label">
                                 <i class="ri-calendar-line"></i> End Date
                             </label>
-                            <input type="datetime-local" 
-                                   id="end_date" 
-                                   name="end_date" 
-                                   class="form-control @error('end_date') error @enderror" 
+                            <input type="datetime-local"
+                                   id="end_date"
+                                   name="end_date"
+                                   class="form-control @error('end_date') error @enderror"
                                    value="{{ old('end_date', \Carbon\Carbon::parse($promotion->end_date)->format('Y-m-d\TH:i')) }}"
                                    required>
                             @error('end_date')
@@ -1015,10 +1015,10 @@
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">ETB</span>
-                                <input type="number" 
-                                       id="min_purchase" 
-                                       name="min_purchase" 
-                                       class="form-control" 
+                                <input type="number"
+                                       id="min_purchase"
+                                       name="min_purchase"
+                                       class="form-control"
                                        placeholder="0 for no minimum"
                                        min="0"
                                        step="1"
@@ -1039,10 +1039,10 @@
                             </label>
                             <div class="input-group">
                                 <span class="input-group-text">ETB</span>
-                                <input type="number" 
-                                       id="max_discount" 
-                                       name="max_discount" 
-                                       class="form-control" 
+                                <input type="number"
+                                       id="max_discount"
+                                       name="max_discount"
+                                       class="form-control"
                                        placeholder="1000"
                                        min="0"
                                        step="1"
@@ -1061,10 +1061,10 @@
                             <label for="usage_limit" class="form-label">
                                 <i class="ri-user-line"></i> Usage Limit Per Customer
                             </label>
-                            <input type="number" 
-                                   id="usage_limit" 
-                                   name="usage_limit" 
-                                   class="form-control" 
+                            <input type="number"
+                                   id="usage_limit"
+                                   name="usage_limit"
+                                   class="form-control"
                                    placeholder="1"
                                    min="0"
                                    value="{{ old('usage_limit', $promotion->usage_limit_per_user) }}">
@@ -1081,10 +1081,10 @@
                             <label for="total_usage_limit" class="form-label">
                                 <i class="ri-group-line"></i> Total Usage Limit
                             </label>
-                            <input type="number" 
-                                   id="total_usage_limit" 
-                                   name="total_usage_limit" 
-                                   class="form-control" 
+                            <input type="number"
+                                   id="total_usage_limit"
+                                   name="total_usage_limit"
+                                   class="form-control"
                                    placeholder="1000"
                                    min="0"
                                    value="{{ old('total_usage_limit', $promotion->total_usage_limit) }}">
@@ -1126,9 +1126,9 @@
                             <label for="description" class="form-label">
                                 <i class="ri-file-text-line"></i> Description
                             </label>
-                            <textarea id="description" 
-                                      name="description" 
-                                      class="form-control @error('description') error @enderror" 
+                            <textarea id="description"
+                                      name="description"
+                                      class="form-control @error('description') error @enderror"
                                       placeholder="Describe the promotion details...">{{ old('description', $promotion->description) }}</textarea>
                             @error('description')
                                 <div class="error-message">
@@ -1142,9 +1142,9 @@
                             <label for="terms" class="form-label">
                                 <i class="ri-file-copy-line"></i> Terms & Conditions
                             </label>
-                            <textarea id="terms" 
-                                      name="terms" 
-                                      class="form-control" 
+                            <textarea id="terms"
+                                      name="terms"
+                                      class="form-control"
                                       placeholder="Terms and conditions for this promotion">{{ old('terms', $promotion->terms_conditions) }}</textarea>
                         </div>
 
@@ -1171,10 +1171,10 @@
                             <label for="banner" class="form-label">
                                 <i class="ri-image-line"></i> Update Banner Image
                             </label>
-                            <input type="file" 
-                                   id="banner" 
-                                   name="banner" 
-                                   class="form-control" 
+                            <input type="file"
+                                   id="banner"
+                                   name="banner"
+                                   class="form-control"
                                    accept="image/*"
                                    onchange="previewImage(this)">
                             <small class="form-text text-muted">Recommended size: 1200x400px (max 2MB)</small>
@@ -1304,11 +1304,11 @@
         // Toggle promotion type fields
         function togglePromotionType() {
             const type = document.getElementById('type').value;
-            
+
             document.getElementById('percentageField').style.display = 'none';
             document.getElementById('fixedField').style.display = 'none';
             document.getElementById('maxDiscountField').style.display = 'none';
-            
+
             if (type === 'percentage') {
                 document.getElementById('percentageField').style.display = 'block';
                 document.getElementById('maxDiscountField').style.display = 'block';
@@ -1320,10 +1320,10 @@
         // Toggle product selection sections
         function toggleProductSelection() {
             const scope = document.querySelector('input[name="product_scope"]:checked').value;
-            
+
             document.getElementById('selectedProductsSection').style.display = 'none';
             document.getElementById('categoriesSection').style.display = 'none';
-            
+
             if (scope === 'selected') {
                 document.getElementById('selectedProductsSection').style.display = 'block';
                 loadProducts();
@@ -1335,7 +1335,7 @@
         // Load products via AJAX
         function loadProducts() {
             const productsList = document.getElementById('productsList');
-            
+
             fetch('{{ route("admin.promotions.products.list.promotions") }}', {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -1363,7 +1363,7 @@
                         `;
                     });
                     productsList.innerHTML = html;
-                    
+
                     // Add search functionality
                     document.getElementById('productSearch').addEventListener('input', function(e) {
                         const search = e.target.value.toLowerCase();
@@ -1393,15 +1393,15 @@
         function previewImage(input) {
             const preview = document.getElementById('imagePreview');
             const img = preview.querySelector('img');
-            
+
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                
+
                 reader.onload = function(e) {
                     img.src = e.target.result;
                     preview.style.display = 'block';
                 }
-                
+
                 reader.readAsDataURL(input.files[0]);
             } else {
                 preview.style.display = 'none';
@@ -1411,22 +1411,22 @@
         // Form submission with loading state
         document.getElementById('promotionForm').addEventListener('submit', function(e) {
             const submitBtn = document.getElementById('submitBtn');
-            
+
             if (submitBtn.disabled) {
                 e.preventDefault();
                 return;
             }
-            
+
             // Validate dates
             const startDate = new Date(document.getElementById('start_date').value);
             const endDate = new Date(document.getElementById('end_date').value);
-            
+
             if (endDate <= startDate) {
                 e.preventDefault();
                 alert('End date must be after start date');
                 return;
             }
-            
+
             // Validate based on type
             const type = document.getElementById('type').value;
             if (type === 'percentage') {
@@ -1444,7 +1444,7 @@
                     return;
                 }
             }
-            
+
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="spinner"></span> Updating...';
             document.getElementById('loadingOverlay').style.display = 'flex';
@@ -1459,14 +1459,7 @@
             });
         }, 5000);
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+       
     </script>
 
 </body>

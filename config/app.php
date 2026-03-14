@@ -82,6 +82,23 @@ return [
 
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Available Locales
+    |--------------------------------------------------------------------------
+    |
+    | These are the locales your application supports. The keys are human
+    | readable names used in selectors; the values are the locale codes
+    | actually used by the translator.
+    |
+    */
+
+    'available_locales' => [
+        'English' => 'en',
+        'አማርኛ' => 'am',
+        'Afan Oromo' => 'om',
+    ],
+
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     /*

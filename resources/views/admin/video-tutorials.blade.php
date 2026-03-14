@@ -1037,7 +1037,7 @@
                     <i class="ri-archive-line"></i>
                     Catalog
                 </a>
-                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions') }}" class="nav-item">
                     <i class="ri-price-tag-3-line"></i>
                     Promotions
                 </a>
@@ -1121,7 +1121,7 @@
                         <span>{{ $unreadNotificationsCount }}</span>
                     </div>
                     @endif
-                    
+
                     @if(isset($unreadMessagesCount) && $unreadMessagesCount > 0)
                     <div class="badge-header">
                         <i class="ri-mail-line"></i>
@@ -1186,11 +1186,11 @@
                             @endforeach
                         </select>
                     </div>
-                    
+
                     @if(request('search'))
                     <input type="hidden" name="search" value="{{ request('search') }}">
                     @endif
-                    
+
                     <div class="filter-actions">
                         <button type="submit" class="btn btn-primary">
                             <i class="ri-filter-3-line"></i>
@@ -1213,7 +1213,7 @@
                     <i class="ri-star-fill"></i>
                     Featured Tutorials
                 </h2>
-                
+
                 <div class="featured-grid">
                     @foreach($featuredVideos as $video)
                     <div class="video-card" onclick="openVideo({{ $video->id }})">
@@ -1339,7 +1339,7 @@
         document.addEventListener('click', function(event) {
             const sidebar = document.getElementById('sidebar');
             const menuToggle = document.getElementById('menuToggle');
-            
+
             if (window.innerWidth <= 768) {
                 if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
                     sidebar.classList.remove('active');
@@ -1350,16 +1350,16 @@
         // Theme toggle
         const themeToggle = document.getElementById('themeToggle');
         const savedTheme = localStorage.getItem('theme') || 'light';
-        
+
         if (savedTheme === 'dark') {
             document.body.classList.add('dark-mode');
             themeToggle.innerHTML = '<i class="ri-sun-line"></i>';
         }
-        
+
         themeToggle.addEventListener('click', function() {
             document.body.classList.toggle('dark-mode');
             const isDark = document.body.classList.contains('dark-mode');
-            
+
             if (isDark) {
                 localStorage.setItem('theme', 'dark');
                 themeToggle.innerHTML = '<i class="ri-sun-line"></i>';
@@ -1382,27 +1382,27 @@
             const modal = document.getElementById('videoModal');
             const player = document.getElementById('videoPlayer');
             const details = document.getElementById('videoDetails');
-            
+
             // Show loading state
             player.innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100%;"><div class="loading-spinner"></div></div>';
             details.innerHTML = '';
-            
+
             modal.classList.add('active');
-            
+
             // Fetch video details
             fetch(`/admin/video-tutorials/${videoId}/details`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         const video = data.video;
-                        
+
                         // Load video player
                         if (video.youtube_id) {
                             player.innerHTML = `<iframe src="https://www.youtube.com/embed/${video.youtube_id}?autoplay=1" allowfullscreen></iframe>`;
                         } else if (video.vimeo_id) {
                             player.innerHTML = `<iframe src="https://player.vimeo.com/video/${video.vimeo_id}?autoplay=1" allowfullscreen></iframe>`;
                         }
-                        
+
                         // Load video details
                         details.innerHTML = `
                             <div class="video-header">
@@ -1425,7 +1425,7 @@
                                 </div>
                             </div>
                         `;
-                        
+
                         // Load related videos
                         loadRelatedVideos(videoId);
                     }
@@ -1442,7 +1442,7 @@
                 .then(response => response.json())
                 .then(data => {
                     const relatedGrid = document.getElementById('relatedGrid');
-                    
+
                     if (data.success && data.videos.length > 0) {
                         relatedGrid.innerHTML = data.videos.map(video => `
                             <div class="related-item" onclick="openVideo(${video.id})">
@@ -1471,7 +1471,7 @@
         function closeModal() {
             const modal = document.getElementById('videoModal');
             const player = document.getElementById('videoPlayer');
-            
+
             modal.classList.remove('active');
             player.innerHTML = ''; // Stop video playback
         }

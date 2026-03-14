@@ -27,7 +27,7 @@ class Vendor extends Model
         'category_id',
         'description',
         'image',
-        'verified',
+        'is_verified',
         'delivery_time',
         'min_order',
         'response_rate',
@@ -37,7 +37,7 @@ class Vendor extends Model
     ];
 
     protected $casts = [
-        'verified' => 'boolean',
+        'is_verified' => 'boolean',
     ];
 
     /**
@@ -103,5 +103,61 @@ class Vendor extends Model
     public function scopeInCity($query, $city)
     {
         return $query->where('city', $city);
+    }
+
+    /**
+     * Get the banner image attribute.
+     */
+    public function getBannerImageAttribute()
+    {
+        return $this->main_image ?? $this->sub_image_1 ?? asset('images/default-banner.jpg');
+    }
+
+    /**
+     * Get the weekday hours attribute.
+     */
+    public function getWeekdayHoursAttribute()
+    {
+        $hours = $this->business_hours ? json_decode($this->business_hours, true) : [];
+        return $hours['weekday'] ?? $hours['monday'] ?? '7:00–20:00';
+    }
+
+    /**
+     * Get the saturday hours attribute.
+     */
+    public function getSaturdayHoursAttribute()
+    {
+        $hours = $this->business_hours ? json_decode($this->business_hours, true) : [];
+        return $hours['saturday'] ?? '8:00–21:00';
+    }
+
+    /**
+     * Get the sunday hours attribute.
+     */
+    public function getSundayHoursAttribute()
+    {
+        $hours = $this->business_hours ? json_decode($this->business_hours, true) : [];
+        return $hours['sunday'] ?? '8:00–18:00';
+    }
+
+    /**
+     * Get the closing time attribute.
+     */
+    public function getClosingTimeAttribute()
+    {
+        $weekday = $this->weekday_hours;
+        if (preg_match('/–(\d+:\d+)/', $weekday, $matches)) {
+            return $matches[1];
+        }
+        return '20:00';
+    }
+
+    /**
+     * Get the tags attribute.
+     */
+    public function getTagsAttribute()
+    {
+        // Get tags from products
+        return $this->products->pluck('tags')->flatten()->unique()->filter()->values()->toArray();
     }
 }

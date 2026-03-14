@@ -596,33 +596,7 @@
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar">
-        <a href="{{ route('home') }}" class="logo">
-            <i class="ri-store-3-fill"></i>
-            Vendora
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma
-            </span>
-        </a>
-
-        <div class="nav-links">
-            <a href="{{ route('home') }}" class="nav-link">Home</a>
-            <a href="{{ route('vendors.search') }}" class="nav-link">Vendors</a>
-            <a href="{{ route('about') }}" class="nav-link">About</a>
-            <a href="{{ route('contact') }}" class="nav-link">Contact</a>
-            @guest
-                <a href="{{ route('login') }}" class="btn-login">Sign In</a>
-            @else
-            @if(Auth::user()->role === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="btn-login">Admin Dashboard</a>
-            @elseif(Auth::user()->role === 'vendor')
-                <a href="{{ route('vendor.dashboard') }}" class="btn-login">Vendor Dashboard</a>
-            @else
-                <a href="{{ route('customer.dashboard') }}" class="btn-login">My Dashboard</a>
-            @endif
-            @endguest
-        </div>
-    </nav>
+    @include('partials.navbar')
 
     <!-- Search Header -->
     <div class="search-header">
@@ -642,7 +616,7 @@
                 <i class="ri-filter-3-line"></i>
                 Filter Vendors
             </div>
-            
+
             <div class="filter-group">
                 <div class="filter-label">Search by name</div>
                 <input type="text" class="filter-search" id="searchInput" placeholder="Vendor name..." value="{{ request('search') }}">
@@ -737,7 +711,7 @@
                                     <i class="ri-star-fill" style="color: var(--primary-gold);" title="Featured Vendor"></i>
                                 @endif
                             </div>
-                            
+
                             <span class="vendor-category">{{ $vendor['category'] }}</span>
 
                             <div class="vendor-location">
@@ -781,7 +755,7 @@
 
                     @for($i = 1; $i <= $pagination['last_page']; $i++)
                         @if($i >= $pagination['current_page'] - 2 && $i <= $pagination['current_page'] + 2)
-                            <a href="{{ route('vendors.search', array_merge(request()->query(), ['page' => $i])) }}" 
+                            <a href="{{ route('vendors.search', array_merge(request()->query(), ['page' => $i])) }}"
                                class="pagination-item {{ $i == $pagination['current_page'] ? 'active' : '' }}">
                                 {{ $i }}
                             </a>
@@ -833,11 +807,11 @@
         // Apply filters
         function applyFilters() {
             document.getElementById('loadingOverlay').style.display = 'flex';
-            
+
             const search = document.getElementById('searchInput').value;
             const rating = document.getElementById('ratingFilter').value;
             const sort = document.getElementById('sortFilter').value;
-            
+
             const categories = Array.from(document.querySelectorAll('input[name="category[]"]:checked')).map(cb => cb.value);
             const locations = Array.from(document.querySelectorAll('input[name="location[]"]:checked')).map(cb => cb.value);
 
@@ -884,7 +858,7 @@
                     button.innerHTML = '<i class="ri-user-unfollow-line"></i> Following';
                     button.style.backgroundColor = 'var(--success-color)';
                     button.onclick = function() { unfollowVendor(vendorId, button); };
-                    
+
                     // Update followers count
                     const countElement = button.closest('.vendor-card').querySelector('.vendor-stats .stat:last-child span');
                     if (countElement) {
@@ -910,7 +884,7 @@
                     button.innerHTML = '<i class="ri-user-follow-line"></i> Follow';
                     button.style.backgroundColor = 'var(--primary-gold)';
                     button.onclick = function() { followVendor(vendorId, button); };
-                    
+
                     // Update followers count
                     const countElement = button.closest('.vendor-card').querySelector('.vendor-stats .stat:last-child span');
                     if (countElement) {

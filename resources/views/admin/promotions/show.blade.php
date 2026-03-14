@@ -721,7 +721,7 @@
 
         <!-- Dashboard Container -->
         <div class="dashboard-container">
-            
+
             <!-- Alert Messages -->
             @if(session('success'))
                 <div class="alert alert-success">
@@ -771,7 +771,7 @@
                             $isActive = $promotion->is_active && $promotion->start_date <= $now && $promotion->end_date >= $now;
                             $isUpcoming = $promotion->is_active && $promotion->start_date > $now;
                             $isExpired = $promotion->end_date < $now;
-                            
+
                             $statusClass = $isActive ? 'active' : ($isUpcoming ? 'upcoming' : ($isExpired ? 'expired' : 'inactive'));
                             $statusText = $isActive ? 'Active' : ($isUpcoming ? 'Upcoming' : ($isExpired ? 'Expired' : 'Inactive'));
                         @endphp
@@ -779,14 +779,14 @@
                             {{ $statusText }}
                         </span>
                     </div>
-                    
+
                     <div class="info-row">
                         <div class="info-label">Code</div>
                         <div class="info-value">
                             <strong class="text-gold font-mono">{{ $promotion->code }}</strong>
                         </div>
                     </div>
-                    
+
                     <div class="info-row">
                         <div class="info-label">Type</div>
                         <div class="info-value">
@@ -805,7 +805,7 @@
                             </span>
                         </div>
                     </div>
-                    
+
                     <div class="info-row">
                         <div class="info-label">Value</div>
                         <div class="info-value">
@@ -823,16 +823,16 @@
                             @endif
                         </div>
                     </div>
-                    
+
                     <div class="info-row">
                         <div class="info-label">Duration</div>
                         <div class="info-value">
-                            <strong>{{ $promotion->start_date->format('M d, Y H:i') }}</strong> 
-                            → 
+                            <strong>{{ $promotion->start_date->format('M d, Y H:i') }}</strong>
+                            →
                             <strong>{{ $promotion->end_date ? $promotion->end_date->format('M d, Y H:i') : 'No end date' }}</strong>
                         </div>
                     </div>
-                    
+
                     <div class="info-row">
                         <div class="info-label">Min Purchase</div>
                         <div class="info-value">
@@ -843,7 +843,7 @@
                             @endif
                         </div>
                     </div>
-                    
+
                     <div class="info-row">
                         <div class="info-label">Product Scope</div>
                         <div class="info-value">
@@ -856,31 +856,31 @@
                             @endif
                         </div>
                     </div>
-                    
+
                     @if($promotion->description)
                     <div class="info-row">
                         <div class="info-label">Description</div>
                         <div class="info-value">{{ $promotion->description }}</div>
                     </div>
                     @endif
-                    
+
                     @if($promotion->terms_conditions)
                     <div class="info-row">
                         <div class="info-label">Terms & Conditions</div>
                         <div class="info-value">{{ $promotion->terms_conditions }}</div>
                     </div>
                     @endif
-                    
+
                     <div class="info-row">
                         <div class="info-label">Created By</div>
                         <div class="info-value">{{ $promotion->creator->name ?? 'System' }}</div>
                     </div>
-                    
+
                     <div class="info-row">
                         <div class="info-label">Created At</div>
                         <div class="info-value">{{ $promotion->created_at->format('M d, Y H:i') }}</div>
                     </div>
-                    
+
                     @if($promotion->updated_at != $promotion->created_at)
                     <div class="info-row">
                         <div class="info-label">Last Updated</div>
@@ -897,7 +897,7 @@
                             Usage Statistics
                         </h3>
                     </div>
-                    
+
                     <div class="stats-grid">
                         <div class="stat-item">
                             <div class="stat-value">{{ $promotion->usages_count ?? 0 }}</div>
@@ -912,7 +912,7 @@
                             <div class="stat-label">Total Limit</div>
                         </div>
                     </div>
-                    
+
                     @if($promotion->banner)
                     <div style="margin-top: 24px;">
                         <h4 style="margin-bottom: 12px; font-size: 14px; color: var(--text-secondary);">Banner Image</h4>
@@ -935,7 +935,7 @@
                         @endif
                     </h3>
                 </div>
-                
+
                 <div class="products-list">
                     @if($promotion->product_scope == 'selected')
                         @forelse($promotion->products as $product)
@@ -994,7 +994,7 @@
                     </h3>
                     <span class="badge badge-info">{{ $recentUsages->count() }} recent uses</span>
                 </div>
-                
+
                 <div style="overflow-x: auto;">
                     <table class="usages-table">
                         <thead>
@@ -1045,7 +1045,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
-            
+
             if (menuToggle && sidebar) {
                 menuToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('active');
@@ -1062,14 +1062,7 @@
             }
         });
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+       
 
         // Auto-hide alerts after 5 seconds
         setTimeout(() => {

@@ -1107,7 +1107,7 @@
                 </a>
                 <form method="POST" action="{{ route('admin.logout') }}" class="logout-form">
                     @csrf
-                    <button type="submit" class="logout-btn" onclick="return confirm('Are you sure you want to logout?')">
+                    <button type="submit" class="logout-btn" >
                         <i class="ri-logout-box-line"></i>
                         Logout
                     </button>
@@ -1459,18 +1459,26 @@
                             @foreach($recentNotifications as $notification)
                                 @php
                                     $notificationData = is_array($notification->data) ? $notification->data : json_decode($notification->data, true) ?? [];
-                                    $color = $notificationData['color'] ?? '#3b82f6';
-                                    $title = $notificationData['title'] ?? 'Notification';
-                                    $message = $notificationData['message'] ?? 'You have a new notification.';
+
+                                    // Handle user_registration notifications
+                                    if ($notification->type === 'user_registration') {
+                                        $color = ($notificationData['user_role'] ?? '') === 'vendor' ? '#8b5cf6' : '#10b981';
+                                        $title = $notification->title;
+                                        $message = $notification->message;
+                                    } else {
+                                        $color = $notificationData['color'] ?? '#3b82f6';
+                                        $title = $notificationData['title'] ?? $notification->title ?? 'Notification';
+                                        $message = $notificationData['message'] ?? $notification->message ?? 'You have a new notification.';
+                                    }
                                 @endphp
-                                <div class="notification-item {{ $notification->read_at ? '' : 'unread' }}" onclick="window.location.href='{{ route('admin.notifications.show', $notification->id) }}'">
+                                <div class="notification-item {{ $notification->read_at ? '' : 'unread' }}" onclick="window.location.href='{{ route('admin.notifications') }}'">
                                     <div class="notif-dot" style="background-color: {{ $color }};"></div>
                                     <div class="notif-content">
                                         <h6>
                                             {{ $title }}
                                             <span class="notif-time">{{ $notification->created_at->diffForHumans() }}</span>
                                         </h6>
-                                        <p>{{ $message }}</p>
+                                        <p>{{ Str::limit($message, 80) }}</p>
                                     </div>
                                 </div>
                             @endforeach
@@ -1579,14 +1587,7 @@
             });
         }, 5000);
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+
 
         // Tooltip for chart bars
         document.querySelectorAll('.bar-group').forEach(group => {

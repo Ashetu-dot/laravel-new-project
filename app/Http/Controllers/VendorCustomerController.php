@@ -27,6 +27,7 @@ use App\Models\JobPosting;
 use App\Models\JobApplication;
 use App\Models\SavedVendor;
 use App\Models\RecentlyViewed;
+use App\Models\Cart;
 
 class VendorCustomerController extends Controller
 {
@@ -1049,31 +1050,32 @@ class VendorCustomerController extends Controller
                 ->find($id);
 
             if (!$vendor) {
-                return redirect()->route('home')->with('error', 'Vendor not found.');
+                return redirect()->route('search.results')->with('error', 'Vendor not found or inactive.');
             }
 
-            // Manually get followers count
-            $followersCount = DB::table('followers')
-                ->where('vendor_id', $vendor->id)
-                ->count();
+            // Get followers count using relationship
+            $followersCount = $vendor->followers()->count();
 
-            // Manually get products
+            // Get products
             $products = Product::where('vendor_id', $vendor->id)
                 ->where('is_active', true)
+                ->whereNotNull('id')
                 ->latest()
                 ->take(6)
-                ->get();
+                ->get()
+                ->filter(function($product) {
+                    // Additional validation to ensure product is valid
+                    return $product && $product->id && $product->name;
+                });
 
-            // For vendor reviews, we'll use product reviews (aggregate)
-            // Get all product IDs for this vendor
-            $productIds = $products->pluck('id')->toArray();
-
-            // Get reviews for all vendor's products
+            // Get reviews for vendor's products
             $reviews = collect([]);
             $totalRating = 0;
             $reviewCount = 0;
 
-            if (!empty($productIds)) {
+            if ($products->isNotEmpty()) {
+                $productIds = $products->pluck('id')->toArray();
+                
                 $reviews = Review::whereIn('product_id', $productIds)
                     ->with('user')
                     ->where('is_approved', true)
@@ -1081,39 +1083,34 @@ class VendorCustomerController extends Controller
                     ->take(5)
                     ->get();
 
-                // Calculate average rating from all product reviews
+                // Calculate average rating
                 $allReviews = Review::whereIn('product_id', $productIds)
                     ->where('is_approved', true)
                     ->get();
 
-                $totalRating = $allReviews->sum('rating');
-                $reviewCount = $allReviews->count();
+                if ($allReviews->isNotEmpty()) {
+                    $totalRating = $allReviews->sum('rating');
+                    $reviewCount = $allReviews->count();
+                }
             }
 
             $averageRating = $reviewCount > 0 ? round($totalRating / $reviewCount, 1) : 4.5;
 
-            // Attach products and reviews to vendor object
+            // Attach data to vendor object
             $vendor->products = $products;
             $vendor->reviews = $reviews;
             $vendor->rating = $averageRating;
             $vendor->total_reviews = $reviewCount;
 
-            // Increment store views
+            // Increment store views safely
             try {
-                $vendor->store_views = ($vendor->store_views ?? 0) + 1;
-                $vendor->save();
+                $vendor->increment('store_views');
             } catch (\Exception $e) {
                 Log::error('Failed to increment store views: ' . $e->getMessage());
             }
 
             // Check if current user is following this vendor
-            $isFollowing = false;
-            if (Auth::check()) {
-                $isFollowing = DB::table('followers')
-                    ->where('user_id', Auth::id())
-                    ->where('vendor_id', $vendor->id)
-                    ->exists();
-            }
+            $isFollowing = Auth::check() ? Auth::user()->isFollowing($vendor) : false;
 
             // Record in recently viewed if user is logged in
             if (Auth::check()) {
@@ -1130,7 +1127,7 @@ class VendorCustomerController extends Controller
             Log::error('Show vendor error: ' . $e->getMessage());
             Log::error('Stack trace: ' . $e->getTraceAsString());
 
-            return redirect()->route('home')
+            return redirect()->route('search.results')
                 ->with('error', 'An error occurred while loading the vendor profile. Please try again.');
         }
     }
@@ -1337,23 +1334,62 @@ class VendorCustomerController extends Controller
                 return back()->with('error', 'You cannot follow your own shop.');
             }
 
-            if ($user->following()->where('vendor_id', $vendor->id)->exists()) {
+            // Check if already following
+            $alreadyFollowing = DB::table('followers')
+                ->where('user_id', $user->id)
+                ->where('vendor_id', $vendor->id)
+                ->exists();
+
+            if ($alreadyFollowing) {
                 return back()->with('info', 'You are already following ' . ($vendor->business_name ?? $vendor->name));
             }
 
-            $user->following()->attach($vendor->id, ['created_at' => now(), 'updated_at' => now()]);
+            // Insert follow record with error handling for duplicates
+            try {
+                DB::table('followers')->insert([
+                    'user_id' => $user->id,
+                    'vendor_id' => $vendor->id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            } catch (\Illuminate\Database\QueryException $insertError) {
+                // If duplicate, just return success (they're already following)
+                if (str_contains($insertError->getMessage(), 'Duplicate entry')) {
+                    return back()->with('info', 'You are already following ' . ($vendor->business_name ?? $vendor->name));
+                }
+                throw $insertError; // Re-throw if it's a different error
+            }
 
             // Update followers count
             $vendor->increment('followers_count');
 
             // Send notification
-            $this->sendFollowNotification($vendor->id, $user->name);
+            try {
+                $this->sendFollowNotification($vendor->id, $user->name);
+            } catch (\Exception $e) {
+                Log::warning('Failed to send follow notification: ' . $e->getMessage());
+            }
 
             return back()->with('success', 'Now following ' . ($vendor->business_name ?? $vendor->name));
 
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::error('Follow database error: ' . $e->getMessage());
+            
+            // Check if it's a table not found error
+            if (str_contains($e->getMessage(), "doesn't exist")) {
+                return back()->with('error', 'Follow feature is not properly configured. Please contact support.');
+            }
+            
+            // Check if it's a duplicate entry error
+            if (str_contains($e->getMessage(), 'Duplicate entry')) {
+                return back()->with('info', 'You are already following this vendor.');
+            }
+            
+            return back()->with('error', 'Failed to follow vendor. Database error: ' . $e->getMessage());
         } catch (\Exception $e) {
             Log::error('Follow error: ' . $e->getMessage());
-            return back()->with('error', 'Failed to follow vendor. Please try again.');
+            Log::error('Follow error trace: ' . $e->getTraceAsString());
+            return back()->with('error', 'Failed to follow vendor. Error: ' . $e->getMessage());
         }
     }
 
@@ -1370,8 +1406,18 @@ class VendorCustomerController extends Controller
             $vendor = User::where('role', 'vendor')->findOrFail($id);
             $user = Auth::user();
 
-            if ($user->following()->where('vendor_id', $vendor->id)->exists()) {
-                $user->following()->detach($vendor->id);
+            // Check if following
+            $isFollowing = DB::table('followers')
+                ->where('user_id', $user->id)
+                ->where('vendor_id', $vendor->id)
+                ->exists();
+
+            if ($isFollowing) {
+                // Delete follow record
+                DB::table('followers')
+                    ->where('user_id', $user->id)
+                    ->where('vendor_id', $vendor->id)
+                    ->delete();
 
                 // Update followers count
                 if ($vendor->followers_count > 0) {
@@ -1390,13 +1436,19 @@ class VendorCustomerController extends Controller
     /**
      * Display user profile.
      */
-    public function show(string $id)
+    public function show(string $id = null)
     {
         try {
-            $user = User::findOrFail($id);
-
-            if (Auth::id() != $id && Auth::user()->role !== 'admin') {
-                abort(403);
+            // If no ID provided, use authenticated user
+            if ($id === null) {
+                $user = Auth::user();
+            } else {
+                $user = User::findOrFail($id);
+                
+                // Check authorization
+                if (Auth::id() != $id && Auth::user()->role !== 'admin') {
+                    abort(403);
+                }
             }
 
             $followersCount = $user->role === 'vendor' ? $user->followers()->count() : 0;
@@ -1436,13 +1488,19 @@ class VendorCustomerController extends Controller
     /**
      * Show the form for editing the profile.
      */
-    public function edit(string $id)
+    public function edit(string $id = null)
     {
         try {
-            $user = User::findOrFail($id);
-
-            if (Auth::id() != $id) {
-                abort(403);
+            // If no ID provided, use authenticated user
+            if ($id === null) {
+                $user = Auth::user();
+            } else {
+                $user = User::findOrFail($id);
+                
+                // Check authorization
+                if (Auth::id() != $id) {
+                    abort(403);
+                }
             }
 
             return view('profile.edit', compact('user'));
@@ -1674,9 +1732,12 @@ class VendorCustomerController extends Controller
                 abort(403);
             }
 
-            // Get following vendors with pagination
+            // Get following vendors with pagination and additional data
             $following = $user->following()
-                ->withCount('products')
+                ->withCount(['products' => function($query) {
+                    $query->where('is_active', true);
+                }])
+                ->where('is_active', true)
                 ->orderBy('followers.created_at', 'desc')
                 ->paginate(8);
 
@@ -1710,16 +1771,59 @@ class VendorCustomerController extends Controller
                 $recentNotifications = collect([]);
             }
 
-            // Get recent orders
+            // Get recent orders with vendor information
             $recentOrders = Order::where('user_id', $user->id)
-                ->with(['items.product'])
+                ->with(['items.product', 'vendor'])
                 ->orderBy('created_at', 'desc')
                 ->take(5)
                 ->get();
 
-            // Cart count (session-based)
-            $cart = session()->get('cart', []);
-            $cartCount = array_sum(array_column($cart, 'quantity'));
+            // Get cart count from database if using Cart model, otherwise session
+            try {
+                $cartCount = Cart::where('user_id', $user->id)->sum('quantity');
+            } catch (\Exception $e) {
+                // Fallback to session-based cart
+                $cart = session()->get('cart', []);
+                $cartCount = array_sum(array_column($cart, 'quantity'));
+            }
+
+            // Get wishlist count
+            $wishlistCount = 0;
+            try {
+                $wishlistCount = $user->wishlists()->count();
+            } catch (\Exception $e) {
+                // Wishlist relationship might not exist
+            }
+
+            // Get reviews count
+            $reviewsCount = 0;
+            try {
+                $reviewsCount = $user->reviews()->count();
+            } catch (\Exception $e) {
+                // Reviews relationship might not exist
+            }
+
+            // Get total spent amount
+            $totalSpent = Order::where('user_id', $user->id)
+                ->where('status', 'completed')
+                ->sum('total_amount');
+
+            // Get favorite categories based on order history
+            $favoriteCategories = collect([]);
+            try {
+                $favoriteCategories = DB::table('orders')
+                    ->join('order_items', 'orders.id', '=', 'order_items.order_id')
+                    ->join('products', 'order_items.product_id', '=', 'products.id')
+                    ->join('categories', 'products.category_id', '=', 'categories.id')
+                    ->where('orders.user_id', $user->id)
+                    ->select('categories.name', DB::raw('COUNT(*) as count'))
+                    ->groupBy('categories.id', 'categories.name')
+                    ->orderBy('count', 'desc')
+                    ->limit(3)
+                    ->get();
+            } catch (\Exception $e) {
+                // Handle if tables don't exist
+            }
 
             $cartItems = collect([]);
             $cartTotal = 0;
@@ -1734,7 +1838,11 @@ class VendorCustomerController extends Controller
                 'recentOrders',
                 'cartCount',
                 'cartItems',
-                'cartTotal'
+                'cartTotal',
+                'wishlistCount',
+                'reviewsCount',
+                'totalSpent',
+                'favoriteCategories'
             ));
 
         } catch (\Exception $e) {

@@ -820,35 +820,9 @@
                 </div>
             @endif
 
-            <!-- Role Selection Tabs -->
-            <div class="role-tabs" id="roleTabs">
-                <button type="button" class="role-tab active" data-role="customer" onclick="setRole('customer')">
-                    <i class="ri-user-line"></i> Customer
-                </button>
-                <button type="button" class="role-tab" data-role="vendor" onclick="setRole('vendor')">
-                    <i class="ri-store-line"></i> Vendor
-                </button>
-                <button type="button" class="role-tab" data-role="admin" onclick="setRole('admin')">
-                    <i class="ri-shield-user-line"></i> Admin
-                </button>
-            </div>
-
-            <!-- Vendor Info Message (Hidden by default) -->
-            <div id="vendorInfoMessage" class="vendor-info-message" style="display: none;">
-                <i class="ri-information-line"></i>
-                <span>Vendor accounts require admin approval. If your account is not approved yet, you won't be able to login.</span>
-            </div>
-
-            <!-- Admin Info Message (Hidden by default) -->
-            <div id="adminInfoMessage" class="vendor-info-message" style="display: none; background-color: #ffebee; border-left-color: var(--error-color);">
-                <i class="ri-shield-keyhole-line"></i>
-                <span>Admin access is restricted to authorized personnel only.</span>
-            </div>
-
             <!-- Login Form -->
             <form method="POST" action="{{ route('login.authenticate') }}" id="loginForm">
                 @csrf
-                <input type="hidden" name="role" id="selectedRole" value="customer">
 
                 <!-- Email Field -->
                 <div class="form-group">
@@ -908,15 +882,12 @@
                     <span>Sign In</span>
                 </button>
 
-                <!-- Sign Up Links -->
+                <!-- Sign Up Link -->
                 <div class="signup-prompt">
                     <span>Don't have an account?</span>
                     <div class="signup-links">
-                        <a href="{{ route('register.customer') }}" class="signup-link">
-                            <i class="ri-user-line"></i> Join as Customer
-                        </a>
                         <a href="{{ route('register') }}" class="signup-link">
-                            <i class="ri-store-line"></i> Join as Vendor
+                            <i class="ri-user-add-line"></i> Sign up
                         </a>
                     </div>
                 </div>
@@ -936,50 +907,6 @@
     <script>
         // CSRF Token
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        // Role selection function
-        function setRole(role) {
-            // Update hidden input
-            document.getElementById('selectedRole').value = role;
-
-            // Update active tab
-            document.querySelectorAll('.role-tab').forEach(tab => {
-                tab.classList.remove('active');
-                if (tab.dataset.role === role) {
-                    tab.classList.add('active');
-                }
-            });
-
-            // Update welcome text based on role
-            const title = document.getElementById('welcomeTitle');
-            const subtitle = document.getElementById('welcomeSubtitle');
-            const emailField = document.getElementById('email');
-            const vendorMessage = document.getElementById('vendorInfoMessage');
-            const adminMessage = document.getElementById('adminInfoMessage');
-
-            // Hide all messages first
-            vendorMessage.style.display = 'none';
-            adminMessage.style.display = 'none';
-
-            if (role === 'vendor') {
-                title.textContent = 'Welcome Vendor!';
-                subtitle.textContent = 'Sign in to manage your store';
-                emailField.placeholder = 'Enter your business email';
-                vendorMessage.style.display = 'flex';
-            } else if (role === 'admin') {
-                title.textContent = 'Admin Login';
-                subtitle.textContent = 'Sign in to access admin dashboard';
-                emailField.placeholder = 'Enter your admin email';
-                adminMessage.style.display = 'flex';
-            } else {
-                title.textContent = 'Welcome Back!';
-                subtitle.textContent = 'Sign in to continue to your account';
-                emailField.placeholder = 'Enter your email';
-            }
-
-            // Save to localStorage
-            localStorage.setItem('lastLoginRole', role);
-        }
 
         // Password visibility toggle
         function togglePassword(element) {
@@ -1029,29 +956,6 @@
                 this.parentElement.querySelector('.input-icon').style.color = '#999';
             });
         });
-
-        // Prevent double submission with a flag
-        let submitted = false;
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            if (submitted) {
-                e.preventDefault();
-                return;
-            }
-            submitted = true;
-
-            // Reset the flag after 5 seconds (in case of network issues)
-            setTimeout(() => {
-                submitted = false;
-            }, 5000);
-        });
-
-        // Load last selected role from localStorage
-        const lastRole = localStorage.getItem('lastLoginRole');
-        if (lastRole && ['customer', 'vendor', 'admin'].includes(lastRole)) {
-            setRole(lastRole);
-        } else {
-            setRole('customer');
-        }
 
         // Reset button state when page loads (in case of back navigation)
         window.addEventListener('pageshow', function(event) {

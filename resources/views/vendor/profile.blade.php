@@ -620,11 +620,11 @@
                 padding: 16px 20px;
                 flex-wrap: wrap;
             }
-            
+
             .mobile-menu-btn {
                 display: block;
             }
-            
+
             .nav-links {
                 display: none;
                 position: absolute;
@@ -639,43 +639,43 @@
                 z-index: 99;
                 border-top: 1px solid var(--border-color);
             }
-            
+
             .nav-links.active {
                 display: flex;
             }
-            
+
             .profile-header {
                 flex-direction: column;
                 text-align: center;
             }
-            
+
             .profile-avatar {
                 width: 100px;
                 height: 100px;
                 font-size: 40px;
             }
-            
+
             .profile-title h1 {
                 font-size: 28px;
             }
-            
+
             .stats-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .info-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .actions {
                 flex-direction: column;
             }
-            
+
             .btn {
                 width: 100%;
                 justify-content: center;
             }
-            
+
             .profile-card {
                 padding: 30px 20px;
             }
@@ -685,27 +685,27 @@
             .navbar {
                 padding: 12px 16px;
             }
-            
+
             .logo {
                 font-size: 20px;
             }
-            
+
             .logo i {
                 font-size: 24px;
             }
-            
+
             .profile-title h1 {
                 font-size: 24px;
             }
-            
+
             .stat-value {
                 font-size: 24px;
             }
-            
+
             .info-item {
                 padding: 12px;
             }
-            
+
             .modal-content {
                 padding: 20px;
             }
@@ -716,7 +716,7 @@
             .navbar, .actions, .social-links, .theme-toggle {
                 display: none !important;
             }
-            
+
             .profile-card {
                 box-shadow: none;
                 border: 1px solid #000;
@@ -737,11 +737,11 @@
                 <i class="ri-map-pin-line"></i> Jimma, Ethiopia
             </span>
         </a>
-        
+
         <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
             <i class="ri-menu-line"></i>
         </div>
-        
+
         <div class="nav-links" id="navLinks">
             <a href="{{ route('home') }}" class="nav-link">Home</a>
             <a href="{{ route('search.results') }}" class="nav-link">Browse</a>
@@ -872,7 +872,7 @@
                         <div class="info-label">Rating</div>
                         <div class="info-value">
                             <span style="color: var(--primary-gold);">
-                                {{ number_format($user->rating, 1) }} 
+                                {{ number_format($user->rating, 1) }}
                                 <i class="ri-star-fill" style="font-size: 14px;"></i>
                             </span>
                             ({{ $user->total_reviews ?? 0 }} reviews)
@@ -980,7 +980,7 @@
             document.body.classList.toggle('dark-mode');
             const icon = this.querySelector('i');
             const text = this.querySelector('span');
-            
+
             if (document.body.classList.contains('dark-mode')) {
                 icon.className = 'ri-sun-line';
                 text.textContent = 'Light';
@@ -1001,15 +1001,15 @@
         // Toast notification system
         function showToast(title, message, type = 'success', duration = 5000) {
             const toastContainer = document.getElementById('toastContainer');
-            
+
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            
+
             let iconHtml = '<i class="ri-checkbox-circle-line"></i>';
             if (type === 'error') iconHtml = '<i class="ri-error-warning-line"></i>';
             else if (type === 'warning') iconHtml = '<i class="ri-alert-line"></i>';
             else if (type === 'info') iconHtml = '<i class="ri-information-line"></i>';
-            
+
             toast.innerHTML = `
                 <div class="toast-icon">${iconHtml}</div>
                 <div class="toast-content">
@@ -1020,9 +1020,9 @@
                     <i class="ri-close-line"></i>
                 </div>
             `;
-            
+
             toastContainer.appendChild(toast);
-            
+
             setTimeout(() => {
                 if (toast.parentNode) {
                     toast.style.animation = 'slideInRight 0.3s reverse';
@@ -1044,7 +1044,7 @@
         function shareOn(platform) {
             const url = '{{ route('vendor.show', $user->id) }}';
             const text = 'Check out {{ $user->business_name ?? $user->name }} on Vendora!';
-            
+
             let shareUrl = '';
             switch(platform) {
                 case 'facebook':
@@ -1060,7 +1060,7 @@
                     shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
                     break;
             }
-            
+
             if (shareUrl) {
                 window.open(shareUrl, '_blank');
             }
@@ -1071,9 +1071,9 @@
             const input = document.getElementById('profileShareLink');
             input.select();
             document.execCommand('copy');
-            
+
             showToast('Success', 'Link copied to clipboard!', 'success');
-            
+
             setTimeout(() => {
                 closeShareModal();
             }, 1500);

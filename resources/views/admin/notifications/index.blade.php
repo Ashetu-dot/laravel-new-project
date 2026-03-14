@@ -691,10 +691,23 @@
                     @foreach($notifications as $notification)
                         @php
                             $data = $notification->data;
-                            $icon = $data['icon'] ?? 'ri-information-line';
-                            $color = $data['color'] ?? 'bg-blue-light';
-                            $title = $data['title'] ?? 'Notification';
-                            $message = $data['message'] ?? 'You have a new notification.';
+                            
+                            // Handle different notification types
+                            if ($notification->type === 'user_registration') {
+                                $icon = $data['user_role'] === 'vendor' ? 'ri-store-2-line' : 'ri-user-add-line';
+                                $color = $data['user_role'] === 'vendor' ? 'bg-purple-light' : 'bg-green-light';
+                                $title = $notification->title;
+                                $message = $notification->message;
+                                
+                                // Add user details to message
+                                $userEmail = $data['user_email'] ?? '';
+                                $businessName = $data['business_name'] ?? null;
+                            } else {
+                                $icon = $data['icon'] ?? 'ri-information-line';
+                                $color = $data['color'] ?? 'bg-blue-light';
+                                $title = $data['title'] ?? $notification->title ?? 'Notification';
+                                $message = $data['message'] ?? $notification->message ?? 'You have a new notification.';
+                            }
                         @endphp
 
                         <div class="notification-item {{ $notification->read_at ? '' : 'unread' }}" id="notification-{{ $notification->id }}">
@@ -710,6 +723,36 @@
                                 <div class="notification-title">{{ $title }}</div>
                                 <div class="notification-message">{{ $message }}</div>
 
+                                @if($notification->type === 'user_registration')
+                                    <div style="margin-top: 12px; padding: 12px; background-color: #f9fafb; border-radius: 8px; border-left: 3px solid var(--primary-gold);">
+                                        <div style="display: grid; gap: 8px; font-size: 13px;">
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <i class="ri-user-line" style="color: var(--text-secondary);"></i>
+                                                <strong>Name:</strong> {{ $data['user_name'] ?? 'N/A' }}
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <i class="ri-mail-line" style="color: var(--text-secondary);"></i>
+                                                <strong>Email:</strong> {{ $data['user_email'] ?? 'N/A' }}
+                                            </div>
+                                            @if(isset($data['business_name']) && $data['business_name'])
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <i class="ri-store-line" style="color: var(--text-secondary);"></i>
+                                                    <strong>Business:</strong> {{ $data['business_name'] }}
+                                                </div>
+                                            @endif
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <i class="ri-shield-check-line" style="color: var(--text-secondary);"></i>
+                                                <strong>Status:</strong> 
+                                                @if($data['requires_approval'] ?? false)
+                                                    <span style="color: var(--accent-yellow); font-weight: 500;">Pending Approval</span>
+                                                @else
+                                                    <span style="color: var(--accent-blue); font-weight: 500;">Email Verification Required</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 <div class="notification-meta">
                                     <span class="notification-time">
                                         <i class="ri-time-line"></i> {{ $notification->created_at->diffForHumans() }}
@@ -720,6 +763,18 @@
                                 </div>
 
                                 <div class="notification-actions">
+                                    @if($notification->type === 'user_registration' && isset($data['user_id']))
+                                        @if($data['user_role'] === 'vendor')
+                                            <a href="{{ route('admin.vendors.show', $data['user_id']) }}" class="notification-action">
+                                                <i class="ri-eye-line"></i> View Vendor
+                                            </a>
+                                        @else
+                                            <a href="{{ route('admin.customers.show', $data['user_id']) }}" class="notification-action">
+                                                <i class="ri-eye-line"></i> View Customer
+                                            </a>
+                                        @endif
+                                    @endif
+                                    
                                     @if(!$notification->read_at)
                                         <form method="POST" action="{{ route('admin.notifications.read', $notification->id) }}" style="display: inline;">
                                             @csrf
@@ -779,14 +834,7 @@
         // Set interval to refresh every 5 minutes (300000 ms)
         // setInterval(refreshNotifications, 300000);
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+      
     </script>
 
 </body>

@@ -903,7 +903,7 @@
                                     @if(!$vendor->email_verified_at)
                                         <form action="{{ route('admin.vendors.verify', $vendor->id) }}" method="POST" style="display: inline;">
                                             @csrf
-                                            <button type="submit" class="action-btn-success" title="Verify Vendor" onclick="return confirm('Verify this vendor?')">
+                                            <button type="submit" class="action-btn-success" title="Verify Vendor" >
                                                 <i class="ri-check-line"></i>
                                             </button>
                                         </form>
@@ -953,14 +953,7 @@
             });
         });
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+
     </script>
 
 </body>

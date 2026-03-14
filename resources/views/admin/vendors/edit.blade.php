@@ -1196,14 +1196,7 @@
             document.getElementById('loadingOverlay').style.display = 'flex';
         });
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+       
 
         // Auto-hide alerts after 5 seconds
         setTimeout(() => {

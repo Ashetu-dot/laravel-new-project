@@ -917,14 +917,14 @@
                 <a href="{{ route('admin.products') }}" class="nav-item">
                     <i class="ri-shopping-cart-line"></i> Products
                 </a>
-                <a href="{{ route('admin.categories') }}" class="nav-item">
+                <a href="{{ route('admin.catalog.categories') }}" class="nav-item">
                     <i class="ri-price-tag-3-line"></i> Categories
                 </a>
             </div>
 
             <div class="nav-group">
                 <div class="nav-label">MARKETING</div>
-                <a href="{{ route('admin.promotions') }}" class="nav-item">
+                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                     <i class="ri-megaphone-line"></i> Promotions
                 </a>
                 <a href="{{ route('admin.coupons') }}" class="nav-item">
@@ -1112,7 +1112,7 @@
                                 $ordersHeight = ($data->count / $maxOrders) * 200;
                             @endphp
                             <div class="bar-wrapper">
-                                <div class="bar" style="height: {{ $ordersHeight }}px; background: var(--accent-blue);" 
+                                <div class="bar" style="height: {{ $ordersHeight }}px; background: var(--accent-blue);"
                                      onmouseover="showTooltip(this, '{{ $data->count }} orders')"
                                      onmouseout="hideTooltip(this)">
                                     <div class="bar-tooltip">{{ $data->count }} orders</div>
@@ -1225,27 +1225,27 @@
                         <i class="ri-lightbulb-line"></i>
                         Key Insights
                     </h3>
-                    
+
                     <div class="metric-row">
                         <span class="metric-label">Average Order Value</span>
                         <span class="metric-value">ETB {{ number_format($salesData->avg('total') ?? 0, 2) }}</span>
                     </div>
-                    
+
                     <div class="metric-row">
                         <span class="metric-label">Conversion Rate</span>
                         <span class="metric-value">3.8%</span>
                     </div>
-                    
+
                     <div class="metric-row">
                         <span class="metric-label">Customer Retention</span>
                         <span class="metric-value">67%</span>
                     </div>
-                    
+
                     <div class="metric-row">
                         <span class="metric-label">Avg. Daily Orders</span>
                         <span class="metric-value">{{ round($salesData->avg('count') ?? 0) }}</span>
                     </div>
-                    
+
                     <div class="progress-bar" style="margin-top: 16px;">
                         <div class="progress-fill" style="width: 75%;"></div>
                     </div>
@@ -1260,32 +1260,32 @@
                         <i class="ri-calendar-check-line"></i>
                         Recent Activity
                     </h3>
-                    
+
                     <div class="metric-row">
                         <span class="metric-label">New Vendors (Today)</span>
                         <span class="metric-value">3</span>
                     </div>
-                    
+
                     <div class="metric-row">
                         <span class="metric-label">New Customers (Today)</span>
                         <span class="metric-value">24</span>
                     </div>
-                    
+
                     <div class="metric-row">
                         <span class="metric-label">New Products (Today)</span>
                         <span class="metric-value">12</span>
                     </div>
-                    
+
                     <div class="metric-row">
                         <span class="metric-label">Pending Reviews</span>
                         <span class="metric-value">8</span>
                     </div>
-                    
+
                     <div class="metric-row">
                         <span class="metric-label">Support Tickets</span>
                         <span class="metric-value">5</span>
                     </div>
-                    
+
                     <div style="margin-top: 16px;">
                         <button class="btn btn-primary btn-sm" style="width: 100%;" onclick="exportAnalytics()">
                             <i class="ri-download-2-line"></i> Export Report
@@ -1352,24 +1352,17 @@
         // Export analytics
         function exportAnalytics() {
             document.getElementById('loadingOverlay').style.display = 'flex';
-            
+
             setTimeout(() => {
                 alert('Export started. Your report will be downloaded shortly.');
                 document.getElementById('loadingOverlay').style.display = 'none';
-                
+
                 // Simulate download
                 // window.location.href = '{{ route("admin.reports.export") }}?type=analytics&period={{ $period }}';
             }, 1000);
         }
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+       
     </script>
 
 </body>

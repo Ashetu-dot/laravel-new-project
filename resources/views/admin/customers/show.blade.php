@@ -979,7 +979,7 @@
                 </div>
             @endif
 
-         
+
 
 
             <!-- Page Header -->
@@ -1040,7 +1040,7 @@
 
         <form action="{{ route('admin.customers.toggle-status', $customer->id) }}" method="POST" style="display: inline;">
             @csrf
-            <button type="submit" class="btn btn-{{ $customer->is_active ? 'danger' : 'success' }}" onclick="return confirm('Are you sure you want to {{ $customer->is_active ? 'deactivate' : 'activate' }} this customer?')">
+            <button type="submit" class="btn btn-{{ $customer->is_active ? 'danger' : 'success' }}">
                 <i class="ri-{{ $customer->is_active ? 'close' : 'check' }}-line"></i>
                 {{ $customer->is_active ? 'Deactivate' : 'Activate' }}
             </button>
@@ -1490,20 +1490,28 @@
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 document.getElementById('loadingOverlay').style.display = 'none';
                 if (data.success) {
+                    alert('Email verified successfully!');
                     location.reload();
                 } else {
-                    alert('Failed to verify email: ' + data.message);
+                    alert('Failed to verify email: ' + (data.message || 'Unknown error'));
                 }
             })
             .catch(error => {
                 document.getElementById('loadingOverlay').style.display = 'none';
-                alert('An error occurred');
+                console.error('Error:', error);
+                alert('An error occurred: ' + error.message);
             });
         }
 
@@ -1536,14 +1544,7 @@
             });
         }
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+     
 
         // Auto-hide alerts after 5 seconds
         setTimeout(() => {

@@ -98,7 +98,7 @@
             border-bottom: 1px solid #374151;
             letter-spacing: -0.5px;
         }
-        
+
         .brand i {
             color: var(--primary-gold);
             margin-right: 12px;
@@ -540,7 +540,7 @@
             font-weight: 500;
             display: inline-block;
         }
-        
+
         .type-fixed { background-color: #dbeafe; color: #1e40af; }
         .type-percentage { background-color: #fef3c7; color: #92400e; }
         .type-bogo { background-color: #f3e8ff; color: #6b21a8; }
@@ -553,7 +553,7 @@
             font-weight: 500;
             display: inline-block;
         }
-        
+
         .status-active { background-color: #d1fae5; color: #065f46; }
         .status-inactive { background-color: #fee2e2; color: #991b1b; }
         .status-upcoming { background-color: #e0f2fe; color: #0369a1; }
@@ -737,7 +737,7 @@
                     </form>
                 </div>
             </div>
-            
+
             <div class="header-actions">
                 <a href="{{ route('admin.help') }}" class="icon-btn">
                     <i class="ri-question-line"></i>
@@ -753,7 +753,7 @@
 
         <!-- Dashboard Content -->
         <div class="dashboard-container">
-            
+
             <!-- Alert Messages -->
             @if(session('success'))
                 <div class="alert alert-success">
@@ -790,7 +790,7 @@
                         <div class="stat-number">{{ number_format($promotions->total() ?? 0) }}</div>
                     </div>
                 </div>
-                
+
                 <div class="stat-card">
                     <div class="stat-icon bg-green-light">
                         <i class="ri-checkbox-circle-line"></i>
@@ -800,7 +800,7 @@
                         <div class="stat-number">{{ number_format($activeCount ?? 0) }}</div>
                     </div>
                 </div>
-                
+
                 <div class="stat-card">
                     <div class="stat-icon bg-yellow-light">
                         <i class="ri-time-line"></i>
@@ -810,7 +810,7 @@
                         <div class="stat-number">{{ number_format($upcomingCount ?? 0) }}</div>
                     </div>
                 </div>
-                
+
                 <div class="stat-card">
                     <div class="stat-icon bg-red-light">
                         <i class="ri-error-warning-line"></i>
@@ -829,7 +829,7 @@
                         <i class="ri-add-line"></i> Create Promotion
                     </a>
                 </div>
-                
+
                 <div class="filter-tabs">
                     <a href="{{ route('admin.promotions.promotions') }}" class="filter-tab {{ !request('status') ? 'active' : '' }}">All</a>
                     <a href="{{ route('admin.promotions.promotions', ['status' => 'active']) }}" class="filter-tab {{ request('status') == 'active' ? 'active' : '' }}">Active</a>
@@ -844,7 +844,7 @@
                     <h3 class="table-title">Promotions List</h3>
                     <span>Showing {{ $promotions->firstItem() ?? 0 }} - {{ $promotions->lastItem() ?? 0 }} of {{ $promotions->total() ?? 0 }} promotions</span>
                 </div>
-                
+
                 <table>
                     <thead>
                         <tr>
@@ -864,7 +864,7 @@
                             $isActive = $promotion->is_active && $promotion->start_date <= $now && $promotion->end_date >= $now;
                             $isUpcoming = $promotion->is_active && $promotion->start_date > $now;
                             $isExpired = $promotion->end_date < $now;
-                            
+
                             $statusClass = $isActive ? 'active' : ($isUpcoming ? 'upcoming' : ($isExpired ? 'expired' : 'inactive'));
                             $statusText = $isActive ? 'Active' : ($isUpcoming ? 'Upcoming' : ($isExpired ? 'Expired' : 'Inactive'));
                         @endphp
@@ -961,7 +961,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
-            
+
             if (menuToggle && sidebar) {
                 menuToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('active');
@@ -978,14 +978,7 @@
             });
         });
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+        
 
         // Auto-hide alerts after 5 seconds
         setTimeout(() => {

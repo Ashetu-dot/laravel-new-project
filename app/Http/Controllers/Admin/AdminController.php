@@ -624,25 +624,61 @@ public function store(AdminLoginRequest $request)
      */
     public function updateOrderStatus(Request $request, $id)
     {
-        $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,completed,cancelled,refunded,refund_requested'
-        ]);
+        try {
+            $request->validate([
+                'status' => 'required|in:pending,processing,shipped,delivered,completed,cancelled,refunded,refund_requested'
+            ]);
 
-        $order = Order::findOrFail($id);
-        $oldStatus = $order->status;
-        $order->status = $request->status;
-        $order->save();
+            $order = Order::findOrFail($id);
+            $oldStatus = $order->status;
+            $order->status = $request->status;
+            $order->save();
 
-        // Log activity
-        if (class_exists('Activity')) {
-            activity()
-                ->performedOn($order)
-                ->causedBy(Auth::guard('admin')->user())
-                ->log("Order status changed from {$oldStatus} to {$request->status}");
+            // Log activity
+            if (class_exists('Activity')) {
+                activity()
+                    ->performedOn($order)
+                    ->causedBy(Auth::user())
+                    ->log("Order status changed from {$oldStatus} to {$request->status}");
+            }
+
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Order status updated successfully.',
+                    'status' => $order->status
+                ]);
+            }
+
+            return redirect()->route('admin.orders.show', $id)
+                ->with('success', 'Order status updated successfully.');
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid status value.',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            return redirect()->back()->with('error', 'Invalid status value.');
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to update order status: ' . $e->getMessage(), [
+                'order_id' => $id,
+                'status' => $request->status ?? 'N/A',
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update order status: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Failed to update order status.');
         }
-
-        return redirect()->route('admin.orders.show', $id)
-            ->with('success', 'Order status updated successfully.');
     }
 
     /**
@@ -659,7 +695,7 @@ public function store(AdminLoginRequest $request)
         $search = $request->get('search');
         $status = $request->get('status');
 
-        $query = User::where('role', 'customer');
+        $query = User::where('role', 'customer')->withCount('orders');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -693,6 +729,7 @@ public function store(AdminLoginRequest $request)
     public function showCustomer($id)
     {
         $customer = User::where('role', 'customer')
+            ->withCount('orders')
             ->with(['orders' => function ($q) {
                 $q->latest()->limit(10);
             }])
@@ -702,7 +739,12 @@ public function store(AdminLoginRequest $request)
             ->where('status', 'completed')
             ->sum('total_amount');
 
-        return view('admin.customers.show', compact('customer', 'totalSpent'));
+        $totalOrders = $customer->orders_count ?? 0;
+        
+        $unreadNotificationsCount = 0;
+        $unreadMessagesCount = 0;
+
+        return view('admin.customers.show', compact('customer', 'totalSpent', 'totalOrders', 'unreadNotificationsCount', 'unreadMessagesCount'));
     }
 
     /**
@@ -711,8 +753,11 @@ public function store(AdminLoginRequest $request)
     public function editCustomer($id)
     {
         $customer = User::where('role', 'customer')->findOrFail($id);
+        
+        $unreadNotificationsCount = 0;
+        $unreadMessagesCount = 0;
 
-        return view('admin.customers.edit', compact('customer'));
+        return view('admin.customers.edit', compact('customer', 'unreadNotificationsCount', 'unreadMessagesCount'));
     }
 
     /**
@@ -726,15 +771,26 @@ public function store(AdminLoginRequest $request)
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $customer->id,
             'phone' => 'nullable|string|max:20',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
             'is_active' => 'boolean',
         ]);
 
-        $customer->update([
+        $updateData = [
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'city' => $request->city,
+            'state' => $request->state,
             'is_active' => $request->boolean('is_active', $customer->is_active),
-        ]);
+        ];
+
+        // Update location string if city and state are provided
+        if ($request->city && $request->state) {
+            $updateData['location'] = $request->city . ', ' . $request->state;
+        }
+
+        $customer->update($updateData);
 
         return redirect()->route('admin.customers.show', $id)
             ->with('success', 'Customer updated successfully.');
@@ -779,6 +835,92 @@ public function store(AdminLoginRequest $request)
 
         return redirect()->back()
             ->with('success', "Customer {$status} successfully.");
+    }
+
+    /**
+     * Get customer statistics (AJAX).
+     */
+    public function getCustomerStats()
+    {
+        try {
+            $stats = [
+                'total' => User::where('role', 'customer')->count(),
+                'active' => User::where('role', 'customer')->where('is_active', true)->count(),
+                'inactive' => User::where('role', 'customer')->where('is_active', false)->count(),
+                'new_today' => User::where('role', 'customer')
+                    ->whereDate('created_at', today())
+                    ->count(),
+                'new_this_week' => User::where('role', 'customer')
+                    ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+                    ->count(),
+                'new_this_month' => User::where('role', 'customer')
+                    ->whereMonth('created_at', now()->month)
+                    ->whereYear('created_at', now()->year)
+                    ->count(),
+                'verified' => User::where('role', 'customer')
+                    ->whereNotNull('email_verified_at')
+                    ->count(),
+                'unverified' => User::where('role', 'customer')
+                    ->whereNull('email_verified_at')
+                    ->count(),
+            ];
+
+            return response()->json([
+                'success' => true,
+                'stats' => $stats
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Get customer stats error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load customer statistics'
+            ], 500);
+        }
+    }
+
+    /**
+     * Verify customer email (admin action).
+     */
+    public function verifyCustomerEmail($id)
+    {
+        try {
+            $customer = User::where('role', 'customer')->findOrFail($id);
+
+            if ($customer->email_verified_at) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email is already verified'
+                ]);
+            }
+
+            $customer->email_verified_at = now();
+            $customer->save();
+
+            Log::info('Admin verified customer email', [
+                'admin_id' => Auth::id(),
+                'customer_id' => $customer->id,
+                'customer_email' => $customer->email
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Email verified successfully'
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer not found'
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Verify customer email error: ' . $e->getMessage(), [
+                'customer_id' => $id,
+                'admin_id' => Auth::id()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to verify email'
+            ], 500);
+        }
     }
 
     /**
@@ -1049,8 +1191,10 @@ public function store(AdminLoginRequest $request)
         $query = Product::with(['vendor', 'category']);
 
         if ($search) {
-            $query->where('name', 'like', "%{$search}%")
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
+            });
         }
 
         if ($category) {
@@ -1069,12 +1213,384 @@ public function store(AdminLoginRequest $request)
     }
 
     /**
+     * Show a specific product
+     */
+    public function showProduct($id)
+    {
+        $product = Product::with(['vendor', 'category', 'reviews.user'])->findOrFail($id);
+        
+        // Get unread counts for header
+        $user = Auth::user();
+        try {
+            $unreadNotificationsCount = Notification::where('user_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+        } catch (\Exception $e) {
+            $unreadNotificationsCount = 0;
+        }
+
+        try {
+            $unreadMessagesCount = Message::where('receiver_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+        } catch (\Exception $e) {
+            $unreadMessagesCount = 0;
+        }
+
+        return view('admin.catalog.products.show', compact(
+            'product',
+            'unreadNotificationsCount',
+            'unreadMessagesCount'
+        ));
+    }
+
+    /**
+     * Show form to create a new product
+     */
+    public function createProduct()
+    {
+        $categories = Category::where('is_active', true)->get();
+        $vendors = User::where('role', 'vendor')->where('is_active', true)->get();
+        
+        return view('admin.catalog.products.create', compact('categories', 'vendors'));
+    }
+
+    /**
+     * Store a new product
+     */
+    public function storeProduct(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
+            'vendor_id' => 'required|exists:users,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_active' => 'boolean'
+        ]);
+
+        $data = $request->all();
+        
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        $product = Product::create($data);
+
+        return redirect()->route('admin.catalog.products')
+            ->with('success', 'Product created successfully.');
+    }
+
+    /**
+     * Show form to edit a product
+     */
+    public function editProduct($id)
+    {
+        $product = Product::findOrFail($id);
+        $categories = Category::where('is_active', true)->get();
+        $vendors = User::where('role', 'vendor')->where('is_active', true)->get();
+        
+        return view('admin.catalog.products.edit', compact('product', 'categories', 'vendors'));
+    }
+
+    /**
+     * Update a product
+     */
+    public function updateProduct(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
+            'vendor_id' => 'required|exists:users,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_active' => 'boolean'
+        ]);
+
+        $data = $request->all();
+        
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        $product->update($data);
+
+        return redirect()->route('admin.catalog.products')
+            ->with('success', 'Product updated successfully.');
+    }
+
+    /**
+     * Delete a product
+     */
+    public function deleteProduct($id)
+    {
+        $product = Product::findOrFail($id);
+        
+        // Delete image if exists
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+        
+        $product->delete();
+
+        // Return JSON response for AJAX requests
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Product deleted successfully.'
+            ]);
+        }
+
+        return redirect()->route('admin.catalog.products')
+            ->with('success', 'Product deleted successfully.');
+    }
+
+    /**
+     * Toggle product status
+     */
+    public function toggleProductStatus($id)
+    {
+        $product = Product::findOrFail($id);
+        $product->is_active = !$product->is_active;
+        $product->save();
+
+        $status = $product->is_active ? 'activated' : 'deactivated';
+        
+        return response()->json([
+            'success' => true,
+            'message' => "Product {$status} successfully.",
+            'status' => $product->is_active
+        ]);
+    }
+
+    /**
+     * Get product statistics
+     */
+    public function getProductStats()
+    {
+        $totalProducts = Product::count();
+        $activeProducts = Product::where('is_active', true)->count();
+        $lowStockProducts = Product::where('stock', '<=', 10)->count();
+        $outOfStockProducts = Product::where('stock', 0)->count();
+
+        return response()->json([
+            'total' => $totalProducts,
+            'active' => $activeProducts,
+            'low_stock' => $lowStockProducts,
+            'out_of_stock' => $outOfStockProducts
+        ]);
+    }
+
+    /**
+     * Export products
+     */
+    public function exportProducts(Request $request)
+    {
+        $products = Product::with(['vendor', 'category'])->get();
+        
+        $filename = 'products_' . now()->format('Y_m_d_H_i_s') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function() use ($products) {
+            $file = fopen('php://output', 'w');
+            
+            // Add CSV headers
+            fputcsv($file, [
+                'ID', 'Name', 'Description', 'Price', 'Stock', 'Category', 
+                'Vendor', 'Status', 'Created At'
+            ]);
+
+            // Add data rows
+            foreach ($products as $product) {
+                fputcsv($file, [
+                    $product->id,
+                    $product->name,
+                    $product->description,
+                    $product->price,
+                    $product->stock,
+                    $product->category->name ?? 'N/A',
+                    $product->vendor->business_name ?? $product->vendor->name ?? 'N/A',
+                    $product->is_active ? 'Active' : 'Inactive',
+                    $product->created_at->format('Y-m-d H:i:s')
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
      * Display categories listing.
      */
     public function categories()
     {
         $categories = Category::withCount('products')->paginate(15);
         return view('admin.catalog.categories', compact('categories'));
+    }
+
+    /**
+     * Show form to create a new category
+     */
+    public function createCategory()
+    {
+        return view('admin.catalog.categories.create');
+    }
+
+    /**
+     * Store a new category
+     */
+    public function storeCategory(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name',
+            'slug' => 'nullable|string|max:255|unique:categories,slug',
+            'description' => 'nullable|string',
+            'icon' => 'nullable|string|max:100',
+            'is_active' => 'boolean'
+        ]);
+
+        $data = $request->all();
+        
+        // Generate slug if not provided
+        if (empty($data['slug'])) {
+            $data['slug'] = \Str::slug($data['name']);
+        }
+
+        Category::create($data);
+
+        return redirect()->route('admin.catalog.categories')
+            ->with('success', 'Category created successfully.');
+    }
+
+    /**
+     * Show a specific category
+     */
+    public function showCategory($id)
+    {
+        $category = Category::withCount('products')->findOrFail($id);
+        $products = $category->products()->paginate(20);
+        
+        return view('admin.catalog.categories.show', compact('category', 'products'));
+    }
+
+    /**
+     * Show form to edit a category
+     */
+    public function editCategory($id)
+    {
+        $category = Category::findOrFail($id);
+        return view('admin.catalog.categories.edit', compact('category'));
+    }
+
+    /**
+     * Update a category
+     */
+    public function updateCategory(Request $request, $id)
+    {
+        $category = Category::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name,' . $id,
+            'slug' => 'nullable|string|max:255|unique:categories,slug,' . $id,
+            'description' => 'nullable|string',
+            'icon' => 'nullable|string|max:100',
+            'is_active' => 'boolean'
+        ]);
+
+        $data = $request->all();
+        
+        // Generate slug if not provided
+        if (empty($data['slug'])) {
+            $data['slug'] = \Str::slug($data['name']);
+        }
+
+        $category->update($data);
+
+        return redirect()->route('admin.catalog.categories')
+            ->with('success', 'Category updated successfully.');
+    }
+
+    /**
+     * Delete a category
+     */
+    public function deleteCategory($id)
+    {
+        $category = Category::findOrFail($id);
+        
+        // Check if category has products
+        if ($category->products()->count() > 0) {
+            return redirect()->back()
+                ->with('error', 'Cannot delete category with existing products.');
+        }
+
+        $category->delete();
+
+        return redirect()->route('admin.catalog.categories')
+            ->with('success', 'Category deleted successfully.');
+    }
+
+    /**
+     * Toggle category status
+     */
+    public function toggleCategoryStatus($id)
+    {
+        $category = Category::findOrFail($id);
+        $category->is_active = !$category->is_active;
+        $category->save();
+
+        return redirect()->back()
+            ->with('success', 'Category status updated successfully.');
+    }
+
+    /**
+     * Export categories
+     */
+    public function exportCategories()
+    {
+        $categories = Category::withCount('products')->get();
+        
+        // Simple CSV export
+        $filename = 'categories_' . date('Y-m-d') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($categories) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['ID', 'Name', 'Slug', 'Products Count', 'Status', 'Created At']);
+
+            foreach ($categories as $category) {
+                fputcsv($file, [
+                    $category->id,
+                    $category->name,
+                    $category->slug,
+                    $category->products_count,
+                    $category->is_active ? 'Active' : 'Inactive',
+                    $category->created_at->format('Y-m-d H:i:s')
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**
@@ -1786,7 +2302,32 @@ public function deletePromotion($id)
             ->limit(10)
             ->get();
 
-        return view('admin.analytics.index', compact('salesData', 'topVendors', 'topProducts', 'period'));
+        // Get unread counts for header
+        $user = Auth::user();
+        try {
+            $unreadNotificationsCount = Notification::where('user_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+        } catch (\Exception $e) {
+            $unreadNotificationsCount = 0;
+        }
+
+        try {
+            $unreadMessagesCount = Message::where('receiver_id', $user->id)
+                ->where('is_read', false)
+                ->count();
+        } catch (\Exception $e) {
+            $unreadMessagesCount = 0;
+        }
+
+        return view('admin.analytics.index', compact(
+            'salesData', 
+            'topVendors', 
+            'topProducts', 
+            'period',
+            'unreadNotificationsCount',
+            'unreadMessagesCount'
+        ));
     }
 
     /**

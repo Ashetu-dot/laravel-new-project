@@ -1738,14 +1738,7 @@
             });
         }, 5000);
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+       
 
         // Add keyboard shortcut for code generation (Ctrl+G)
         document.addEventListener('keydown', function(e) {

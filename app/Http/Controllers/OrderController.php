@@ -145,9 +145,7 @@ class OrderController extends Controller
                 'items.product' => function($q) use ($user) {
                     $q->where('vendor_id', $user->id);
                 },
-                'user',
-                'shippingAddress',
-                'billingAddress'
+                'user'
             ])
             ->firstOrFail();
 
@@ -507,7 +505,7 @@ class OrderController extends Controller
             ->whereHas('items.product', function($q) use ($user) {
                 $q->where('vendor_id', $user->id);
             })
-            ->with(['items.product', 'user', 'shippingAddress'])
+            ->with(['items.product', 'user'])
             ->firstOrFail();
 
         // Calculate vendor totals
@@ -621,7 +619,7 @@ class OrderController extends Controller
         $user = Auth::user();
 
         $order = Order::where('user_id', $user->id)
-            ->with(['items.product', 'vendor', 'shippingAddress', 'billingAddress'])
+            ->with(['items.product', 'vendor'])
             ->findOrFail($id);
 
         // Get unread counts for header

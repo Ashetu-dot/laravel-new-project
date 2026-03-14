@@ -1033,7 +1033,7 @@
 
                     <form action="{{ route('admin.vendors.status', $vendor->id) }}" method="POST" style="display: inline;">
                         @csrf
-                        <button type="submit" class="btn btn-{{ $vendor->is_active ? 'danger' : 'success' }}" onclick="return confirm('Are you sure you want to {{ $vendor->is_active ? 'deactivate' : 'activate' }} this vendor?')">
+                        <button type="submit" class="btn btn-{{ $vendor->is_active ? 'danger' : 'success' }}">
                             <i class="ri-{{ $vendor->is_active ? 'close' : 'check' }}-line"></i>
                             {{ $vendor->is_active ? 'Deactivate' : 'Activate' }}
                         </button>
@@ -1487,14 +1487,7 @@
             }
         });
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+
 
         // Auto-hide alerts after 5 seconds
         setTimeout(() => {

@@ -261,6 +261,7 @@ class NotificationController extends Controller
             'warning' => 'ri-alert-line',
             'success' => 'ri-checkbox-circle-line',
             'error' => 'ri-error-warning-line',
+            'user_registration' => 'ri-user-add-line',
         ];
 
         return $icons[$type] ?? 'ri-notification-line';

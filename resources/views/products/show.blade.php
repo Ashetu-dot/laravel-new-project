@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $product->name }} - {{ $product->vendor->business_name ?? $product->vendor->name ?? 'Vendor' }} | Vendora</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="user-authenticated" content="{{ Auth::check() ? 'true' : 'false' }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <script src="{{ asset('js/cart.js') }}" defer></script>
+    <script src="{{ asset('js/wishlist.js') }}" defer></script>
     <style>
         :root {
             --primary-gold: #B88E3F;
@@ -669,14 +672,46 @@
                         <span>{{ $stockText }}</span>
                     </div>
 
+                    <!-- Quantity Selector -->
+                    @if($stock > 0)
+                    <div class="quantity-selector" style="margin: 20px 0;">
+                        <label for="quantity" style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-dark);">Quantity:</label>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <button type="button" onclick="decreaseQuantity()" style="width: 40px; height: 40px; border: 1px solid var(--border-color); background: var(--white); border-radius: 6px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                                <i class="ri-subtract-line"></i>
+                            </button>
+                            <input type="number" id="quantity" value="1" min="1" max="{{ $stock }}" style="width: 80px; height: 40px; text-align: center; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; font-weight: 600;">
+                            <button type="button" onclick="increaseQuantity()" style="width: 40px; height: 40px; border: 1px solid var(--border-color); background: var(--white); border-radius: 6px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                                <i class="ri-add-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                    @endif
+
                     <!-- Product Actions -->
                     <div class="product-actions">
-                        <button class="btn btn-primary" onclick="addToCart({{ $product->id }})">
+                        @if($stock > 0)
+                        <button class="btn btn-primary" onclick="addToCart({{ $product->id }}, document.getElementById('quantity')?.value || 1)">
                             <i class="ri-shopping-cart-line"></i> Add to Cart
                         </button>
-                        <button class="btn btn-outline" onclick="addToWishlist({{ $product->id }})">
-                            <i class="ri-heart-line"></i>
+                        @else
+                        <button class="btn btn-primary" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <i class="ri-close-circle-line"></i> Out of Stock
                         </button>
+                        @endif
+                        @auth
+                            @php
+                                $inWishlist = Auth::user()->wishlists()->where('product_id', $product->id)->exists();
+                            @endphp
+                            <button class="btn btn-outline" onclick="toggleWishlist({{ $product->id }}, event)" 
+                                    style="{{ $inWishlist ? 'color: #ef4444;' : '' }}">
+                                <i class="{{ $inWishlist ? 'ri-heart-fill' : 'ri-heart-line' }}"></i>
+                            </button>
+                        @else
+                            <button class="btn btn-outline" onclick="window.location.href='{{ route('login') }}'">
+                                <i class="ri-heart-line"></i>
+                            </button>
+                        @endauth
                     </div>
                 </div>
             </div>
@@ -800,23 +835,6 @@
             }, 3000);
         }
 
-        // Add to cart
-        function addToCart(productId) {
-            @auth
-                showToast('Success', 'Product added to cart!');
-            @else
-                window.location.href = '{{ route("login") }}';
-            @endauth
-        }
-
-        // Add to wishlist
-        function addToWishlist(productId) {
-            @auth
-                showToast('Success', 'Product added to wishlist!');
-            @else
-                window.location.href = '{{ route("login") }}';
-            @endauth
-        }
     </script>
 </body>
 </html>

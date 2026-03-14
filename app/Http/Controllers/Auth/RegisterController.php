@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -14,6 +15,13 @@ use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     /**
      * Show the registration form (main registration page for both customer and vendor)
      */
@@ -123,6 +131,18 @@ class RegisterController extends Controller
                 // Don't rollback - user is already created
             }
 
+            // Notify admins about new user registration
+            try {
+                $this->notificationService->notifyAdminsNewUser($user);
+                Log::info('Admin notification sent for new user', ['user_id' => $user->id]);
+            } catch (\Exception $e) {
+                Log::error('Failed to notify admins about new user', [
+                    'error' => $e->getMessage(),
+                    'user_id' => $user->id
+                ]);
+                // Don't rollback - user is already created
+            }
+
             DB::commit();
 
             Log::info('Transaction committed', ['user_id' => $user->id]);
@@ -193,14 +213,39 @@ class RegisterController extends Controller
     {
         return Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'phone' => ['required', 'string', 'max:20'],
+            'phone' => [
+                'required',
+                'string',
+                'max:25',
+                function ($attribute, $value, $fail) {
+                    // Normalize to digits only and validate Ethiopian mobile format
+                    $digits = preg_replace('/\D+/', '', $value ?? '');
+
+                    // Expect 12 digits starting with country code 251 and leading 9 (e.g. 2519XXXXXXXX)
+                    if (!preg_match('/^2519\d{8}$/', $digits)) {
+                        $fail('Please enter a valid Ethiopian mobile number (e.g. +251 9XX XXX XXX).');
+                    }
+                },
+            ],
             'business_name' => ['required', 'string', 'max:255'],
             'category' => ['required', 'string', 'max:100'],
             'description' => ['nullable', 'string', 'max:1000'],
-            'city' => ['nullable', 'string', 'max:100'],
-            'state' => ['nullable', 'string', 'max:100'],
+            'city' => [
+                'nullable',
+                'string',
+                'max:100',
+                // Common Ethiopian cities – keep in sync with the view
+                'in:Addis Ababa,Jimma,Dire Dawa,Bahir Dar,Mekelle,Adama,Hawassa,Gondar,Dessie,Jijiga,Shashamane,Harar',
+            ],
+            'state' => [
+                'nullable',
+                'string',
+                'max:100',
+                // Ethiopian regions – keep in sync with the view
+                'in:Oromia,Amhara,Tigray,Addis Ababa,Dire Dawa,Somali,Afar,Benishangul-Gumuz,SNNPR,Gambela,Harari,Sidama,South West Ethiopia Peoples',
+            ],
             'website' => ['nullable', 'url', 'max:255'],
             'terms' => ['required', 'accepted'],
         ], [
@@ -225,9 +270,25 @@ class RegisterController extends Controller
     {
         return Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'phone' => [
+                'nullable',
+                'string',
+                'max:25',
+                function ($attribute, $value, $fail) {
+                    if ($value === null || $value === '') {
+                        return;
+                    }
+
+                    $digits = preg_replace('/\D+/', '', $value ?? '');
+
+                    // Allow empty or valid Ethiopian mobile number
+                    if (!preg_match('/^2519\d{8}$/', $digits)) {
+                        $fail('Please enter a valid Ethiopian mobile number (e.g. +251 9XX XXX XXX).');
+                    }
+                },
+            ],
             'terms' => ['required', 'accepted'],
         ], [
             'name.required' => 'Please enter your full name.',

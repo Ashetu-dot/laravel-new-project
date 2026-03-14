@@ -1038,6 +1038,49 @@
             box-shadow: 0 4px 8px rgba(184, 142, 63, 0.3);
         }
 
+        .btn-shop {
+            flex: 1;
+            height: 40px;
+            padding: 0 16px;
+            background: var(--primary-gold);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .btn-shop:hover {
+            background: #9c7832;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(184, 142, 63, 0.3);
+        }
+
+        .btn-shop::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-shop:hover::before {
+            opacity: 1;
+        }
+
         .btn-following {
             flex: 1;
             height: 40px;
@@ -1322,7 +1365,8 @@
         }
 
         .modal-actions .btn-primary,
-        .modal-actions .btn-outline {
+        .modal-actions .btn-outline,
+        .modal-actions .btn-shop {
             flex: 1;
             height: 48px;
             font-size: 15px;
@@ -2215,8 +2259,11 @@
                             </div>
                         </div>
                          <div class="action-area">
-                            <a href="{{ route('vendor.show', $vendor->id) }}" class="btn-outline">
+                            <a href="{{ route('vendor.show', $vendor->id) }}" class="btn-outline" title="{{ __('View vendor profile and information') }}">
                                 <i class="ri-store-line"></i> {{ __('View Shop') }}
+                            </a>
+                            <a href="{{ route('vendor.show', $vendor->id) }}#products" class="btn-shop" title="{{ __('Go directly to products section') }}">
+                                <i class="ri-shopping-bag-line"></i> {{ __('Shop Now') }}
                             </a>
                             @auth
                                 @if(Auth::id() !== $vendor->id)
@@ -2408,6 +2455,11 @@
     <script>
         // Global variables
         let compareList = JSON.parse(localStorage.getItem('compareList')) || [];
+        const vendorShowUrl = '{{ route("vendor.show", ":id") }}';
+        const vendorSaveUrl = '{{ route("vendor.save.customer", ":id") }}';
+        const vendorUnsaveUrl = '{{ route("vendor.unsave.customer", ":id") }}';
+        const vendorQuickViewUrl = '{{ route("vendor.quick-view", ":id") }}';
+        const compareUrl = '{{ route("vendors.compare") }}';
         let savedVendors = new Set();
         let currentView = localStorage.getItem('viewMode') || 'grid';
 
@@ -2726,7 +2778,7 @@
                 savedVendors.delete(vendorId);
                 button.classList.remove('saved');
                 icon.className = 'ri-bookmark-line';
-                fetch(`/vendors/${vendorId}/unsave`, {
+                fetch(vendorUnsaveUrl.replace(':id', vendorId), {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -2746,7 +2798,7 @@
                 savedVendors.add(vendorId);
                 button.classList.add('saved');
                 icon.className = 'ri-bookmark-fill';
-                fetch(`/vendors/${vendorId}/save`, {
+                fetch(vendorSaveUrl.replace(':id', vendorId), {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -2770,7 +2822,7 @@
             const modal = document.getElementById('shareModal');
             const linkInput = document.getElementById('shareLink');
             if (linkInput) {
-                linkInput.value = window.location.origin + '/vendors/' + vendorId;
+                linkInput.value = window.location.origin + vendorShowUrl.replace(':id', vendorId);
             }
             if (modal) {
                 modal.classList.add('active');
@@ -2840,7 +2892,7 @@
             content.innerHTML = '<div style="text-align: center; padding: 60px 40px;"><div class="loading-spinner" style="margin: 0 auto 20px;"></div><p style="color: var(--text-gray);">{{ __("Loading vendor details...") }}</p></div>';
             modal.classList.add('active');
 
-            fetch(`/vendors/${vendorId}/quick-view`)
+            fetch(vendorQuickViewUrl.replace(':id', vendorId))
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
@@ -2914,10 +2966,10 @@
                                 </div>
 
                                 <div class="modal-actions" style="display: flex; gap: 12px; margin-top: 20px;">
-                                    <a href="/vendors/${data.id}" class="btn-outline" style="flex: 1; text-align: center;">
+                                    <a href="#" onclick="window.location.href=vendorShowUrl.replace(':id', data.id)" class="btn-outline" style="flex: 1; text-align: center;">
                                         <i class="ri-store-line"></i> {{ __('View Full Shop') }}
                                     </a>
-                                    <button class="btn-primary" onclick="closeQuickView(); window.location.href='/vendors/${data.id}'" style="flex: 1;">
+                                    <button class="btn-shop" onclick="closeQuickView(); window.location.href=vendorShowUrl.replace(':id', data.id) + '#products'" style="flex: 1;">
                                         <i class="ri-shopping-bag-line"></i> {{ __('Shop Now') }}
                                     </button>
                                 </div>
@@ -3014,7 +3066,7 @@
                 alert('{{ __("Please select at least 2 vendors to compare") }}');
                 return;
             }
-            window.location.href = `/compare?vendors=${compareList.join(',')}`;
+            window.location.href = `${compareUrl}?vendors=${compareList.join(',')}`;
         }
 
         // Save Search

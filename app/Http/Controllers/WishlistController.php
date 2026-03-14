@@ -269,7 +269,16 @@ class WishlistController extends Controller
             $user = Auth::user();
 
             // Check if product exists and is in wishlist
-            $product = Product::findOrFail($productId);
+            $product = Product::where('id', $productId)
+                ->where('is_active', true)
+                ->first();
+            
+            if (!$product) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product not found or unavailable'
+                ], 404);
+            }
             
             $inWishlist = Wishlist::where('user_id', $user->id)
                 ->where('product_id', $productId)
@@ -290,20 +299,44 @@ class WishlistController extends Controller
                 ]);
             }
 
-            // Add to cart logic here (you'll need to implement Cart functionality)
-            // For now, we'll just remove from wishlist and return success
+            // Add to cart
+            $existingCart = \App\Models\Cart::where('user_id', $user->id)
+                ->where('product_id', $productId)
+                ->first();
+
+            if ($existingCart) {
+                // Update quantity if already in cart
+                if ($existingCart->quantity < $product->stock) {
+                    $existingCart->increment('quantity');
+                    $message = 'Product quantity updated in cart';
+                } else {
+                    $message = 'Product already in cart with maximum available quantity';
+                }
+            } else {
+                // Add new cart item
+                \App\Models\Cart::create([
+                    'user_id' => $user->id,
+                    'product_id' => $productId,
+                    'quantity' => 1,
+                    'options' => null,
+                ]);
+                $message = 'Product moved to cart successfully';
+            }
             
             // Remove from wishlist
             Wishlist::where('user_id', $user->id)
                 ->where('product_id', $productId)
                 ->delete();
 
-            // You would add to cart here
-            // Cart::add($productId, 1);
+            Log::info('Product moved from wishlist to cart', [
+                'user_id' => $user->id,
+                'product_id' => $productId
+            ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Product moved to cart successfully'
+                'message' => $message,
+                'cart_count' => \App\Models\Cart::where('user_id', $user->id)->count()
             ]);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -315,7 +348,7 @@ class WishlistController extends Controller
             Log::error('Error moving to cart: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to move to cart'
+                'message' => 'Failed to move to cart: ' . $e->getMessage()
             ], 500);
         }
     }

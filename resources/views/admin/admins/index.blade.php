@@ -546,18 +546,18 @@
             display: inline-block;
         }
 
-        .status-active { 
-            background-color: #d1fae5; 
-            color: #065f46; 
+        .status-active {
+            background-color: #d1fae5;
+            color: #065f46;
         }
         body.dark-mode .status-active {
             background-color: rgba(16, 185, 129, 0.2);
             color: #6ee7b7;
         }
 
-        .status-inactive { 
-            background-color: #fee2e2; 
-            color: #991b1b; 
+        .status-inactive {
+            background-color: #fee2e2;
+            color: #991b1b;
         }
         body.dark-mode .status-inactive {
             background-color: rgba(239, 68, 68, 0.2);
@@ -1079,7 +1079,7 @@
                         @else
                             <a href="{{ $admins->previousPageUrl() }}" class="pagination-item">Previous</a>
                         @endif
-                        
+
                         @foreach($admins->getUrlRange(1, $admins->lastPage()) as $page => $url)
                             @if($page == $admins->currentPage())
                                 <span class="pagination-item active">{{ $page }}</span>
@@ -1087,7 +1087,7 @@
                                 <a href="{{ $url }}" class="pagination-item">{{ $page }}</a>
                             @endif
                         @endforeach
-                        
+
                         @if($admins->hasMorePages())
                             <a href="{{ $admins->nextPageUrl() }}" class="pagination-item">Next</a>
                         @else
@@ -1172,7 +1172,7 @@
                         alertDiv.className = 'alert alert-success';
                         alertDiv.innerHTML = '<i class="ri-checkbox-circle-line"></i> Admin status updated successfully.';
                         document.querySelector('.dashboard-container').insertBefore(alertDiv, document.querySelector('.stats-grid'));
-                        
+
                         setTimeout(() => {
                             location.reload();
                         }, 1500);
@@ -1187,14 +1187,7 @@
             }
         }
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+       
     </script>
 </body>
 </html>

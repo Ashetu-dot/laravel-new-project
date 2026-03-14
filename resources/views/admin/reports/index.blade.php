@@ -1044,23 +1044,16 @@
         // Export report
         function exportReport() {
             document.getElementById('loadingOverlay').style.display = 'flex';
-            
+
             const type = document.getElementById('reportType').value;
             const dateFrom = document.querySelector('input[name="date_from"]').value;
             const dateTo = document.querySelector('input[name="date_to"]').value;
             const format = document.getElementById('exportFormat').value;
-            
+
             window.location.href = `{{ route('admin.reports.export') }}?type=${type}&date_from=${dateFrom}&date_to=${dateTo}&format=${format}`;
         }
 
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
+      
     </script>
 
 </body>

@@ -1023,12 +1023,25 @@
                             <label for="city" class="form-label">City</label>
                             <div class="input-wrapper">
                                 <i class="ri-map-pin-line input-icon"></i>
-                                <input type="text"
-                                       id="city"
-                                       name="city"
-                                       class="form-control @error('city') error @enderror"
-                                       placeholder="Jimma"
-                                       value="{{ old('city') }}">
+                                <select
+                                    id="city"
+                                    name="city"
+                                    class="form-control @error('city') error @enderror"
+                                >
+                                    <option value="">Select city (Ethiopia)</option>
+                                    <option value="Addis Ababa" {{ old('city') == 'Addis Ababa' ? 'selected' : '' }}>Addis Ababa</option>
+                                    <option value="Jimma" {{ old('city') == 'Jimma' ? 'selected' : '' }}>Jimma</option>
+                                    <option value="Dire Dawa" {{ old('city') == 'Dire Dawa' ? 'selected' : '' }}>Dire Dawa</option>
+                                    <option value="Bahir Dar" {{ old('city') == 'Bahir Dar' ? 'selected' : '' }}>Bahir Dar</option>
+                                    <option value="Mekelle" {{ old('city') == 'Mekelle' ? 'selected' : '' }}>Mekelle</option>
+                                    <option value="Adama" {{ old('city') == 'Adama' ? 'selected' : '' }}>Adama</option>
+                                    <option value="Hawassa" {{ old('city') == 'Hawassa' ? 'selected' : '' }}>Hawassa</option>
+                                    <option value="Gondar" {{ old('city') == 'Gondar' ? 'selected' : '' }}>Gondar</option>
+                                    <option value="Dessie" {{ old('city') == 'Dessie' ? 'selected' : '' }}>Dessie</option>
+                                    <option value="Jijiga" {{ old('city') == 'Jijiga' ? 'selected' : '' }}>Jijiga</option>
+                                    <option value="Shashamane" {{ old('city') == 'Shashamane' ? 'selected' : '' }}>Shashamane</option>
+                                    <option value="Harar" {{ old('city') == 'Harar' ? 'selected' : '' }}>Harar</option>
+                                </select>
                             </div>
                         </div>
 
@@ -1036,12 +1049,26 @@
                             <label for="state" class="form-label">State/Region</label>
                             <div class="input-wrapper">
                                 <i class="ri-government-line input-icon"></i>
-                                <input type="text"
-                                       id="state"
-                                       name="state"
-                                       class="form-control @error('state') error @enderror"
-                                       placeholder="Oromia"
-                                       value="{{ old('state') }}">
+                                <select
+                                    id="state"
+                                    name="state"
+                                    class="form-control @error('state') error @enderror"
+                                >
+                                    <option value="">Select region</option>
+                                    <option value="Oromia" {{ old('state') == 'Oromia' ? 'selected' : '' }}>Oromia</option>
+                                    <option value="Amhara" {{ old('state') == 'Amhara' ? 'selected' : '' }}>Amhara</option>
+                                    <option value="Tigray" {{ old('state') == 'Tigray' ? 'selected' : '' }}>Tigray</option>
+                                    <option value="Addis Ababa" {{ old('state') == 'Addis Ababa' ? 'selected' : '' }}>Addis Ababa</option>
+                                    <option value="Dire Dawa" {{ old('state') == 'Dire Dawa' ? 'selected' : '' }}>Dire Dawa</option>
+                                    <option value="Somali" {{ old('state') == 'Somali' ? 'selected' : '' }}>Somali</option>
+                                    <option value="Afar" {{ old('state') == 'Afar' ? 'selected' : '' }}>Afar</option>
+                                    <option value="Benishangul-Gumuz" {{ old('state') == 'Benishangul-Gumuz' ? 'selected' : '' }}>Benishangul-Gumuz</option>
+                                    <option value="SNNPR" {{ old('state') == 'SNNPR' ? 'selected' : '' }}>SNNPR</option>
+                                    <option value="Gambela" {{ old('state') == 'Gambela' ? 'selected' : '' }}>Gambela</option>
+                                    <option value="Harari" {{ old('state') == 'Harari' ? 'selected' : '' }}>Harari</option>
+                                    <option value="Sidama" {{ old('state') == 'Sidama' ? 'selected' : '' }}>Sidama</option>
+                                    <option value="South West Ethiopia Peoples" {{ old('state') == 'South West Ethiopia Peoples' ? 'selected' : '' }}>South West Ethiopia Peoples</option>
+                                </select>
                             </div>
                         </div>
                     </div>

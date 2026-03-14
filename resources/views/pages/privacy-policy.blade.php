@@ -3,40 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Privacy Policy for Vendora - Your trusted local marketplace in Jimma, Ethiopia. Learn how we protect your data.">
+    <meta name="theme-color" content="#B88E3F">
     <title>Privacy Policy - Vendora | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         @font-face {
             font-family: 'Inter';
-
-            font-weight: 400;
-        }
-        @font-face {
-            font-family: 'Inter';
-            font-weight: 500;
-        }
-        @font-face {
-            font-family: 'Inter';
-            font-weight: 700;
+            src: url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+            font-display: swap;
         }
 
         :root {
             --primary-gold: #B88E3F;
-            --primary-hover: #9c7832;
-            --text-dark: #1e293b;
-            --text-light: #64748b;
-            --bg-body: #f8fafc;
-            --white: #ffffff;
-            --border-color: #e2e8f0;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            --shadow-hover: 0 8px 30px rgba(184, 142, 63, 0.15);
-            --success-light: #d1fae5;
-            --success-dark: #065f46;
-            --info-light: #dbeafe;
-            --info-dark: #1e40af;
-            --warning-light: #fef3c7;
-            --warning-dark: #92400e;
+            --primary-dark: #8B6B2F;
+            --primary-light: #E5D4B3;
+            --primary-soft: rgba(184, 142, 63, 0.1);
+            --secondary-green: #078930;
+            --secondary-yellow: #FCDD09;
+            --secondary-red: #DA121A;
+            --text-dark: #1E293B;
+            --text-medium: #334155;
+            --text-light: #64748B;
+            --text-soft: #94A3B8;
+            --bg-body: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --bg-soft: #F1F5F9;
+            --border-color: #E2E8F0;
+            --border-soft: #EDF2F7;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            --shadow-gold: 0 10px 25px -5px rgba(184, 142, 63, 0.3);
+            --gradient-gold: linear-gradient(135deg, var(--primary-gold), var(--primary-dark));
+            --gradient-ethiopia: linear-gradient(135deg, #078930 0%, #FCDD09 50%, #DA121A 100%);
+            --gradient-soft: linear-gradient(135deg, #F8FAFC, #F1F5F9);
+            --gradient-card: linear-gradient(135deg, #FFFFFF, #F8FAFC);
+            --success-light: #D1FAE5;
+            --success-dark: #065F46;
+            --info-light: #DBEAFE;
+            --info-dark: #1E40AF;
+            --warning-light: #FEF3C7;
+            --warning-dark: #92400E;
+            --error-light: #FEE2E2;
+            --error-dark: #991B1B;
         }
 
         * {
@@ -47,7 +59,9 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            background: var(--bg-body);
+            background-image: radial-gradient(circle at 10% 20%, rgba(184, 142, 63, 0.02) 0%, transparent 20%),
+                              radial-gradient(circle at 90% 80%, rgba(184, 142, 63, 0.02) 0%, transparent 20%);
             color: var(--text-dark);
             line-height: 1.6;
             display: flex;
@@ -55,17 +69,20 @@
             min-height: 100vh;
         }
 
-        /* Navigation */
+        /* Modern Glass Navigation */
         .navbar {
-            background-color: var(--white);
-            padding: 20px 60px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 16px 60px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            box-shadow: var(--shadow-sm);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(184, 142, 63, 0.1);
         }
 
         .logo {
@@ -77,10 +94,19 @@
             align-items: center;
             gap: 8px;
             letter-spacing: -0.5px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
         }
 
         .logo i {
             font-size: 32px;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .ethiopia-badge {
@@ -88,12 +114,19 @@
             align-items: center;
             gap: 4px;
             padding: 4px 12px;
-            background: linear-gradient(135deg, #078930 0%, #FCDD09 50%, #DA121A 100%);
+            background: var(--gradient-ethiopia);
             color: white;
-            border-radius: 20px;
-            font-size: 12px;
+            border-radius: 30px;
+            font-size: 11px;
             font-weight: 600;
             margin-left: 8px;
+            box-shadow: var(--shadow-md);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
         }
 
         .nav-links {
@@ -103,12 +136,13 @@
         }
 
         .nav-link {
-            color: var(--text-dark);
+            color: var(--text-medium);
             text-decoration: none;
             font-weight: 500;
             font-size: 15px;
-            transition: color 0.3s;
+            transition: all 0.3s;
             position: relative;
+            padding: 8px 0;
         }
 
         .nav-link:hover {
@@ -118,12 +152,12 @@
         .nav-link::after {
             content: '';
             position: absolute;
-            bottom: -4px;
+            bottom: 0;
             left: 0;
             width: 0;
             height: 2px;
-            background-color: var(--primary-gold);
-            transition: width 0.3s;
+            background: var(--gradient-gold);
+            transition: width 0.3s ease;
         }
 
         .nav-link:hover::after {
@@ -131,17 +165,16 @@
         }
 
         .btn-signup {
-            background: var(--primary-gold);
+            background: var(--gradient-gold);
             color: white !important;
-            padding: 8px 20px !important;
+            padding: 10px 24px !important;
             border-radius: 50px !important;
-            transition: all 0.3s !important;
+            box-shadow: var(--shadow-md);
         }
 
         .btn-signup:hover {
-            background: var(--primary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(184, 142, 63, 0.3);
+            box-shadow: var(--shadow-gold);
         }
 
         .btn-signup::after {
@@ -153,104 +186,86 @@
             font-size: 24px;
             cursor: pointer;
             color: var(--text-dark);
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.2s;
+            transition: all 0.3s;
+            background: var(--bg-soft);
         }
 
         .hamburger:hover {
-            background-color: rgba(0,0,0,0.05);
+            background: var(--primary-soft);
+            color: var(--primary-gold);
         }
 
         /* Mobile Menu */
         .mobile-menu {
             display: none;
             position: fixed;
-            top: 70px;
-            left: 0;
-            right: 0;
-            background: var(--white);
-            padding: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            z-index: 99;
+            top: 80px;
+            left: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-xl);
+            z-index: 999;
             transform: translateY(-150%);
             transition: transform 0.3s ease;
-            border-bottom: 1px solid var(--border-color);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
         }
 
         .mobile-menu.active {
             transform: translateY(0);
         }
 
-        .mobile-menu a {
+        .mobile-menu a, .mobile-menu button {
             display: block;
-            padding: 15px 0;
+            padding: 16px 20px;
             color: var(--text-dark);
             text-decoration: none;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-soft);
             font-weight: 500;
-        }
-
-        .mobile-menu a:last-child {
-            border-bottom: none;
-        }
-
-        .mobile-menu a:hover {
-            color: var(--primary-gold);
-            padding-left: 10px;
-        }
-
-        .mobile-menu button {
             width: 100%;
             text-align: left;
             background: none;
             border: none;
-            padding: 15px 0;
             font-size: 16px;
-            font-weight: 500;
-            color: var(--text-dark);
             cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s;
+            border-radius: 12px;
         }
 
-        .mobile-menu button:hover {
-            color: var(--error-color);
+        .mobile-menu a:hover, .mobile-menu button:hover {
+            background: var(--primary-soft);
+            color: var(--primary-gold);
+            padding-left: 30px;
+        }
+
+        .mobile-menu a:last-child, .mobile-menu button:last-child {
+            border-bottom: none;
+        }
+
+        .btn-signup-mobile {
+            background: var(--gradient-gold);
+            color: white !important;
+        }
+
+        .btn-signup-mobile:hover {
+            background: var(--gradient-gold) !important;
+            opacity: 0.9;
         }
 
         /* Main Content */
         .main-container {
             flex: 1;
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 40px auto;
-            padding: 0 20px;
+            padding: 0 24px;
             width: 100%;
-        }
-
-        .page-card {
-            background: var(--white);
-            border-radius: 24px;
-            padding: 50px;
-            box-shadow: var(--shadow);
-            transition: box-shadow 0.3s;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .page-card:hover {
-            box-shadow: var(--shadow-hover);
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .back-link {
@@ -260,101 +275,176 @@
             color: var(--text-light);
             text-decoration: none;
             margin-bottom: 24px;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 50px;
-            background: var(--white);
-            box-shadow: var(--shadow);
+            background: var(--bg-card);
+            box-shadow: var(--shadow-sm);
             transition: all 0.3s;
             font-size: 14px;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
         }
 
         .back-link:hover {
             color: var(--primary-gold);
             transform: translateX(-5px);
-            box-shadow: var(--shadow-hover);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-gold);
+        }
+
+        .page-card {
+            background: var(--bg-card);
+            border-radius: 32px;
+            padding: 60px;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid rgba(184, 142, 63, 0.1);
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.6s ease;
+        }
+
+        .page-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-gold);
+        }
+
+        .page-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(184, 142, 63, 0.03) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .page-header {
-            margin-bottom: 40px;
+            margin-bottom: 48px;
             text-align: center;
-            padding-bottom: 30px;
-            border-bottom: 2px solid var(--border-color);
+            position: relative;
+            z-index: 1;
         }
 
         .page-header h1 {
-            font-size: 42px;
+            font-size: 48px;
             font-weight: 800;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             color: var(--text-dark);
+            line-height: 1.2;
         }
 
         .page-header h1 span {
-            color: var(--primary-gold);
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             position: relative;
             display: inline-block;
-        }
-
-        .page-header h1 span::after {
-            content: '';
-            position: absolute;
-            bottom: 8px;
-            left: 0;
-            width: 100%;
-            height: 12px;
-            background-color: rgba(184, 142, 63, 0.2);
-            z-index: -1;
-            border-radius: 4px;
         }
 
         .page-header .last-updated {
             color: var(--text-light);
             font-size: 14px;
-            background: #f1f5f9;
+            background: var(--bg-soft);
             display: inline-block;
-            padding: 6px 16px;
+            padding: 8px 24px;
             border-radius: 50px;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
         }
 
-        .page-section {
-            margin-bottom: 40px;
+        .highlight-box {
+            background: linear-gradient(135deg, #FEF3E7, #FFF);
+            border-left: 4px solid var(--primary-gold);
+            padding: 28px;
+            border-radius: 20px;
+            margin: 40px 0;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(184, 142, 63, 0.2);
         }
 
-        .page-section h2 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 20px;
+        .highlight-box p {
+            margin-bottom: 0;
+            font-weight: 500;
             color: var(--text-dark);
+            font-size: 18px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
-        .page-section h2 i {
+        .highlight-box i {
             color: var(--primary-gold);
             font-size: 28px;
         }
 
-        .page-section h3 {
-            font-size: 20px;
-            font-weight: 600;
-            margin: 24px 0 12px;
+        .page-section {
+            margin-bottom: 48px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-section h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 24px;
             color: var(--text-dark);
-            padding-left: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-section h2 i {
+            color: var(--primary-gold);
+            font-size: 32px;
+            background: var(--primary-soft);
+            padding: 10px;
+            border-radius: 16px;
+        }
+
+        .page-section h3 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 32px 0 20px;
+            color: var(--text-dark);
+            padding-left: 12px;
             border-left: 4px solid var(--primary-gold);
         }
 
         .page-section p {
-            color: var(--text-light);
-            margin-bottom: 16px;
+            color: var(--text-medium);
+            margin-bottom: 20px;
             font-size: 16px;
+            line-height: 1.8;
         }
 
         /* Enhanced List Styling */
         .list-container {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 24px;
-            margin: 20px 0;
+            background: var(--gradient-soft);
+            border-radius: 24px;
+            padding: 28px;
+            margin: 24px 0;
+            border: 1px solid var(--border-color);
         }
 
         .styled-list {
@@ -367,33 +457,40 @@
         .styled-list li {
             display: flex;
             align-items: flex-start;
-            gap: 12px;
-            padding: 12px 16px;
-            background: var(--white);
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            gap: 16px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
             transition: all 0.3s;
             border: 1px solid transparent;
         }
 
         .styled-list li:hover {
-            transform: translateX(5px);
+            transform: translateX(8px) translateY(-2px);
             border-color: var(--primary-gold);
-            box-shadow: 0 4px 12px rgba(184, 142, 63, 0.1);
+            box-shadow: var(--shadow-lg);
+            background: white;
         }
 
         .list-icon {
-            width: 28px;
-            height: 28px;
-            background: rgba(184, 142, 63, 0.1);
-            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            background: var(--primary-soft);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--primary-gold);
-            font-size: 14px;
+            font-size: 18px;
             flex-shrink: 0;
-            margin-top: 2px;
+            transition: all 0.3s;
+        }
+
+        .styled-list li:hover .list-icon {
+            background: var(--primary-gold);
+            color: white;
+            transform: scale(1.1);
         }
 
         .list-content {
@@ -401,29 +498,62 @@
         }
 
         .list-content strong {
-            color: var(--primary-gold);
+            color: var(--text-dark);
             font-weight: 600;
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            font-size: 16px;
         }
 
         .list-content .list-description {
             color: var(--text-light);
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
-        /* Alternative List Style - Bullet Points */
+        /* Checkmark List */
+        .check-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .check-list li {
+            position: relative;
+            padding-left: 36px;
+            margin-bottom: 16px;
+            color: var(--text-medium);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .check-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success-dark);
+            font-weight: bold;
+            background: var(--success-light);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Bullet List */
         .bullet-list {
             list-style: none;
-            margin: 16px 0;
+            margin: 20px 0;
         }
 
         .bullet-list li {
             position: relative;
             padding-left: 28px;
-            margin-bottom: 12px;
-            color: var(--text-light);
+            margin-bottom: 14px;
+            color: var(--text-medium);
             font-size: 15px;
         }
 
@@ -436,182 +566,173 @@
             font-weight: bold;
         }
 
-        /* Numbered List Style */
-        .numbered-list {
-            list-style: none;
-            counter-reset: item;
-            margin: 16px 0;
-        }
-
-        .numbered-list li {
-            position: relative;
-            padding-left: 32px;
-            margin-bottom: 12px;
-            color: var(--text-light);
-            font-size: 15px;
-            counter-increment: item;
-        }
-
-        .numbered-list li::before {
-            content: counter(item) ".";
-            position: absolute;
-            left: 0;
-            color: var(--primary-gold);
-            font-weight: 600;
-        }
-
-        /* Checkmark List Style */
-        .check-list {
-            list-style: none;
-            margin: 16px 0;
-        }
-
-        .check-list li {
-            position: relative;
-            padding-left: 32px;
-            margin-bottom: 12px;
-            color: var(--text-light);
-            font-size: 15px;
-        }
-
-        .check-list li::before {
-            content: '✓';
-            position: absolute;
-            left: 8px;
-            color: var(--success-dark);
-            font-weight: bold;
-            background: var(--success-light);
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-
-        /* Two-column List Grid */
-        .list-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin: 20px 0;
-        }
-
-        .list-grid-item {
-            background: #f8fafc;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s;
-        }
-
-        .list-grid-item:hover {
-            border-color: var(--primary-gold);
-            transform: translateY(-3px);
-        }
-
-        .list-grid-item h5 {
-            color: var(--primary-gold);
-            margin-bottom: 8px;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .list-grid-item p {
-            color: var(--text-light);
-            font-size: 14px;
-            margin-bottom: 0;
-        }
-
-        .highlight-box {
-            background: linear-gradient(135deg, #fef3e7 0%, #fff 100%);
-            border-left: 4px solid var(--primary-gold);
-            padding: 24px;
-            border-radius: 16px;
-            margin: 30px 0;
-            box-shadow: var(--shadow);
-        }
-
-        .highlight-box p {
-            margin-bottom: 0;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-
-        .highlight-box i {
-            color: var(--primary-gold);
-            margin-right: 8px;
-        }
-
+        /* Info Cards Grid */
         .info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin: 20px 0;
+            gap: 24px;
+            margin: 30px 0;
         }
 
         .info-card {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 12px;
+            background: var(--gradient-card);
+            padding: 28px;
+            border-radius: 24px;
             border: 1px solid var(--border-color);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-gold);
+            transform: scaleX(0);
             transition: transform 0.3s;
         }
 
         .info-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
             border-color: var(--primary-gold);
+        }
+
+        .info-card:hover::before {
+            transform: scaleX(1);
         }
 
         .info-card h4 {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
+            gap: 12px;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+            font-size: 20px;
+        }
+
+        .info-card h4 i {
             color: var(--primary-gold);
+            font-size: 24px;
+            background: var(--primary-soft);
+            padding: 8px;
+            border-radius: 12px;
         }
 
         .info-card p {
+            color: var(--text-light);
             margin-bottom: 0;
             font-size: 14px;
+            line-height: 1.7;
         }
 
-        .contact-details {
-            background: #f8fafc;
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-item {
+            background: var(--bg-soft);
+            padding: 24px 16px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+            background: white;
+            border-color: var(--primary-gold);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-soft);
             border-radius: 16px;
-            padding: 30px;
-            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: var(--primary-gold);
+            font-size: 28px;
+            transition: all 0.3s;
+        }
+
+        .feature-item:hover .feature-icon {
+            background: var(--primary-gold);
+            color: white;
+            transform: rotate(360deg);
+        }
+
+        .feature-item h5 {
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .feature-item p {
+            color: var(--text-light);
+            font-size: 13px;
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
+
+        /* Contact Section */
+        .contact-details {
+            background: var(--gradient-soft);
+            border-radius: 24px;
+            padding: 32px;
+            margin-top: 24px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            border: 1px solid var(--border-color);
         }
 
         .contact-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: var(--white);
-            border-radius: 12px;
-            margin-bottom: 15px;
-            transition: transform 0.3s;
+            gap: 16px;
+            padding: 20px;
+            background: var(--bg-card);
+            border-radius: 18px;
+            transition: all 0.3s;
+            border: 1px solid transparent;
         }
 
         .contact-item:hover {
-            transform: translateX(5px);
-            box-shadow: var(--shadow);
+            transform: translateY(-3px);
+            border-color: var(--primary-gold);
+            box-shadow: var(--shadow-lg);
         }
 
         .contact-icon {
-            width: 45px;
-            height: 45px;
-            background: rgba(184, 142, 63, 0.1);
-            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            background: var(--primary-soft);
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--primary-gold);
-            font-size: 20px;
+            font-size: 24px;
+            transition: all 0.3s;
+        }
+
+        .contact-item:hover .contact-icon {
+            background: var(--primary-gold);
+            color: white;
         }
 
         .contact-info {
@@ -620,40 +741,55 @@
 
         .contact-label {
             font-size: 12px;
-            color: var(--text-light);
-            margin-bottom: 2px;
+            color: var(--text-soft);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .contact-value {
             font-weight: 600;
             color: var(--text-dark);
+            font-size: 16px;
         }
 
         .contact-value a {
             color: var(--primary-gold);
             text-decoration: none;
+            transition: color 0.3s;
         }
 
         .contact-value a:hover {
+            color: var(--primary-dark);
             text-decoration: underline;
         }
 
         .footer-note {
-            margin-top: 40px;
-            padding: 20px;
-            background: #f1f5f9;
-            border-radius: 12px;
+            margin-top: 48px;
+            padding: 28px;
+            background: linear-gradient(135deg, var(--primary-soft), transparent);
+            border-radius: 20px;
             text-align: center;
-            font-size: 14px;
-            color: var(--text-light);
-            border: 1px dashed var(--border-color);
+            font-size: 15px;
+            color: var(--text-medium);
+            border: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-note i {
+            color: var(--primary-gold);
+            font-size: 24px;
+            vertical-align: middle;
+            margin-right: 8px;
         }
 
         /* Footer */
         footer {
-            background-color: var(--white);
-            padding: 50px 60px 30px;
+            background: var(--bg-card);
+            padding: 60px 60px 30px;
             border-top: 1px solid var(--border-color);
+            margin-top: 60px;
         }
 
         .footer-content {
@@ -665,10 +801,22 @@
         }
 
         .footer-section h4 {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             color: var(--text-dark);
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 600;
+            position: relative;
+            padding-bottom: 8px;
+        }
+
+        .footer-section h4::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--gradient-gold);
         }
 
         .footer-section ul {
@@ -676,18 +824,20 @@
         }
 
         .footer-section li {
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .footer-section a {
             color: var(--text-light);
             text-decoration: none;
             font-size: 14px;
-            transition: color 0.2s;
+            transition: all 0.3s;
+            display: inline-block;
         }
 
         .footer-section a:hover {
             color: var(--primary-gold);
+            transform: translateX(5px);
         }
 
         .footer-bottom {
@@ -709,29 +859,39 @@
 
         .social-links a {
             color: var(--text-light);
-            font-size: 20px;
-            transition: color 0.2s;
+            font-size: 22px;
+            transition: all 0.3s;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-soft);
         }
 
         .social-links a:hover {
-            color: var(--primary-gold);
+            color: white;
+            background: var(--primary-gold);
+            transform: translateY(-3px);
         }
 
         /* Responsive */
         @media (max-width: 1024px) {
-            .navbar { padding: 20px 40px; }
+            .navbar { padding: 16px 40px; }
             .footer-content { grid-template-columns: repeat(2, 1fr); }
-            .list-grid { grid-template-columns: 1fr; }
+            .feature-grid { grid-template-columns: repeat(2, 1fr); }
+            .contact-details { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 768px) {
-            .navbar { padding: 16px 30px; }
+            .navbar { padding: 16px 24px; }
             .nav-links { display: none; }
             .hamburger { display: flex; }
             .mobile-menu { display: block; }
 
-            .page-card { padding: 30px 25px; }
-            .page-header h1 { font-size: 32px; }
+            .page-card { padding: 32px 24px; }
+            .page-header h1 { font-size: 36px; }
 
             .info-grid {
                 grid-template-columns: 1fr;
@@ -741,8 +901,8 @@
                 grid-template-columns: 1fr;
             }
 
-            .list-grid-item {
-                padding: 14px;
+            .feature-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -750,6 +910,7 @@
             .navbar { padding: 14px 20px; }
             .logo { font-size: 24px; }
             .logo i { font-size: 28px; }
+            .ethiopia-badge { display: none; }
 
             .page-card { padding: 24px 20px; }
             .page-header h1 { font-size: 28px; }
@@ -760,37 +921,85 @@
 
             .page-section h2 i {
                 font-size: 24px;
+                padding: 8px;
             }
 
             .contact-item {
                 flex-direction: column;
                 text-align: center;
+                padding: 24px;
             }
 
             .footer-bottom {
                 flex-direction: column;
-                gap: 16px;
+                gap: 20px;
+                text-align: center;
             }
 
             .styled-list li {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 8px;
+                gap: 12px;
             }
 
             .list-icon {
                 margin-bottom: 4px;
             }
+
+            .highlight-box p {
+                flex-direction: column;
+                text-align: center;
+                font-size: 16px;
+            }
         }
 
+        @media (max-width: 380px) {
+            .page-header h1 { font-size: 24px; }
+            .page-section h2 { font-size: 22px; }
+            .feature-item { padding: 20px 12px; }
+        }
+
+        /* Print Styles */
         @media print {
-            .navbar, .footer, .back-link, .footer-note, .hamburger, .mobile-menu {
-                display: none;
+            .navbar, .footer, .back-link, .hamburger, .mobile-menu, .social-links {
+                display: none !important;
             }
             .page-card {
                 box-shadow: none;
-                padding: 0;
+                padding: 20px;
+                border: 1px solid #ddd;
             }
+            body {
+                background: white;
+            }
+        }
+
+        /* Loading Animation */
+        .skeleton {
+            animation: skeleton-loading 1s linear infinite alternate;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-color: hsl(200, 20%, 90%); }
+            100% { background-color: hsl(200, 20%, 95%); }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-soft);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gold);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
         }
     </style>
 </head>
@@ -806,28 +1015,12 @@
             </span>
         </a>
         <div class="nav-links">
-            <a href="{{ route('home') }}" class="nav-link">Home</a>
+            <a href="{{ route('home') }}" class="nav-link">{{ __('nav.home') }}</a>
             <a href="{{ route('home') }}#categories" class="nav-link">Categories</a>
             <a href="{{ route('home') }}#features" class="nav-link">Features</a>
-            <a href="{{ route('register') }}" class="nav-link">For Vendors</a>
-            <a href="{{ route('about') }}" class="nav-link">About</a>
-            @guest
-                <a href="{{ route('login') }}" class="nav-link">Login</a>
-                <a href="{{ route('register') }}" class="nav-link btn-signup">Sign Up</a>
-            @else
-                <a href="{{ route('profile.show', Auth::id()) }}" class="nav-link">Profile</a>
-                @if(Auth::user()->role === 'vendor')
-                    <a href="{{ route('vendor.dashboard') }}" class="nav-link">Dashboard</a>
-                @elseif(Auth::user()->role === 'customer')
-                    <a href="{{ route('customer.dashboard') }}" class="nav-link">Dashboard</a>
-                @elseif(Auth::user()->role === 'admin')
-                    <a href="{{ route('admin.dashboard') }}" class="nav-link">Admin</a>
-                @endif
-                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer;">Logout</button>
-                </form>
-            @endguest
+            <a href="{{ route('about') }}" class="nav-link">{{ __('nav.about') }}</a>
+            <a href="{{ route('contact') }}" class="nav-link">{{ __('nav.contact') }}</a>
+            <a href="{{ route('login') }}" class="nav-link btn-signup">{{ __('nav.sign_in') }}</a>
         </div>
         <div class="hamburger" id="menuToggle">
             <i class="ri-menu-line"></i>
@@ -836,33 +1029,20 @@
 
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
-        <a href="{{ route('home') }}">Home</a>
+        <a href="{{ route('home') }}">{{ __('nav.home') }}</a>
         <a href="{{ route('home') }}#categories">Categories</a>
         <a href="{{ route('home') }}#features">Features</a>
-        <a href="{{ route('register') }}">For Vendors</a>
-        <a href="{{ route('about') }}">About</a>
-        @guest
-            <a href="{{ route('login') }}">Login</a>
-            <a href="{{ route('register') }}" class="btn-signup-mobile">Sign Up</a>
-        @else
-            <a href="{{ route('profile.show', Auth::id()) }}">Profile</a>
-            @if(Auth::user()->role === 'vendor')
-                <a href="{{ route('vendor.dashboard') }}">Dashboard</a>
-            @elseif(Auth::user()->role === 'customer')
-                <a href="{{ route('customer.dashboard') }}">Dashboard</a>
-            @elseif(Auth::user()->role === 'admin')
-                <a href="{{ route('admin.dashboard') }}">Admin</a>
-            @endif
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit">Logout</button>
-            </form>
-        @endguest
+        <a href="{{ route('about') }}">{{ __('nav.about') }}</a>
+        <a href="{{ route('contact') }}">{{ __('nav.contact') }}</a>
+        <a href="{{ route('login') }}" class="btn-signup-mobile">{{ __('nav.sign_in') }}</a>
     </div>
 
     <!-- Main Content -->
     <main class="main-container">
 
+        <a href="javascript:history.back()" class="back-link">
+            <i class="ri-arrow-left-line"></i> Back
+        </a>
 
         <div class="page-card">
             <div class="page-header">
@@ -871,7 +1051,10 @@
             </div>
 
             <div class="highlight-box">
-                <p><i class="ri-shield-check-line"></i> <strong>Your privacy is our priority.</strong> This policy explains how we collect, use, and protect your personal information when you use Vendora in Jimma, Ethiopia.</p>
+                <p>
+                    <i class="ri-shield-check-line"></i>
+                    <strong>Your privacy is our priority.</strong> This policy explains how we collect, use, and protect your personal information when you use Vendora in Jimma, Ethiopia.
+                </p>
             </div>
 
             <div class="page-section">
@@ -944,7 +1127,7 @@
                             <span class="list-icon"><i class="ri-bank-card-line"></i></span>
                             <div class="list-content">
                                 <strong>Payment Processors</strong>
-                                <span class="list-description">Transaction confirmations and payment status</span>
+                                <span class="list-description">Transaction confirmations and payment status via Chapa</span>
                             </div>
                         </li>
                         <li>
@@ -968,48 +1151,73 @@
             <div class="info-grid">
                 <div class="info-card">
                     <h4><i class="ri-customer-service-line"></i> For Customers</h4>
-                    <p>We collect information to help you find the best local vendors and complete your bookings securely.</p>
+                    <p>We collect information to help you find the best local vendors and complete your bookings securely. Your data helps personalize your experience.</p>
                 </div>
                 <div class="info-card">
                     <h4><i class="ri-store-line"></i> For Vendors</h4>
-                    <p>We collect business information to verify your identity and showcase your services to potential customers.</p>
+                    <p>We collect business information to verify your identity and showcase your services to potential customers in Jimma and beyond.</p>
                 </div>
             </div>
 
             <div class="page-section">
                 <h2><i class="ri-stack-line"></i> How We Use Your Information</h2>
-                <div class="list-grid">
-                    <div class="list-grid-item">
-                        <h5><i class="ri-service-line"></i> Provide Services</h5>
-                        <p>To operate and maintain your account, process bookings, and facilitate payments</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="ri-service-line"></i>
+                        </div>
+                        <h5>Provide Services</h5>
+                        <p>Operate accounts, process bookings, and facilitate payments</p>
                     </div>
-                    <div class="list-grid-item">
-                        <h5><i class="ri-bar-chart-2-line"></i> Improve Platform</h5>
-                        <p>To analyze usage patterns and enhance user experience</p>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="ri-bar-chart-2-line"></i>
+                        </div>
+                        <h5>Improve Platform</h5>
+                        <p>Analyze usage patterns to enhance user experience</p>
                     </div>
-                    <div class="list-grid-item">
-                        <h5><i class="ri-mail-send-line"></i> Communicate</h5>
-                        <p>To send updates, confirmations, and important notifications</p>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="ri-mail-send-line"></i>
+                        </div>
+                        <h5>Communicate</h5>
+                        <p>Send updates, confirmations, and important notifications</p>
                     </div>
-                    <div class="list-grid-item">
-                        <h5><i class="ri-user-heart-line"></i> Personalize</h5>
-                        <p>To recommend relevant vendors and services based on your preferences</p>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="ri-user-heart-line"></i>
+                        </div>
+                        <h5>Personalize</h5>
+                        <p>Recommend relevant vendors based on preferences</p>
                     </div>
-                    <div class="list-grid-item">
-                        <h5><i class="ri-shield-check-line"></i> Verify</h5>
-                        <p>To verify vendor identities and ensure platform safety</p>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="ri-shield-check-line"></i>
+                        </div>
+                        <h5>Verify</h5>
+                        <p>Verify vendor identities and ensure platform safety</p>
                     </div>
-                    <div class="list-grid-item">
-                        <h5><i class="ri-lock-line"></i> Security</h5>
-                        <p>To detect and prevent fraud, abuse, and security incidents</p>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="ri-lock-line"></i>
+                        </div>
+                        <h5>Security</h5>
+                        <p>Detect and prevent fraud and security incidents</p>
                     </div>
-                    <div class="list-grid-item">
-                        <h5><i class="ri-gavel-line"></i> Legal Compliance</h5>
-                        <p>To comply with Ethiopian laws and regulations</p>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="ri-gavel-line"></i>
+                        </div>
+                        <h5>Legal Compliance</h5>
+                        <p>Comply with Ethiopian laws and regulations</p>
                     </div>
-                    <div class="list-grid-item">
-                        <h5><i class="ri-megaphone-line"></i> Marketing</h5>
-                        <p>To send promotional communications (with your consent)</p>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="ri-megaphone-line"></i>
+                        </div>
+                        <h5>Marketing</h5>
+                        <p>Send promotional communications (with consent)</p>
                     </div>
                 </div>
             </div>
@@ -1024,8 +1232,8 @@
                 <h3>With Service Providers</h3>
                 <p>We share information with trusted third parties who help us operate our platform:</p>
                 <ul class="check-list">
-                    <li><strong>Payment Processors:</strong> Chapa</li>
-                    <li><strong>Cloud Services:</strong> Data hosting and storage</li>
+                    <li><strong>Payment Processors:</strong> Chapa (PCI-DSS compliant)</li>
+                    <li><strong>Cloud Services:</strong> Secure data hosting and storage</li>
                     <li><strong>Analytics:</strong> Google Analytics and similar tools</li>
                     <li><strong>Customer Support:</strong> Help desk software</li>
                 </ul>
@@ -1040,6 +1248,7 @@
                         <li><strong>Regular Audits:</strong> Security assessments and vulnerability testing</li>
                         <li><strong>Secure Storage:</strong> Data stored in secure facilities</li>
                         <li><strong>Payment Security:</strong> Payment information is handled by PCI-DSS compliant partners</li>
+                        <li><strong>2FA:</strong> Two-factor authentication available for all accounts</li>
                     </ul>
                 </div>
             </div>
@@ -1049,27 +1258,38 @@
                 <p>Under Ethiopian data protection law, you have the following rights:</p>
                 <div class="list-container">
                     <ul class="check-list">
+                        <li><strong>Access:</strong> Request a copy of your personal data</li>
                         <li><strong>Correction:</strong> Update inaccurate or incomplete information</li>
                         <li><strong>Deletion:</strong> Request deletion of your data (subject to legal requirements)</li>
                         <li><strong>Restriction:</strong> Limit how we use your information</li>
                         <li><strong>Objection:</strong> Object to certain types of processing</li>
                         <li><strong>Portability:</strong> Receive your data in a structured, commonly used format</li>
+                        <li><strong>Withdraw Consent:</strong> Withdraw consent at any time</li>
                     </ul>
                 </div>
             </div>
-
-
 
             <div class="page-section">
                 <h2><i class="ri-calendar-line"></i> Data Retention</h2>
                 <p>We retain your information for as long as necessary to:</p>
                 <ul class="bullet-list">
                     <li>Provide you with our services</li>
-                    <li>Comply with legal obligations</li>
+                    <li>Comply with legal obligations (up to 7 years for financial records)</li>
                     <li>Resolve disputes</li>
                     <li>Enforce our agreements</li>
                 </ul>
                 <p>When information is no longer needed, we securely delete or anonymize it. Account information is typically retained for the duration of your account plus a reasonable period afterward to comply with legal requirements.</p>
+            </div>
+
+            <div class="page-section">
+                <h2><i class="ri-cookie-line"></i> Cookie Policy</h2>
+                <p>We use cookies and similar technologies to enhance your experience. You can control cookies through your browser settings. Types of cookies we use:</p>
+                <ul class="bullet-list">
+                    <li><strong>Essential Cookies:</strong> Required for platform functionality</li>
+                    <li><strong>Analytics Cookies:</strong> Help us understand how visitors use our site</li>
+                    <li><strong>Preference Cookies:</strong> Remember your settings and preferences</li>
+                    <li><strong>Marketing Cookies:</strong> Used for targeted advertising (with consent)</li>
+                </ul>
             </div>
 
             <div class="page-section">
@@ -1079,7 +1299,7 @@
 
             <div class="page-section">
                 <h2><i class="ri-earth-line"></i> International Data Transfers</h2>
-                <p>Your information may be transferred to and processed in countries other than Ethiopia. We ensure appropriate safeguards are in place to protect your information in accordance with this policy.</p>
+                <p>Your information may be transferred to and processed in countries other than Ethiopia. We ensure appropriate safeguards are in place to protect your information in accordance with this policy. All data transfers comply with applicable laws.</p>
             </div>
 
             <div class="page-section">
@@ -1128,7 +1348,7 @@
                         </div>
                         <div class="contact-info">
                             <div class="contact-label">Address</div>
-                            <div class="contact-value">Jimma, Ethiopia</div>
+                            <div class="contact-value">Jimma University Technology Park<br>Jimma, Ethiopia</div>
                         </div>
                     </div>
 
@@ -1138,15 +1358,39 @@
                         </div>
                         <div class="contact-info">
                             <div class="contact-label">Response Time</div>
-                            <div class="contact-value">Within 48 hours</div>
+                            <div class="contact-value">Within 24-48 hours</div>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="ri-whatsapp-line"></i>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">WhatsApp</div>
+                            <div class="contact-value">
+                                <a href="https://wa.me/251471112233">+251 47 111 2233</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="ri-telegram-line"></i>
+                        </div>
+                        <div class="contact-info">
+                            <div class="contact-label">Telegram</div>
+                            <div class="contact-value">
+                                <a href="https://t.me/vendora">@VendoraSupport</a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="footer-note">
-                <i class="ri-shield-check-line" style="color: var(--primary-gold); margin-right: 8px;"></i>
-                Vendora is committed to protecting your privacy and building a trusted marketplace for the Jimma community.
+                <i class="ri-shield-check-line"></i>
+                <strong>Vendora is committed to protecting your privacy</strong> and building a trusted marketplace for the Jimma community. We're here to help with any questions or concerns.
             </div>
         </div>
     </main>
@@ -1156,8 +1400,10 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h4>Vendora</h4>
-                <p style="color: var(--text-light); margin-bottom: 16px; font-size: 14px;">Connecting you with trusted local vendors in Jimma and across Ethiopia.</p>
-                <span class="ethiopia-badge">
+                <p style="color: var(--text-light); margin-bottom: 20px; font-size: 14px; line-height: 1.7;">
+                    Connecting you with trusted local vendors in Jimma and across Ethiopia. Your trusted marketplace since 2024.
+                </p>
+                <span class="ethiopia-badge" style="display: inline-flex;">
                     <i class="ri-map-pin-line"></i> Jimma, Ethiopia
                 </span>
             </div>
@@ -1173,103 +1419,209 @@
             <div class="footer-section">
                 <h4>For Vendors</h4>
                 <ul>
-                    <li><a href="{{ route('list-service') }}">List Your Service</a></li>
-                    <li><a href="{{ route('vendor-resources') }}">Resources</a></li>
-                    <li><a href="{{ route('success-stories') }}">Success Stories</a></li>
+                    
                     <li><a href="{{ route('community') }}">Community</a></li>
                 </ul>
             </div>
             <div class="footer-section">
                 <h4>Legal</h4>
                 <ul>
-                    <li><a href="{{ route('privacy.policy') }}">Privacy Policy</a></li>
-                    <li><a href="{{ route('terms.service') }}">Terms of Service</a></li>
-
+                    <li><a href="{{ route('privacy-policy') }}" style="color: var(--primary-gold);">Privacy Policy</a></li>
+                    <li><a href="{{ route('terms-of-service') }}">Terms of Service</a></li>
+                    <li><a href="{{ route('cookie-policy') }}">Cookie Policy</a></li>
                     <li><a href="{{ route('trust-safety') }}">Trust & Safety</a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <span>&copy; {{ date('Y') }} Vendora Marketplace. All rights reserved. Jimma, Ethiopia</span>
+            <span>&copy; {{ date('Y') }} Vendora Marketplace. All rights reserved. Made with ❤️ in Jimma, Ethiopia</span>
             <div class="social-links">
-                <a href="#" target="_blank"><i class="ri-twitter-fill"></i></a>
-                <a href="#" target="_blank"><i class="ri-instagram-fill"></i></a>
-                <a href="#" target="_blank"><i class="ri-facebook-fill"></i></a>
-                <a href="#" target="_blank"><i class="ri-telegram-fill"></i></a>
+                <a href="#" target="_blank" aria-label="Twitter"><i class="ri-twitter-fill"></i></a>
+                <a href="#" target="_blank" aria-label="Instagram"><i class="ri-instagram-fill"></i></a>
+                <a href="#" target="_blank" aria-label="Facebook"><i class="ri-facebook-fill"></i></a>
+                <a href="#" target="_blank" aria-label="Telegram"><i class="ri-telegram-fill"></i></a>
+                <a href="#" target="_blank" aria-label="LinkedIn"><i class="ri-linkedin-fill"></i></a>
             </div>
         </div>
     </footer>
 
     <script>
-        // Mobile menu toggle
-        const menuToggle = document.getElementById('menuToggle');
-        const mobileMenu = document.getElementById('mobileMenu');
+        // Mobile menu toggle with improved functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const body = document.body;
 
-        if (menuToggle && mobileMenu) {
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                mobileMenu.classList.toggle('active');
+            if (menuToggle && mobileMenu) {
+                menuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isActive = mobileMenu.classList.toggle('active');
+                    
+                    // Change icon
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        icon.className = isActive ? 'ri-close-line' : 'ri-menu-line';
+                    }
 
-                // Change icon
-                const icon = this.querySelector('i');
-                if (mobileMenu.classList.contains('active')) {
-                    icon.className = 'ri-close-line';
-                } else {
-                    icon.className = 'ri-menu-line';
-                }
-            });
-
-            // Close mobile menu when clicking on a link
-            mobileMenu.querySelectorAll('a, button').forEach(link => {
-                link.addEventListener('click', function() {
-                    mobileMenu.classList.remove('active');
-                    const icon = menuToggle.querySelector('i');
-                    if (icon) icon.className = 'ri-menu-line';
+                    // Prevent body scroll when menu is open
+                    body.style.overflow = isActive ? 'hidden' : '';
                 });
-            });
 
-            // Close when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!mobileMenu.contains(event.target) && !menuToggle.contains(event.target)) {
-                    mobileMenu.classList.remove('active');
-                    const icon = menuToggle.querySelector('i');
-                    if (icon) icon.className = 'ri-menu-line';
-                }
-            });
-        }
-
-        // Confirm logout
-        document.querySelectorAll('form[action*="logout"] button[type="submit"]').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
-
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-
-                    // Close mobile menu if open
-                    if (mobileMenu && mobileMenu.classList.contains('active')) {
+                // Close mobile menu when clicking on a link
+                mobileMenu.querySelectorAll('a, button').forEach(link => {
+                    link.addEventListener('click', function() {
                         mobileMenu.classList.remove('active');
                         const icon = menuToggle.querySelector('i');
                         if (icon) icon.className = 'ri-menu-line';
+                        body.style.overflow = '';
+                    });
+                });
+
+                // Close when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (mobileMenu.classList.contains('active') && 
+                        !mobileMenu.contains(event.target) && 
+                        !menuToggle.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        const icon = menuToggle.querySelector('i');
+                        if (icon) icon.className = 'ri-menu-line';
+                        body.style.overflow = '';
                     }
+                });
+
+                // Handle escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+                        mobileMenu.classList.remove('active');
+                        const icon = menuToggle.querySelector('i');
+                        if (icon) icon.className = 'ri-menu-line';
+                        body.style.overflow = '';
+                    }
+                });
+            }
+
+            // Confirm logout
+            document.querySelectorAll('form[action*="logout"] button[type="submit"]').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    if (!confirm('Are you sure you want to logout?')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+
+                        // Close mobile menu if open
+                        if (mobileMenu && mobileMenu.classList.contains('active')) {
+                            mobileMenu.classList.remove('active');
+                            const icon = menuToggle.querySelector('i');
+                            if (icon) icon.className = 'ri-menu-line';
+                            body.style.overflow = '';
+                        }
+                    }
+                });
+            });
+
+            // Add active state to current page in footer
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.footer-section a').forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.style.color = 'var(--primary-gold)';
+                    link.style.fontWeight = '600';
                 }
             });
+
+            // Lazy load images
+            const images = document.querySelectorAll('img[data-src]');
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.add('loaded');
+                        observer.unobserve(img);
+                    }
+                });
+            });
+
+            images.forEach(img => imageObserver.observe(img));
+
+            // Add copy protection for sensitive content (optional)
+            const sensitiveContent = document.querySelector('.contact-details');
+            if (sensitiveContent) {
+                sensitiveContent.addEventListener('copy', (e) => {
+                    e.clipboardData.setData('text/plain', 
+                        'Contact information from Vendora. For more info, visit vendora.com');
+                    e.preventDefault();
+                });
+            }
+
+            // Animate elements on scroll
+            const animateOnScroll = () => {
+                const elements = document.querySelectorAll('.info-card, .feature-item, .list-container');
+                elements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const elementBottom = element.getBoundingClientRect().bottom;
+                    
+                    if (elementTop < window.innerHeight && elementBottom > 0) {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                    }
+                });
+            };
+
+            // Set initial styles for animation
+            document.querySelectorAll('.info-card, .feature-item, .list-container').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            });
+
+            window.addEventListener('scroll', animateOnScroll);
+            animateOnScroll(); // Run once on load
+        });
+
+        // Add to homescreen prompt for mobile (optional)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // You can show a custom install prompt here
+        });
+
+        // Service worker registration (if you have one)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+
+        // Performance monitoring
+        window.addEventListener('load', () => {
+            if (window.performance) {
+                const perfData = window.performance.timing;
+                const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+                console.log(`Page load time: ${pageLoadTime}ms`);
+            }
         });
     </script>
 
     @if(app()->environment('local'))
-    {{--  <script>
-        console.log('Privacy Policy page loaded - Local environment');
-    </script>  --}}
+        <!-- Development environment indicator -->
+        <div style="position: fixed; bottom: 10px; right: 10px; background: #FFD700; color: #000; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; opacity: 0.5; z-index: 9999;">
+            DEV MODE
+        </div>
     @endif
 </body>
 </html>
