@@ -881,7 +881,11 @@
 
         <div class="user-profile">
             <div class="avatar">
-                {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
+                @if(auth()->user()->avatar)
+                    <img src="{{ Storage::url(auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                @else
+                    {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
+                @endif
             </div>
             <div class="user-info">
                 <h4>{{ auth()->user()->name ?? 'Admin User' }}</h4>
@@ -1093,7 +1097,11 @@
                                 <td>
                                     <div class="user-info">
                                         <div class="user-avatar">
-                                            {{ strtoupper(substr($user->business_name ?? $user->name, 0, 2)) }}
+                                            @if($user->avatar)
+                                                <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                                            @else
+                                                {{ strtoupper(substr($user->business_name ?? $user->name, 0, 2)) }}
+                                            @endif
                                         </div>
                                         <div class="user-details">
                                             <h4>{{ $user->business_name ?? $user->name }}</h4>

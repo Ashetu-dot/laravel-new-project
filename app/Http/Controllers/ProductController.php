@@ -411,10 +411,14 @@ class ProductController extends Controller
     public function publicShow($id)
     {
         try {
-            // Find the product with vendor information
+            // Support both numeric ID and slug
             $product = Product::where('is_active', true)
                 ->with('vendor')
-                ->findOrFail($id);
+                ->where(function($q) use ($id) {
+                    $q->where('id', is_numeric($id) ? $id : 0)
+                      ->orWhere('slug', $id);
+                })
+                ->firstOrFail();
 
             // Get reviews for this product using DB facade to avoid model issues
             $reviews = DB::table('reviews')
@@ -556,16 +560,12 @@ class ProductController extends Controller
                 ->where('is_active', true)
                 ->findOrFail($vendorId);
 
-            $products = Product::where('vendor_id', $vendorId)
-                ->where('is_active', true)
-                ->orderBy('created_at', 'desc')
-                ->paginate(12);
-
-            return view('vendor.products-list', compact('vendor', 'products'));
+            // Redirect to the vendor's public store page, scrolled to products section
+            return redirect()->route('vendor.show', $vendorId . '#products');
 
         } catch (\Exception $e) {
             Log::error('Vendor products error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to load products.');
+            return redirect()->route('search.results')->with('error', 'Vendor not found.');
         }
     }
 

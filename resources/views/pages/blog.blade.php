@@ -1796,9 +1796,7 @@
                 <i class="ri-store-2-fill"></i>
                 Vendora
             </a>
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma, Ethiopia
-            </span>
+            
         </div>
 
         <div class="nav-links">
@@ -2465,9 +2463,7 @@
                 <h2><i class="ri-store-2-fill"></i> Vendora</h2>
                 <p class="footer-text">{{ $t['blog_subtitle'] }}</p>
                 <div class="mt-4">
-                    <span class="ethiopia-badge">
-                        <i class="ri-map-pin-line"></i> Jimma, Ethiopia
-                    </span>
+                    
                 </div>
             </div>
             <div class="footer-links">

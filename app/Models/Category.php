@@ -21,6 +21,7 @@ class Category extends Model
         'is_global',
         'parent_id',
         'image',
+        'image_color',
         'is_active',
         'sort_order',
     ];
@@ -88,51 +89,6 @@ class Category extends Model
         return $this->activeProducts()->count();
     }
 
-    // /**
-    //  * Get vendors through the category_vendor pivot table.
-    //  */
-    // public function vendors()
-    // {
-    //     return $this->belongsToMany(User::class, 'category_vendor', 'category_id', 'user_id')
-    //                 ->where('role', 'vendor')
-    //                 ->withTimestamps();
-    // }
-
-
-
-
-
-// /**
-//  * Get vendors through the category_vendor pivot table.
-//  */
-// public function vendors()
-// {
-//     // Try different possible column names
-//     $tableName = 'category_vendor';
-    
-//     // Check which columns exist and use the correct ones
-//     if (Schema::hasColumn($tableName, 'category_id') && Schema::hasColumn($tableName, 'user_id')) {
-//         return $this->belongsToMany(User::class, $tableName, 'category_id', 'user_id')
-//                     ->where('role', 'vendor')
-//                     ->withTimestamps();
-//     } 
-//     elseif (Schema::hasColumn($tableName, 'category_id') && Schema::hasColumn($tableName, 'vendor_id')) {
-//         return $this->belongsToMany(User::class, $tableName, 'category_id', 'vendor_id')
-//                     ->where('role', 'vendor')
-//                     ->withTimestamps();
-//     }
-//     elseif (Schema::hasColumn($tableName, 'category_id') && Schema::hasColumn($tableName, 'users_id')) {
-//         return $this->belongsToMany(User::class, $tableName, 'category_id', 'users_id')
-//                     ->where('role', 'vendor')
-//                     ->withTimestamps();
-//     }
-//     else {
-//         // Default fallback - return empty relationship
-//         return $this->belongsToMany(User::class, $tableName)
-//                     ->where('role', 'vendor')
-//                     ->withTimestamps();
-//     }
-// }
 
 
 
@@ -211,12 +167,12 @@ public function vendors()
     {
         $path = [$this->name];
         $parent = $this->parent;
-        
+
         while ($parent) {
             array_unshift($path, $parent->name);
             $parent = $parent->parent;
         }
-        
+
         return implode(' > ', $path);
     }
 
@@ -267,7 +223,7 @@ public function vendors()
         ];
 
         $lowercaseName = strtolower($this->name);
-        
+
         foreach ($icons as $key => $icon) {
             if (strpos($lowercaseName, $key) !== false) {
                 return $icon;
@@ -285,9 +241,41 @@ public function vendors()
         if ($this->image) {
             return asset('storage/' . $this->image);
         }
-        
+
         return null;
     }
+
+
+
+
+
+    /**
+     * Get the thumbnail URL
+     */
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        if ($this->image) {
+            $path = pathinfo($this->image, PATHINFO_DIRNAME);
+            $filename = pathinfo($this->image, PATHINFO_FILENAME);
+            return asset('storage/' . $path . '/thumbnails/' . $filename . '.jpg');
+        }
+
+        return $this->image_url;
+    }
+
+    /**
+     * Get background color for fallback
+     */
+    public function getBackgroundColorAttribute(): string
+    {
+        return $this->image_color ?? '#E5E7EB';
+    }
+
+
+
+
+
+    
 
     /**
      * Get the short description (excerpt).
@@ -297,9 +285,9 @@ public function vendors()
         if (!$this->description) {
             return "Find the best " . $this->name . " vendors in Jimma and across Ethiopia.";
         }
-        
-        return strlen($this->description) > 100 
-            ? substr($this->description, 0, 100) . '...' 
+
+        return strlen($this->description) > 100
+            ? substr($this->description, 0, 100) . '...'
             : $this->description;
     }
 
@@ -486,11 +474,11 @@ public function vendors()
             if (empty($category->slug)) {
                 $category->slug = Str::slug($category->name);
             }
-            
+
             // Ensure slug is unique
             $originalSlug = $category->slug;
             $counter = 1;
-            
+
             while (static::where('slug', $category->slug)->exists()) {
                 $category->slug = $originalSlug . '-' . $counter++;
             }
@@ -500,16 +488,16 @@ public function vendors()
         static::updating(function ($category) {
             if ($category->isDirty('name')) {
                 $newSlug = Str::slug($category->name);
-                
+
                 // Check if new slug is different and not already taken
                 if ($newSlug !== $category->getOriginal('slug')) {
                     $originalSlug = $newSlug;
                     $counter = 1;
-                    
+
                     while (static::where('slug', $newSlug)->where('id', '!=', $category->id)->exists()) {
                         $newSlug = $originalSlug . '-' . $counter++;
                     }
-                    
+
                     $category->slug = $newSlug;
                 }
             }
@@ -521,10 +509,10 @@ public function vendors()
             if ($category->children()->exists()) {
                 $category->children()->update(['parent_id' => null]);
             }
-            
+
             // Detach all vendors
             $category->vendors()->detach();
-            
+
             // Set category_id to null for products
             if ($category->products()->exists()) {
                 $category->products()->update(['category_id' => null]);

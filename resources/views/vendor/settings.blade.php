@@ -1018,7 +1018,7 @@
                         @if($user->avatar)
                             <div class="image-preview" id="currentAvatar">
                                 <div class="current-image">
-                                    <img src="{{ Storage::url($user->avatar) }}" alt="Current avatar">
+                                    <img src="{{ $user->avatar_url }}" alt="Current avatar">
                                 </div>
                                 <div class="image-actions">
                                     <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('remove_avatar').checked = true; document.getElementById('currentAvatar').style.display = 'none';">
@@ -1048,7 +1048,17 @@
                         @if($user->main_image)
                             <div class="image-preview" id="currentMainImage">
                                 <div class="current-image" style="width: 200px;">
-                                    <img src="{{ Storage::url($user->main_image) }}" alt="Main banner">
+                                    @php
+                                        $bannerPreview = filter_var($user->main_image, FILTER_VALIDATE_URL)
+                                            ? $user->main_image
+                                            : (Storage::disk('public')->exists(ltrim($user->main_image, '/'))
+                                                ? Storage::url(ltrim($user->main_image, '/'))
+                                                : null);
+                                    @endphp
+                                    @if($bannerPreview)
+                                        <img src="{{ $bannerPreview }}" alt="Main banner">
+                                    @endif
+                                </div>
                                 </div>
                                 <div class="image-actions">
                                     <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('remove_main_image').checked = true; document.getElementById('currentMainImage').style.display = 'none';">

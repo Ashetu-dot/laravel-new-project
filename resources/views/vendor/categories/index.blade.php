@@ -185,7 +185,16 @@
             margin-right: 12px;
         }
 
-        .user-info h4 {
+         .profile-avatar-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--white);
+            box-shadow: var(--shadow);
+        }
+       
+           .user-info h4 {
             color: white;
             font-size: 14px;
             margin-bottom: 2px;
@@ -891,7 +900,7 @@
             <form id="categoryForm" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" id="categoryId" name="id">
-                
+
                 <div class="modal-body">
                     <div class="form-group">
                         <label class="form-label">Category Name <span style="color: var(--accent-red);">*</span></label>
@@ -975,9 +984,7 @@
         <div class="brand">
             <i class="ri-store-3-fill"></i>
             Vendora
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma
-            </span>
+            
         </div>
 
         <div class="nav-menu">
@@ -1035,15 +1042,13 @@
         </div>
 
         <div class="user-profile">
-            <div class="avatar">
-                @if($vendor->profile_image)
-                    <img src="{{ Storage::url($vendor->profile_image) }}" alt="{{ $vendor->business_name ?? $vendor->name }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
-                @elseif($vendor->main_image)
-                    <img src="{{ Storage::url($vendor->main_image) }}" alt="{{ $vendor->business_name ?? $vendor->name }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
-                @else
-                    {{ strtoupper(substr($vendor->business_name ?? $vendor->name, 0, 2)) }}
-                @endif
-            </div>
+            @if(Auth::user()->avatar)
+                <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->business_name ?? Auth::user()->name }}" class="profile-avatar-img">
+            @else
+                <div class="avatar">
+                    {{ substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2) }}
+                </div>
+            @endif
             <div class="user-info">
                 <h4>{{ $vendor->business_name ?? $vendor->name }}</h4>
                 <p>Vendor since {{ $vendor->created_at->format('M Y') }}</p>
@@ -1101,7 +1106,7 @@
                         <div class="stat-value">{{ $categories->count() }}</div>
                     </div>
                 </div>
-                
+
                 <div class="stat-card">
                     <div class="stat-icon bg-green-light">
                         <i class="ri-product-hunt-line"></i>
@@ -1111,7 +1116,7 @@
                         <div class="stat-value">{{ $categories->sum('products_count') }}</div>
                     </div>
                 </div>
-                
+
                 <div class="stat-card">
                     <div class="stat-icon bg-yellow-light">
                         <i class="ri-stack-line"></i>
@@ -1121,7 +1126,7 @@
                         <div class="stat-value">{{ $categories->whereNull('parent_id')->count() }}</div>
                     </div>
                 </div>
-                
+
                 <div class="stat-card">
                     <div class="stat-icon bg-purple-light">
                         <i class="ri-star-line"></i>
@@ -1166,11 +1171,11 @@
                             @endif
                         </div>
                     </div>
-                    
+
                     <div class="category-description">
                         {{ $category->description ?? 'No description available.' }}
                     </div>
-                    
+
                     <div class="category-footer">
                         <div class="product-count">
                             <i class="ri-shopping-bag-3-line"></i>
@@ -1178,7 +1183,7 @@
                         </div>
                         <span class="category-slug">{{ $category->slug }}</span>
                     </div>
-                    
+
                     @if($category->parent)
                     <div style="margin-top: 8px; font-size: 12px; color: var(--text-secondary);">
                         <i class="ri-arrow-up-line"></i> Parent: {{ $category->parent->name }}
@@ -1259,7 +1264,7 @@
                         document.getElementById('categoryDescription').value = category.description || '';
                         document.getElementById('categoryParent').value = category.parent_id || '';
                         document.getElementById('categoryActive').checked = category.is_active;
-                        
+
                         if (category.image) {
                             const preview = document.getElementById('imagePreview');
                             const imageUrl = category.image.startsWith('http') ? category.image : `/storage/${category.image}`;
@@ -1272,7 +1277,7 @@
                             `;
                             preview.classList.add('active');
                         }
-                        
+
                         document.getElementById('categoryModal').classList.add('active');
                         document.body.style.overflow = 'hidden';
                     }
@@ -1323,7 +1328,7 @@
         document.getElementById('categoryImage').addEventListener('change', function(e) {
             const preview = document.getElementById('imagePreview');
             const file = e.target.files[0];
-            
+
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -1364,12 +1369,12 @@
             formData.append('description', document.getElementById('categoryDescription').value);
             formData.append('parent_id', document.getElementById('categoryParent').value || '');
             formData.append('is_active', document.getElementById('categoryActive').checked ? '1' : '0');
-            
+
             const imageFile = document.getElementById('categoryImage').files[0];
             if (imageFile) {
                 formData.append('image', imageFile);
             }
-            
+
             if (currentImageDeleted) {
                 formData.append('delete_image', '1');
             }

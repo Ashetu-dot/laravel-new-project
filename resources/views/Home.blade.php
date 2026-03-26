@@ -983,6 +983,21 @@
             align-items: center;
             justify-content: center;
             font-size: 48px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .local-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            inset: 0;
+        }
+
+        .local-image .local-icon {
+            position: relative;
+            z-index: 1;
             color: white;
         }
 
@@ -1070,6 +1085,16 @@
             color: white;
             font-weight: 600;
             flex-shrink: 0;
+            object-fit: cover;
+            overflow: hidden;
+        }
+
+        img.testimonial-avatar {
+            display: block;
+            background: none;
+            object-fit: cover;
+            width: 48px;
+            height: 48px;
         }
 
         .testimonial-info h4 {
@@ -1665,6 +1690,7 @@
             <a href="#categories" class="nav-item">{{ $t['categories'] }}</a>
             <a href="#features" class="nav-item">{{ $t['features'] }}</a>
             <a href="{{ route('list-service') }}" class="nav-item">{{ $t['for_vendors'] }}</a>
+            <a href="{{ route('documentation') }}" class="nav-item">Documentation</a>
 
             @guest
                 <a href="{{ route('login') }}" class="nav-item">{{ $t['log_in'] }}</a>
@@ -1841,6 +1867,7 @@
         <a href="#categories" class="nav-item">{{ $t['categories'] }}</a>
         <a href="#features" class="nav-item">{{ $t['features'] }}</a>
         <a href="{{ route('list-service') }}" class="nav-item">{{ $t['for_vendors'] }}</a>
+        <a href="{{ route('documentation') }}" class="nav-item">Documentation</a>
 
         <div style="padding: 15px 0; border-bottom: 1px solid var(--border-color);">
             <div style="margin-bottom: 10px; font-weight: 600;">{{ $t['language'] }}:</div>
@@ -1959,7 +1986,11 @@
         <div class="categories-grid">
             @forelse($popularCategories ?? [] as $category)
             <a href="{{ route('search.results', ['category' => $category->slug ?? '']) }}" class="category-item">
-                <i class="{{ $category->icon ?? 'ri-price-tag-3-line' }} cat-icon"></i>
+                @if($category->image)
+                    <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="cat-icon" style="width:48px;height:48px;object-fit:cover;border-radius:10px;">
+                @else
+                    <i class="{{ $category->icon ?? 'ri-price-tag-3-line' }} cat-icon"></i>
+                @endif
                 <span class="cat-name">{{ $category->name ?? '' }}</span>
             </a>
             @empty
@@ -2001,7 +2032,11 @@
             @forelse($jimmaCategories ?? [] as $localCat)
             <a href="{{ route('search.results', ['category' => $localCat->slug ?? '', 'location' => 'Jimma']) }}" class="local-card">
                 <div class="local-image">
-                    <i class="{{ $localCat->icon ?? 'ri-store-line' }}"></i>
+                    @if($localCat->image_url)
+                        <img src="{{ $localCat->image_url }}" alt="{{ $localCat->name }}" loading="lazy">
+                    @else
+                        <span class="local-icon"><i class="{{ $localCat->icon ?? 'ri-store-line' }}"></i></span>
+                    @endif
                 </div>
                 <div class="local-content">
                     <h3>{{ $localCat->name ?? '' }}</h3>
@@ -2084,7 +2119,7 @@
                 <div class="testimonial-card">
                     <p class="testimonial-text">"{{ $testimonial->content ?? '' }}"</p>
                     <div class="testimonial-author">
-                        <div class="testimonial-avatar">{{ strtoupper(substr($testimonial->author_name ?? 'AA', 0, 2)) }}</div>
+                        <img class="testimonial-avatar" src="{{ $testimonial->avatar_url }}" alt="{{ $testimonial->author_name }}" style="object-fit:cover;">
                         <div class="testimonial-info">
                             <h4>{{ $testimonial->author_name ?? '' }}</h4>
                             <p>{{ $testimonial->author_role ?? '' }}</p>

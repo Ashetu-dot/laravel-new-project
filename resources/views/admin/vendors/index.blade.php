@@ -704,9 +704,13 @@
         </div>
 
         <div class="user-profile">
-            <div class="avatar">
+            {{--  <div class="avatar">
                 {{ substr(Auth::user()->name ?? 'AD', 0, 2) }}
-            </div>
+            </div>  --}}
+             <img src="{{ Auth::user()->avatar_url }}"
+                 alt="{{ Auth::user()->name }}"
+                 class="avatar"
+                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode(substr(Auth::user()->name ?? 'AD', 0, 2)) }}&background=B88E3F&color=fff&size=80';">
             <div class="user-info">
                 <h4>{{ Auth::user()->name ?? 'Admin User' }}</h4>
                 <p>{{ Auth::user()->role ?? 'Super Admin' }}</p>

@@ -733,9 +733,7 @@
         <a href="{{ route('home') }}" class="logo">
             <i class="ri-store-3-fill"></i>
             Vendora
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma, Ethiopia
-            </span>
+            
         </a>
 
         <div class="mobile-menu-btn" onclick="toggleMobileMenu()">

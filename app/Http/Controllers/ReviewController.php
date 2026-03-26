@@ -40,9 +40,12 @@ class ReviewController extends Controller
         
         // Get vendor's product IDs
         $vendorProductIds = Product::where('vendor_id', $user->id)->pluck('id');
-        
-        // Build query for reviews on vendor's products
-        $query = Review::whereIn('product_id', $vendorProductIds)
+
+        // Build query — product reviews + direct vendor reviews
+        $query = Review::where(function($q) use ($vendorProductIds, $user) {
+                $q->whereIn('product_id', $vendorProductIds)
+                  ->orWhere('vendor_id', $user->id);
+            })
             ->with(['user', 'product'])
             ->orderBy('created_at', 'desc');
         
@@ -99,21 +102,22 @@ class ReviewController extends Controller
             }
         }
         
-        // Get statistics
-        $totalReviews = Review::whereIn('product_id', $vendorProductIds)->count();
-        $averageRating = round(Review::whereIn('product_id', $vendorProductIds)->where('is_approved', true)->avg('rating') ?? 0, 1);
-        $pendingReviews = Review::whereIn('product_id', $vendorProductIds)->whereNull('is_approved')->count();
-        $approvedReviews = Review::whereIn('product_id', $vendorProductIds)->where('is_approved', true)->count();
-        $rejectedReviews = Review::whereIn('product_id', $vendorProductIds)->where('is_approved', false)->count();
+        // Get statistics (product reviews + direct vendor reviews)
+        $baseQuery = fn() => Review::where(function($q) use ($vendorProductIds, $user) {
+            $q->whereIn('product_id', $vendorProductIds)->orWhere('vendor_id', $user->id);
+        });
+
+        $totalReviews        = $baseQuery()->count();
+        $averageRating       = round($baseQuery()->where('is_approved', true)->avg('rating') ?? 0, 1);
+        $pendingReviews      = $baseQuery()->where('is_approved', false)->count();
+        $approvedReviews     = $baseQuery()->where('is_approved', true)->count();
+        $rejectedReviews     = $baseQuery()->where('is_approved', false)->count();
         $productsWithReviews = Review::whereIn('product_id', $vendorProductIds)->distinct('product_id')->count('product_id');
-        
-        $ratingDistribution = [
-            5 => Review::whereIn('product_id', $vendorProductIds)->where('rating', 5)->count(),
-            4 => Review::whereIn('product_id', $vendorProductIds)->where('rating', 4)->count(),
-            3 => Review::whereIn('product_id', $vendorProductIds)->where('rating', 3)->count(),
-            2 => Review::whereIn('product_id', $vendorProductIds)->where('rating', 2)->count(),
-            1 => Review::whereIn('product_id', $vendorProductIds)->where('rating', 1)->count(),
-        ];
+
+        $ratingDistribution = [];
+        foreach ([5,4,3,2,1] as $star) {
+            $ratingDistribution[$star] = $baseQuery()->where('rating', $star)->count();
+        }
         
         // Paginate results
         $reviews = $query->paginate(15)->withQueryString();
@@ -209,55 +213,43 @@ class ReviewController extends Controller
     public function approve($id)
     {
         $user = Auth::user();
-        
+
         try {
-            $review = Review::whereHas('product', function($q) use ($user) {
-                $q->where('vendor_id', $user->id);
+            $review = Review::where(function($q) use ($user) {
+                $q->whereHas('product', fn($p) => $p->where('vendor_id', $user->id))
+                  ->orWhere('vendor_id', $user->id);
             })->findOrFail($id);
-            
+
             $review->is_approved = true;
-            $review->approved_at = now();
             $review->save();
-            
-            // Update product average rating
-            $this->updateProductRating($review->product_id);
-            
-            // Create notification for the customer
+
+            if ($review->product_id) $this->updateProductRating($review->product_id);
+            if ($review->vendor_id)  $this->updateVendorRating($review->vendor_id);
+
             try {
+                $subject = $review->product->name ?? 'your store';
                 Notification::create([
-                    'user_id' => $review->user_id,
-                    'type' => 'review_approved',
-                    'title' => 'Review Approved',
-                    'message' => 'Your review for ' . $review->product->name . ' has been approved and published.',
-                    'data' => json_encode([
-                        'review_id' => $review->id,
-                        'product_id' => $review->product_id,
-                        'product_name' => $review->product->name
-                    ]),
-                    'is_read' => false,
+                    'user_id'  => $review->user_id,
+                    'type'     => 'review_approved',
+                    'title'    => 'Review Approved',
+                    'message'  => 'Your review for ' . $subject . ' has been approved and published.',
+                    'data'     => json_encode(['review_id' => $review->id]),
+                    'is_read'  => false,
                 ]);
             } catch (\Exception $e) {
                 Log::warning('Failed to create review approval notification: ' . $e->getMessage());
             }
-            
+
             if (request()->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Review approved successfully'
-                ]);
+                return response()->json(['success' => true, 'message' => 'Review approved successfully']);
             }
-            
             return redirect()->back()->with('success', 'Review approved successfully!');
+
         } catch (\Exception $e) {
             Log::error('Error approving review: ' . $e->getMessage());
-            
             if (request()->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to approve review'
-                ], 500);
+                return response()->json(['success' => false, 'message' => 'Failed to approve review'], 500);
             }
-            
             return redirect()->back()->with('error', 'Failed to approve review.');
         }
     }
@@ -268,52 +260,40 @@ class ReviewController extends Controller
     public function reject($id)
     {
         $user = Auth::user();
-        
+
         try {
-            $review = Review::whereHas('product', function($q) use ($user) {
-                $q->where('vendor_id', $user->id);
+            $review = Review::where(function($q) use ($user) {
+                $q->whereHas('product', fn($p) => $p->where('vendor_id', $user->id))
+                  ->orWhere('vendor_id', $user->id);
             })->findOrFail($id);
-            
+
             $review->is_approved = false;
-            $review->rejected_at = now();
             $review->save();
-            
-            // Create notification for the customer
+
             try {
+                $subject = $review->product->name ?? 'your store';
                 Notification::create([
-                    'user_id' => $review->user_id,
-                    'type' => 'review_rejected',
-                    'title' => 'Review Not Approved',
-                    'message' => 'Your review for ' . $review->product->name . ' was not approved.',
-                    'data' => json_encode([
-                        'review_id' => $review->id,
-                        'product_id' => $review->product_id,
-                        'product_name' => $review->product->name
-                    ]),
-                    'is_read' => false,
+                    'user_id'  => $review->user_id,
+                    'type'     => 'review_rejected',
+                    'title'    => 'Review Not Approved',
+                    'message'  => 'Your review for ' . $subject . ' was not approved.',
+                    'data'     => json_encode(['review_id' => $review->id]),
+                    'is_read'  => false,
                 ]);
             } catch (\Exception $e) {
                 Log::warning('Failed to create review rejection notification: ' . $e->getMessage());
             }
-            
+
             if (request()->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Review rejected successfully'
-                ]);
+                return response()->json(['success' => true, 'message' => 'Review rejected successfully']);
             }
-            
             return redirect()->back()->with('success', 'Review rejected successfully!');
+
         } catch (\Exception $e) {
             Log::error('Error rejecting review: ' . $e->getMessage());
-            
             if (request()->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to reject review'
-                ], 500);
+                return response()->json(['success' => false, 'message' => 'Failed to reject review'], 500);
             }
-            
             return redirect()->back()->with('error', 'Failed to reject review.');
         }
     }
@@ -324,48 +304,38 @@ class ReviewController extends Controller
     public function destroy($id)
     {
         $user = Auth::user();
-        
+
         try {
-            $review = Review::whereHas('product', function($q) use ($user) {
-                $q->where('vendor_id', $user->id);
+            $review = Review::where(function($q) use ($user) {
+                $q->whereHas('product', fn($p) => $p->where('vendor_id', $user->id))
+                  ->orWhere('vendor_id', $user->id);
             })->findOrFail($id);
-            
+
             $productId = $review->product_id;
-            $productName = $review->product->name;
-            
-            // Delete associated images if they exist
+            $vendorId  = $review->vendor_id;
+
             if ($review->images) {
                 $images = is_string($review->images) ? json_decode($review->images, true) : $review->images;
                 if (is_array($images)) {
-                    foreach ($images as $image) {
-                        Storage::disk('public')->delete($image);
-                    }
+                    foreach ($images as $image) Storage::disk('public')->delete($image);
                 }
             }
-            
+
             $review->delete();
-            
-            // Update product average rating
-            $this->updateProductRating($productId);
-            
+
+            if ($productId) $this->updateProductRating($productId);
+            if ($vendorId)  $this->updateVendorRating($vendorId);
+
             if (request()->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Review deleted successfully'
-                ]);
+                return response()->json(['success' => true, 'message' => 'Review deleted successfully']);
             }
-            
             return redirect()->back()->with('success', 'Review deleted successfully!');
+
         } catch (\Exception $e) {
             Log::error('Error deleting review: ' . $e->getMessage());
-            
             if (request()->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to delete review'
-                ], 500);
+                return response()->json(['success' => false, 'message' => 'Failed to delete review'], 500);
             }
-            
             return redirect()->back()->with('error', 'Failed to delete review.');
         }
     }

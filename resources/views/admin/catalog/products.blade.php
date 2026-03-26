@@ -1119,9 +1119,7 @@
         <div class="brand">
             <i class="ri-store-3-fill"></i>
             Vendora
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma
-            </span>
+            
         </div>
 
         <div class="nav-menu">
@@ -1339,7 +1337,7 @@
                     @if($products->count() > 0)
                     <div class="results-info">
                         <i class="ri-file-list-line"></i>
-                        Showing <strong>{{ $products->firstItem() }}</strong> - <strong>{{ $products->lastItem() }}</strong> 
+                        Showing <strong>{{ $products->firstItem() }}</strong> - <strong>{{ $products->lastItem() }}</strong>
                         of <strong>{{ $products->total() }}</strong> products
                     </div>
                     @endif
@@ -1433,7 +1431,7 @@
                 <div class="pagination-wrapper">
                     <div class="pagination-info">
                         <i class="ri-file-list-line"></i>
-                        Showing <strong>{{ $products->firstItem() }}</strong> - <strong>{{ $products->lastItem() }}</strong> 
+                        Showing <strong>{{ $products->firstItem() }}</strong> - <strong>{{ $products->lastItem() }}</strong>
                         of <strong>{{ $products->total() }}</strong> results
                     </div>
 
@@ -1502,7 +1500,7 @@
                 menuToggle.addEventListener('click', function(e) {
                     e.stopPropagation();
                     sidebar.classList.toggle('active');
-                    
+
                     // Change icon based on state
                     const icon = this.querySelector('i');
                     if (icon) {
@@ -1567,6 +1565,6 @@
         });
     </script>
 
-  
+
 </body>
 </html>

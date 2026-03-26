@@ -98,6 +98,10 @@ Route::get('/features', [VendorCustomerController::class, 'features'])->name('fe
 // List Service
 Route::get('/list-service', [VendorCustomerController::class, 'listService'])->name('list-service');
 
+// Documentation
+Route::get('/documentation', [VendorCustomerController::class, 'documentation'])->name('documentation');
+Route::post('/documentation/feedback', [VendorCustomerController::class, 'documentationFeedback'])->name('documentation.feedback');
+
 // // Vendor Resources
 // Route::get('/vendor-resources', [VendorCustomerController::class, 'vendorResources'])->name('vendor-resources');
 
@@ -756,6 +760,7 @@ Route::post('/contact/submit', [VendorCustomerController::class, 'contactSubmit'
 // REVIEW ROUTES
 // =========================================================================
 Route::get('/vendors/{id}/reviews', [VendorCustomerController::class, 'loadMoreReviews'])->name('vendor.reviews');
+Route::post('/vendors/{id}/reviews', [VendorCustomerController::class, 'storeVendorReview'])->name('vendor.review.store')->middleware('auth');
 
 // =========================================================================
 // FALLBACK ROUTE (404 handling)

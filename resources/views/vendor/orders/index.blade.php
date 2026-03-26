@@ -183,6 +183,15 @@
             margin-right: 12px;
         }
 
+           .profile-avatar-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--white);
+            box-shadow: var(--shadow);
+        }
+
         .user-info h4 {
             color: white;
             font-size: 14px;
@@ -725,9 +734,7 @@
     <div class="brand">
         <i class="ri-store-3-fill"></i>
         Vendora
-        <span class="ethiopia-badge">
-            <i class="ri-map-pin-line"></i> Jimma
-        </span>
+        
     </div>
 
     <div class="nav-menu">
@@ -788,9 +795,13 @@
     </div>
 
     <div class="user-profile">
-        <div class="avatar">
-            {{ substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2) }}
-        </div>
+         @if($user->avatar)
+                            <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->business_name ?? $user->name }}" class="profile-avatar-img">
+                        @else
+            <div class="avatar">
+                {{ substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2) }}
+            </div>
+            @endif
         <div class="user-info">
             <h4>{{ Auth::user()->business_name ?? Auth::user()->name }}</h4>
             <p>Vendor since {{ Auth::user()->created_at->format('M Y') }}</p>

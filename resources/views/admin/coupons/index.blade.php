@@ -654,9 +654,7 @@
         <div class="brand">
             <i class="ri-store-3-fill"></i>
             Vendora
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma
-            </span>
+            
         </div>
 
         <div class="nav-menu">

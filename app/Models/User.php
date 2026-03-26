@@ -111,6 +111,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $appends = [
         'avatar_url',
+        'banner_url',
         'full_address',
         'location_string',
         'rating_stars',
@@ -465,22 +466,49 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getAvatarUrlAttribute(): string
     {
-        if ($this->avatar && Storage::disk('public')->exists($this->avatar)) {
-            return Storage::url($this->avatar);
+        if ($this->avatar) {
+            // Full URL (e.g. Unsplash) — return as-is
+            if (filter_var($this->avatar, FILTER_VALIDATE_URL)) {
+                return $this->avatar;
+            }
+            // Local storage path
+            if (Storage::disk('public')->exists(ltrim($this->avatar, '/'))) {
+                return Storage::url(ltrim($this->avatar, '/'));
+            }
         }
 
         $name = $this->business_name ?? $this->name ?? 'User';
         $initials = '';
-        $words = explode(' ', $name);
-
-        foreach ($words as $word) {
-            if (!empty($word)) {
-                $initials .= strtoupper(substr($word, 0, 1));
-            }
+        foreach (explode(' ', $name) as $word) {
+            if (!empty($word)) $initials .= strtoupper(substr($word, 0, 1));
         }
 
         return 'https://ui-avatars.com/api/?name=' . urlencode($initials ?: 'U') . '&background=B88E3F&color=fff&size=200';
     }
+
+    /**
+     * Resolve the vendor's banner URL from main_image → sub_image_1 → null.
+     * Returns null when no banner is set (let the view decide the fallback).
+     */
+    public function getBannerUrlAttribute(): ?string
+    {
+        foreach (['main_image', 'sub_image_1'] as $field) {
+            $value = $this->$field;
+            if (!$value) continue;
+
+            if (filter_var($value, FILTER_VALIDATE_URL)) {
+                return $value;
+            }
+
+            $path = ltrim($value, '/');
+            if (Storage::disk('public')->exists($path)) {
+                return Storage::url($path);
+            }
+        }
+
+        return null;
+    }
+
 
     /**
      * Get the full address attribute.

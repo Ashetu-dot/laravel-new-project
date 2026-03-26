@@ -864,9 +864,7 @@
         <div class="brand">
             <i class="ri-store-3-fill"></i>
             Vendora
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma
-            </span>
+            
         </div>
 
         <div class="nav-menu">
@@ -928,11 +926,7 @@
 
         <div class="user-profile">
             <div class="avatar">
-                @if(Auth::user()->avatar)
-                    <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->business_name ?? Auth::user()->name }}">
-                @else
-                    {{ strtoupper(substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2)) }}
-                @endif
+                <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->business_name ?? Auth::user()->name }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
             </div>
             <div class="user-info">
                 <h4>{{ Auth::user()->business_name ?? Auth::user()->name }}</h4>
@@ -1077,26 +1071,39 @@
                             <td>
                                 <div class="product-info">
                                     <div class="product-image">
-                                        @if($review->product && $review->product->image)
-                                            <img src="{{ Storage::url($review->product->image) }}" alt="{{ $review->product->name }}">
+                                        @php
+                                            $pImg = null;
+                                            if ($review->product) {
+                                                $imgs = $review->product->images;
+                                                if (is_string($imgs)) $imgs = json_decode($imgs, true);
+                                                $raw = is_array($imgs) ? ($imgs[0] ?? null) : null;
+                                                if ($raw) {
+                                                    $pImg = filter_var($raw, FILTER_VALIDATE_URL)
+                                                        ? $raw
+                                                        : (Storage::disk('public')->exists(ltrim($raw, '/'))
+                                                            ? Storage::url(ltrim($raw, '/'))
+                                                            : null);
+                                                }
+                                            }
+                                        @endphp
+                                        @if($pImg)
+                                            <img src="{{ $pImg }}" alt="{{ $review->product->name }}">
                                         @else
                                             <i class="ri-shopping-bag-line"></i>
                                         @endif
                                     </div>
                                     <div>
-                                        <div class="product-name">{{ $review->product->name ?? 'Unknown Product' }}</div>
-                                        <div class="product-category">{{ $review->product->category ?? 'N/A' }}</div>
+                                        <div class="product-name">{{ $review->product->name ?? 'Vendor Review' }}</div>
+                                        <div class="product-category">{{ $review->product->category ?? ($review->vendor_id ? 'Store Review' : 'N/A') }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td>
                                 <div class="customer-info">
                                     <div class="customer-avatar">
-                                        @if($review->user && $review->user->avatar)
-                                            <img src="{{ Storage::url($review->user->avatar) }}" alt="{{ $review->user->name }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                                        @else
-                                            {{ $review->user ? strtoupper(substr($review->user->name, 0, 2)) : 'GU' }}
-                                        @endif
+                                        <img src="{{ $review->user?->avatar_url ?? 'https://ui-avatars.com/api/?name=GU&background=B88E3F&color=fff&size=80' }}"
+                                             alt="{{ $review->user->name ?? 'Guest' }}"
+                                             style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
                                     </div>
                                     <div>
                                         <div class="customer-name">{{ $review->user->name ?? 'Guest User' }}</div>
@@ -1283,14 +1290,14 @@
                 if (data.success) {
                     displayReviewModal(data.data);
                 } else {
-                    alert('Failed to load review details');
+                    showToast('Failed to load review details', 'error');
                 }
                 document.getElementById('loadingOverlay').style.display = 'none';
             })
             .catch(error => {
                 console.error('Error:', error);
                 document.getElementById('loadingOverlay').style.display = 'none';
-                alert('Failed to load review details');
+                showToast('Failed to load review details', 'error');
             });
         }
 
@@ -1378,94 +1385,60 @@
             document.getElementById('reviewModal').classList.remove('active');
         }
 
+        // ── Toast ──────────────────────────────────────────────────────
+        function showToast(msg, type = 'info') {
+            let c = document.getElementById('toastContainer');
+            if (!c) {
+                c = document.createElement('div');
+                c.id = 'toastContainer';
+                c.style.cssText = 'position:fixed;top:1.2rem;right:1.2rem;z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;';
+                document.body.appendChild(c);
+            }
+            const bg = {success:'#059669',error:'#DC2626',info:'#3b82f6',warning:'#D97706'}[type]||'#3b82f6';
+            const ic = {success:'ri-checkbox-circle-line',error:'ri-error-warning-line',info:'ri-information-line',warning:'ri-alert-line'}[type]||'ri-information-line';
+            const t = document.createElement('div');
+            t.style.cssText = `pointer-events:auto;min-width:260px;max-width:380px;padding:12px 16px;border-radius:8px;color:#fff;font-size:14px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,0.2);background:${bg};`;
+            t.innerHTML = `<i class="${ic}" style="font-size:18px;flex-shrink:0;"></i><span>${msg}</span>`;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 4000);
+        }
+
+        function reviewAction(url, method, successMsg, confirmMsg) {
+            if (!confirm(confirmMsg)) return;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            fetch(url, {
+                method,
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                if (data.success) {
+                    showToast(data.message || successMsg, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.message || 'Something went wrong.', 'error');
+                }
+            })
+            .catch(() => {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showToast('Network error. Please try again.', 'error');
+            });
+        }
+
         // Approve review
         function approveReview(reviewId) {
-            if (!confirm('Are you sure you want to approve this review?')) return;
-            
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            
-            fetch(`/vendor/reviews/${reviewId}/approve`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Failed to approve review: ' + (data.message || 'Unknown error'));
-                }
-                document.getElementById('loadingOverlay').style.display = 'none';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('loadingOverlay').style.display = 'none';
-                alert('Failed to approve review');
-            });
+            reviewAction(`/vendor/reviews/${reviewId}/approve`, 'POST', 'Review approved successfully', 'Approve this review?');
         }
 
         // Reject review
         function rejectReview(reviewId) {
-            if (!confirm('Are you sure you want to reject this review?')) return;
-            
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            
-            fetch(`/vendor/reviews/${reviewId}/reject`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Failed to reject review: ' + (data.message || 'Unknown error'));
-                }
-                document.getElementById('loadingOverlay').style.display = 'none';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('loadingOverlay').style.display = 'none';
-                alert('Failed to reject review');
-            });
+            reviewAction(`/vendor/reviews/${reviewId}/reject`, 'POST', 'Review rejected successfully', 'Reject this review?');
         }
 
         // Delete review
         function deleteReview(reviewId) {
-            if (!confirm('Are you sure you want to delete this review? This action cannot be undone.')) return;
-            
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            
-            fetch(`/vendor/reviews/${reviewId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Failed to delete review: ' + (data.message || 'Unknown error'));
-                }
-                document.getElementById('loadingOverlay').style.display = 'none';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('loadingOverlay').style.display = 'none';
-                alert('Failed to delete review');
-            });
+            reviewAction(`/vendor/reviews/${reviewId}`, 'DELETE', 'Review deleted successfully', 'Delete this review? This cannot be undone.');
         }
 
         // View image

@@ -183,6 +183,15 @@
             margin-right: 12px;
         }
 
+         .profile-avatar-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--white);
+            box-shadow: var(--shadow);
+        }
+        
         .user-info h4 {
             color: white;
             font-size: 14px;
@@ -686,9 +695,7 @@
         <div class="brand">
             <i class="ri-store-3-fill"></i>
             Vendora
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma
-            </span>
+            
         </div>
 
         <div class="nav-menu">
@@ -749,9 +756,13 @@
         </div>
 
         <div class="user-profile">
+            @if(Auth::user()->avatar)
+                <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->business_name ?? Auth::user()->name }}" class="profile-avatar-img">
+            @else
             <div class="avatar">
                 {{ substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2) }}
             </div>
+            @endif
             <div class="user-info">
                 <h4>{{ Auth::user()->business_name ?? Auth::user()->name }}</h4>
                 <p>Vendor since {{ Auth::user()->created_at->format('M Y') }}</p>
@@ -795,7 +806,7 @@
             <div class="page-header">
                 <div>
                     <h1>
-                        <i class="ri-add-circle-line" style="color: var(--primary-gold);"></i> 
+                        <i class="ri-add-circle-line" style="color: var(--primary-gold);"></i>
                         Add New Product
                     </h1>
                     <p>Fill in the details below to add a new product to your store</p>
@@ -808,14 +819,14 @@
             <!-- Success/Error Messages -->
             @if(session('success'))
                 <div class="alert alert-success">
-                    <i class="ri-checkbox-circle-line"></i> 
+                    <i class="ri-checkbox-circle-line"></i>
                     {{ session('success') }}
                 </div>
             @endif
 
             @if(session('error'))
                 <div class="alert alert-error">
-                    <i class="ri-error-warning-line"></i> 
+                    <i class="ri-error-warning-line"></i>
                     {{ session('error') }}
                 </div>
             @endif
@@ -842,10 +853,10 @@
                             <label class="form-label">
                                 Product Name <span class="required">*</span>
                             </label>
-                            <input type="text" 
-                                   name="name" 
-                                   id="name" 
-                                   class="form-input @error('name') error @enderror" 
+                            <input type="text"
+                                   name="name"
+                                   id="name"
+                                   class="form-input @error('name') error @enderror"
                                    value="{{ old('name') }}"
                                    placeholder="e.g., Ethiopian Coffee, Traditional Dress, Handicraft"
                                    required>
@@ -878,10 +889,10 @@
                             </label>
                             <div class="price-input-group">
                                 <span class="price-currency">ETB</span>
-                                <input type="number" 
-                                       name="price" 
-                                       id="price" 
-                                       class="form-input @error('price') error @enderror" 
+                                <input type="number"
+                                       name="price"
+                                       id="price"
+                                       class="form-input @error('price') error @enderror"
                                        value="{{ old('price') }}"
                                        placeholder="0.00"
                                        min="0"
@@ -898,10 +909,10 @@
                             <label class="form-label">Sale Price (ETB)</label>
                             <div class="price-input-group">
                                 <span class="price-currency">ETB</span>
-                                <input type="number" 
-                                       name="sale_price" 
-                                       id="sale_price" 
-                                       class="form-input @error('sale_price') error @enderror" 
+                                <input type="number"
+                                       name="sale_price"
+                                       id="sale_price"
+                                       class="form-input @error('sale_price') error @enderror"
                                        value="{{ old('sale_price') }}"
                                        placeholder="0.00"
                                        min="0"
@@ -917,10 +928,10 @@
                             <label class="form-label">
                                 Stock Quantity <span class="required">*</span>
                             </label>
-                            <input type="number" 
-                                   name="stock" 
-                                   id="stock" 
-                                   class="form-input @error('stock') error @enderror" 
+                            <input type="number"
+                                   name="stock"
+                                   id="stock"
+                                   class="form-input @error('stock') error @enderror"
                                    value="{{ old('stock', 1) }}"
                                    placeholder="0"
                                    min="0"
@@ -934,10 +945,10 @@
                         <!-- SKU and Status -->
                         <div class="form-group">
                             <label class="form-label">SKU (Optional)</label>
-                            <input type="text" 
-                                   name="sku" 
-                                   id="sku" 
-                                   class="form-input @error('sku') error @enderror" 
+                            <input type="text"
+                                   name="sku"
+                                   id="sku"
+                                   class="form-input @error('sku') error @enderror"
                                    value="{{ old('sku') }}"
                                    placeholder="e.g., COF-001">
                             <div class="form-hint">Stock Keeping Unit - unique identifier</div>
@@ -963,9 +974,9 @@
                             <label class="form-label">
                                 Description <span class="required">*</span>
                             </label>
-                            <textarea name="description" 
-                                      id="description" 
-                                      class="form-textarea @error('description') error @enderror" 
+                            <textarea name="description"
+                                      id="description"
+                                      class="form-textarea @error('description') error @enderror"
                                       placeholder="Describe your product in detail. Include materials, dimensions, care instructions, etc."
                                       required>{{ old('description') }}</textarea>
                             <div class="form-hint" id="charCount">0/500 characters</div>
@@ -981,11 +992,11 @@
                                 <i class="ri-upload-cloud-2-line file-upload-icon"></i>
                                 <div class="file-upload-text">Click to upload or drag and drop</div>
                                 <div class="file-upload-hint">SVG, PNG, JPG or GIF (max. 5MB per image, up to 5 images)</div>
-                                <input type="file" 
-                                       name="images[]" 
-                                       id="images" 
-                                       style="display: none;" 
-                                       accept="image/*" 
+                                <input type="file"
+                                       name="images[]"
+                                       id="images"
+                                       style="display: none;"
+                                       accept="image/*"
                                        multiple>
                             </div>
                             <div id="imagePreviewContainer" class="image-preview-container"></div>
@@ -1000,10 +1011,10 @@
                         <!-- Tags -->
                         <div class="form-group full-width">
                             <label class="form-label">Tags</label>
-                            <input type="text" 
-                                   name="tags" 
-                                   id="tags" 
-                                   class="form-input @error('tags') error @enderror" 
+                            <input type="text"
+                                   name="tags"
+                                   id="tags"
+                                   class="form-input @error('tags') error @enderror"
                                    value="{{ old('tags') }}"
                                    placeholder="e.g., coffee, traditional, handmade, gift">
                             <div class="form-hint">Separate tags with commas</div>
@@ -1054,7 +1065,7 @@
             // Toggle status label
             const statusToggle = document.getElementById('is_active');
             const statusLabel = document.getElementById('statusLabel');
-            
+
             if (statusToggle && statusLabel) {
                 statusToggle.addEventListener('change', function() {
                     statusLabel.textContent = this.checked ? 'Active' : 'Inactive';
@@ -1064,7 +1075,7 @@
             // Character counter for description
             const description = document.getElementById('description');
             const charCount = document.getElementById('charCount');
-            
+
             if (description && charCount) {
                 description.addEventListener('input', function() {
                     charCount.textContent = this.value.length + '/500 characters';
@@ -1079,7 +1090,7 @@
             if (fileInput && previewContainer) {
                 fileInput.addEventListener('change', function(e) {
                     const files = Array.from(e.target.files);
-                    
+
                     if (files.length > 5) {
                         alert('Maximum 5 images allowed');
                         this.value = '';
@@ -1104,7 +1115,7 @@
 
                     files.forEach((file, index) => {
                         const reader = new FileReader();
-                        
+
                         reader.onload = function(e) {
                             const previewItem = document.createElement('div');
                             previewItem.className = 'image-preview-item';
@@ -1116,7 +1127,7 @@
                             `;
                             previewContainer.appendChild(previewItem);
                         };
-                        
+
                         reader.readAsDataURL(file);
                     });
                 });
@@ -1151,19 +1162,19 @@
             const dt = new DataTransfer();
             const fileInput = document.getElementById('images');
             const files = Array.from(fileInput.files);
-            
+
             files.splice(index, 1);
-            
+
             files.forEach(file => {
                 dt.items.add(file);
             });
-            
+
             fileInput.files = dt.files;
-            
+
             // Refresh preview
             const previewContainer = document.getElementById('imagePreviewContainer');
             previewContainer.innerHTML = '';
-            
+
             Array.from(fileInput.files).forEach((file, i) => {
                 const reader = new FileReader();
                 reader.onload = function(e) {

@@ -12,14 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('categories', function (Blueprint $table) {
-            // Add vendor_id column (nullable because global categories don't belong to a vendor)
-            $table->foreignId('vendor_id')->nullable()->after('id')->constrained('users')->onDelete('cascade');
-            
-            // Add is_global column to distinguish between global and vendor-specific categories
-            $table->boolean('is_global')->default(false)->after('vendor_id');
-            
-            // Add index for better performance
-            $table->index(['vendor_id', 'is_global']);
+            if (!Schema::hasColumn('categories', 'vendor_id')) {
+                $table->foreignId('vendor_id')->nullable()->after('id')->constrained('users')->onDelete('cascade');
+            }
+            if (!Schema::hasColumn('categories', 'is_global')) {
+                $table->boolean('is_global')->default(false)->after('vendor_id');
+            }
+            if (!Schema::hasIndex('categories', 'categories_vendor_id_is_global_index')) {
+                $table->index(['vendor_id', 'is_global']);
+            }
         });
     }
 

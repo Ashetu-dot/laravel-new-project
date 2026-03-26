@@ -56,27 +56,37 @@ class VendorCustomerController extends Controller
             // Get popular categories (categories with most vendors/products)
             $popularCategories = Category::withCount('products')
                                          ->orderBy('products_count', 'desc')
-                                         ->limit(16)
+                                         ->limit(8)
                                          ->get();
 
-            // Get categories popular in Jimma
+            // Get categories popular in Jimma — fall back to all active categories if none match
             $jimmaCategories = Category::withCount(['products' => function($query) {
                 $query->whereHas('vendor', function($q) {
                     $q->where('city', 'LIKE', '%Jimma%')
                       ->orWhere('location', 'LIKE', '%Jimma%');
                 });
             }])
-            ->having('products_count', '>', 0)
+            ->where('is_active', true)
             ->orderBy('products_count', 'desc')
-            ->limit(4)
+            ->limit(8)
             ->get();
+
+            // If no Jimma-specific results, fall back to popular active categories
+            if ($jimmaCategories->isEmpty()) {
+                $jimmaCategories = Category::withCount('products')
+                    ->where('is_active', true)
+                    ->orderBy('products_count', 'desc')
+                    ->limit(4)
+                    ->get();
+            }
 
             // Get testimonials
             try {
-                $testimonials = Testimonial::where('is_active', true)
+                $testimonials = Testimonial::with('user')
+                                           ->where('is_active', true)
                                            ->orderBy('sort_order')
                                            ->orderBy('created_at', 'desc')
-                                           ->limit(6)
+                                           ->limit(3)
                                            ->get();
             } catch (\Exception $e) {
                 // If testimonials table doesn't exist, create empty collection
@@ -532,52 +542,42 @@ class VendorCustomerController extends Controller
         }
     }
 
-    // /**
-    //  * Display vendor resources page.
-    //  */
-    // public function vendorResources()
-    // {
-    //     $telegramMembers = 2500;
-    //     $whatsappMembers = 1800;
+    /**
+     * Display public documentation page.
+     */
+    public function documentation()
+    {
+        try {
+            $vendorCount = User::where('role', 'vendor')->where('is_active', true)->count() ?: 500;
+            $customerCount = User::where('role', 'customer')->where('is_active', true)->count() ?: 10000;
+            $categoryCount = Category::count() ?: 15;
+            $popularCategories = Category::withCount('products')->orderBy('products_count', 'desc')->limit(16)->get();
+            $jimmaCategories = collect([]);
+            $testimonials = collect([]);
+        } catch (\Exception $e) {
+            $vendorCount = 500;
+            $customerCount = 10000;
+            $categoryCount = 15;
+            $popularCategories = collect([]);
+            $jimmaCategories = collect([]);
+            $testimonials = collect([]);
+        }
 
-    //     return view('pages.vendor-resources', compact('telegramMembers', 'whatsappMembers'));
-    // }
+        return view('pages.help.public-documentation', compact(
+            'vendorCount', 'customerCount', 'categoryCount',
+            'popularCategories', 'jimmaCategories', 'testimonials'
+        ));
+    }
 
-    // /**
-    //  * Display success stories page.
-    //  */
-    // public function successStories()
-    // {
-    //     try {
-    //         $vendorCount = User::where('role', 'vendor')->where('is_active', true)->count();
-    //         $totalEarnings = Order::whereIn('status', ['completed', 'delivered'])->sum('total_amount');
-    //         $totalEarningsFormatted = $totalEarnings > 0 ? number_format($totalEarnings) . '+' : '5M+';
-    //         $happyCustomers = User::where('role', 'customer')->where('is_active', true)->count();
-    //         $avgGrowth = '150%';
+    /**
+     * Handle documentation feedback submission.
+     */
+    public function documentationFeedback(Request $request)
+    {
+        // Feedback is logged/stored here if needed
+        return response()->json(['success' => true]);
+    }
 
-    //         return view('pages.success-stories', compact(
-    //             'vendorCount',
-    //             'avgGrowth',
-    //             'totalEarningsFormatted',
-    //             'happyCustomers'
-    //         ));
-
-    //     } catch (\Exception $e) {
-    //         Log::error('Success stories page error: ' . $e->getMessage());
-
-    //         $vendorCount = 500;
-    //         $avgGrowth = '150%';
-    //         $totalEarningsFormatted = '5M+';
-    //         $happyCustomers = 10000;
-
-    //         return view('pages.success-stories', compact(
-    //             'vendorCount',
-    //             'avgGrowth',
-    //             'totalEarningsFormatted',
-    //             'happyCustomers'
-    //         ));
-    //     }
-    // }
 
     /**
      * Display community page.
@@ -635,7 +635,7 @@ class VendorCustomerController extends Controller
                     });
                 })
                 ->when($category, function ($q, $category) {
-                    return $q->where('category', $category);
+                    return $q->where('category', 'like', "%{$category}%");
                 })
                 ->when($location, function ($q, $location) {
                     return $q->where(function ($subQ) use ($location) {
@@ -648,7 +648,7 @@ class VendorCustomerController extends Controller
                 })
                 ->with(['products' => function($q) {
                     $q->where('is_active', true)->latest()->take(2);
-                }])
+                }, 'categories'])
                 ->withCount('followers')
                 ->orderBy('rating', 'desc')
                 ->orderBy('created_at', 'desc')
@@ -668,7 +668,12 @@ class VendorCustomerController extends Controller
                 ->limit(5)
                 ->get(['id', 'business_name', 'rating', 'products_count', 'city']);
 
-            return view('search-results', compact('vendors', 'trendingVendors'));
+            // Get all categories for the filter dropdown
+            $categories = Category::where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'slug', 'image', 'icon']);
+
+            return view('search-results', compact('vendors', 'trendingVendors', 'categories'));
 
         } catch (\Exception $e) {
             Log::error('Search error: ' . $e->getMessage());
@@ -770,14 +775,20 @@ class VendorCustomerController extends Controller
         try {
             $vendor = User::with(['products' => function($query) {
                 $query->where('is_active', true)->latest()->limit(5);
-            }])->where('role', 'vendor')
+            }, 'categories'])->where('role', 'vendor')
               ->where('is_active', true)
               ->findOrFail($vendorId);
 
-            // Prepare images
-            $mainImage = $this->getVendorImage($vendor->main_image, 'main');
-            $subImage1 = $this->getVendorImage($vendor->sub_image_1, 'sub1');
-            $subImage2 = $this->getVendorImage($vendor->sub_image_2, 'sub2');
+            // Use category images as fallbacks when vendor has no own images
+            $cats    = $vendor->categories;
+            $catImg0 = $cats->get(0)?->image_url;
+            $catImg1 = $cats->get(1)?->image_url ?? $catImg0;
+            $catImg2 = $cats->get(2)?->image_url ?? $catImg0;
+
+            $banner    = $vendor->banner_url;
+            $mainImage = $banner ?? $catImg0 ?? 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=400&fit=crop';
+            $subImage1 = $banner ?? $catImg1 ?? 'https://images.unsplash.com/photo-1565193566173-7a646c770962?w=200&fit=crop';
+            $subImage2 = $banner ?? $catImg2 ?? 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=200&fit=crop';
 
             // Get product data with pricing
             $products = $vendor->products->map(function($product) {
@@ -837,16 +848,20 @@ class VendorCustomerController extends Controller
     /**
      * Get vendor image URL
      */
-    private function getVendorImage($image, $type)
+    private function getVendorImage($image, $type, ?string $categoryFallback = null)
     {
-        if ($image && Storage::disk('public')->exists($image)) {
-            return Storage::url($image);
+        if ($image && Storage::disk('public')->exists(ltrim($image, '/'))) {
+            return Storage::url(ltrim($image, '/'));
+        }
+
+        if ($categoryFallback) {
+            return $categoryFallback;
         }
 
         $defaults = [
-            'main' => 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80',
-            'sub1' => 'https://images.unsplash.com/photo-1565193566173-7a646c770962?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-            'sub2' => 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
+            'main' => 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=400&fit=crop',
+            'sub1' => 'https://images.unsplash.com/photo-1565193566173-7a646c770962?w=200&fit=crop',
+            'sub2' => 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=200&fit=crop',
         ];
 
         return $defaults[$type] ?? $defaults['main'];
@@ -1047,6 +1062,7 @@ class VendorCustomerController extends Controller
             // Find the vendor
             $vendor = User::where('role', 'vendor')
                 ->where('is_active', true)
+                ->with('categories')
                 ->find($id);
 
             if (!$vendor) {
@@ -1068,33 +1084,38 @@ class VendorCustomerController extends Controller
                     return $product && $product->id && $product->name;
                 });
 
-            // Get reviews for vendor's products
+            // Get reviews — direct vendor reviews + product reviews combined
             $reviews = collect([]);
             $totalRating = 0;
             $reviewCount = 0;
 
+            // Direct vendor reviews (submitted via Write a Review)
+            $vendorReviews = Review::where('vendor_id', $vendor->id)
+                ->with('user')
+                ->where('is_approved', true)
+                ->latest()
+                ->take(5)
+                ->get();
+
+            // Product reviews
+            $productReviews = collect([]);
             if ($products->isNotEmpty()) {
                 $productIds = $products->pluck('id')->toArray();
-                
-                $reviews = Review::whereIn('product_id', $productIds)
+                $productReviews = Review::whereIn('product_id', $productIds)
+                    ->whereNull('vendor_id')
                     ->with('user')
                     ->where('is_approved', true)
                     ->latest()
                     ->take(5)
                     ->get();
-
-                // Calculate average rating
-                $allReviews = Review::whereIn('product_id', $productIds)
-                    ->where('is_approved', true)
-                    ->get();
-
-                if ($allReviews->isNotEmpty()) {
-                    $totalRating = $allReviews->sum('rating');
-                    $reviewCount = $allReviews->count();
-                }
             }
 
-            $averageRating = $reviewCount > 0 ? round($totalRating / $reviewCount, 1) : 4.5;
+            $reviews = $vendorReviews->merge($productReviews)->sortByDesc('created_at')->take(5);
+
+            // Rating from vendor's cached value (updated on each approved review)
+            $reviewCount = Review::where('vendor_id', $vendor->id)->where('is_approved', true)->count();
+            $avgRating   = Review::where('vendor_id', $vendor->id)->where('is_approved', true)->avg('rating');
+            $averageRating = $avgRating ? round($avgRating, 1) : ($vendor->rating ?? 4.5);
 
             // Attach data to vendor object
             $vendor->products = $products;
@@ -1197,6 +1218,50 @@ class VendorCustomerController extends Controller
             ], 500);
         }
     }
+
+    public function storeVendorReview(Request $request, $id)
+    {
+        $request->validate([
+            'rating'  => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|min:10|max:1000',
+        ]);
+
+        $vendor = User::where('role', 'vendor')->where('is_active', true)->findOrFail($id);
+
+        // Prevent reviewing own store
+        if (Auth::id() === $vendor->id) {
+            return back()->with('error', 'You cannot review your own store.');
+        }
+
+        // One review per user per vendor
+        $existing = Review::where('user_id', Auth::id())
+            ->where('vendor_id', $vendor->id)
+            ->first();
+
+        if ($existing) {
+            return back()->with('error', 'You have already reviewed this vendor.');
+        }
+
+        Review::create([
+            'user_id'     => Auth::id(),
+            'vendor_id'   => $vendor->id,
+            'product_id'  => null,
+            'rating'      => $request->rating,
+            'comment'     => $request->comment,
+            'is_approved' => false,
+        ]);
+
+        // Update vendor's cached rating & review count
+        $avg = Review::where('vendor_id', $vendor->id)->where('is_approved', true)->avg('rating');
+        $count = Review::where('vendor_id', $vendor->id)->where('is_approved', true)->count();
+        $vendor->update([
+            'rating'        => round($avg ?? 0, 1),
+            'total_reviews' => $count,
+        ]);
+
+        return back()->with('success', 'Your review has been submitted and is pending approval. Thank you!');
+    }
+
 
     /**
      * Show vendor profile (authenticated vendor viewing their own profile)
@@ -1374,17 +1439,17 @@ class VendorCustomerController extends Controller
 
         } catch (\Illuminate\Database\QueryException $e) {
             Log::error('Follow database error: ' . $e->getMessage());
-            
+
             // Check if it's a table not found error
             if (str_contains($e->getMessage(), "doesn't exist")) {
                 return back()->with('error', 'Follow feature is not properly configured. Please contact support.');
             }
-            
+
             // Check if it's a duplicate entry error
             if (str_contains($e->getMessage(), 'Duplicate entry')) {
                 return back()->with('info', 'You are already following this vendor.');
             }
-            
+
             return back()->with('error', 'Failed to follow vendor. Database error: ' . $e->getMessage());
         } catch (\Exception $e) {
             Log::error('Follow error: ' . $e->getMessage());
@@ -1444,7 +1509,7 @@ class VendorCustomerController extends Controller
                 $user = Auth::user();
             } else {
                 $user = User::findOrFail($id);
-                
+
                 // Check authorization
                 if (Auth::id() != $id && Auth::user()->role !== 'admin') {
                     abort(403);
@@ -1496,7 +1561,7 @@ class VendorCustomerController extends Controller
                 $user = Auth::user();
             } else {
                 $user = User::findOrFail($id);
-                
+
                 // Check authorization
                 if (Auth::id() != $id) {
                     abort(403);
@@ -1971,16 +2036,56 @@ public function following()
 
             $validated = $request->validate([
                 'business_name' => 'required|string|max:255',
-                'category' => 'required|string|max:100',
-                'description' => 'required|string|max:500',
-                'website' => 'nullable|url|max:255',
-                'phone' => 'nullable|string|max:20',
+                'category'      => 'required|string|max:100',
+                'description'   => 'required|string|max:500',
+                'website'       => 'nullable|url|max:255',
+                'phone'         => 'nullable|string|max:20',
                 'address_line1' => 'required|string|max:255',
                 'address_line2' => 'nullable|string|max:255',
-                'city' => 'required|string|max:100',
-                'state' => 'required|string|max:100',
-                'zip_code' => 'required|string|max:20',
+                'city'          => 'required|string|max:100',
+                'state'         => 'required|string|max:100',
+                'zip_code'      => 'required|string|max:20',
+                'avatar'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                'main_image'    => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+                'sub_image_1'   => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+                'sub_image_2'   => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             ]);
+
+            // Handle avatar upload
+            if ($request->hasFile('avatar')) {
+                if ($user->avatar && !filter_var($user->avatar, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+                $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            }
+
+            // Handle main banner image
+            if ($request->hasFile('main_image')) {
+                if ($user->main_image && !filter_var($user->main_image, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($user->main_image);
+                }
+                $validated['main_image'] = $request->file('main_image')->store('vendor-banners', 'public');
+            } elseif ($request->input('remove_main_image')) {
+                if ($user->main_image) Storage::disk('public')->delete($user->main_image);
+                $validated['main_image'] = null;
+            } else {
+                unset($validated['main_image']);
+            }
+
+            // Handle sub images
+            foreach (['sub_image_1', 'sub_image_2'] as $field) {
+                if ($request->hasFile($field)) {
+                    if ($user->$field && !filter_var($user->$field, FILTER_VALIDATE_URL)) {
+                        Storage::disk('public')->delete($user->$field);
+                    }
+                    $validated[$field] = $request->file($field)->store('vendor-banners', 'public');
+                } elseif ($request->input('remove_' . $field)) {
+                    if ($user->$field) Storage::disk('public')->delete($user->$field);
+                    $validated[$field] = null;
+                } else {
+                    unset($validated[$field]);
+                }
+            }
 
             $user->update($validated);
 
@@ -2155,10 +2260,10 @@ public function searchVendors(Request $request)
             'business_name' => $vendor->business_name ?? $vendor->name,
             'city' => $vendor->city ?? 'Jimma',
             'state' => $vendor->state ?? 'Oromia',
-            'avatar' => $vendor->avatar ? Storage::url($vendor->avatar) : null,
+            'avatar' => $vendor->avatar_url,
             'rating' => number_format($rating, 1),
             'category' => $vendor->category ?? 'General Store',
-            'avatar_url' => $vendor->avatar ? Storage::url($vendor->avatar) : 'https://ui-avatars.com/api/?name=' . urlencode($vendor->business_name ?? $vendor->name) . '&background=B88E3F&color=fff&size=200',
+            'avatar_url' => $vendor->avatar_url,
             'full_address' => ($vendor->city ?? 'Jimma') . ', ' . ($vendor->state ?? 'Oromia'),
             'location_string' => ($vendor->city ?? 'Jimma') . ', ' . ($vendor->state ?? 'Oromia'),
             'rating_stars' => $stars,
@@ -2193,7 +2298,10 @@ public function searchVendors(Request $request)
             'last_page' => $vendors->lastPage(),
             'per_page' => $vendors->perPage(),
             'total' => $vendors->total()
-        ]
+        ],
+        'allCategories' => \App\Models\Category::where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug', 'icon', 'image']),
     ]);
 }
 

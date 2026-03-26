@@ -937,9 +937,7 @@
         <div class="brand">
             <i class="ri-store-3-fill"></i>
             Vendora
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma
-            </span>
+            
         </div>
 
         <div class="nav-menu">
@@ -965,7 +963,7 @@
                     <a href="{{ route('admin.catalog') }}" class="nav-item">
                         <i class="ri-archive-line"></i> Catalog
                     </a>
-                    <a href="{{ route('admin.promotions') }}" class="nav-item">
+                    <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
                         <i class="ri-price-tag-3-line"></i> Promotions
                     </a>
                 </div>

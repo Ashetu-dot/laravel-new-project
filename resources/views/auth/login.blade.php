@@ -780,9 +780,7 @@
         <a href="{{ route('home') }}" class="logo">
             <i class="ri-store-3-fill logo-icon"></i>
             Vendora
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma
-            </span>
+            
         </a>
         <button class="menu-btn" aria-label="Menu" id="menuBtn">
             <i class="ri-menu-line"></i>

@@ -1687,9 +1687,7 @@
                     <i class="ri-store-3-fill"></i>
                     Vendora
                 </a>
-                <span class="ethiopia-badge">
-                    <i class="ri-map-pin-line"></i> Jimma, Ethiopia
-                </span>
+                
             </div>
 
             <div class="search-container">
@@ -1839,12 +1837,7 @@
 
                     {{-- Profile link --}}
                     <a href="{{ route('profile.show', Auth::id()) }}" class="user-menu">
-                        @php
-                            $avatarUrl = Auth::user()->avatar
-                                ? Storage::url(Auth::user()->avatar)
-                                : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=B88E3F&color=fff&size=200';
-                        @endphp
-                        <img src="{{ $avatarUrl }}" alt="{{ Auth::user()->name }}" class="user-avatar" loading="lazy">
+                        <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="user-avatar" loading="lazy">
                         <span>{{ Auth::user()->name }}</span>
                     </a>
                 @endguest
@@ -1890,10 +1883,11 @@
 
                     <select name="category" class="filter-btn" onchange="this.form.submit()">
                         <option value="">🏷️ {{ __('All Categories') }}</option>
-                        <option value="coffee" {{ request('category') == 'coffee' ? 'selected' : '' }}>☕ {{ __('Coffee & Tea') }}</option>
-                        <option value="handicrafts" {{ request('category') == 'handicrafts' ? 'selected' : '' }}>🎨 {{ __('Handicrafts') }}</option>
-                        <option value="textiles" {{ request('category') == 'textiles' ? 'selected' : '' }}>🧵 {{ __('Textiles') }}</option>
-                        <option value="food" {{ request('category') == 'food' ? 'selected' : '' }}>🍲 {{ __('Food & Spices') }}</option>
+                        @foreach($categories ?? [] as $cat)
+                            <option value="{{ $cat->name }}" {{ request('category') == $cat->name ? 'selected' : '' }}>
+                                {{ $cat->name }}
+                            </option>
+                        @endforeach
                     </select>
 
                     <select name="rating" class="filter-btn" onchange="this.form.submit()">
@@ -2121,20 +2115,6 @@
             </div>
             @endauth
 
-            <!-- Export Results -->
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">
-                    <i class="ri-download-line"></i> {{ __('Export Results') }}
-                </h3>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn-outline" style="flex: 1;" onclick="exportResults('csv')">
-                        CSV
-                    </button>
-                    <button class="btn-outline" style="flex: 1;" onclick="exportResults('pdf')">
-                        PDF
-                    </button>
-                </div>
-            </div>
         </aside>
 
         <!-- Main Content Area -->
@@ -2169,23 +2149,16 @@
                         </div>
 
                         @php
-                            $mainImage = $vendor->main_image
-                                ? (filter_var($vendor->main_image, FILTER_VALIDATE_URL)
-                                    ? $vendor->main_image
-                                    : Storage::url($vendor->main_image))
-                                : 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80';
+                            $cats    = $vendor->categories;
+                            $catImg0 = $cats->get(0)?->image_url;
+                            $catImg1 = $cats->get(1)?->image_url ?? $catImg0;
+                            $catImg2 = $cats->get(2)?->image_url ?? $catImg0;
 
-                            $subImage1 = $vendor->sub_image_1
-                                ? (filter_var($vendor->sub_image_1, FILTER_VALIDATE_URL)
-                                    ? $vendor->sub_image_1
-                                    : Storage::url($vendor->sub_image_1))
-                                : 'https://images.unsplash.com/photo-1565193566173-7a646c770962?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80';
+                            $banner  = $vendor->banner_url;
 
-                            $subImage2 = $vendor->sub_image_2
-                                ? (filter_var($vendor->sub_image_2, FILTER_VALIDATE_URL)
-                                    ? $vendor->sub_image_2
-                                    : Storage::url($vendor->sub_image_2))
-                                : 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80';
+                            $mainImage = $banner ?? $catImg0 ?? 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=400&fit=crop';
+                            $subImage1 = $banner ?? $catImg1 ?? 'https://images.unsplash.com/photo-1565193566173-7a646c770962?w=200&fit=crop';
+                            $subImage2 = $banner ?? $catImg2 ?? 'https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=200&fit=crop';
                         @endphp
                         <img src="{{ $mainImage }}"
                              alt="{{ $vendor->business_name }}"
@@ -2210,24 +2183,58 @@
                                 <i class="ri-star-fill"></i> {{ number_format($vendor->rating ?? 4.5, 1) }}
                             </div>
                         </div>
-                        <span class="vendor-category">{{ $vendor->category ?? __('General Store') }}</span>
+                        <span class="vendor-category">
+                            @php
+                                $matchedCat = ($categories ?? collect())->first(fn($c) => stripos($vendor->category ?? '', $c->name) !== false || stripos($c->name, $vendor->category ?? '') !== false);
+                            @endphp
+                            @if($matchedCat && $matchedCat->image)
+                                <img src="{{ asset('storage/' . $matchedCat->image) }}"
+                                     alt="{{ $matchedCat->name }}"
+                                     style="width:18px;height:18px;object-fit:cover;border-radius:3px;vertical-align:middle;margin-right:4px;">
+                            @elseif($matchedCat)
+                                <i class="{{ $matchedCat->icon ?? 'ri-price-tag-3-line' }}" style="margin-right:4px;"></i>
+                            @endif
+                            {{ $vendor->category ?? __('General Store') }}
+                        </span>
 
                         @if($vendor->description)
                         <p class="vendor-description">{{ Str::limit($vendor->description, 100) }}</p>
                         @endif
 
-                        <!-- Product Pricing with Original Price & Discount -->
-                        @if($vendor->products()->count() > 0)
+                        <!-- Product Pricing with Images & Discount -->
+                        @if($vendor->products->count() > 0)
                         <div class="product-pricing">
-                            @foreach($vendor->products()->latest()->take(2)->get() as $product)
+                            @foreach($vendor->products->take(2) as $product)
+                            @php
+                                // Resolve product image from JSON images array
+                                $productImg = null;
+                                if (!empty($product->images) && is_array($product->images)) {
+                                    $firstImg = $product->images[0];
+                                    if (filter_var($firstImg, FILTER_VALIDATE_URL)) {
+                                        $productImg = $firstImg;
+                                    } elseif (Storage::disk('public')->exists(ltrim($firstImg, '/'))) {
+                                        $productImg = Storage::url(ltrim($firstImg, '/'));
+                                    } else {
+                                        $productImg = asset('storage/' . ltrim($firstImg, '/'));
+                                    }
+                                }
+                                $productImgFallback = 'https://ui-avatars.com/api/?name=' . urlencode($product->name) . '&background=B88E3F&color=fff&size=60';
+                            @endphp
                             <div class="product-item">
-                                <span class="product-name">{{ Str::limit($product->name, 20) }}</span>
+                                <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+                                    <img src="{{ $productImg ?? $productImgFallback }}"
+                                         alt="{{ $product->name }}"
+                                         style="width:36px;height:36px;object-fit:cover;border-radius:6px;flex-shrink:0;border:1px solid var(--border-color);"
+                                         loading="lazy"
+                                         onerror="this.src='{{ $productImgFallback }}'">
+                                    <span class="product-name" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ Str::limit($product->name, 18) }}</span>
+                                </div>
                                 <div class="price-wrapper">
-                                    @if(isset($product->original_price) && $product->original_price > $product->price)
-                                        <span class="original-price">{{ number_format($product->original_price) }} ETB</span>
-                                        <span class="current-price">{{ number_format($product->price) }} ETB</span>
+                                    @if($product->sale_price && $product->sale_price > 0 && $product->sale_price < $product->price)
+                                        <span class="original-price">{{ number_format($product->price) }}</span>
+                                        <span class="current-price">{{ number_format($product->sale_price) }} ETB</span>
                                         @php
-                                            $discount = round((($product->original_price - $product->price) / $product->original_price) * 100);
+                                            $discount = round((($product->price - $product->sale_price) / $product->price) * 100);
                                         @endphp
                                         <span class="discount-badge">-{{ $discount }}%</span>
                                     @else
@@ -2236,9 +2243,9 @@
                                 </div>
                             </div>
                             @endforeach
-                            @if($vendor->products()->count() > 2)
+                            @if($vendor->products->count() > 2)
                             <div style="text-align: right; font-size: 11px; color: var(--text-gray); margin-top: 4px;">
-                                +{{ $vendor->products()->count() - 2 }} {{ __('more products') }}
+                                +{{ $vendor->products->count() - 2 }} {{ __('more products') }}
                             </div>
                             @endif
                         </div>
@@ -2966,12 +2973,12 @@
                                 </div>
 
                                 <div class="modal-actions" style="display: flex; gap: 12px; margin-top: 20px;">
-                                    <a href="#" onclick="window.location.href=vendorShowUrl.replace(':id', data.id)" class="btn-outline" style="flex: 1; text-align: center;">
+                                    <a href="${vendorShowUrl.replace(':id', data.id)}" class="btn-outline" style="flex: 1; text-align: center;">
                                         <i class="ri-store-line"></i> {{ __('View Full Shop') }}
                                     </a>
-                                    <button class="btn-shop" onclick="closeQuickView(); window.location.href=vendorShowUrl.replace(':id', data.id) + '#products'" style="flex: 1;">
+                                    <a href="${vendorShowUrl.replace(':id', data.id)}#products" class="btn-shop" style="flex: 1; text-align: center;" onclick="closeQuickView()">
                                         <i class="ri-shopping-bag-line"></i> {{ __('Shop Now') }}
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         `;
@@ -3103,13 +3110,6 @@
                 console.error('Error:', error);
                 showToast('Error', '{{ __("Failed to save search") }}', 'error');
             });
-        }
-
-        // Export Results
-        function exportResults(format) {
-            const url = new URL(window.location.href);
-            url.searchParams.set('export', format);
-            window.open(url.toString(), '_blank');
         }
 
         // Auto-dismiss alerts

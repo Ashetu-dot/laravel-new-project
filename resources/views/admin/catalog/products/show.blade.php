@@ -170,21 +170,10 @@
         .avatar {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, var(--primary-gold), #9c7832);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            margin-right: 12px;
-            overflow: hidden;
-        }
-
-        .avatar img {
-            width: 100%;
-            height: 100%;
             object-fit: cover;
+            margin-right: 12px;
+            flex-shrink: 0;
         }
 
         .user-info h4 {
@@ -429,19 +418,6 @@
             gap: 12px;
         }
 
-        .vendor-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary-gold), #9c7832);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
         .vendor-avatar img {
             width: 40px;
             height: 40px;
@@ -571,9 +547,7 @@
         <div class="brand">
             <i class="ri-store-3-fill"></i>
             Vendora
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma
-            </span>
+            
         </div>
 
         <div class="nav-menu">
@@ -655,16 +629,13 @@
         </div>
 
         <div class="user-profile">
-            <div class="avatar">
-                @if(Auth::user()->profile_image)
-                    <img src="{{ asset('storage/' . Auth::user()->profile_image) }}" alt="Admin">
-                @else
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                @endif
-            </div>
+            <img src="{{ Auth::user()->avatar_url }}"
+                 alt="{{ Auth::user()->name }}"
+                 class="avatar"
+                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode(substr(Auth::user()->name ?? 'AD', 0, 2)) }}&background=B88E3F&color=fff&size=80';">
             <div class="user-info">
                 <h4>{{ Auth::user()->name }}</h4>
-                <p>Administrator</p>
+                <p>{{ ucfirst(Auth::user()->role ?? 'Admin') }}</p>
             </div>
         </div>
 
@@ -730,9 +701,13 @@
                                 Product Details
                             </h3>
                         </div>
-                        
-                        @if($product->image)
-                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="product-image">
+
+                        @php $firstImage = $product->first_image; @endphp
+                        @if($firstImage)
+                            <img src="{{ filter_var($firstImage, FILTER_VALIDATE_URL) ? $firstImage : asset('storage/' . ltrim($firstImage, '/')) }}"
+                                 alt="{{ $product->name }}"
+                                 class="product-image"
+                                 onerror="this.onerror=null;this.src='{{ $product->placeholder_image }}'">
                         @else
                             <div class="product-image-placeholder">
                                 <i class="ri-image-line"></i>
@@ -755,11 +730,9 @@
                         </div>
                         <div class="vendor-info">
                             <div class="vendor-avatar">
-                                @if($product->vendor->profile_image)
-                                    <img src="{{ asset('storage/' . $product->vendor->profile_image) }}" alt="{{ $product->vendor->name }}">
-                                @else
-                                    {{ strtoupper(substr($product->vendor->name, 0, 1)) }}
-                                @endif
+                                <img src="{{ $product->vendor->avatar_url }}"
+                                     alt="{{ $product->vendor->name }}"
+                                     onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode(substr($product->vendor->business_name ?? $product->vendor->name, 0, 2)) }}&background=B88E3F&color=fff&size=80';">
                             </div>
                             <div class="vendor-details">
                                 <h4>{{ $product->vendor->business_name ?? $product->vendor->name }}</h4>
@@ -844,18 +817,18 @@
                                 <i class="ri-edit-line"></i>
                                 Edit Product
                             </a>
-                            
-                            <button class="btn {{ $product->is_active ? 'btn-secondary' : 'btn-success' }}" 
+
+                            <button class="btn {{ $product->is_active ? 'btn-secondary' : 'btn-success' }}"
                                     onclick="toggleProductStatus({{ $product->id }})">
                                 <i class="ri-{{ $product->is_active ? 'pause' : 'play' }}-circle-line"></i>
                                 {{ $product->is_active ? 'Deactivate' : 'Activate' }}
                             </button>
-                            
+
                             <button class="btn btn-danger" onclick="deleteProduct({{ $product->id }})">
                                 <i class="ri-delete-bin-line"></i>
                                 Delete Product
                             </button>
-                            
+
                             <a href="{{ route('admin.catalog.products') }}" class="btn btn-secondary">
                                 <i class="ri-arrow-left-line"></i>
                                 Back to Products
@@ -929,7 +902,7 @@
             if (window.innerWidth <= 768) {
                 const sidebar = document.getElementById('sidebar');
                 const menuToggle = document.querySelector('.menu-toggle');
-                
+
                 if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
                     sidebar.classList.remove('active');
                 }

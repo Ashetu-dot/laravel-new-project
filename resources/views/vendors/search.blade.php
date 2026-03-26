@@ -623,18 +623,18 @@
             </div>
 
             <div class="filter-group">
-                <div class="filter-label">Categories</div>
-                <div class="filter-options">
-                    @php
-                        $categories = collect($vendors)->pluck('category')->unique()->sort()->values();
-                    @endphp
-                    @foreach($categories as $category)
-                        <label class="filter-checkbox">
-                            <input type="checkbox" name="category[]" value="{{ $category }}" {{ in_array($category, (array)request('category')) ? 'checked' : '' }}>
-                            {{ $category }}
-                        </label>
+                <div class="filter-label">Category</div>
+                <select class="filter-search" id="categoryFilter">
+                    <option value="">All Categories</option>
+                    @foreach($allCategories ?? [] as $cat)
+                        <option value="{{ $cat->slug }}"
+                            {{ request('category') === $cat->slug ? 'selected' : '' }}
+                            style="display:flex;align-items:center;gap:6px;">
+                            @if($cat->icon) {{ $cat->icon ? '' : '' }} @endif
+                            {{ $cat->name }}
+                        </option>
                     @endforeach
-                </div>
+                </select>
             </div>
 
             <div class="filter-group">
@@ -689,13 +689,7 @@
                     <a href="{{ route('vendor.show', $vendor['id']) }}" class="vendor-card">
                         <div class="vendor-header">
                             <div class="vendor-avatar">
-                                @if(isset($vendor['avatar']) && $vendor['avatar'])
-                                    <img src="{{ $vendor['avatar'] }}" alt="{{ $vendor['business_name'] }}">
-                                @else
-                                    <div class="avatar-placeholder">
-                                        {{ $vendor['avatar_text'] ?? substr($vendor['business_name'], 0, 2) }}
-                                    </div>
-                                @endif
+                                <img src="{{ $vendor['avatar_url'] }}" alt="{{ $vendor['business_name'] }}" style="width:100%;height:100%;object-fit:cover;">
                             </div>
                             @if(isset($vendor['verified']) && $vendor['verified'])
                                 <div class="vendor-verified">
@@ -808,18 +802,17 @@
         function applyFilters() {
             document.getElementById('loadingOverlay').style.display = 'flex';
 
-            const search = document.getElementById('searchInput').value;
-            const rating = document.getElementById('ratingFilter').value;
-            const sort = document.getElementById('sortFilter').value;
-
-            const categories = Array.from(document.querySelectorAll('input[name="category[]"]:checked')).map(cb => cb.value);
+            const search   = document.getElementById('searchInput').value;
+            const rating   = document.getElementById('ratingFilter').value;
+            const sort     = document.getElementById('sortFilter').value;
+            const category = document.getElementById('categoryFilter').value;
             const locations = Array.from(document.querySelectorAll('input[name="location[]"]:checked')).map(cb => cb.value);
 
             const params = new URLSearchParams();
-            if (search) params.append('search', search);
-            if (rating) params.append('rating', rating);
-            if (sort) params.append('sort', sort);
-            categories.forEach(c => params.append('category[]', c));
+            if (search)   params.append('search', search);
+            if (rating)   params.append('rating', rating);
+            if (sort)     params.append('sort', sort);
+            if (category) params.append('category', category);
             locations.forEach(l => params.append('location[]', l));
 
             window.location.href = '{{ route("vendors.search") }}?' + params.toString();

@@ -945,12 +945,12 @@
             box-shadow: var(--shadow-sm);
         }
 
-        .status-active { 
-            background: linear-gradient(135deg, #d1fae5, #a7f3d0); 
+        .status-active {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
             color: #065f46;
         }
-        .status-inactive { 
-            background: linear-gradient(135deg, #fee2e2, #fecaca); 
+        .status-inactive {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
             color: #991b1b;
         }
 
@@ -1187,9 +1187,7 @@
         <div class="brand">
             <i class="ri-store-3-fill"></i>
             Vendora
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma
-            </span>
+            
         </div>
 
         <div class="nav-menu">
@@ -1422,7 +1420,7 @@
                     </h3>
                     <div class="results-info">
                         <i class="ri-file-list-line"></i>
-                        Showing <strong>{{ $categories->firstItem() ?? 0 }}</strong> - <strong>{{ $categories->lastItem() ?? 0 }}</strong> 
+                        Showing <strong>{{ $categories->firstItem() ?? 0 }}</strong> - <strong>{{ $categories->lastItem() ?? 0 }}</strong>
                         of <strong>{{ $categories->total() ?? 0 }}</strong> categories
                     </div>
                 </div>
@@ -1444,9 +1442,13 @@
                         <tr>
                             <td>
                                 <div class="category-name">
-                                    <div class="category-icon bg-gold-light">
-                                        <i class="ri-price-tag-line"></i>
-                                    </div>
+                                    @if($category->image)
+                                        <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="category-icon" style="object-fit: cover;">
+                                    @else
+                                        <div class="category-icon bg-gold-light">
+                                            <i class="{{ $category->icon ?? 'ri-price-tag-line' }}"></i>
+                                        </div>
+                                    @endif
                                     <div class="category-details">
                                         <span style="font-weight: 600;">{{ $category->name }}</span>
                                         <span class="category-id">ID: #{{ $category->id }}</span>
@@ -1547,7 +1549,7 @@
                 <div class="pagination-wrapper">
                     <div class="pagination-info">
                         <i class="ri-file-list-line"></i>
-                        Showing <strong>{{ $categories->firstItem() }}</strong> - <strong>{{ $categories->lastItem() }}</strong> 
+                        Showing <strong>{{ $categories->firstItem() }}</strong> - <strong>{{ $categories->lastItem() }}</strong>
                         of <strong>{{ $categories->total() }}</strong> results
                     </div>
 
@@ -1605,7 +1607,7 @@
                 menuToggle.addEventListener('click', function(e) {
                     e.stopPropagation();
                     sidebar.classList.toggle('active');
-                    
+
                     // Change icon based on state
                     const icon = this.querySelector('i');
                     if (icon) {

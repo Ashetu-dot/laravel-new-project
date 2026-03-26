@@ -716,9 +716,66 @@
         .social-icon:hover {
             color: var(--primary);
         }
+
+        /* ===== TOAST ===== */
+        #toast-container {
+            position: fixed;
+            top: 1.2rem;
+            right: 1.2rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .toast {
+            min-width: 260px;
+            max-width: 360px;
+            padding: 0.85rem 1.2rem;
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-family: var(--font-medium);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: var(--shadow);
+            animation: toastIn 0.25s ease;
+        }
+        .toast.success { background: #059669; }
+        .toast.error   { background: #DC2626; }
+        .toast.info    { background: var(--primary); }
+        .toast.confirm {
+            background: #fff;
+            color: var(--text-dark);
+            border: 1px solid var(--border);
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        .toast.confirm .toast-actions {
+            display: flex;
+            gap: 0.5rem;
+            width: 100%;
+            justify-content: flex-end;
+        }
+        .toast.confirm .toast-actions button {
+            padding: 0.35rem 0.9rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-family: var(--font-medium);
+            font-size: 0.85rem;
+        }
+        .toast.confirm .toast-actions .btn-yes  { background: var(--primary); color: #fff; }
+        .toast.confirm .toast-actions .btn-no   { background: #F3F4F6; color: var(--text-dark); }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(40px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
     </style>
 </head>
 <body>
+    <div id="toast-container"></div>
     <!-- Navbar -->
     @include('partials.navbar')
 
@@ -727,15 +784,9 @@
         <div class="banner-container">
             <div class="hero-overlay"></div>
             @php
-                // Banner: use main_image (store banner), fallback to sub_image_1
-                $bannerImage = $vendor->main_image ?? $vendor->sub_image_1 ?? null;
-                if ($bannerImage) {
-                    $bannerUrl = str_starts_with($bannerImage, 'http')
-                        ? $bannerImage
-                        : Storage::url($bannerImage);
-                } else {
-                    $bannerUrl = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1280&q=80';
-                }
+                $bannerUrl = $vendor->banner_url
+                    ?? $vendor->categories->first()?->image_url
+                    ?? 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1280&q=80';
             @endphp
             <img src="{{ $bannerUrl }}" alt="Vendor Banner" class="banner-img" loading="lazy">
         </div>
@@ -743,8 +794,8 @@
         <div class="vendor-profile-header">
             <div class="profile-pic-container">
                 {{-- Use the model's avatar_url accessor which handles storage path + fallback to initials avatar --}}
-                <img src="{{ $vendor->avatar_url }}" 
-                     alt="{{ $vendor->business_name ?? $vendor->name }}" 
+                <img src="{{ $vendor->avatar_url }}"
+                     alt="{{ $vendor->business_name ?? $vendor->name }}"
                      class="profile-pic"
                      onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(substr($vendor->business_name ?? $vendor->name, 0, 2)) }}&background=B88E3F&color=fff&size=200'">
             </div>
@@ -808,7 +859,7 @@
             <div class="section-card" id="products">
                 <div class="section-title">
                     Featured Products
-                    <a href="{{ route('vendor.products', $vendor->id) }}" class="section-title-link">View All <i class="ri-arrow-right-line"></i></a>
+                    <a href="{{ route('vendor.show', $vendor->id) }}#products" class="section-title-link">View All <i class="ri-arrow-right-line"></i></a>
                 </div>
                 @if($vendor->products && $vendor->products->count() > 0)
                 <div class="product-grid">
@@ -819,7 +870,7 @@
                                 @php
                                     // Handle product images
                                     $productImage = null;
-                                    
+
                                     // Check different possible image fields
                                     if (!empty($product->images)) {
                                         if (is_array($product->images)) {
@@ -835,7 +886,7 @@
                                     } elseif (!empty($product->image)) {
                                         $productImage = $product->image;
                                     }
-                                    
+
                                     // Build correct URL
                                     if ($productImage) {
                                         if (str_starts_with($productImage, 'http')) {
@@ -885,10 +936,25 @@
             <div class="section-card">
                 <div class="section-title">
                     Reviews & Ratings
-                    @if(Auth::check())
-                    <a href="{{ route('vendor.products', $vendor->id) }}" class="btn btn-outline" style="font-size: 0.85rem; text-decoration: none;">Write a Review</a>
-                    @endif
+                    @auth
+                        <button onclick="document.getElementById('reviewModal').style.display='flex'"
+                                class="btn btn-outline" style="font-size:0.85rem;">
+                            <i class="ri-edit-line"></i> Write a Review
+                        </button>
+                    @endauth
                 </div>
+
+                {{-- Flash messages --}}
+                @if(session('success'))
+                    <div style="background:#D1FAE5;color:#065F46;padding:12px 16px;border-radius:8px;margin-bottom:1rem;display:flex;align-items:center;gap:8px;">
+                        <i class="ri-checkbox-circle-line"></i> {{ session('success') }}
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div style="background:#FEE2E2;color:#991B1B;padding:12px 16px;border-radius:8px;margin-bottom:1rem;display:flex;align-items:center;gap:8px;">
+                        <i class="ri-error-warning-line"></i> {{ session('error') }}
+                    </div>
+                @endif
                 <div class="review-summary">
                     <div>
                         <div class="rating-big">{{ number_format($vendor->rating ?? 0, 1) }}</div>
@@ -913,8 +979,8 @@
                             $totalReviews = $vendor->reviews->count();
                         @endphp
                         @for($star=5;$star>=1;$star--)
-                            @php 
-                                $count = isset($counts[$star]) ? $counts[$star]->count() : 0; 
+                            @php
+                                $count = isset($counts[$star]) ? $counts[$star]->count() : 0;
                                 $pct = $totalReviews ? round(($count * 100) / $totalReviews) : 0;
                             @endphp
                             <div class="rating-bar-row">
@@ -933,8 +999,8 @@
                             <div class="reviewer-info">
                                 <div class="reviewer-details">
                                     @if($review->user)
-                                        <img src="{{ $review->user->avatar_url }}" 
-                                             alt="{{ $review->user->name }}" 
+                                        <img src="{{ $review->user->avatar_url }}"
+                                             alt="{{ $review->user->name }}"
                                              class="reviewer-avatar"
                                              style="object-fit: cover;">
                                     @else
@@ -961,8 +1027,28 @@
                 </div>
                 @endif
                 @else
-                <div style="text-align: center; padding: 20px; color: var(--text-gray);">
-                    <p>No reviews yet. Be the first to review!</p>
+                <div style="text-align:center;padding:2rem 1rem;color:var(--text-gray);">
+                    <i class="ri-chat-3-line" style="font-size:3rem;opacity:0.3;display:block;margin-bottom:0.75rem;"></i>
+                    <p style="font-size:1rem;font-weight:500;margin-bottom:0.5rem;">No reviews yet.</p>
+                    @auth
+                        @php
+                            $hasPending = \App\Models\Review::where('vendor_id', $vendor->id)
+                                ->where('user_id', Auth::id())
+                                ->where('is_approved', false)
+                                ->exists();
+                        @endphp
+                        @if($hasPending)
+                            <p style="font-size:0.875rem;color:#D97706;background:#FEF3C7;padding:8px 14px;border-radius:8px;display:inline-block;">
+                                <i class="ri-time-line"></i> Your review is pending approval.
+                            </p>
+                        @else
+                            <p style="font-size:0.875rem;">Be the first to share your experience!</p>
+                        @endif
+                    @else
+                        <p style="font-size:0.875rem;">
+                            <a href="{{ route('login') }}" style="color:var(--primary);">Sign in</a> to be the first to review.
+                        </p>
+                    @endauth
                 </div>
                 @endif
             </div>
@@ -1011,7 +1097,7 @@
                     <li class="hours-item"><span>Sunday</span><span>{{ $vendor->sunday_hours ?? '8:00–18:00' }}</span></li>
                 </ul>
             </div>
-            
+
             <div class="contact-card">
                 <h3 style="font-family:var(--font-bold); margin-bottom:1rem;">Send Message</h3>
                 @if(Auth::check())
@@ -1077,8 +1163,25 @@
     </footer>
 
     <script>
-        // CSRF Token
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        function showToast(msg, type = 'info', duration = 3500) {
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            const icon = type === 'success' ? 'ri-checkbox-circle-line' : type === 'error' ? 'ri-error-warning-line' : 'ri-information-line';
+            t.innerHTML = `<i class="${icon}"></i><span>${msg}</span>`;
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(() => t.remove(), duration);
+        }
+
+        function showConfirm(msg, onYes) {
+            const t = document.createElement('div');
+            t.className = 'toast confirm';
+            t.innerHTML = `<span>${msg}</span><div class="toast-actions"><button class="btn-no">Cancel</button><button class="btn-yes">Confirm</button></div>`;
+            document.getElementById('toast-container').appendChild(t);
+            t.querySelector('.btn-no').onclick  = () => t.remove();
+            t.querySelector('.btn-yes').onclick = () => { t.remove(); onYes(); };
+        }
 
         // Smooth scroll to products section if URL has #products
         document.addEventListener('DOMContentLoaded', function() {
@@ -1086,7 +1189,7 @@
                 const productsSection = document.getElementById('products');
                 if (productsSection) {
                     setTimeout(() => {
-                        productsSection.scrollIntoView({ 
+                        productsSection.scrollIntoView({
                             behavior: 'smooth',
                             block: 'start'
                         });
@@ -1097,93 +1200,58 @@
 
         // Save Vendor Function
         function saveVendor(vendorId) {
-            if (!confirm('Are you sure you want to save this vendor?')) return;
-            
-            fetch(`/vendors/${vendorId}/save`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message || 'Vendor saved successfully!');
-                    // Update button state
-                    const btn = document.querySelector(`button[onclick="saveVendor(${vendorId})"]`);
-                    if (btn) {
-                        btn.innerHTML = '<i class="ri-heart-fill"></i>';
-                        btn.setAttribute('onclick', `unsaveVendor(${vendorId})`);
-                        btn.setAttribute('title', 'Unsave');
-                    }
-                } else {
-                    alert(data.message || 'Failed to save vendor');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
+            showConfirm('Save this vendor?', () => {
+                fetch(`/vendors/${vendorId}/save`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message || 'Vendor saved!', 'success');
+                        const btn = document.querySelector(`button[onclick="saveVendor(${vendorId})"]`);
+                        if (btn) { btn.innerHTML = '<i class="ri-heart-fill"></i>'; btn.setAttribute('onclick', `unsaveVendor(${vendorId})`); btn.setAttribute('title', 'Unsave'); }
+                    } else { showToast(data.message || 'Failed to save vendor', 'error'); }
+                })
+                .catch(() => showToast('An error occurred. Please try again.', 'error'));
             });
         }
 
         // Unsave Vendor Function
         function unsaveVendor(vendorId) {
-            if (!confirm('Remove this vendor from your saved list?')) return;
-            
-            fetch(`/vendors/${vendorId}/unsave`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message || 'Vendor removed from saved list!');
-                    // Update button state
-                    const btn = document.querySelector(`button[onclick="unsaveVendor(${vendorId})"]`);
-                    if (btn) {
-                        btn.innerHTML = '<i class="ri-heart-line"></i>';
-                        btn.setAttribute('onclick', `saveVendor(${vendorId})`);
-                        btn.setAttribute('title', 'Save');
-                    }
-                } else {
-                    alert(data.message || 'Failed to unsave vendor');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
+            showConfirm('Remove this vendor from your saved list?', () => {
+                fetch(`/vendors/${vendorId}/unsave`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message || 'Vendor removed from saved list!', 'success');
+                        const btn = document.querySelector(`button[onclick="unsaveVendor(${vendorId})"]`);
+                        if (btn) { btn.innerHTML = '<i class="ri-heart-line"></i>'; btn.setAttribute('onclick', `saveVendor(${vendorId})`); btn.setAttribute('title', 'Save'); }
+                    } else { showToast(data.message || 'Failed to unsave vendor', 'error'); }
+                })
+                .catch(() => showToast('An error occurred. Please try again.', 'error'));
             });
         }
 
         // Share Vendor Function
         function shareVendor() {
             const url = window.location.href;
-            const title = document.title;
-
             if (navigator.share) {
-                navigator.share({
-                    title: title,
-                    url: url
-                }).catch(() => {
-                    // User cancelled share
-                });
+                navigator.share({ title: document.title, url }).catch(() => {});
             } else {
-                // Fallback: copy to clipboard
                 navigator.clipboard.writeText(url).then(() => {
-                    alert('Link copied to clipboard!');
+                    showToast('Link copied to clipboard!', 'info');
                 }).catch(() => {
-                    // Fallback for older browsers
-                    const textArea = document.createElement('textarea');
-                    textArea.value = url;
-                    document.body.appendChild(textArea);
-                    textArea.select();
+                    const ta = document.createElement('textarea');
+                    ta.value = url;
+                    document.body.appendChild(ta);
+                    ta.select();
                     document.execCommand('copy');
-                    document.body.removeChild(textArea);
-                    alert('Link copied to clipboard!');
+                    document.body.removeChild(ta);
+                    showToast('Link copied to clipboard!', 'info');
                 });
             }
         }
@@ -1192,10 +1260,9 @@
         function getDirections() {
             const address = "{{ $vendor->address_line1 ?? '' }} {{ $vendor->city ?? '' }}".trim();
             if (address) {
-                const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
-                window.open(url, '_blank');
+                window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`, '_blank');
             } else {
-                alert('Address not available for directions.');
+                showToast('Address not available for directions.', 'error');
             }
         }
 
@@ -1203,35 +1270,20 @@
         function quickAddToCart(productId, event) {
             event.preventDefault();
             event.stopPropagation();
-            
             fetch('/cart/add', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify({
-                    product_id: productId,
-                    quantity: 1
-                })
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                body: JSON.stringify({ product_id: productId, quantity: 1 })
             })
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    alert('Product added to cart!');
-                    // Update cart count if you have a cart counter
+                    showToast('Product added to cart!', 'success');
                     const cartCount = document.querySelector('.cart-count');
-                    if (cartCount && data.cartCount) {
-                        cartCount.textContent = data.cartCount;
-                    }
-                } else {
-                    alert(data.message || 'Failed to add to cart');
-                }
+                    if (cartCount && data.cartCount) cartCount.textContent = data.cartCount;
+                } else { showToast(data.message || 'Failed to add to cart', 'error'); }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            });
+            .catch(() => showToast('An error occurred. Please try again.', 'error'));
         }
 
         // Contact Form Handler
@@ -1246,24 +1298,15 @@
 
                     fetch('{{ route("contact.vendor") }}', {
                         method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken
-                        },
+                        headers: { 'X-CSRF-TOKEN': csrfToken },
                         body: formData
                     })
-                    .then(response => response.json())
+                    .then(r => r.json())
                     .then(data => {
-                        if (data.success) {
-                            alert(data.message || 'Message sent successfully!');
-                            this.reset();
-                        } else {
-                            alert(data.message || 'Failed to send message');
-                        }
+                        if (data.success) { showToast(data.message || 'Message sent successfully!', 'success'); this.reset(); }
+                        else { showToast(data.message || 'Failed to send message', 'error'); }
                     })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred. Please try again.');
-                    });
+                    .catch(() => showToast('An error occurred. Please try again.', 'error'));
                 });
             }
         });
@@ -1281,9 +1324,95 @@
                 });
             });
         }
-        
+
         // Uncomment to debug images
         // window.addEventListener('load', debugImages);
     </script>
+
+    @auth
+    <!-- Review Modal -->
+    <div id="reviewModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:1rem;">
+        <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:500px;position:relative;max-height:90vh;overflow-y:auto;">
+            <button onclick="document.getElementById('reviewModal').style.display='none'"
+                    style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#6B7280;">
+                <i class="ri-close-line"></i>
+            </button>
+            <h3 style="font-size:1.3rem;font-weight:700;margin-bottom:1.5rem;">Review {{ $vendor->business_name ?? $vendor->name }}</h3>
+
+            <form method="POST" action="{{ route('vendor.review.store', $vendor->id) }}">
+                @csrf
+
+                <!-- Star Rating -->
+                <div style="margin-bottom:1.2rem;">
+                    <label style="display:block;font-weight:600;font-size:0.9rem;margin-bottom:0.5rem;color:#374151;">Your Rating *</label>
+                    <div class="star-picker" id="starPicker">
+                        @for($i=1;$i<=5;$i++)
+                            <i class="ri-star-line" data-value="{{ $i }}"
+                               style="font-size:2rem;cursor:pointer;color:#D1D5DB;transition:color 0.15s;"
+                               onmouseover="hoverStars({{ $i }})"
+                               onmouseout="resetStars()"
+                               onclick="selectStar({{ $i }})"></i>
+                        @endfor
+                    </div>
+                    <input type="hidden" name="rating" id="ratingInput" value="">
+                    @error('rating')<p style="color:#DC2626;font-size:0.8rem;margin-top:4px;">{{ $message }}</p>@enderror
+                </div>
+
+                <!-- Comment -->
+                <div style="margin-bottom:1.5rem;">
+                    <label style="display:block;font-weight:600;font-size:0.9rem;margin-bottom:0.5rem;color:#374151;">Your Review *</label>
+                    <textarea name="comment" rows="4" placeholder="Share your experience with this vendor (min. 10 characters)..."
+                              style="width:100%;padding:0.8rem;border:1px solid #E5E7EB;border-radius:8px;font-family:inherit;font-size:0.95rem;resize:vertical;"
+                              required minlength="10" maxlength="1000">{{ old('comment') }}</textarea>
+                    @error('comment')<p style="color:#DC2626;font-size:0.8rem;margin-top:4px;">{{ $message }}</p>@enderror
+                </div>
+
+                <div style="display:flex;gap:0.75rem;">
+                    <button type="submit" class="btn btn-primary" style="flex:1;padding:0.75rem;">
+                        <i class="ri-send-plane-line"></i> Submit Review
+                    </button>
+                    <button type="button" onclick="document.getElementById('reviewModal').style.display='none'"
+                            class="btn btn-outline" style="flex:1;padding:0.75rem;">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let selectedRating = 0;
+
+        function hoverStars(val) {
+            document.querySelectorAll('#starPicker i').forEach((s, i) => {
+                s.className = i < val ? 'ri-star-fill' : 'ri-star-line';
+                s.style.color = i < val ? '#FBBF24' : '#D1D5DB';
+            });
+        }
+
+        function resetStars() {
+            document.querySelectorAll('#starPicker i').forEach((s, i) => {
+                s.className = i < selectedRating ? 'ri-star-fill' : 'ri-star-line';
+                s.style.color = i < selectedRating ? '#FBBF24' : '#D1D5DB';
+            });
+        }
+
+        function selectStar(val) {
+            selectedRating = val;
+            document.getElementById('ratingInput').value = val;
+            resetStars();
+        }
+
+        // Auto-open modal if there are validation errors
+        @if($errors->any())
+            document.getElementById('reviewModal').style.display = 'flex';
+        @endif
+
+        // Close on backdrop click
+        document.getElementById('reviewModal').addEventListener('click', function(e) {
+            if (e.target === this) this.style.display = 'none';
+        });
+    </script>
+    @endauth
 </body>
 </html>

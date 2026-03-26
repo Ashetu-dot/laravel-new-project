@@ -759,9 +759,7 @@
             Vendora
         </a>
         <div class="nav-controls">
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma, Ethiopia
-            </span>
+            
             <button class="theme-toggle" id="themeToggle" title="{{ __('Toggle theme') }}">
                 <i class="ri-moon-line"></i>
             </button>

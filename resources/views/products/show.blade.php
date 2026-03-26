@@ -703,7 +703,7 @@
                             @php
                                 $inWishlist = Auth::user()->wishlists()->where('product_id', $product->id)->exists();
                             @endphp
-                            <button class="btn btn-outline" onclick="toggleWishlist({{ $product->id }}, event)" 
+                            <button class="btn btn-outline" onclick="toggleWishlist({{ $product->id }}, event)"
                                     style="{{ $inWishlist ? 'color: #ef4444;' : '' }}">
                                 <i class="{{ $inWishlist ? 'ri-heart-fill' : 'ri-heart-line' }}"></i>
                             </button>

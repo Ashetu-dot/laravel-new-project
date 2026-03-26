@@ -156,14 +156,10 @@
         .avatar {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, var(--primary-gold), #9c7832);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
+            object-fit: cover;
             margin-right: 12px;
+            flex-shrink: 0;
         }
 
         .user-info h4 {
@@ -524,6 +520,7 @@
             border-radius: 50%;
             background-color: #e5e7eb;
             object-fit: cover;
+            flex-shrink: 0;
         }
 
         .action-buttons {
@@ -675,12 +672,13 @@
         </div>
 
         <div class="user-profile">
-            <div class="avatar">
-                {{ substr(Auth::user()->name ?? 'AD', 0, 2) }}
-            </div>
+            <img src="{{ Auth::user()->avatar_url }}"
+                 alt="{{ Auth::user()->name }}"
+                 class="avatar"
+                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode(substr(Auth::user()->name ?? 'AD', 0, 2)) }}&background=B88E3F&color=fff&size=80';">
             <div class="user-info">
                 <h4>{{ Auth::user()->name ?? 'Admin User' }}</h4>
-                <p>{{ Auth::user()->role ?? 'Super Admin' }}</p>
+                <p>{{ ucfirst(Auth::user()->role ?? 'Admin') }}</p>
             </div>
         </div>
     </nav>
@@ -809,11 +807,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($customers ?? [] as $customer)
+                        @forelse($customers as $customer)
                         <tr>
                             <td>
                                 <div class="customer-cell">
-                                    <img src="{{ $customer->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($customer->name) . '&background=B88E3F&color=fff' }}" alt="Avatar" class="customer-avatar">
+                                    <img src="{{ $customer->avatar_url }}"
+                                         alt="{{ $customer->name }}"
+                                         class="customer-avatar"
+                                         onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($customer->name) }}&background=B88E3F&color=fff&size=80';">
                                     <div>
                                         <div style="font-weight: 600;">{{ $customer->name }}</div>
                                     </div>
@@ -861,7 +862,7 @@
 
                 <!-- Pagination -->
                 <div class="pagination">
-                    {{ $customers->links() }}
+                    {{ $customers->withQueryString()->links() }}
                 </div>
             </div>
         </div>
@@ -889,7 +890,7 @@
             });
         });
 
-       
+
     </script>
 
 </body>
