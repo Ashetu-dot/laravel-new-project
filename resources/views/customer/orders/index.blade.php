@@ -797,13 +797,12 @@
         <div class="brand">
             <i class="ri-store-3-fill"></i>
             Vendora
-            
         </div>
 
         <div class="nav-menu">
             <div class="nav-group">
                 <div class="nav-label">MAIN MENU</div>
-                <a href="{{ route('customer.dashboard') }}" class="nav-item {{ request()->routeIs('customer.dashboard') ? 'active' : '' }}">
+                <a href="{{ route('customer.dashboard') }}" class="nav-item">
                     <i class="ri-dashboard-line"></i> Dashboard
                 </a>
                 <a href="{{ route('search.results') }}" class="nav-item">
@@ -825,9 +824,6 @@
                 <a href="{{ route('customer.coupons') }}" class="nav-item">
                     <i class="ri-coupon-line"></i> My Coupons
                 </a>
-                <a href="{{ route('customer.cart.index') }}" class="nav-item">
-                    <i class="ri-shopping-cart-line"></i> Cart
-                </a>
             </div>
 
             <div class="nav-group">
@@ -837,18 +833,6 @@
                 </a>
                 <a href="{{ route('customer.settings') }}" class="nav-item">
                     <i class="ri-settings-4-line"></i> Settings
-                </a>
-                <a href="{{ route('customer.notifications') }}" class="nav-item">
-                    <i class="ri-notification-3-line"></i> Notifications
-                    @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
-                        <span class="badge-count">{{ $unreadNotificationsCount }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('customer.messages') }}" class="nav-item">
-                    <i class="ri-mail-line"></i> Messages
-                    @if(isset($unreadMessagesCount) && $unreadMessagesCount > 0)
-                        <span class="badge-count">{{ $unreadMessagesCount }}</span>
-                    @endif
                 </a>
                 <form method="POST" action="{{ route('logout') }}" class="logout-form">
                     @csrf
@@ -861,11 +845,7 @@
 
         <div class="user-profile">
             <div class="avatar">
-                @if(Auth::user()->avatar)
-                    <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
-                @else
-                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
-                @endif
+                <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}">
             </div>
             <div class="user-info">
                 <h4>{{ Auth::user()->name }}</h4>
@@ -888,6 +868,12 @@
             </div>
 
             <div class="header-actions">
+                <a href="{{ route('customer.cart.index') }}" class="icon-btn">
+                    <i class="ri-shopping-cart-line"></i>
+                    @if(isset($cartCount) && $cartCount > 0)
+                        <span class="badge-count">{{ $cartCount }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('customer.notifications') }}" class="icon-btn">
                     <i class="ri-notification-3-line"></i>
                     @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)

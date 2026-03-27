@@ -391,34 +391,56 @@ class AdminController extends Controller
         $pendingOrdersCount = Order::where('status', 'pending')->count();
         $pendingVendorsCount = User::where('role', 'vendor')->whereNull('email_verified_at')->count();
 
-        // FIX: Comment out notifications until table is created
-        // $unreadNotificationsCount = Auth::guard('admin')->user()->unreadNotifications->count();
-        $unreadNotificationsCount = 0; // Temporary placeholder
+        // Notifications count
+        try {
+            $unreadNotificationsCount = \App\Models\Notification::where('user_id', Auth::id())
+                ->where('is_read', false)->count();
+            $recentNotifications = \App\Models\Notification::where('user_id', Auth::id())
+                ->latest()->limit(5)->get();
+        } catch (\Exception $e) {
+            $unreadNotificationsCount = 0;
+            $recentNotifications = collect([]);
+        }
+
+        // Messages count
+        try {
+            $unreadMessagesCount = \App\Models\Message::where('receiver_id', Auth::id())
+                ->where('is_read', false)->count();
+        } catch (\Exception $e) {
+            $unreadMessagesCount = 0;
+        }
 
         $recentOrders = Order::with('user')->latest()->paginate(10);
 
-        // FIX: Comment out notifications query
-        // $recentNotifications = Auth::guard('admin')->user()->notifications()->latest()->limit(5)->get();
-        $recentNotifications = collect([]); // Empty collection
-
-        // Get counts for KPI cards
-        $totalRevenue = Order::where('status', 'completed')->sum('total_amount') ?? 0;
-        $activeVendorsCount = User::where('role', 'vendor')->where('is_active', true)->count();
+        // KPI cards — real data
+        $totalRevenue        = Order::where('status', 'completed')->sum('total_amount') ?? 0;
+        $activeVendorsCount  = User::where('role', 'vendor')->where('is_active', true)->count();
         $totalCustomersCount = User::where('role', 'customer')->count();
+        $totalOrdersCount    = Order::count();
 
-        // Calculate growth percentages (mock for now - implement real logic later)
-        $revenueGrowth = 12.5;
-        $vendorGrowth = 5.2;
-        $orderChange = -2.1;
-        $customerGrowth = 8.4;
+        // Growth: compare last 30 days vs previous 30 days
+        $now   = now();
+        $rev30 = Order::where('status', 'completed')->where('created_at', '>=', $now->copy()->subDays(30))->sum('total_amount');
+        $rev60 = Order::where('status', 'completed')->whereBetween('created_at', [$now->copy()->subDays(60), $now->copy()->subDays(30)])->sum('total_amount');
+        $revenueGrowth  = $rev60 > 0 ? round((($rev30 - $rev60) / $rev60) * 100, 1) : 0;
 
-        // Today's stats
-        $productViewsToday = 45200;
-        $completedOrdersToday = Order::where('status', 'completed')
-            ->whereDate('created_at', today())
-            ->count() ?: 892;
-        $newReviewsToday = 128;
-        $refundRequests = Order::where('status', 'refund_requested')->count() ?: 12;
+        $ord30 = Order::where('created_at', '>=', $now->copy()->subDays(30))->count();
+        $ord60 = Order::whereBetween('created_at', [$now->copy()->subDays(60), $now->copy()->subDays(30)])->count();
+        $orderChange = $ord60 > 0 ? round((($ord30 - $ord60) / $ord60) * 100, 1) : 0;
+
+        $cust30 = User::where('role', 'customer')->where('created_at', '>=', $now->copy()->subDays(30))->count();
+        $cust60 = User::where('role', 'customer')->whereBetween('created_at', [$now->copy()->subDays(60), $now->copy()->subDays(30)])->count();
+        $customerGrowth = $cust60 > 0 ? round((($cust30 - $cust60) / $cust60) * 100, 1) : 0;
+
+        $vend30 = User::where('role', 'vendor')->where('created_at', '>=', $now->copy()->subDays(30))->count();
+        $vend60 = User::where('role', 'vendor')->whereBetween('created_at', [$now->copy()->subDays(60), $now->copy()->subDays(30)])->count();
+        $vendorGrowth = $vend60 > 0 ? round((($vend30 - $vend60) / $vend60) * 100, 1) : 0;
+
+        // Today's stats — real data
+        $completedOrdersToday = Order::where('status', 'completed')->whereDate('created_at', today())->count();
+        $newReviewsToday      = \App\Models\Review::whereDate('created_at', today())->count();
+        $refundRequests       = Order::where('status', 'refund_requested')->count();
+        $productViewsToday    = \App\Models\Product::whereDate('updated_at', today())->sum('views_count') ?? 0;
 
         // Greeting based on time
         $greeting = $this->getGreeting();
@@ -431,11 +453,13 @@ class AdminController extends Controller
             'pendingOrdersCount',
             'pendingVendorsCount',
             'unreadNotificationsCount',
+            'unreadMessagesCount',
             'recentOrders',
             'recentNotifications',
             'totalRevenue',
             'activeVendorsCount',
             'totalCustomersCount',
+            'totalOrdersCount',
             'revenueGrowth',
             'vendorGrowth',
             'orderChange',
@@ -612,7 +636,22 @@ public function store(AdminLoginRequest $request)
             'cancelled' => Order::where('status', 'cancelled')->count(),
         ];
 
-        return view('admin.orders.index', compact('orders', 'orderStats', 'status', 'search', 'dateFrom', 'dateTo'));
+        $pendingOrdersCount  = $orderStats['pending'];
+        $pendingVendorsCount = User::where('role', 'vendor')->whereNull('email_verified_at')->count();
+
+        try {
+            $unreadNotificationsCount = \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count();
+        } catch (\Exception $e) { $unreadNotificationsCount = 0; }
+
+        try {
+            $unreadMessagesCount = \App\Models\Message::where('receiver_id', Auth::id())->where('is_read', false)->count();
+        } catch (\Exception $e) { $unreadMessagesCount = 0; }
+
+        return view('admin.orders.index', compact(
+            'orders', 'orderStats', 'status', 'search', 'dateFrom', 'dateTo',
+            'pendingOrdersCount', 'pendingVendorsCount',
+            'unreadNotificationsCount', 'unreadMessagesCount'
+        ));
     }
 
     /**

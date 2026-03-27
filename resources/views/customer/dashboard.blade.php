@@ -348,10 +348,8 @@
 
         /* Top Header */
         .top-header {
-            height: 80px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            height: 70px;
+            background-color: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
@@ -360,7 +358,6 @@
             position: sticky;
             top: 0;
             z-index: 99;
-            box-shadow: var(--shadow-sm);
         }
 
         .menu-toggle {
@@ -369,162 +366,66 @@
             color: var(--text-secondary);
             cursor: pointer;
             margin-right: 20px;
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            background: var(--bg-soft);
-            border: 1px solid var(--border-color);
-        }
-
-        .menu-toggle:hover {
-            background: var(--primary-gold);
-            color: white;
-            transform: scale(1.05);
-        }
-
-        @media (max-width: 1024px) {
-            .menu-toggle {
-                display: flex;
-            }
         }
 
         @media (max-width: 768px) {
-            .top-header {
-                padding: 0 20px;
-            }
+            .menu-toggle { display: block; }
+            .top-header { padding: 0 20px; }
         }
 
-        .search-bar {
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            background: var(--bg-soft);
-            padding: 12px 20px;
-            border-radius: 16px;
-            width: 400px;
-            border: 2px solid transparent;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .search-bar:focus-within {
-            border-color: var(--primary-gold);
-            box-shadow: 0 0 0 4px rgba(184, 142, 63, 0.1);
-            transform: translateY(-1px);
-            background: white;
-        }
-
-        .search-bar i {
-            color: var(--text-secondary);
-            margin-right: 12px;
-            font-size: 18px;
-        }
-
-        .search-bar input {
-            border: none;
-            background: none;
-            outline: none;
-            font-size: 15px;
-            width: 100%;
-            color: var(--text-primary);
-            font-weight: 500;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .search-bar input::placeholder {
-            color: var(--text-soft);
-            font-weight: 400;
-        }
-
-        @media (max-width: 1200px) {
-            .search-bar {
-                width: 300px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .search-bar {
-                width: 200px;
-                padding: 10px 16px;
-            }
-            .search-bar i {
-                margin-right: 8px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .search-bar {
-                width: 160px;
-            }
+            gap: 8px;
         }
 
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 20px;
         }
 
         .icon-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             color: var(--text-secondary);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background 0.2s;
             position: relative;
             text-decoration: none;
-            background: var(--bg-soft);
-            border: 1px solid var(--border-color);
             font-size: 20px;
         }
 
         .icon-btn:hover {
-            background: var(--gradient-gold);
-            color: white;
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: var(--shadow-lg);
-            border-color: transparent;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
         }
 
         .icon-btn .badge-count {
             position: absolute;
-            top: -6px;
-            right: -6px;
-            min-width: 22px;
-            height: 22px;
-            border-radius: 22px;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            top: -5px;
+            right: -5px;
+            background-color: var(--accent-red);
             color: white;
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 10px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid white;
-            box-shadow: var(--shadow-md);
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
         }
 
         /* Dashboard Container */
         .dashboard-container {
-            padding: 40px;
+            padding: 32px;
             flex: 1;
-        }
-
-        @media (max-width: 1024px) {
-            .dashboard-container {
-                padding: 30px;
-            }
         }
 
         @media (max-width: 768px) {
@@ -903,21 +804,20 @@
             overflow: hidden;
         }
 
-        .vendor-image::before {
-            content: '';
+        .vendor-image img.vendor-banner {
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .vendor-image::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%);
+            inset: 0;
+            background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.35) 100%);
+            z-index: 1;
         }
 
         .vendor-logo {
@@ -1563,18 +1463,15 @@
 
         <div class="nav-menu">
             <div class="nav-group">
-                <div class="nav-label">MAIN</div>
+                <div class="nav-label">MAIN MENU</div>
                 <a href="{{ route('customer.dashboard') }}" class="nav-item active">
-                    <i class="ri-dashboard-line"></i>
-                    Dashboard
+                    <i class="ri-dashboard-line"></i> Dashboard
                 </a>
                 <a href="{{ route('search.results') }}" class="nav-item">
-                    <i class="ri-search-line"></i>
-                    Discover
+                    <i class="ri-search-line"></i> Discover
                 </a>
                 <a href="{{ route('customer.orders') }}" class="nav-item">
-                    <i class="ri-shopping-bag-3-line"></i>
-                    My Orders
+                    <i class="ri-shopping-bag-3-line"></i> My Orders
                     @if(isset($recentOrders) && $recentOrders->count() > 0)
                         <span class="badge-count">{{ $recentOrders->count() }}</span>
                     @endif
@@ -1584,37 +1481,37 @@
             <div class="nav-group">
                 <div class="nav-label">SHOPPING</div>
                 <a href="{{ route('customer.wishlist.index') }}" class="nav-item">
-                    <i class="ri-heart-3-line"></i>
-                    Wishlist
+                    <i class="ri-heart-3-line"></i> Wishlist
                 </a>
                 <a href="{{ route('customer.following') }}" class="nav-item">
-                    <i class="ri-store-2-line"></i>
-                    Following
+                    <i class="ri-store-line"></i> Following
                     @if(isset($followingCount) && $followingCount > 0)
                         <span class="badge-count">{{ $followingCount }}</span>
                     @endif
                 </a>
                 <a href="{{ route('customer.coupons') }}" class="nav-item">
-                    <i class="ri-coupon-3-line"></i>
-                    My Coupons
+                    <i class="ri-coupon-line"></i> My Coupons
+                </a>
+                <a href="{{ route('customer.cart.index') }}" class="nav-item">
+                    <i class="ri-shopping-cart-line"></i> Cart
+                    @if(isset($cartCount) && $cartCount > 0)
+                        <span class="badge-count">{{ $cartCount }}</span>
+                    @endif
                 </a>
             </div>
 
             <div class="nav-group">
                 <div class="nav-label">ACCOUNT</div>
-                <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">
-                    <i class="ri-user-line"></i>
-                    My Profile
+                <a href="{{ route('customer.profile') }}" class="nav-item">
+                    <i class="ri-user-line"></i> My Profile
                 </a>
-                <a href="{{ route('profile.edit', Auth::id()) }}" class="nav-item">
-                    <i class="ri-settings-4-line"></i>
-                    Account Settings
+                <a href="{{ route('customer.settings') }}" class="nav-item">
+                    <i class="ri-settings-4-line"></i> Settings
                 </a>
-                <form method="POST" action="{{ route('logout') }}" style="display: block; margin-top: 8px;">
+                <form method="POST" action="{{ route('logout') }}" class="logout-form">
                     @csrf
-                    <button type="submit" class="logout-btn">
-                        <i class="ri-logout-box-line"></i>
-                        Logout
+                    <button type="submit" class="logout-btn" onclick="return confirm('Are you sure you want to logout?')">
+                        <i class="ri-logout-box-line"></i> Logout
                     </button>
                 </form>
             </div>
@@ -1622,15 +1519,11 @@
 
         <div class="user-profile">
             <div class="avatar">
-                @if(Auth::user() && Auth::user()->profile_image)
-                    <img src="{{ asset('storage/' . Auth::user()->profile_image) }}" alt="{{ Auth::user()->name }}">
-                @else
-                    {{ strtoupper(substr(Auth::user()->name ?? 'CU', 0, 2)) }}
-                @endif
+                <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}">
             </div>
             <div class="user-info">
-                <h4>{{ Auth::user()->name ?? 'Customer' }}</h4>
-                <p>Member since {{ Auth::user() ? Auth::user()->created_at->format('M Y') : date('M Y') }}</p>
+                <h4>{{ Auth::user()->name }}</h4>
+                <p>Customer since {{ Auth::user()->created_at->format('M Y') }}</p>
             </div>
         </div>
     </nav>
@@ -1639,29 +1532,26 @@
     <main class="main-content">
         <!-- Top Header -->
         <header class="top-header">
-            <div style="display: flex; align-items: center; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 16px;">
                 <div class="menu-toggle" id="menuToggle">
                     <i class="ri-menu-line"></i>
                 </div>
-                <div class="search-bar">
-                    <i class="ri-search-line"></i>
-                    <form action="{{ route('search.results') }}" method="GET" style="width: 100%;">
-                        <input type="text" name="query" placeholder="Search for vendors, products..." value="{{ request('query') }}" aria-label="Search">
-                    </form>
+                <div class="page-title">
+                    <i class="ri-dashboard-line" style="color: var(--primary-gold);"></i> My Dashboard
                 </div>
             </div>
 
             <div class="header-actions">
-                <a href="{{ route('customer.notifications') }}" class="icon-btn" data-tooltip="Notifications">
+                <a href="{{ route('customer.notifications') }}" class="icon-btn">
                     <i class="ri-notification-3-line"></i>
                     @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
                         <span class="badge-count">{{ $unreadNotificationsCount }}</span>
                     @endif
                 </a>
-                <a href="{{ route('customer.cart.index')}}" class="icon-btn" data-tooltip="Shopping Cart">
-                    <i class="ri-shopping-cart-2-line"></i>
-                    @if(isset($cartCount) && $cartCount > 0)
-                        <span class="badge-count">{{ $cartCount }}</span>
+                <a href="{{ route('customer.messages') }}" class="icon-btn">
+                    <i class="ri-mail-line"></i>
+                    @if(isset($unreadMessagesCount) && $unreadMessagesCount > 0)
+                        <span class="badge-count">{{ $unreadMessagesCount }}</span>
                     @endif
                 </a>
             </div>
@@ -1743,12 +1633,11 @@
                     @foreach($following as $vendor)
                         <a href="{{ route('vendor.show', $vendor->id) }}" class="vendor-card">
                             <div class="vendor-image">
+                                @if($vendor->banner_url)
+                                    <img src="{{ $vendor->banner_url }}" alt="{{ $vendor->business_name ?? $vendor->name }} banner" class="vendor-banner" loading="lazy">
+                                @endif
                                 <div class="vendor-logo">
-                                    @if($vendor->profile_image)
-                                        <img src="{{ asset('storage/' . $vendor->profile_image) }}" alt="{{ $vendor->business_name ?? $vendor->name }}" loading="lazy">
-                                    @else
-                                        {{ strtoupper(substr($vendor->business_name ?? $vendor->name, 0, 2)) }}
-                                    @endif
+                                    <img src="{{ $vendor->avatar_url }}" alt="{{ $vendor->business_name ?? $vendor->name }}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
                                 </div>
                             </div>
                             <div class="vendor-info">
@@ -1813,11 +1702,9 @@
                                 <td>
                                     <div class="vendor-cell">
                                         <div class="vendor-thumb">
-                                            @if($order->vendor && $order->vendor->profile_image)
-                                                <img src="{{ asset('storage/' . $order->vendor->profile_image) }}" alt="{{ $order->vendor->business_name ?? $order->vendor->name }}" loading="lazy">
-                                            @else
-                                                {{ strtoupper(substr($order->vendor->business_name ?? $order->vendor->name ?? 'V', 0, 2)) }}
-                                            @endif
+                                            <img src="{{ $order->vendor?->avatar_url ?? 'https://ui-avatars.com/api/?name=V&background=B88E3F&color=fff&size=80' }}"
+                                                 alt="{{ $order->vendor->business_name ?? 'Vendor' }}" loading="lazy"
+                                                 style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
                                         </div>
                                         <div>
                                             <div style="font-weight: 600;">{{ $order->vendor->business_name ?? $order->vendor->name ?? 'Unknown Vendor' }}</div>
@@ -1862,35 +1749,18 @@
             </div>
 
             <div class="recommended-grid">
-                @php
-                    $recommendedVendors = isset($following) ? \App\Models\User::where('role', 'vendor')
-                        ->where('is_active', true)
-                        ->whereNotIn('id', $following->pluck('id'))
-                        ->inRandomOrder()
-                        ->limit(6)
-                        ->get() : collect([]);
-                @endphp
-
                 @forelse($recommendedVendors as $vendor)
                     <a href="{{ route('vendor.show', $vendor->id) }}" class="recommended-card">
                         <div class="recommended-avatar">
-                            @if($vendor->profile_image)
-                                <img src="{{ asset('storage/' . $vendor->profile_image) }}" alt="{{ $vendor->business_name ?? $vendor->name }}" loading="lazy">
-                            @else
-                                {{ strtoupper(substr($vendor->business_name ?? $vendor->name, 0, 2)) }}
-                            @endif
+                            <img src="{{ $vendor->avatar_url }}" alt="{{ $vendor->business_name ?? $vendor->name }}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
                         </div>
                         <div class="recommended-name">{{ $vendor->business_name ?? $vendor->name }}</div>
                         <div class="recommended-category">{{ $vendor->category ?? 'General Store' }}</div>
                     </a>
                 @empty
-                    @for($i = 1; $i <= 6; $i++)
-                        <a href="{{ route('search.results') }}" class="recommended-card">
-                            <div class="recommended-avatar">V{{ $i }}</div>
-                            <div class="recommended-name">Vendor {{ $i }}</div>
-                            <div class="recommended-category">Handmade Crafts</div>
-                        </a>
-                    @endfor
+                    <p style="color:var(--text-secondary);grid-column:1/-1;text-align:center;padding:2rem;">
+                        No recommendations yet. <a href="{{ route('search.results') }}" style="color:var(--primary-gold);">Explore vendors</a>
+                    </p>
                 @endforelse
             </div>
         </div>

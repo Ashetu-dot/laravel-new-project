@@ -556,7 +556,40 @@
         .btn-redeem {
             background-color: var(--primary-gold);
             color: white;
+            padding: 8px 16px;
             border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-redeem:hover:not(:disabled) {
+            background-color: #9c7832;
+            transform: translateY(-2px);
+        }
+
+        .btn-redeem:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-copy {
+            background-color: var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--primary-gold);
+            color: white;
+        }            border: none;
             padding: 8px 16px;
             border-radius: 8px;
             font-size: 13px;
@@ -842,7 +875,6 @@
         <div class="brand">
             <i class="ri-store-3-fill"></i>
             Vendora
-            
         </div>
 
         <div class="nav-menu">
@@ -865,26 +897,20 @@
                     <i class="ri-heart-3-line"></i> Wishlist
                 </a>
                 <a href="{{ route('customer.following') }}" class="nav-item">
-                    <i class="ri-store-2-line"></i> Following
+                    <i class="ri-store-line"></i> Following
                 </a>
                 <a href="{{ route('customer.coupons') }}" class="nav-item active">
-                    <i class="ri-coupon-3-line"></i> My Coupons
+                    <i class="ri-coupon-line"></i> My Coupons
                 </a>
             </div>
 
             <div class="nav-group">
                 <div class="nav-label">ACCOUNT</div>
-                <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">
+                <a href="{{ route('customer.profile') }}" class="nav-item">
                     <i class="ri-user-line"></i> My Profile
                 </a>
-                <a href="{{ route('profile.edit', Auth::id()) }}" class="nav-item">
-                    <i class="ri-settings-4-line"></i> Account Settings
-                </a>
-                <a href="{{ route('customer.notifications') }}" class="nav-item">
-                    <i class="ri-notification-3-line"></i> Notifications
-                </a>
-                <a href="{{ route('customer.messages') }}" class="nav-item">
-                    <i class="ri-mail-line"></i> Messages
+                <a href="{{ route('customer.settings') }}" class="nav-item">
+                    <i class="ri-settings-4-line"></i> Settings
                 </a>
                 <form method="POST" action="{{ route('logout') }}" class="logout-form">
                     @csrf
@@ -897,15 +923,11 @@
 
         <div class="user-profile">
             <div class="avatar">
-                @if(Auth::user()->avatar)
-                    <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
-                @else
-                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
-                @endif
+                <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}">
             </div>
             <div class="user-info">
                 <h4>{{ Auth::user()->name }}</h4>
-                <p>Member since {{ Auth::user()->created_at->format('M Y') }}</p>
+                <p>Customer since {{ Auth::user()->created_at->format('M Y') }}</p>
             </div>
         </div>
     </nav>
@@ -924,6 +946,12 @@
             </div>
 
             <div class="header-actions">
+                <a href="{{ route('customer.cart.index') }}" class="icon-btn">
+                    <i class="ri-shopping-cart-line"></i>
+                    @if(isset($cartCount) && $cartCount > 0)
+                        <span class="badge-count">{{ $cartCount }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('customer.notifications') }}" class="icon-btn">
                     <i class="ri-notification-3-line"></i>
                     @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
@@ -935,9 +963,6 @@
                     @if(isset($unreadMessagesCount) && $unreadMessagesCount > 0)
                         <span class="badge-count">{{ $unreadMessagesCount }}</span>
                     @endif
-                </a>
-                <a href="{{ route('customer.cart.index') }}" class="icon-btn">
-                    <i class="ri-shopping-cart-line"></i>
                 </a>
             </div>
         </header>
@@ -958,224 +983,126 @@
             <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon bg-blue-light">
-                        <i class="ri-coupon-3-line"></i>
-                    </div>
+                    <div class="stat-icon bg-blue-light"><i class="ri-coupon-3-line"></i></div>
                     <div class="stat-details">
-                        <div class="stat-value">8</div>
+                        <div class="stat-value">{{ $activeCoupons }}</div>
                         <div class="stat-label">Active Coupons</div>
                     </div>
                 </div>
-
                 <div class="stat-card">
-                    <div class="stat-icon bg-green-light">
-                        <i class="ri-price-tag-3-line"></i>
-                    </div>
+                    <div class="stat-icon bg-green-light"><i class="ri-price-tag-3-line"></i></div>
                     <div class="stat-details">
-                        <div class="stat-value">ETB 1,250</div>
+                        <div class="stat-value">ETB {{ number_format($totalSavings, 0) }}</div>
                         <div class="stat-label">Total Savings</div>
                     </div>
                 </div>
-
                 <div class="stat-card">
-                    <div class="stat-icon bg-purple-light">
-                        <i class="ri-history-line"></i>
-                    </div>
+                    <div class="stat-icon bg-purple-light"><i class="ri-history-line"></i></div>
                     <div class="stat-details">
-                        <div class="stat-value">12</div>
+                        <div class="stat-value">{{ $usedCoupons }}</div>
                         <div class="stat-label">Used Coupons</div>
                     </div>
                 </div>
-
                 <div class="stat-card">
-                    <div class="stat-icon bg-gold-light">
-                        <i class="ri-timer-line"></i>
-                    </div>
+                    <div class="stat-icon bg-gold-light"><i class="ri-timer-line"></i></div>
                     <div class="stat-details">
-                        <div class="stat-value">3</div>
+                        <div class="stat-value">{{ $expiringSoon }}</div>
                         <div class="stat-label">Expiring Soon</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tabs -->
+            <!-- Filter Tabs -->
             <div class="tabs">
-                <button class="tab active" onclick="filterCoupons('all')">All Coupons</button>
-                <button class="tab" onclick="filterCoupons('active')">Active</button>
-                <button class="tab" onclick="filterCoupons('used')">Used</button>
-                <button class="tab" onclick="filterCoupons('expired')">Expired</button>
+                <a href="{{ route('customer.coupons') }}" class="tab {{ !request('filter') || request('filter') === 'active' ? 'active' : '' }}">Active</a>
+                <a href="{{ route('customer.coupons', ['filter' => 'used']) }}" class="tab {{ request('filter') === 'used' ? 'active' : '' }}">Used</a>
+                <a href="{{ route('customer.coupons', ['filter' => 'expired']) }}" class="tab {{ request('filter') === 'expired' ? 'active' : '' }}">Expired</a>
             </div>
 
             <!-- Coupons Grid -->
-            <div class="coupons-grid" id="couponsGrid">
-                <!-- Active Coupon -->
-                <div class="coupon-card" data-status="active">
-                    <div class="coupon-header">
-                        <div class="coupon-type">WELCOME BONUS</div>
-                        <div class="coupon-value">20% OFF</div>
-                        <div class="coupon-code">WELCOME20</div>
+            @if($coupons->count() > 0)
+            <div class="coupons-grid">
+                @foreach($coupons as $coupon)
+                @php
+                    $isExpired = $coupon->expires_at && $coupon->expires_at->isPast();
+                    $isUsed    = $coupon->usages()->where('user_id', Auth::id())->exists();
+                    $isActive  = !$isExpired && !$isUsed && $coupon->is_active;
+                    $statusClass = $isExpired ? 'status-expired' : ($isUsed ? 'status-used' : 'status-active');
+                    $statusLabel = $isExpired ? 'Expired' : ($isUsed ? 'Used' : 'Active');
+                    $valueLabel  = $coupon->type === 'percentage'
+                        ? number_format($coupon->value, 0) . '% OFF'
+                        : 'ETB ' . number_format($coupon->value, 0) . ' OFF';
+                    $headerBg = $isExpired
+                        ? 'background:linear-gradient(135deg,#ef4444,#b91c1c);'
+                        : ($isUsed ? 'background:linear-gradient(135deg,#9ca3af,#6b7280);' : '');
+                @endphp
+                <div class="coupon-card" data-status="{{ $isExpired ? 'expired' : ($isUsed ? 'used' : 'active') }}">
+                    <div class="coupon-header" style="{{ $headerBg }}">
+                        <div class="coupon-type">{{ strtoupper($coupon->description ?? 'DISCOUNT') }}</div>
+                        <div class="coupon-value">{{ $valueLabel }}</div>
+                        <div class="coupon-code" id="code-{{ $coupon->id }}">{{ $coupon->code }}</div>
                     </div>
                     <div class="coupon-body">
-                        <h3 class="coupon-title">Welcome Discount</h3>
-                        <p class="coupon-description">Get 20% off on your first purchase from any vendor. Minimum purchase ETB 500.</p>
-                        
+                        <h3 class="coupon-title">{{ $coupon->description ?? $coupon->code }}</h3>
+                        <p class="coupon-description">
+                            @if($coupon->min_order_amount)
+                                Minimum purchase ETB {{ number_format($coupon->min_order_amount, 0) }}.
+                            @endif
+                            @if($coupon->max_discount_amount)
+                                Max discount ETB {{ number_format($coupon->max_discount_amount, 0) }}.
+                            @endif
+                        </p>
+
                         <div class="coupon-meta">
                             <div class="meta-item">
-                                <div class="meta-label">Valid From</div>
-                                <div class="meta-value">Jan 1, 2026</div>
-                            </div>
-                            <div class="meta-item">
                                 <div class="meta-label">Valid Until</div>
-                                <div class="meta-value">Mar 31, 2026</div>
+                                <div class="meta-value">
+                                    {{ $coupon->expires_at ? $coupon->expires_at->format('M d, Y') : 'No expiry' }}
+                                </div>
                             </div>
+                            @if($coupon->min_order_amount)
                             <div class="meta-item">
                                 <div class="meta-label">Min. Purchase</div>
-                                <div class="meta-value">ETB 500</div>
+                                <div class="meta-value">ETB {{ number_format($coupon->min_order_amount, 0) }}</div>
                             </div>
+                            @endif
+                            @if($coupon->max_uses)
+                            <div class="meta-item">
+                                <div class="meta-label">Uses Left</div>
+                                <div class="meta-value">{{ max(0, $coupon->max_uses - $coupon->used_count) }}</div>
+                            </div>
+                            @endif
                         </div>
 
                         <div class="coupon-footer">
-                            <span class="coupon-status status-active">Active</span>
-                            <button class="btn-redeem" onclick="redeemCoupon(1)">Redeem Now</button>
+                            <span class="coupon-status {{ $statusClass }}">{{ $statusLabel }}</span>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn-copy" onclick="copyCode('{{ $coupon->code }}', this)" title="Copy code">
+                                    <i class="ri-file-copy-line"></i>
+                                </button>
+                                @if($isActive)
+                                    <button class="btn-redeem" onclick="redeemCoupon({{ $coupon->id }}, '{{ $coupon->code }}', this)">
+                                        Redeem Now
+                                    </button>
+                                @else
+                                    <button class="btn-redeem" disabled>{{ $statusLabel }}</button>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Percentage Discount -->
-                <div class="coupon-card" data-status="active">
-                    <div class="coupon-header">
-                        <div class="coupon-type">FLASH SALE</div>
-                        <div class="coupon-value">15% OFF</div>
-                        <div class="coupon-code">FLASH15</div>
-                    </div>
-                    <div class="coupon-body">
-                        <h3 class="coupon-title">Flash Sale Discount</h3>
-                        <p class="coupon-description">Limited time offer! 15% off on all electronics and gadgets.</p>
-                        
-                        <div class="coupon-meta">
-                            <div class="meta-item">
-                                <div class="meta-label">Valid From</div>
-                                <div class="meta-value">Feb 15, 2026</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Valid Until</div>
-                                <div class="meta-value">Feb 28, 2026</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Max Discount</div>
-                                <div class="meta-value">ETB 1,000</div>
-                            </div>
-                        </div>
-
-                        <div class="coupon-footer">
-                            <span class="coupon-status status-active">Active</span>
-                            <button class="btn-redeem" onclick="redeemCoupon(2)">Redeem Now</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fixed Amount Discount -->
-                <div class="coupon-card" data-status="active">
-                    <div class="coupon-header">
-                        <div class="coupon-type">SPECIAL OFFER</div>
-                        <div class="coupon-value">ETB 200 OFF</div>
-                        <div class="coupon-code">SAVE200</div>
-                    </div>
-                    <div class="coupon-body">
-                        <h3 class="coupon-title">Special Discount</h3>
-                        <p class="coupon-description">Get ETB 200 off on orders above ETB 1,000. Valid on all categories.</p>
-                        
-                        <div class="coupon-meta">
-                            <div class="meta-item">
-                                <div class="meta-label">Valid From</div>
-                                <div class="meta-value">Mar 1, 2026</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Valid Until</div>
-                                <div class="meta-value">Apr 15, 2026</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Min. Purchase</div>
-                                <div class="meta-value">ETB 1,000</div>
-                            </div>
-                        </div>
-
-                        <div class="coupon-footer">
-                            <span class="coupon-status status-active">Active</span>
-                            <button class="btn-redeem" onclick="redeemCoupon(3)">Redeem Now</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Used Coupon -->
-                <div class="coupon-card" data-status="used">
-                    <div class="coupon-header" style="background: linear-gradient(135deg, #9ca3af, #6b7280);">
-                        <div class="coupon-type">LOYALTY REWARD</div>
-                        <div class="coupon-value">10% OFF</div>
-                        <div class="coupon-code">LOYAL10</div>
-                    </div>
-                    <div class="coupon-body">
-                        <h3 class="coupon-title">Loyalty Reward</h3>
-                        <p class="coupon-description">Thank you for being a loyal customer! Get 10% off on your next purchase.</p>
-                        
-                        <div class="coupon-meta">
-                            <div class="meta-item">
-                                <div class="meta-label">Valid From</div>
-                                <div class="meta-value">Jan 15, 2026</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Valid Until</div>
-                                <div class="meta-value">Feb 15, 2026</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Used On</div>
-                                <div class="meta-value">Feb 10, 2026</div>
-                            </div>
-                        </div>
-
-                        <div class="coupon-footer">
-                            <span class="coupon-status status-used">Used</span>
-                            <button class="btn-redeem" disabled>Already Used</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Expired Coupon -->
-                <div class="coupon-card" data-status="expired">
-                    <div class="coupon-header" style="background: linear-gradient(135deg, #ef4444, #b91c1c);">
-                        <div class="coupon-type">NEW YEAR SALE</div>
-                        <div class="coupon-value">25% OFF</div>
-                        <div class="coupon-code">NEWYEAR25</div>
-                    </div>
-                    <div class="coupon-body">
-                        <h3 class="coupon-title">New Year Special</h3>
-                        <p class="coupon-description">Celebrate the new year with 25% off on all products.</p>
-                        
-                        <div class="coupon-meta">
-                            <div class="meta-item">
-                                <div class="meta-label">Valid From</div>
-                                <div class="meta-value">Dec 25, 2025</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Valid Until</div>
-                                <div class="meta-value">Jan 15, 2026</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-label">Status</div>
-                                <div class="meta-value">Expired</div>
-                            </div>
-                        </div>
-
-                        <div class="coupon-footer">
-                            <span class="coupon-status status-expired">Expired</span>
-                            <button class="btn-redeem" disabled>Expired</button>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
 
-            <!-- Empty State (hidden by default) -->
-            <div class="empty-state" id="emptyState" style="display: none;">
+            <!-- Pagination -->
+            @if($coupons->hasPages())
+                <div class="pagination">
+                    {{ $coupons->appends(request()->query())->links() }}
+                </div>
+            @endif
+
+            @else
+            <div class="empty-state" id="emptyState">
                 <i class="ri-coupon-3-line empty-icon"></i>
                 <h3>No coupons available</h3>
                 <p>You don't have any coupons at the moment. Check back later for new offers!</p>
@@ -1183,15 +1110,7 @@
                     <i class="ri-shopping-bag-line"></i> Start Shopping
                 </a>
             </div>
-
-            <!-- Pagination -->
-            <div class="pagination">
-                <a href="#" class="pagination-item"><i class="ri-arrow-left-s-line"></i></a>
-                <a href="#" class="pagination-item active">1</a>
-                <a href="#" class="pagination-item">2</a>
-                <a href="#" class="pagination-item">3</a>
-                <a href="#" class="pagination-item"><i class="ri-arrow-right-s-line"></i></a>
-            </div>
+            @endif
         </div>
     </main>
 
@@ -1199,18 +1118,14 @@
     <div class="modal" id="redeemModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Redeem Coupon</h3>
-                <div class="modal-close" onclick="closeModal()">
-                    <i class="ri-close-line"></i>
-                </div>
+                <h3>Coupon Redeemed!</h3>
+                <div class="modal-close" onclick="closeModal()"><i class="ri-close-line"></i></div>
             </div>
             <div class="modal-body">
-                <div class="modal-icon">
-                    <i class="ri-checkbox-circle-line"></i>
-                </div>
-                <h4 style="margin-bottom: 8px;">Coupon Applied!</h4>
-                <p style="color: var(--text-secondary);">Your discount has been applied to the cart.</p>
-                <p style="font-size: 14px; margin-top: 8px;">Code: <strong id="redeemedCode"></strong></p>
+                <div class="modal-icon"><i class="ri-checkbox-circle-line"></i></div>
+                <h4 style="margin-bottom:8px;">Coupon Applied!</h4>
+                <p style="color:var(--text-secondary);">Your discount code has been saved.</p>
+                <p style="font-size:14px;margin-top:8px;">Code: <strong id="redeemedCode"></strong></p>
             </div>
             <div class="modal-footer">
                 <a href="{{ route('customer.cart.index') }}" class="btn btn-primary">View Cart</a>
@@ -1219,141 +1134,105 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
+    <!-- Toast -->
     <div id="toast" class="toast">
-        <div class="toast-icon">
-            <i class="ri-checkbox-circle-line"></i>
-        </div>
+        <div class="toast-icon"><i class="ri-checkbox-circle-line"></i></div>
         <div class="toast-content">
             <div class="toast-title" id="toastTitle">Success</div>
-            <div class="toast-message" id="toastMessage">Coupon redeemed successfully</div>
+            <div class="toast-message" id="toastMessage"></div>
         </div>
-        <div class="toast-close" onclick="hideToast()">
-            <i class="ri-close-line"></i>
-        </div>
+        <div class="toast-close" onclick="hideToast()"><i class="ri-close-line"></i></div>
     </div>
 
     <script>
-        // CSRF Token
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         // Mobile menu toggle
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.getElementById('sidebar');
-
             if (menuToggle && sidebar) {
-                menuToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('active');
-                });
-
-                document.addEventListener('click', function(event) {
-                    if (window.innerWidth <= 768) {
-                        if (!sidebar.contains(event.target) && !menuToggle.contains(event.target)) {
-                            sidebar.classList.remove('active');
-                        }
-                    }
+                menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
+                document.addEventListener('click', e => {
+                    if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target))
+                        sidebar.classList.remove('active');
                 });
             }
         });
 
-        // Filter coupons
-        function filterCoupons(status) {
-            // Update tabs
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
+        // Copy coupon code
+        function copyCode(code, btn) {
+            navigator.clipboard.writeText(code).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="ri-check-line"></i>';
+                showToast('Copied!', code + ' copied to clipboard', 'success');
+                setTimeout(() => btn.innerHTML = orig, 2000);
+            }).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = code;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast('Copied!', code + ' copied to clipboard', 'success');
             });
-            event.target.classList.add('active');
-
-            // Filter cards
-            const cards = document.querySelectorAll('.coupon-card');
-            let visibleCount = 0;
-
-            cards.forEach(card => {
-                if (status === 'all' || card.dataset.status === status) {
-                    card.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            // Show/hide empty state
-            const emptyState = document.getElementById('emptyState');
-            if (visibleCount === 0) {
-                emptyState.style.display = 'block';
-            } else {
-                emptyState.style.display = 'none';
-            }
         }
 
-        // Redeem coupon
-        function redeemCoupon(couponId) {
-            // Show loading state
-            const btn = event.target;
-            const originalText = btn.innerHTML;
+        // Redeem coupon via API
+        function redeemCoupon(couponId, code, btn) {
+            const orig = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<span class="loading-spinner"></span> Redeeming...';
 
-            // Simulate API call
-            setTimeout(() => {
-                // Get coupon code
-                const couponCode = btn.closest('.coupon-card').querySelector('.coupon-code').textContent;
-                document.getElementById('redeemedCode').textContent = couponCode;
-                
-                // Show modal
-                document.getElementById('redeemModal').classList.add('active');
-                
-                // Reset button
+            fetch(`/customer/coupons/${couponId}/redeem`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(r => r.json())
+            .then(data => {
                 btn.disabled = false;
-                btn.innerHTML = originalText;
-            }, 1000);
+                btn.innerHTML = orig;
+                if (data.success) {
+                    document.getElementById('redeemedCode').textContent = code;
+                    document.getElementById('redeemModal').classList.add('active');
+                    btn.textContent = 'Redeemed';
+                    btn.disabled = true;
+                    btn.closest('.coupon-card').querySelector('.coupon-status').textContent = 'Used';
+                    btn.closest('.coupon-card').querySelector('.coupon-status').className = 'coupon-status status-used';
+                } else {
+                    showToast('Error', data.message || 'Failed to redeem coupon', 'error');
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = orig;
+                showToast('Error', 'Network error. Please try again.', 'error');
+            });
         }
 
-        // Close modal
         function closeModal() {
             document.getElementById('redeemModal').classList.remove('active');
-            showToast('Success', 'Coupon applied to your cart!', 'success');
         }
 
-        // Show toast
         function showToast(title, message, type = 'success') {
             const toast = document.getElementById('toast');
-            const toastTitle = document.getElementById('toastTitle');
-            const toastMessage = document.getElementById('toastMessage');
-            const toastIcon = toast.querySelector('.toast-icon i');
-
-            toast.className = 'toast';
-            if (type === 'success') {
-                toast.classList.add('toast-success');
-                toastIcon.className = 'ri-checkbox-circle-line';
-            } else {
-                toast.classList.add('toast-error');
-                toastIcon.className = 'ri-error-warning-line';
-            }
-
-            toastTitle.textContent = title;
-            toastMessage.textContent = message;
-
+            const icon = toast.querySelector('.toast-icon i');
+            toast.className = 'toast ' + (type === 'success' ? 'toast-success' : 'toast-error');
+            icon.className = type === 'success' ? 'ri-checkbox-circle-line' : 'ri-error-warning-line';
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMessage').textContent = message;
             toast.classList.add('show');
-
-            setTimeout(() => {
-                hideToast();
-            }, 3000);
+            setTimeout(hideToast, 3500);
         }
 
         function hideToast() {
             document.getElementById('toast').classList.remove('show');
         }
-
-        // Confirm logout
-        document.querySelectorAll('.logout-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to logout?')) {
-                    e.preventDefault();
-                }
-            });
-        });
     </script>
 
 </body>

@@ -597,6 +597,13 @@ class OrderController extends Controller
         $cancelledOrders = Order::where('user_id', $user->id)->where('status', 'cancelled')->count();
         $totalSpent = Order::where('user_id', $user->id)->whereIn('status', ['completed', 'delivered'])->sum('total_amount');
 
+        // Get cart count
+        try {
+            $cartCount = \App\Models\Cart::where('user_id', $user->id)->sum('quantity');
+        } catch (\Exception $e) {
+            $cartCount = 0;
+        }
+
         return view('customer.orders.index', compact(
             'orders',
             'totalOrders',
@@ -607,6 +614,7 @@ class OrderController extends Controller
             'totalSpent',
             'unreadNotificationsCount',
             'unreadMessagesCount',
+            'cartCount',
             'user'
         ));
     }

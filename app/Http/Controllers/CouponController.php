@@ -101,6 +101,13 @@ class CouponController extends Controller
             ->whereBetween('expires_at', [now(), now()->addDays(7)])
             ->count();
 
+        // Get cart count
+        try {
+            $cartCount = \App\Models\Cart::where('user_id', $user->id)->sum('quantity');
+        } catch (\Exception $e) {
+            $cartCount = 0;
+        }
+
         return view('customer.coupons', compact(
             'user',
             'coupons',
@@ -109,7 +116,8 @@ class CouponController extends Controller
             'usedCoupons',
             'expiringSoon',
             'unreadNotificationsCount',
-            'unreadMessagesCount'
+            'unreadMessagesCount',
+            'cartCount'
         ));
     }
 

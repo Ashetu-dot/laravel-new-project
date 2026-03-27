@@ -420,6 +420,9 @@ class ProductController extends Controller
                 })
                 ->firstOrFail();
 
+            // Increment view count
+            $product->increment('views_count');
+
             // Get reviews for this product using DB facade to avoid model issues
             $reviews = DB::table('reviews')
                 ->where('product_id', $product->id)

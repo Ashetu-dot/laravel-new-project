@@ -164,6 +164,14 @@
             color: white;
             font-weight: 600;
             margin-right: 12px;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
         }
 
         .user-info h4 {
@@ -613,6 +621,10 @@
             color: var(--accent-red);
         }
 
+        .logout-form {
+            margin-top: 8px;
+        }
+
         .bg-blue-light { background-color: #eff6ff; color: var(--accent-blue); }
         .bg-green-light { background-color: #ecfdf5; color: var(--accent-green); }
         .bg-yellow-light { background-color: #fffbeb; color: var(--accent-yellow); }
@@ -640,40 +652,71 @@
                 <a href="{{ route('admin.orders') }}" class="nav-item active">
                     <i class="ri-shopping-bag-3-line"></i>
                     Orders
+                    @if(isset($pendingOrdersCount) && $pendingOrdersCount > 0)
+                        <span style="margin-left:auto;background:var(--accent-red);color:white;padding:2px 8px;border-radius:12px;font-size:12px;">{{ $pendingOrdersCount }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('admin.customers') }}" class="nav-item">
                     <i class="ri-user-3-line"></i>
                     Customers
                 </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">Management</div>
                 <a href="{{ route('admin.vendors') }}" class="nav-item">
                     <i class="ri-store-2-line"></i>
                     Vendors
                 </a>
-                <a href="{{ route('admin.catalog') }}" class="nav-item">
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-label">Management</div>
+                <a href="{{ route('admin.catalog.products') }}" class="nav-item">
+                    <i class="ri-shopping-cart-line"></i>
+                    Products
+                </a>
+                <a href="{{ route('admin.catalog.categories') }}" class="nav-item">
+                    <i class="ri-price-tag-3-line"></i>
+                    Categories
+                </a>
+                <a href="{{ route('admin.inventory') }}" class="nav-item">
                     <i class="ri-archive-line"></i>
-                    Catalog
+                    Inventory
                 </a>
                 <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
-                    <i class="ri-price-tag-3-line"></i>
+                    <i class="ri-megaphone-line"></i>
                     Promotions
+                </a>
+                <a href="{{ route('admin.coupons') }}" class="nav-item">
+                    <i class="ri-coupon-line"></i>
+                    Coupons
+                </a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-label">Analytics</div>
+                <a href="{{ route('admin.analytics') }}" class="nav-item">
+                    <i class="ri-bar-chart-2-line"></i>
+                    Analytics
+                </a>
+                <a href="{{ route('admin.reports') }}" class="nav-item">
+                    <i class="ri-file-list-3-line"></i>
+                    Reports
                 </a>
             </div>
 
             <div class="nav-group">
                 <div class="nav-label">Admin</div>
+                <a href="{{ route('admin.admins.list') }}" class="nav-item">
+                    <i class="ri-shield-user-line"></i>
+                    Administrators
+                </a>
                 <a href="{{ route('admin.settings') }}" class="nav-item">
                     <i class="ri-settings-4-line"></i>
                     Settings
                 </a>
-                <a href="{{ route('admin.admins.list') }}" class="nav-item">
-                    <i class="ri-shield-user-line"></i>
-                    Admins
+                <a href="{{ route('admin.help') }}" class="nav-item">
+                    <i class="ri-question-line"></i>
+                    Help & Support
                 </a>
-                <form method="POST" action="{{ route('admin.logout') }}" style="display: block; margin-top: 8px;">
+                <form method="POST" action="{{ route('admin.logout') }}" class="logout-form">
                     @csrf
                     <button type="submit" class="logout-btn">
                         <i class="ri-logout-box-line"></i>
@@ -684,18 +727,12 @@
         </div>
 
         <div class="user-profile">
-            <div class="avatar" style="overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                @if(Auth::user() && Auth::user()->avatar)
-                    <img src="{{ Storage::url(Auth::user()->avatar) }}"
-                         alt="{{ Auth::user()->name ?? 'Admin User' }}"
-                         style="width: 100%; height: 100%; object-fit: cover;">
-                @else
-                    {{ substr(Auth::user()->name ?? 'AD', 0, 2) }}
-                @endif
+            <div class="avatar">
+                <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name ?? 'Admin' }}">
             </div>
             <div class="user-info">
                 <h4>{{ Auth::user()->name ?? 'Admin User' }}</h4>
-                <p>{{ Auth::user()->role ?? 'Super Admin' }}</p>
+                <p>{{ ucfirst(Auth::user()->role ?? 'administrator') }}</p>
             </div>
         </div>
     </nav>

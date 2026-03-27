@@ -835,74 +835,50 @@
         <div class="brand">
             <i class="ri-store-3-fill"></i>
             Vendora
-            
         </div>
 
         <div class="nav-menu">
             <div class="nav-group">
-                <div class="nav-label">MAIN</div>
+                <div class="nav-label">MAIN MENU</div>
                 <a href="{{ route('customer.dashboard') }}" class="nav-item">
-                    <i class="ri-dashboard-line"></i>
-                    Dashboard
+                    <i class="ri-dashboard-line"></i> Dashboard
                 </a>
                 <a href="{{ route('search.results') }}" class="nav-item">
-                    <i class="ri-search-line"></i>
-                    Discover
+                    <i class="ri-search-line"></i> Discover
                 </a>
                 <a href="{{ route('customer.orders') }}" class="nav-item">
-                    <i class="ri-shopping-bag-3-line"></i>
-                    My Orders
+                    <i class="ri-shopping-bag-3-line"></i> My Orders
                 </a>
             </div>
 
             <div class="nav-group">
                 <div class="nav-label">SHOPPING</div>
                 <a href="{{ route('customer.wishlist.index') }}" class="nav-item">
-                    <i class="ri-heart-3-line"></i>
-                    Wishlist
+                    <i class="ri-heart-3-line"></i> Wishlist
                     @if(isset($wishlistCount) && $wishlistCount > 0)
                         <span class="badge-count">{{ $wishlistCount }}</span>
                     @endif
                 </a>
                 <a href="{{ route('customer.following') }}" class="nav-item active">
-                    <i class="ri-store-2-line"></i>
-                    Following
+                    <i class="ri-store-line"></i> Following
                 </a>
                 <a href="{{ route('customer.coupons') }}" class="nav-item">
-                    <i class="ri-coupon-3-line"></i>
-                    My Coupons
+                    <i class="ri-coupon-line"></i> My Coupons
                 </a>
             </div>
 
             <div class="nav-group">
                 <div class="nav-label">ACCOUNT</div>
-                <a href="{{ route('profile.show', Auth::id()) }}" class="nav-item">
-                    <i class="ri-user-line"></i>
-                    My Profile
+                <a href="{{ route('customer.profile') }}" class="nav-item">
+                    <i class="ri-user-line"></i> My Profile
                 </a>
-                <a href="{{ route('profile.edit', Auth::id()) }}" class="nav-item">
-                    <i class="ri-settings-4-line"></i>
-                    Account Settings
-                </a>
-                <a href="{{ route('customer.notifications') }}" class="nav-item">
-                    <i class="ri-notification-3-line"></i>
-                    Notifications
-                    @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
-                        <span class="badge-count">{{ $unreadNotificationsCount }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('customer.messages') }}" class="nav-item">
-                    <i class="ri-mail-line"></i>
-                    Messages
-                    @if(isset($unreadMessagesCount) && $unreadMessagesCount > 0)
-                        <span class="badge-count">{{ $unreadMessagesCount }}</span>
-                    @endif
+                <a href="{{ route('customer.settings') }}" class="nav-item">
+                    <i class="ri-settings-4-line"></i> Settings
                 </a>
                 <form method="POST" action="{{ route('logout') }}" class="logout-form">
                     @csrf
                     <button type="submit" class="logout-btn" onclick="return confirm('Are you sure you want to logout?')">
-                        <i class="ri-logout-box-line"></i>
-                        Logout
+                        <i class="ri-logout-box-line"></i> Logout
                     </button>
                 </form>
             </div>
@@ -910,15 +886,11 @@
 
         <div class="user-profile">
             <div class="avatar">
-                @if(Auth::user()->avatar)
-                    <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
-                @else
-                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
-                @endif
+                <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}">
             </div>
             <div class="user-info">
                 <h4>{{ Auth::user()->name }}</h4>
-                <p>Member since {{ Auth::user()->created_at->format('M Y') }}</p>
+                <p>Customer since {{ Auth::user()->created_at->format('M Y') }}</p>
             </div>
         </div>
     </nav>
@@ -937,6 +909,12 @@
             </div>
 
             <div class="header-actions">
+                <a href="{{ route('customer.cart.index') }}" class="icon-btn">
+                    <i class="ri-shopping-cart-line"></i>
+                    @if(isset($cartCount) && $cartCount > 0)
+                        <span class="badge-count">{{ $cartCount }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('customer.notifications') }}" class="icon-btn">
                     <i class="ri-notification-3-line"></i>
                     @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
@@ -947,12 +925,6 @@
                     <i class="ri-mail-line"></i>
                     @if(isset($unreadMessagesCount) && $unreadMessagesCount > 0)
                         <span class="badge-count">{{ $unreadMessagesCount }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('customer.cart.index') }}" class="icon-btn">
-                    <i class="ri-shopping-cart-2-line"></i>
-                    @if(isset($cartCount) && $cartCount > 0)
-                        <span class="badge-count">{{ $cartCount }}</span>
                     @endif
                 </a>
             </div>

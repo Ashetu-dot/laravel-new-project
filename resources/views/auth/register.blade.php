@@ -1434,31 +1434,40 @@
             console.log('Menu clicked');
         });
 
-        // Email validation on blur
-        document.getElementById('email').addEventListener('blur', function() {
-            const email = this.value;
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
-            if (email && !emailRegex.test(email)) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'error-message';
-                errorDiv.innerHTML = '<i class="ri-error-warning-fill"></i> Please enter a valid email address';
-                
-                const existingError = this.parentElement.parentElement.querySelector('.error-message');
-                if (existingError) {
-                    existingError.remove();
-                }
-                
-                this.parentElement.parentElement.appendChild(errorDiv);
-                this.classList.add('error');
+        // Email validation — suppress browser native tooltip, use custom message
+        const emailInput = document.getElementById('email');
+
+        emailInput.addEventListener('invalid', function(e) {
+            e.preventDefault(); // stop browser tooltip
+            showEmailError(this);
+        });
+
+        emailInput.addEventListener('blur', function() {
+            if (this.value && !this.validity.valid) {
+                showEmailError(this);
             } else {
-                this.classList.remove('error');
-                const existingError = this.parentElement.parentElement.querySelector('.error-message');
-                if (existingError) {
-                    existingError.remove();
-                }
+                clearEmailError(this);
             }
         });
+
+        emailInput.addEventListener('input', function() {
+            if (this.validity.valid) clearEmailError(this);
+        });
+
+        function showEmailError(input) {
+            clearEmailError(input);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message email-custom-error';
+            errorDiv.innerHTML = '<i class="ri-error-warning-fill"></i> Please enter a valid email address (e.g. name@example.com)';
+            input.parentElement.parentElement.appendChild(errorDiv);
+            input.classList.add('error');
+        }
+
+        function clearEmailError(input) {
+            input.classList.remove('error');
+            const existing = input.parentElement.parentElement.querySelector('.email-custom-error');
+            if (existing) existing.remove();
+        }
 
         // Phone number formatting for Ethiopian numbers
         document.getElementById('phone').addEventListener('input', function(e) {

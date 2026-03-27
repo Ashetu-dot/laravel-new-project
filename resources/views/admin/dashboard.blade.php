@@ -1099,10 +1099,6 @@
                     <i class="ri-question-line"></i>
                     Help & Support
                 </a>
-                <a href="{{ route('admin.documentation') }}" class="nav-item">
-                    <i class="ri-book-open-line"></i>
-                    Documentation
-                </a>
                 <form method="POST" action="{{ route('admin.logout') }}" class="logout-form">
                     @csrf
                     <button type="submit" class="logout-btn" >
@@ -1540,7 +1536,7 @@
 
             // Auto-refresh dashboard data every 5 minutes
             setInterval(() => {
-                fetch('{{ route("admin.dashboard") }}', {
+                fetch('{{ route("admin.ajax.stats") }}', {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json'
@@ -1548,7 +1544,6 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Update KPI values
                     updateKPIs(data);
                 })
                 .catch(error => console.error('Auto-refresh error:', error));

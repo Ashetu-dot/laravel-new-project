@@ -661,18 +661,6 @@
                 <a href="{{ route('customer.settings') }}" class="nav-item">
                     <i class="ri-settings-4-line"></i> Settings
                 </a>
-                <a href="{{ route('customer.notifications') }}" class="nav-item">
-                    <i class="ri-notification-3-line"></i> Notifications
-                    @if(isset($unreadNotificationsCount) && $unreadNotificationsCount > 0)
-                        <span class="badge-count">{{ $unreadNotificationsCount }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('customer.messages') }}" class="nav-item">
-                    <i class="ri-mail-line"></i> Messages
-                    @if(isset($unreadMessagesCount) && $unreadMessagesCount > 0)
-                        <span class="badge-count">{{ $unreadMessagesCount }}</span>
-                    @endif
-                </a>
                 <form method="POST" action="{{ route('logout') }}" class="logout-form">
                     @csrf
                     <button type="submit" class="logout-btn" onclick="return confirm('Are you sure you want to logout?')">

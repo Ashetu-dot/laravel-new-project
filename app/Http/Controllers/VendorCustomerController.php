@@ -1893,6 +1893,15 @@ class VendorCustomerController extends Controller
             $cartItems = collect([]);
             $cartTotal = 0;
 
+            // Recommended vendors — top rated active vendors not already followed
+            $followingIds = $user->following()->pluck('users.id');
+            $recommendedVendors = User::where('role', 'vendor')
+                ->where('is_active', true)
+                ->whereNotIn('id', $followingIds)
+                ->orderBy('rating', 'desc')
+                ->limit(6)
+                ->get();
+
             return view('customer.dashboard', compact(
                 'user',
                 'following',
@@ -1907,7 +1916,8 @@ class VendorCustomerController extends Controller
                 'wishlistCount',
                 'reviewsCount',
                 'totalSpent',
-                'favoriteCategories'
+                'favoriteCategories',
+                'recommendedVendors'
             ));
 
         } catch (\Exception $e) {
