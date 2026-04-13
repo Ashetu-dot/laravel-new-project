@@ -182,6 +182,13 @@
             margin-right: 12px;
         }
 
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
         .user-info h4 {
             color: white;
             font-size: 14px;
@@ -882,94 +889,7 @@
 <body>
 
     <!-- Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <div class="brand">
-            <i class="ri-store-3-fill"></i>
-            Vendora
-        </div>
-
-        <div class="nav-menu">
-            <div class="nav-group">
-                <div class="nav-label">MAIN</div>
-                <a href="{{ route('admin.dashboard') }}" class="nav-item">
-                    <i class="ri-dashboard-line"></i>
-                    Dashboard
-                </a>
-                <a href="{{ route('admin.orders') }}" class="nav-item">
-                    <i class="ri-shopping-bag-3-line"></i>
-                    Orders
-                </a>
-                <a href="{{ route('admin.customers') }}" class="nav-item">
-                    <i class="ri-user-3-line"></i>
-                    Customers
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">MANAGEMENT</div>
-                <a href="{{ route('admin.vendors') }}" class="nav-item">
-                    <i class="ri-store-2-line"></i>
-                    Vendors
-                </a>
-                <a href="{{ route('admin.catalog') }}" class="nav-item">
-                    <i class="ri-archive-line"></i>
-                    Catalog
-                </a>
-                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
-                    <i class="ri-price-tag-3-line"></i>
-                    Promotions
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">ADMIN</div>
-                <a href="{{ route('admin.settings') }}" class="nav-item">
-                    <i class="ri-settings-4-line"></i>
-                    Settings
-                </a>
-                <a href="{{ route('admin.admins.list') }}" class="nav-item">
-                    <i class="ri-shield-user-line"></i>
-                    Admins
-                </a>
-                <a href="{{ route('admin.support-tickets') }}" class="nav-item active">
-                    <i class="ri-customer-service-line"></i>
-                    Support Tickets
-                    @if(isset($stats) && ($stats['open'] + $stats['pending']) > 0)
-                        <span class="badge-count" style="margin-left: auto; background-color: var(--accent-red); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">{{ $stats['open'] + $stats['pending'] }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('admin.help') }}" class="nav-item">
-                    <i class="ri-question-line"></i>
-                    Help
-                </a>
-                <a href="{{ route('admin.notifications') }}" class="nav-item">
-                    <i class="ri-notification-3-line"></i>
-                    Notifications
-                </a>
-                <a href="{{ route('admin.messages') }}" class="nav-item">
-                    <i class="ri-mail-line"></i>
-                    Messages
-                </a>
-                <form method="POST" action="{{ route('admin.logout') }}" style="display: block; margin-top: 8px;">
-                    @csrf
-                    <button type="submit" class="logout-btn">
-                        <i class="ri-logout-box-line"></i>
-                        Logout
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <div class="user-profile">
-            <div class="avatar">
-                {{ substr($user->name ?? 'AD', 0, 2) }}
-            </div>
-            <div class="user-info">
-                <h4>{{ $user->name ?? 'Admin User' }}</h4>
-                <p>{{ $user->role ?? 'Super Admin' }}</p>
-            </div>
-        </div>
-    </nav>
+    @include('partials.admin-sidebar')
 
     <!-- Main Content -->
     <main class="main-content">

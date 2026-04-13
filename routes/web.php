@@ -67,13 +67,9 @@ Route::post('/switch-language', [LanguageController::class, 'switch'])->name('la
 Route::get('/careers', [VendorCustomerController::class, 'careers'])->name('careers');
 Route::post('/careers/apply', [VendorCustomerController::class, 'apply'])->name('careers.apply');
 
-// Blog
-Route::get('/blog', [VendorCustomerController::class, 'blog'])->name('blog');
-Route::get('/blog/{slug}', [VendorCustomerController::class, 'blogPost'])->name('blog.post');
-Route::post('/blog/subscribe', [VendorCustomerController::class, 'blogSubscribe'])->name('blog.subscribe');
 
-// Press
-Route::get('/press', [VendorCustomerController::class, 'press'])->name('press');
+
+// Press routes removed
 Route::post('/press/subscribe', [VendorCustomerController::class, 'pressSubscribe'])->name('press.subscribe');
 
 // Trust & Safety
@@ -82,6 +78,7 @@ Route::post('/safety/report', [VendorCustomerController::class, 'safetyReport'])
 
 // Help Center
 Route::get('/help-center', [VendorCustomerController::class, 'helpCenter'])->name('help-center');
+Route::post('/help-center/contact', [VendorCustomerController::class, 'helpContactSubmit'])->name('help.contact.submit');
 Route::get('/help-center/search', [VendorCustomerController::class, 'helpSearch'])->name('help.search');
 Route::get('/help-center/article/{slug}', [VendorCustomerController::class, 'helpArticle'])->name('help.article');
 
@@ -102,14 +99,12 @@ Route::get('/list-service', [VendorCustomerController::class, 'listService'])->n
 Route::get('/documentation', [VendorCustomerController::class, 'documentation'])->name('documentation');
 Route::post('/documentation/feedback', [VendorCustomerController::class, 'documentationFeedback'])->name('documentation.feedback');
 
-// // Vendor Resources
-// Route::get('/vendor-resources', [VendorCustomerController::class, 'vendorResources'])->name('vendor-resources');
 
-// // Success Stories
-// Route::get('/success-stories', [VendorCustomerController::class, 'successStories'])->name('success-stories');
 
 // Community
 Route::get('/community', [VendorCustomerController::class, 'community'])->name('community');
+Route::post('/community/discussion', [VendorCustomerController::class, 'storeDiscussion'])->name('community.discussion.store')->middleware('auth');
+Route::post('/community/discussion/{id}/reply', [VendorCustomerController::class, 'replyDiscussion'])->name('community.discussion.reply')->middleware('auth');
 
 // =========================================================================
 // PUBLIC VENDOR SEARCH & PROFILES
@@ -419,6 +414,7 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::get('/checkout', [\App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout/process', [\App\Http\Controllers\CheckoutController::class, 'process'])->name('checkout.process');
     Route::get('/checkout/success', [\App\Http\Controllers\CheckoutController::class, 'success'])->name('orders.success');
+    Route::get('/checkout/chapa/callback', [\App\Http\Controllers\CheckoutController::class, 'chapaCallback'])->name('customer.checkout.chapa.callback');
 
     // ======== CUSTOMER ORDERS ========
     Route::get('/orders', [OrderController::class, 'customerOrders'])->name('orders');
@@ -596,18 +592,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/export/csv', [PromotionController::class, 'export'])->name('export');
         });
 
-        // ======== COUPONS MANAGEMENT ========
-        Route::get('/coupons', [CouponController::class, 'adminIndex'])->name('coupons');
-        Route::get('/coupons/create', [CouponController::class, 'create'])->name('coupons.create');
-        Route::post('/coupons', [CouponController::class, 'store'])->name('coupons.store');
-        Route::get('/coupons/{id}/edit', [CouponController::class, 'edit'])->name('coupons.edit');
-        Route::put('/coupons/{id}', [CouponController::class, 'update'])->name('coupons.update');
-        Route::post('/coupons/generate', [CouponController::class, 'generate'])->name('coupons.generate');
-        Route::delete('/coupons/{id}', [CouponController::class, 'adminDelete'])->name('coupons.delete');
-        Route::post('/coupons/{id}/toggle', [CouponController::class, 'toggleStatus'])->name('coupons.toggle');
-        Route::post('/coupons/bulk-delete', [CouponController::class, 'bulkDelete'])->name('coupons.bulk-delete');
-        Route::get('/coupons/export', [CouponController::class, 'export'])->name('coupons.export');
-
         // ======== ADMIN PROFILE & SETTINGS ========
         Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
         Route::post('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
@@ -701,15 +685,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/chart-data', [AdminController::class, 'getChartDataAjax'])->name('chart.data');
         });
 
-        // Blog routes
-        Route::prefix('blog')->name('blog.')->group(function () {
-            Route::get('/', [BlogController::class, 'index'])->name('index');
-            Route::get('/search', [BlogController::class, 'search'])->name('search');
-            Route::get('/category/{slug}', [BlogController::class, 'category'])->name('category');
-            Route::get('/tag/{slug}', [BlogController::class, 'tag'])->name('tag');
-            Route::get('/{slug}', [BlogController::class, 'show'])->name('show');
-            Route::post('/newsletter', [BlogController::class, 'newsletter'])->name('newsletter');
-        });
+        // Blog routes removed
     });
 });
 

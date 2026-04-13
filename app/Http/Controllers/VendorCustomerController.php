@@ -314,8 +314,17 @@ class VendorCustomerController extends Controller
         ]);
 
         try {
-            // Here you would save to database or add to mailing list
-            return redirect()->route('press')->with('success', 'Thank you for subscribing to our press newsletter!');
+            \App\Models\BlogNewsletter::updateOrCreate(
+                ['email' => $validated['email']],
+                [
+                    'email'         => $validated['email'],
+                    'ip_address'    => $request->ip(),
+                    'user_agent'    => $request->userAgent(),
+                    'subscribed_at' => now(),
+                ]
+            );
+
+            return back()->with('success', 'Thank you for subscribing to our newsletter!');
 
         } catch (\Exception $e) {
             Log::error('Press subscription failed: ' . $e->getMessage());
@@ -420,20 +429,28 @@ class VendorCustomerController extends Controller
         $totalInvites = 0;
         $successfulInvites = 0;
         $totalEarned = 0;
+        $referrals = collect([]);
 
         if ($user) {
-            // Generate referral code if user doesn't have one
             if (!$user->referral_code) {
                 $user->generateReferralCode();
             }
 
-            // Example data
-            $totalInvites = 12;
-            $successfulInvites = 8;
-            $totalEarned = 450;
+            // Count users who signed up with this referral code
+            $referredUsers = User::where('referred_by', $user->referral_code)->get();
+            $totalInvites      = $referredUsers->count();
+            $successfulInvites = $referredUsers->where('email_verified_at', '!=', null)->count();
+            $totalEarned       = $successfulInvites * 50; // ETB 50 per verified signup
+
+            $referrals = $referredUsers->map(fn($u) => (object)[
+                'friend_name' => $u->name,
+                'created_at'  => $u->created_at,
+                'status'      => $u->email_verified_at ? 'success' : 'pending',
+                'reward'      => $u->email_verified_at ? 'ETB 50' : 'Pending',
+            ]);
         }
 
-        return view('pages.invite', compact('user', 'totalInvites', 'successfulInvites', 'totalEarned'));
+        return view('pages.invite', compact('user', 'totalInvites', 'successfulInvites', 'totalEarned', 'referrals'));
     }
 
     /**
@@ -442,19 +459,41 @@ class VendorCustomerController extends Controller
     public function sendInvite(Request $request)
     {
         $validated = $request->validate([
-            'friend_name' => 'required|string|max:255',
+            'friend_name'  => 'required|string|max:255',
             'friend_email' => 'required|email|max:255',
-            'message' => 'nullable|string',
+            'message'      => 'nullable|string|max:1000',
         ]);
 
         try {
-            $user = Auth::user();
+            $user        = Auth::user();
+            $referralUrl = url('/register?ref=' . ($user->referral_code ?? ''));
+            $senderName  = $user->name ?? 'A Vendora user';
+            $customMsg   = $validated['message'] ?? "Hey {$validated['friend_name']}! I've been using Vendora to find amazing local services in Jimma. Join me and get ETB 25 bonus on signup!";
 
-            return redirect()->route('invite')->with('success', 'Invitation sent successfully to ' . $validated['friend_name'] . '!');
+            \Illuminate\Support\Facades\Mail::send([], [], function ($mail) use ($validated, $senderName, $referralUrl, $customMsg) {
+                $mail->to($validated['friend_email'], $validated['friend_name'])
+                     ->subject("{$senderName} invited you to join Vendora!")
+                     ->html("
+                        <div style='font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;'>
+                            <h2 style='color:#B88E3F;'>You've been invited to Vendora!</h2>
+                            <p>{$customMsg}</p>
+                            <p style='margin:24px 0;'>
+                                <a href='{$referralUrl}' style='background:#B88E3F;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;'>
+                                    Join Vendora Now
+                                </a>
+                            </p>
+                            <p style='color:#6b7280;font-size:13px;'>Or copy this link: {$referralUrl}</p>
+                            <hr style='border:none;border-top:1px solid #e5e7eb;margin:24px 0;'>
+                            <p style='color:#9ca3af;font-size:12px;'>Vendora — Local Vendor Marketplace, Jimma, Ethiopia</p>
+                        </div>
+                     ");
+            });
+
+            return redirect()->route('invite')->with('success', "Invitation sent to {$validated['friend_name']}!");
 
         } catch (\Exception $e) {
             Log::error('Invite send failed: ' . $e->getMessage());
-            return back()->with('error', 'Failed to send invitation. Please try again.');
+            return back()->withInput()->with('error', 'Failed to send invitation. Please try again.');
         }
     }
 
@@ -512,33 +551,34 @@ class VendorCustomerController extends Controller
     {
         try {
             $categoryVendors = [
-                'food' => User::where('role', 'vendor')->where('category', 'like', '%food%')->count(),
+                'food'        => User::where('role', 'vendor')->where('category', 'like', '%food%')->orWhere('category', 'like', '%catering%')->count(),
                 'photography' => User::where('role', 'vendor')->where('category', 'like', '%photo%')->count(),
-                'home' => User::where('role', 'vendor')->where('category', 'like', '%home%')->count(),
-                'beauty' => User::where('role', 'vendor')->where('category', 'like', '%beauty%')->count(),
-                'automotive' => User::where('role', 'vendor')->where('category', 'like', '%auto%')->count(),
-                'events' => User::where('role', 'vendor')->where('category', 'like', '%event%')->count(),
-                'tech' => User::where('role', 'vendor')->where('category', 'like', '%tech%')->count(),
+                'home'        => User::where('role', 'vendor')->where('category', 'like', '%home%')->count(),
+                'beauty'      => User::where('role', 'vendor')->where('category', 'like', '%beauty%')->orWhere('category', 'like', '%health%')->count(),
+                'automotive'  => User::where('role', 'vendor')->where('category', 'like', '%auto%')->count(),
+                'events'      => User::where('role', 'vendor')->where('category', 'like', '%event%')->count(),
+                'tech'        => User::where('role', 'vendor')->where('category', 'like', '%tech%')->count(),
                 'handicrafts' => User::where('role', 'vendor')->where('category', 'like', '%handicraft%')->count(),
             ];
 
-            return view('pages.list-service', compact('categoryVendors'));
+            $totalVendors   = User::where('role', 'vendor')->where('is_active', true)->count();
+            $totalCustomers = User::where('role', 'customer')->count();
+            $totalRevenue   = \App\Models\Order::where('status', 'completed')->sum('total_amount');
+
+            $testimonials = \App\Models\Testimonial::where('is_active', true)
+                ->orderBy('sort_order')->orderBy('created_at', 'desc')
+                ->limit(5)->get();
+
+            return view('pages.list-service', compact('categoryVendors', 'totalVendors', 'totalCustomers', 'totalRevenue', 'testimonials'));
 
         } catch (\Exception $e) {
             Log::error('List service page error: ' . $e->getMessage());
 
-            $categoryVendors = [
-                'food' => 245,
-                'photography' => 189,
-                'home' => 312,
-                'beauty' => 178,
-                'automotive' => 95,
-                'events' => 156,
-                'tech' => 67,
-                'handicrafts' => 134,
-            ];
+            $categoryVendors = ['food'=>0,'photography'=>0,'home'=>0,'beauty'=>0,'automotive'=>0,'events'=>0,'tech'=>0,'handicrafts'=>0];
+            $totalVendors = 0; $totalCustomers = 0; $totalRevenue = 0;
+            $testimonials = collect([]);
 
-            return view('pages.list-service', compact('categoryVendors'));
+            return view('pages.list-service', compact('categoryVendors', 'totalVendors', 'totalCustomers', 'totalRevenue', 'testimonials'));
         }
     }
 
@@ -586,31 +626,113 @@ class VendorCustomerController extends Controller
     {
         try {
             $totalMembers = User::count();
-            $dailyPosts = 500;
-            $monthlyEvents = 25;
-            $mentors = User::where('role', 'vendor')->where('is_active', true)->count() / 10;
+            $totalVendors = User::where('role', 'vendor')->where('is_active', true)->count();
+            $dailyPosts   = \App\Models\Message::whereDate('created_at', today())->count();
+
+            // Recent active vendors as "forum participants"
+            $recentVendors = User::where('role', 'vendor')
+                ->where('is_active', true)
+                ->latest('updated_at')
+                ->limit(8)
+                ->get(['id', 'name', 'business_name', 'avatar']);
+
+            // Online count — users active in last 15 minutes (via sessions)
+            $onlineCount = \DB::table('sessions')
+                ->where('last_activity', '>=', now()->subMinutes(15)->timestamp)
+                ->count();
+
+            // Recent discussions: use support tickets as forum topics
+            $recentDiscussions = \App\Models\SupportTicket::with(['user', 'replies'])
+                ->latest()
+                ->limit(4)
+                ->get()
+                ->map(function ($ticket) {
+                    return (object)[
+                        'id'          => $ticket->id,
+                        'title'       => $ticket->subject,
+                        'author'      => $ticket->user->name ?? 'Anonymous',
+                        'initials'    => strtoupper(substr($ticket->user->name ?? 'AN', 0, 2)),
+                        'avatar'      => $ticket->user->avatar_url ?? null,
+                        'replies'     => $ticket->replies->count(),
+                        'time_ago'    => $ticket->created_at->diffForHumans(),
+                        'search_query'=> urlencode($ticket->subject),
+                    ];
+                });
+
+            // Forum category counts from real data
+            $forumCounts = [
+                'general'       => \App\Models\SupportTicket::count(),
+                'business_tips' => \App\Models\SupportTicket::where('priority', 'medium')->count(),
+                'qa'            => \App\Models\SupportTicket::where('status', 'open')->count(),
+                'announcements' => \App\Models\Message::whereNull('parent_id')->count(),
+                'find_vendors'  => User::where('role', 'vendor')->where('is_active', true)->count(),
+            ];
 
             return view('pages.community', compact(
-                'totalMembers',
-                'dailyPosts',
-                'monthlyEvents',
-                'mentors'
+                'totalMembers', 'totalVendors', 'dailyPosts',
+                'recentVendors', 'onlineCount',
+                'recentDiscussions', 'forumCounts'
             ));
 
         } catch (\Exception $e) {
             Log::error('Community page error: ' . $e->getMessage());
+            return view('pages.community', [
+                'totalMembers'     => 0,
+                'totalVendors'     => 0,
+                'dailyPosts'       => 0,
+                'recentVendors'    => collect([]),
+                'onlineCount'      => 0,
+                'recentDiscussions'=> collect([]),
+                'forumCounts'      => ['general'=>0,'business_tips'=>0,'qa'=>0,'announcements'=>0,'find_vendors'=>0],
+            ]);
+        }
+    }
 
-            $totalMembers = 15000;
-            $dailyPosts = 500;
-            $monthlyEvents = 25;
-            $mentors = 50;
+    /**
+     * Store a new community discussion (support ticket).
+     */
+    public function storeDiscussion(Request $request)
+    {
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|max:2000',
+        ]);
 
-            return view('pages.community', compact(
-                'totalMembers',
-                'dailyPosts',
-                'monthlyEvents',
-                'mentors'
-            ));
+        try {
+            \App\Models\SupportTicket::create([
+                'user_id' => Auth::id(),
+                'subject' => $request->subject,
+                'message' => $request->message,
+                'status'  => 'open',
+                'priority'=> 'medium',
+            ]);
+
+            return redirect()->route('community')->with('success', 'Discussion started successfully!');
+        } catch (\Exception $e) {
+            Log::error('Discussion store failed: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Failed to start discussion. Please try again.');
+        }
+    }
+
+    /**
+     * Reply to a community discussion.
+     */
+    public function replyDiscussion(Request $request, $id)
+    {
+        $request->validate(['message' => 'required|string|max:2000']);
+
+        try {
+            $ticket = \App\Models\SupportTicket::findOrFail($id);
+            \App\Models\TicketReply::create([
+                'ticket_id' => $ticket->id,
+                'user_id'   => Auth::id(),
+                'message'   => $request->message,
+            ]);
+
+            return redirect()->route('community')->with('success', 'Reply posted!');
+        } catch (\Exception $e) {
+            Log::error('Discussion reply failed: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Failed to post reply.');
         }
     }
 
@@ -2451,6 +2573,71 @@ public function contactSubmit(Request $request)
         return redirect()->back()
             ->with('error', 'Failed to send message. Please try again.')
             ->withInput();
+    }
+}
+
+/**
+ * Handle help center contact/email support form submission.
+ */
+public function helpContactSubmit(Request $request)
+{
+    $request->validate([
+        'name'    => 'required|string|max:255',
+        'email'   => 'required|email|max:255',
+        'subject' => 'required|string|max:255',
+        'message' => 'required|string|min:10|max:2000',
+    ]);
+
+    try {
+        // Save as a support ticket
+        \App\Models\SupportTicket::create([
+            'user_id'  => Auth::id(),
+            'subject'  => $request->subject,
+            'message'  => "From: {$request->name} <{$request->email}>\n\n{$request->message}",
+            'status'   => 'open',
+            'priority' => 'medium',
+        ]);
+
+        // Send confirmation email to the user
+        \Illuminate\Support\Facades\Mail::send([], [], function ($mail) use ($request) {
+            $mail->to($request->email, $request->name)
+                 ->subject("We received your message — Vendora Support")
+                 ->html("
+                    <div style='font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;'>
+                        <h2 style='color:#B88E3F;'>Thanks for reaching out, {$request->name}!</h2>
+                        <p>We've received your message and will get back to you within <strong>24 hours</strong>.</p>
+                        <div style='background:#f9fafb;border-left:4px solid #B88E3F;padding:16px;border-radius:8px;margin:20px 0;'>
+                            <p style='margin:0;font-weight:600;'>Your message:</p>
+                            <p style='margin:8px 0 0;color:#6b7280;'>{$request->message}</p>
+                        </div>
+                        <p style='color:#6b7280;font-size:13px;'>If you need urgent help, reply to this email or visit our <a href='".route('help-center')."' style='color:#B88E3F;'>Help Center</a>.</p>
+                        <hr style='border:none;border-top:1px solid #e5e7eb;margin:24px 0;'>
+                        <p style='color:#9ca3af;font-size:12px;'>Vendora Support Team — support@vendora.com</p>
+                    </div>
+                 ");
+        });
+
+        // Notify support team
+        \Illuminate\Support\Facades\Mail::send([], [], function ($mail) use ($request) {
+            $mail->to('support@vendora.com')
+                 ->subject("[Help Center] {$request->subject}")
+                 ->html("
+                    <div style='font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;'>
+                        <h3>New support request from Help Center</h3>
+                        <p><strong>Name:</strong> {$request->name}</p>
+                        <p><strong>Email:</strong> {$request->email}</p>
+                        <p><strong>Subject:</strong> {$request->subject}</p>
+                        <p><strong>Message:</strong></p>
+                        <p style='background:#f9fafb;padding:12px;border-radius:8px;'>{$request->message}</p>
+                    </div>
+                 ");
+        });
+
+        return redirect()->route('help-center')->with('success', 'Your message has been sent! We\'ll reply to ' . $request->email . ' within 24 hours.');
+
+    } catch (\Exception $e) {
+        Log::error('Help contact submit failed: ' . $e->getMessage());
+        return back()->withInput()->with('error', 'Failed to send message. Please try again or email us directly at support@vendora.com.');
     }
 }
 

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Vendora - Local Vendor Finder | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* Import Ethiopic font */
@@ -1457,7 +1460,7 @@
                 'search_what' => 'What',
                 'search_where' => 'Where',
                 'search_placeholder' => 'Plumbers, Bakers, Photographers...',
-                'location_placeholder' => 'Jimma, Ethiopia',
+                'location_placeholder' => 'City or area...',
                 'popular_categories' => 'Popular Categories',
                 'view_all' => 'View All',
                 'popular_in_jimma' => 'Popular in Jimma',
@@ -1601,7 +1604,7 @@
                 'search_what' => 'Maal',
                 'search_where' => 'Eessa',
                 'search_placeholder' => 'Ogeeyyii ujummoo, daabbooftota, warra suuraa kaasani...',
-                'location_placeholder' => 'Jimmaa, Itoophiyaa',
+                'location_placeholder' => 'Jimmaa, Itoophiyaa...',
                 'popular_categories' => 'Ramaddiiwwan Beekamoo',
                 'view_all' => 'Hunda ilaali',
                 'popular_in_jimma' => 'Jimmaa keessatti beekamoo',
@@ -1663,14 +1666,18 @@
 
         $t = $translations[$currentLang] ?? $translations['en'];
 
-        // Background images array
+        // Background images array — direct Unsplash URLs
         $backgroundImages = [
-            'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?q=80&w=2071&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=2068&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?q=80&w=2083&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1567449303078-57ad995bd17a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NTR8fHNob3BwaW5nfGVufDB8fDB8fHww',
+            'https://www.istockphoto.com/search/2/image?utm_source=unsplash&utm_medium=affiliate&utm_campaign=srp_photos_bottom&utm_content=https%3A%2F%2Funsplash.com%2Fs%2Fphotos%2Fshopping&utm_term=shopping%3A%3A%3A%3A5e3c8ac6-48fe-463e-bd92-69b466221911&phrase=shopping&alloweduse=availableforalluses&excludenudity=true&sort=best&mediatype=photography',
+            'https://media.istockphoto.com/id/2228695359/photo/happy-woman-walking-at-the-shopping-mall-carrying-bags.webp?a=1&b=1&s=612x612&w=0&k=20&c=49DHYC9-EH8WDO27aGdneE7iyQeHzKme7h1RuleBd5Y=',
+            'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2hvcHBpbmd8ZW58MHx8MHx8fDA%3D',
+            'https://images.unsplash.com/photo-1483181957632-8bda974cbc91?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fHNob3BwaW5nfGVufDB8fDB8fHww',
+            'https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjZ8fHNob3BwaW5nfGVufDB8fDB8fHww',
+            'https://images.unsplash.com/photo-1580440282860-8555b1ae102c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjZ8fHNob3BwaW5nfGVufDB8fDB8fHww',
+            'https://images.unsplash.com/photo-1614521084980-811d04f6c6cb?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NzV8fHNob3BwaW5nfGVufDB8fDB8fHww',
         ];
+        
         $randomImage = $backgroundImages[array_rand($backgroundImages)];
     @endphp
 
@@ -1678,12 +1685,8 @@
     <nav class="navbar">
         <div class="brand-badge">
             <a href="{{ route('home') }}" class="brand">
-                <i class="ri-store-2-fill"></i>
-                Vendora
+                <img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:48px;width:48px;object-fit:cover;border-radius:50%;vertical-align:middle;">
             </a>
-            <span class="ethiopia-badge">
-                <i class="ri-map-pin-line"></i> Jimma, Ethiopia
-            </span>
         </div>
 
         <div class="nav-links">
@@ -1967,7 +1970,7 @@
                     <i class="ri-map-pin-line"></i>
                     <div class="input-content">
                         <label class="input-label">{{ $t['search_where'] }}</label>
-                        <input type="text" name="location" class="input-field" placeholder="{{ $t['location_placeholder'] }}" value="{{ request('location', 'Jimma') }}" id="searchLocation">
+                        <input type="text" name="location" class="input-field" placeholder="{{ $t['location_placeholder'] }}" value="{{ request('location') }}" id="searchLocation">
                     </div>
                 </div>
                 <button type="submit" class="search-btn" aria-label="Search" id="searchBtn">
@@ -2191,12 +2194,9 @@
     <footer>
         <div class="footer-content">
             <div class="footer-brand">
-                <h2><i class="ri-store-2-fill"></i> Vendora</h2>
+                <h2><img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:40px;width:40px;object-fit:cover;border-radius:50%;vertical-align:middle;"></h2>
                 <p class="footer-text">{{ $t['cta_text'] }}</p>
                 <div class="mt-4">
-                    <span class="ethiopia-badge">
-                        <i class="ri-map-pin-line"></i> Jimma, Ethiopia
-                    </span>
                 </div>
             </div>
             <div class="footer-links">
@@ -2205,8 +2205,6 @@
                     <ul>
                         <li><a href="{{ route('about') }}">{{ $t['about_us'] }}</a></li>
                         <li><a href="{{ route('careers') }}">{{ $t['careers'] }}</a></li>
-                        <li><a href="{{ route('press') }}">{{ $t['press'] }}</a></li>
-                        <li><a href="{{ route('blog') }}">{{ $t['blog'] }}</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
@@ -2230,7 +2228,7 @@
             </div>
         </div>
         <div class="bottom-bar">
-            <span>&copy; {{ date('Y') }} Vendora. {{ $t['rights_reserved'] }}. Jimma, Ethiopia</span>
+            <span>&copy; {{ date('Y') }} Vendora. {{ $t['rights_reserved'] }}.</span>
             <div class="social-icons">
                 <a href="#" target="_blank" aria-label="Twitter"><i class="ri-twitter-fill"></i></a>
                 <a href="#" target="_blank" aria-label="Instagram"><i class="ri-instagram-fill"></i></a>
@@ -2630,17 +2628,20 @@
             const heroBackground = document.querySelector('.hero-background');
             if (heroBackground) {
                 const backgrounds = [
-                    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?q=80&w=2071&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=2068&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop',
-                    'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?q=80&w=2083&auto=format&fit=crop',
+                    'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600&q=80',
+                    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80',
+                    'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1600&q=80',
+                    'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&q=80',
+                    'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1600&q=80',
+                    'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=1600&q=80',
+                    'https://images.unsplash.com/photo-1580880532975-f8b0d9d3c9b5?w=1600&q=80',
                 ];
 
+                let currentIndex = 0;
                 setInterval(() => {
-                    const randomIndex = Math.floor(Math.random() * backgrounds.length);
-                    heroBackground.style.backgroundImage = `url('${backgrounds[randomIndex]}')`;
-                }, 10000);
+                    currentIndex = (currentIndex + 1) % backgrounds.length;
+                    heroBackground.style.backgroundImage = `url('${backgrounds[currentIndex]}')`;
+                }, 8000);
             }
 
 

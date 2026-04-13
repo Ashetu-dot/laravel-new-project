@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Products Management - Vendora Admin | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         @font-face {
@@ -1115,98 +1118,7 @@
 <body>
 
     <!-- Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <div class="brand">
-            <i class="ri-store-3-fill"></i>
-            Vendora
-            
-        </div>
-
-        <div class="nav-menu">
-            <div class="nav-group">
-                <div class="nav-label">DASHBOARD</div>
-                <a href="{{ route('admin.dashboard') }}" class="nav-item">
-                    <i class="ri-dashboard-line"></i> Dashboard
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">MANAGEMENT</div>
-                <a href="{{ route('admin.orders') }}" class="nav-item">
-                    <i class="ri-shopping-bag-3-line"></i> Orders
-                </a>
-                <a href="{{ route('admin.customers') }}" class="nav-item">
-                    <i class="ri-user-line"></i> Customers
-                </a>
-                <a href="{{ route('admin.vendors') }}" class="nav-item">
-                    <i class="ri-store-line"></i> Vendors
-                </a>
-                <a href="{{ route('admin.products') }}" class="nav-item active">
-                    <i class="ri-shopping-cart-line"></i> Products
-                </a>
-                <a href="{{ route('admin.catalog.categories') }}" class="nav-item">
-                    <i class="ri-price-tag-3-line"></i> Categories
-                </a>
-                <a href="{{ route('admin.inventory') }}" class="nav-item">
-                    <i class="ri-archive-line"></i> Inventory
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">MARKETING</div>
-                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
-                    <i class="ri-megaphone-line"></i> Promotions
-                </a>
-                <a href="{{ route('admin.coupons') }}" class="nav-item">
-                    <i class="ri-coupon-line"></i> Coupons
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">ANALYTICS</div>
-                <a href="{{ route('admin.analytics') }}" class="nav-item">
-                    <i class="ri-bar-chart-2-line"></i> Analytics
-                </a>
-                <a href="{{ route('admin.reports') }}" class="nav-item">
-                    <i class="ri-file-list-3-line"></i> Reports
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">SYSTEM</div>
-                <a href="{{ route('admin.admins.list') }}" class="nav-item">
-                    <i class="ri-shield-user-line"></i> Administrators
-                </a>
-                <a href="{{ route('admin.settings') }}" class="nav-item">
-                    <i class="ri-settings-4-line"></i> Settings
-                </a>
-                <a href="{{ route('admin.help') }}" class="nav-item">
-                    <i class="ri-question-line"></i> Help
-                </a>
-            </div>
-        </div>
-
-        <div class="user-profile">
-            <div class="avatar">
-                @if(Auth::user() && Auth::user()->profile_image)
-                    <img src="{{ asset('storage/' . Auth::user()->profile_image) }}" alt="{{ Auth::user()->name }}">
-                @else
-                    {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 2)) }}
-                @endif
-            </div>
-            <div class="user-info">
-                <h4>{{ Auth::user()->name ?? 'Admin' }}</h4>
-                <p>{{ ucfirst(Auth::user()->role ?? 'administrator') }}</p>
-            </div>
-        </div>
-
-        <form method="POST" action="{{ route('admin.logout') }}">
-            @csrf
-            <button type="submit" class="logout-btn" onclick="return confirm('Are you sure you want to logout?')">
-                <i class="ri-logout-box-line"></i> Logout
-            </button>
-        </form>
-    </nav>
+    @include('partials.admin-sidebar')
 
     <!-- Main Content -->
     <main class="main-content">
@@ -1262,18 +1174,44 @@
                 <div>
                     <h1>
                         <i class="ri-shopping-cart-line"></i>
-                        Products Management
+                        Catalog Management
                     </h1>
-                    <p>Manage and organize your product catalog</p>
+                    <p>Manage products and categories</p>
                 </div>
-                <a href="{{ route('admin.products.create') }}" class="btn btn-primary">
-                    <i class="ri-add-line"></i> Add New Product
+                @if(($tab ?? 'products') === 'categories')
+                    <a href="{{ route('admin.catalog.categories.create') }}" class="btn btn-primary">
+                        <i class="ri-add-line"></i> Add Category
+                    </a>
+                @else
+                    <a href="{{ route('admin.products.create') }}" class="btn btn-primary">
+                        <i class="ri-add-line"></i> Add New Product
+                    </a>
+                @endif
+            </div>
+
+            <!-- Tabs -->
+            <div style="display:flex;gap:4px;margin-bottom:24px;background:var(--card-bg);padding:6px;border-radius:14px;border:1px solid var(--border-color);width:fit-content;box-shadow:var(--shadow-sm);">
+                <a href="{{ route('admin.products') }}?tab=products"
+                   style="padding:10px 24px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;display:flex;align-items:center;gap:8px;
+                   {{ ($tab ?? 'products') === 'products' ? 'background:var(--gradient-gold);color:white;box-shadow:var(--shadow-gold);' : 'color:var(--text-secondary);' }}">
+                    <i class="ri-shopping-cart-line"></i> Products
+                    <span style="background:{{ ($tab ?? 'products') === 'products' ? 'rgba(255,255,255,0.25)' : 'var(--primary-soft)' }};padding:2px 8px;border-radius:20px;font-size:11px;">{{ $products->total() }}</span>
+                </a>
+                <a href="{{ route('admin.products') }}?tab=categories"
+                   style="padding:10px 24px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;display:flex;align-items:center;gap:8px;
+                   {{ ($tab ?? 'products') === 'categories' ? 'background:var(--gradient-gold);color:white;box-shadow:var(--shadow-gold);' : 'color:var(--text-secondary);' }}">
+                    <i class="ri-price-tag-3-line"></i> Categories
+                    <span style="background:{{ ($tab ?? 'products') === 'categories' ? 'rgba(255,255,255,0.25)' : 'var(--primary-soft)' }};padding:2px 8px;border-radius:20px;font-size:11px;">{{ $totalCategories }}</span>
                 </a>
             </div>
+
+            @if(($tab ?? 'products') === 'products')
+            {{-- ===== PRODUCTS TAB ===== --}}
 
             <!-- Filters -->
             <div class="filters-card">
                 <form method="GET" action="{{ route('admin.products') }}">
+                    <input type="hidden" name="tab" value="products">
                     <div class="filter-row">
                         <div class="filter-group">
                             <label><i class="ri-search-line"></i> Search</label>
@@ -1318,7 +1256,7 @@
                                 <i class="ri-filter-line"></i> Apply Filters
                             </button>
                             @if(request()->anyFilled(['search', 'category', 'vendor', 'status']))
-                                <a href="{{ route('admin.products') }}" class="btn btn-secondary">
+                                <a href="{{ route('admin.products') }}?tab=products" class="btn btn-secondary">
                                     <i class="ri-close-line"></i> Clear
                                 </a>
                             @endif
@@ -1362,8 +1300,17 @@
                             <td>
                                 <div class="product-cell">
                                     <div class="product-image">
-                                        @if($product->image)
-                                            <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}">
+                                        @php
+                                            $pImg = $product->first_image;
+                                            $pUrl = $pImg
+                                                ? (filter_var($pImg, FILTER_VALIDATE_URL)
+                                                    ? $pImg
+                                                    : asset('storage/' . ltrim($pImg, '/')))
+                                                : null;
+                                        @endphp
+                                        @if($pUrl)
+                                            <img src="{{ $pUrl }}" alt="{{ $product->name }}"
+                                                 onerror="this.onerror=null;this.src='{{ $product->placeholder_image }}'">
                                         @else
                                             <i class="ri-image-line"></i>
                                         @endif
@@ -1483,6 +1430,196 @@
                 </div>
                 @endif
             </div>
+
+            @else
+            {{-- ===== CATEGORIES TAB ===== --}}
+
+            <!-- Category Stats -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:28px;">
+                <div style="background:var(--card-bg);border-radius:16px;padding:24px;box-shadow:var(--shadow-md);border:1px solid var(--border-color);display:flex;align-items:center;gap:16px;">
+                    <div style="width:52px;height:52px;border-radius:14px;background:rgba(184,142,63,0.1);display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--primary-gold);">
+                        <i class="ri-price-tag-3-line"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:28px;font-weight:700;">{{ $totalCategories }}</div>
+                        <div style="font-size:13px;color:var(--text-secondary);">Total Categories</div>
+                    </div>
+                </div>
+                <div style="background:var(--card-bg);border-radius:16px;padding:24px;box-shadow:var(--shadow-md);border:1px solid var(--border-color);display:flex;align-items:center;gap:16px;">
+                    <div style="width:52px;height:52px;border-radius:14px;background:rgba(16,185,129,0.1);display:flex;align-items:center;justify-content:center;font-size:26px;color:#10b981;">
+                        <i class="ri-checkbox-circle-line"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:28px;font-weight:700;">{{ $activeCategories }}</div>
+                        <div style="font-size:13px;color:var(--text-secondary);">Active Categories</div>
+                    </div>
+                </div>
+                <div style="background:var(--card-bg);border-radius:16px;padding:24px;box-shadow:var(--shadow-md);border:1px solid var(--border-color);display:flex;align-items:center;gap:16px;">
+                    <div style="width:52px;height:52px;border-radius:14px;background:rgba(59,130,246,0.1);display:flex;align-items:center;justify-content:center;font-size:26px;color:#3b82f6;">
+                        <i class="ri-shopping-bag-line"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:28px;font-weight:700;">{{ $totalProductsInCategories }}</div>
+                        <div style="font-size:13px;color:var(--text-secondary);">Total Products</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Filters -->
+            <div class="filters-card">
+                <form method="GET" action="{{ route('admin.products') }}">
+                    <input type="hidden" name="tab" value="categories">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label><i class="ri-search-line"></i> Search</label>
+                            <input type="text" name="cat_search" placeholder="Search categories..." value="{{ $catSearch ?? '' }}">
+                        </div>
+                        <div class="filter-group">
+                            <label><i class="ri-filter-line"></i> Filter</label>
+                            <select name="cat_filter">
+                                <option value="">All Categories</option>
+                                <option value="active" {{ ($catFilter ?? '') === 'active' ? 'selected' : '' }}>Active Only</option>
+                                <option value="inactive" {{ ($catFilter ?? '') === 'inactive' ? 'selected' : '' }}>Inactive Only</option>
+                                <option value="parent" {{ ($catFilter ?? '') === 'parent' ? 'selected' : '' }}>Parent Only</option>
+                                <option value="child" {{ ($catFilter ?? '') === 'child' ? 'selected' : '' }}>Sub-categories</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button type="submit" class="btn btn-primary"><i class="ri-filter-line"></i> Apply</button>
+                            @if($catSearch || $catFilter)
+                                <a href="{{ route('admin.products') }}?tab=categories" class="btn btn-secondary"><i class="ri-close-line"></i> Clear</a>
+                            @endif
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Categories Table -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title"><i class="ri-price-tag-3-line"></i> Categories List</h3>
+                    @if($categoriesPaginated->count() > 0)
+                    <div class="results-info">
+                        <i class="ri-file-list-line"></i>
+                        Showing <strong>{{ $categoriesPaginated->firstItem() }}</strong> - <strong>{{ $categoriesPaginated->lastItem() }}</strong>
+                        of <strong>{{ $categoriesPaginated->total() }}</strong> categories
+                    </div>
+                    @endif
+                </div>
+
+                @if($categoriesPaginated->count() > 0)
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Slug</th>
+                            <th>Products</th>
+                            <th>Sub-categories</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($categoriesPaginated as $cat)
+                        <tr>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:12px;">
+                                    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--primary-gold),var(--primary-gold-hover));display:flex;align-items:center;justify-content:center;color:white;font-size:20px;flex-shrink:0;">
+                                        @if($cat->image && filter_var($cat->image, FILTER_VALIDATE_URL))
+                                            <img src="{{ $cat->image }}" alt="{{ $cat->name }}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\'ri-price-tag-3-line\'></i>'">
+                                        @elseif($cat->image)
+                                            <img src="{{ asset('storage/' . ltrim($cat->image, '/')) }}" alt="{{ $cat->name }}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" onerror="this.style.display='none';this.parentElement.innerHTML='<i class=\'ri-price-tag-3-line\'></i>'">
+                                        @else
+                                            <i class="{{ $cat->icon ?? 'ri-price-tag-3-line' }}"></i>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:700;">{{ $cat->name }}</div>
+                                        @if($cat->description)
+                                            <div style="font-size:12px;color:var(--text-secondary);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $cat->description }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td><code style="font-size:12px;background:var(--primary-soft);padding:3px 8px;border-radius:6px;">{{ $cat->slug }}</code></td>
+                            <td><span class="badge badge-info">{{ $cat->products_count }}</span></td>
+                            <td>
+                                @if($cat->children->count() > 0)
+                                    <span class="badge badge-warning">{{ $cat->children->count() }} sub</span>
+                                @else
+                                    <span style="color:var(--text-soft);font-size:13px;">—</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($cat->is_active)
+                                    <span class="badge badge-success">Active</span>
+                                @else
+                                    <span class="badge badge-danger">Inactive</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{{ route('admin.catalog.categories.edit', $cat->id) }}" class="action-btn action-btn-edit" title="Edit">
+                                        <i class="ri-edit-line"></i>
+                                    </a>
+                                    <form action="{{ route('admin.catalog.categories.destroy', $cat->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this category?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="action-btn action-btn-delete" title="Delete">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                @if($categoriesPaginated->hasPages())
+                <div class="pagination-wrapper">
+                    <div class="pagination-info">
+                        <i class="ri-file-list-line"></i>
+                        Showing <strong>{{ $categoriesPaginated->firstItem() }}</strong> - <strong>{{ $categoriesPaginated->lastItem() }}</strong>
+                        of <strong>{{ $categoriesPaginated->total() }}</strong> results
+                    </div>
+                    <div class="pagination">
+                        @if($categoriesPaginated->onFirstPage())
+                            <span class="pagination-item disabled"><i class="ri-arrow-left-s-line"></i></span>
+                        @else
+                            <a href="{{ $categoriesPaginated->previousPageUrl() }}" class="pagination-item"><i class="ri-arrow-left-s-line"></i></a>
+                        @endif
+                        @foreach($categoriesPaginated->getUrlRange(1, $categoriesPaginated->lastPage()) as $page => $url)
+                            @if($page == $categoriesPaginated->currentPage())
+                                <span class="pagination-item active">{{ $page }}</span>
+                            @elseif($page == 1 || $page == $categoriesPaginated->lastPage() || abs($page - $categoriesPaginated->currentPage()) <= 2)
+                                <a href="{{ $url }}" class="pagination-item">{{ $page }}</a>
+                            @elseif($page == 2 || $page == $categoriesPaginated->lastPage() - 1)
+                                <span class="pagination-dots">...</span>
+                            @endif
+                        @endforeach
+                        @if($categoriesPaginated->hasMorePages())
+                            <a href="{{ $categoriesPaginated->nextPageUrl() }}" class="pagination-item"><i class="ri-arrow-right-s-line"></i></a>
+                        @else
+                            <span class="pagination-item disabled"><i class="ri-arrow-right-s-line"></i></span>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
+                @else
+                <div class="empty-state">
+                    <i class="ri-price-tag-3-line empty-icon"></i>
+                    <h3 class="empty-title">No categories found</h3>
+                    <p class="empty-text">Add your first category to organize products</p>
+                    <a href="{{ route('admin.catalog.categories.create') }}" class="btn btn-primary">
+                        <i class="ri-add-line"></i> Add Category
+                    </a>
+                </div>
+                @endif
+            </div>
+
+            @endif {{-- end tab check --}}
+
         </div>
     </main>
 

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Edit Product - Vendora Admin | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         @font-face {
@@ -1057,98 +1060,7 @@
 <body>
 
     <!-- Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <div class="brand">
-            <i class="ri-store-3-fill"></i>
-            Vendora
-            
-        </div>
-
-        <div class="nav-menu">
-            <div class="nav-group">
-                <div class="nav-label">DASHBOARD</div>
-                <a href="{{ route('admin.dashboard') }}" class="nav-item">
-                    <i class="ri-dashboard-line"></i> Dashboard
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">MANAGEMENT</div>
-                <a href="{{ route('admin.orders') }}" class="nav-item">
-                    <i class="ri-shopping-bag-3-line"></i> Orders
-                </a>
-                <a href="{{ route('admin.customers') }}" class="nav-item">
-                    <i class="ri-user-line"></i> Customers
-                </a>
-                <a href="{{ route('admin.vendors') }}" class="nav-item">
-                    <i class="ri-store-line"></i> Vendors
-                </a>
-                <a href="{{ route('admin.products') }}" class="nav-item active">
-                    <i class="ri-shopping-cart-line"></i> Products
-                </a>
-                <a href="{{ route('admin.catalog.categories') }}" class="nav-item">
-                    <i class="ri-price-tag-3-line"></i> Categories
-                </a>
-                <a href="{{ route('admin.inventory') }}" class="nav-item">
-                    <i class="ri-archive-line"></i> Inventory
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">MARKETING</div>
-                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
-                    <i class="ri-megaphone-line"></i> Promotions
-                </a>
-                <a href="{{ route('admin.coupons') }}" class="nav-item">
-                    <i class="ri-coupon-line"></i> Coupons
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">ANALYTICS</div>
-                <a href="{{ route('admin.analytics') }}" class="nav-item">
-                    <i class="ri-bar-chart-2-line"></i> Analytics
-                </a>
-                <a href="{{ route('admin.reports') }}" class="nav-item">
-                    <i class="ri-file-list-3-line"></i> Reports
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">SYSTEM</div>
-                <a href="{{ route('admin.admins.list') }}" class="nav-item">
-                    <i class="ri-shield-user-line"></i> Administrators
-                </a>
-                <a href="{{ route('admin.settings') }}" class="nav-item">
-                    <i class="ri-settings-4-line"></i> Settings
-                </a>
-                <a href="{{ route('admin.help') }}" class="nav-item">
-                    <i class="ri-question-line"></i> Help
-                </a>
-            </div>
-        </div>
-
-        <div class="user-profile">
-            <div class="avatar">
-                @if(Auth::user() && Auth::user()->profile_image)
-                    <img src="{{ asset('storage/' . Auth::user()->profile_image) }}" alt="{{ Auth::user()->name }}">
-                @else
-                    {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 2)) }}
-                @endif
-            </div>
-            <div class="user-info">
-                <h4>{{ Auth::user()->name ?? 'Admin' }}</h4>
-                <p>{{ ucfirst(Auth::user()->role ?? 'administrator') }}</p>
-            </div>
-        </div>
-
-        <form method="POST" action="{{ route('admin.logout') }}">
-            @csrf
-            <button type="submit" class="logout-btn" onclick="return confirm('Are you sure you want to logout?')">
-                <i class="ri-logout-box-line"></i> Logout
-            </button>
-        </form>
-    </nav>
+    @include('partials.admin-sidebar')
 
     <!-- Main Content -->
     <main class="main-content">
@@ -1393,17 +1305,26 @@
                             </label>
                             
                             <div class="image-section">
-                                @if($product->image)
+                                @php
+                                    $editImg = $product->first_image;
+                                    $editUrl = $editImg
+                                        ? (filter_var($editImg, FILTER_VALIDATE_URL)
+                                            ? $editImg
+                                            : asset('storage/' . ltrim($editImg, '/')))
+                                        : null;
+                                @endphp
+                                @if($editUrl)
                                 <div class="current-image-container">
                                     <span class="current-image-label">Current Image:</span>
-                                    <img src="{{ Storage::url($product->image) }}" alt="{{ $product->name }}" class="current-image">
+                                    <img src="{{ $editUrl }}" alt="{{ $product->name }}" class="current-image"
+                                         onerror="this.onerror=null;this.src='{{ $product->placeholder_image }}'">
                                 </div>
                                 @endif
 
                                 <div class="image-upload-area" onclick="document.getElementById('image-input').click()">
                                     <i class="ri-upload-cloud-line upload-icon"></i>
                                     <p style="font-weight: 600; margin-bottom: 8px;">
-                                        {{ $product->image ? 'Click to upload new image' : 'Click to upload image' }}
+                                        {{ $editUrl ? 'Click to upload new image' : 'Click to upload image' }}
                                     </p>
                                     <p class="form-text">JPG, PNG, GIF up to 2MB</p>
                                     <input type="file" id="image-input" name="image" accept="image/jpeg,image/png,image/gif,image/webp" onchange="previewImage(event)">

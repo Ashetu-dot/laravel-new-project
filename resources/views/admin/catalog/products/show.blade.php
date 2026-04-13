@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>{{ $product->name }} - Vendora Admin | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         @font-face {
@@ -174,6 +177,13 @@
             object-fit: cover;
             margin-right: 12px;
             flex-shrink: 0;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
         }
 
         .user-info h4 {
@@ -542,111 +552,8 @@
 </head>
 <body>
 
-    <!-- Left Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <div class="brand">
-            <i class="ri-store-3-fill"></i>
-            Vendora
-            
-        </div>
-
-        <div class="nav-menu">
-            <div class="nav-group">
-                <div class="nav-label">Main</div>
-                <a href="{{ route('admin.dashboard') }}" class="nav-item">
-                    <i class="ri-dashboard-line"></i>
-                    Dashboard
-                </a>
-                <a href="{{ route('admin.orders') }}" class="nav-item">
-                    <i class="ri-shopping-bag-3-line"></i>
-                    Orders
-                </a>
-                <a href="{{ route('admin.customers') }}" class="nav-item">
-                    <i class="ri-user-3-line"></i>
-                    Customers
-                </a>
-                <a href="{{ route('admin.vendors') }}" class="nav-item">
-                    <i class="ri-store-2-line"></i>
-                    Vendors
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">Management</div>
-                <a href="{{ route('admin.catalog.products') }}" class="nav-item active">
-                    <i class="ri-shopping-cart-line"></i>
-                    Products
-                </a>
-                <a href="{{ route('admin.catalog.categories') }}" class="nav-item">
-                    <i class="ri-price-tag-3-line"></i>
-                    Categories
-                </a>
-                <a href="{{ route('admin.inventory') }}" class="nav-item">
-                    <i class="ri-archive-line"></i>
-                    Inventory
-                </a>
-                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
-                    <i class="ri-megaphone-line"></i>
-                    Promotions
-                </a>
-                <a href="{{ route('admin.coupons') }}" class="nav-item">
-                    <i class="ri-coupon-line"></i>
-                    Coupons
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">Analytics</div>
-                <a href="{{ route('admin.analytics') }}" class="nav-item">
-                    <i class="ri-bar-chart-2-line"></i>
-                    Analytics
-                </a>
-                <a href="{{ route('admin.reports') }}" class="nav-item">
-                    <i class="ri-file-list-3-line"></i>
-                    Reports
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">Admin</div>
-                <a href="{{ route('admin.admins.list') }}" class="nav-item">
-                    <i class="ri-shield-user-line"></i>
-                    Administrators
-                </a>
-                <a href="{{ route('admin.settings') }}" class="nav-item">
-                    <i class="ri-settings-4-line"></i>
-                    Settings
-                </a>
-                <a href="{{ route('admin.help') }}" class="nav-item">
-                    <i class="ri-question-line"></i>
-                    Help & Support
-                </a>
-                <a href="{{ route('admin.documentation') }}" class="nav-item">
-                    <i class="ri-book-open-line"></i>
-                    Documentation
-                </a>
-            </div>
-        </div>
-
-        <div class="user-profile">
-            <img src="{{ Auth::user()->avatar_url }}"
-                 alt="{{ Auth::user()->name }}"
-                 class="avatar"
-                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode(substr(Auth::user()->name ?? 'AD', 0, 2)) }}&background=B88E3F&color=fff&size=80';">
-            <div class="user-info">
-                <h4>{{ Auth::user()->name }}</h4>
-                <p>{{ ucfirst(Auth::user()->role ?? 'Admin') }}</p>
-            </div>
-        </div>
-
-        <form method="POST" action="{{ route('admin.logout') }}" style="margin: 0;">
-            @csrf
-            <button type="submit" class="logout-btn">
-                <i class="ri-logout-circle-line"></i>
-                Logout
-            </button>
-        </form>
-    </nav>
+    <!-- Sidebar -->
+    @include('partials.admin-sidebar')
 
     <!-- Main Content -->
     <main class="main-content">

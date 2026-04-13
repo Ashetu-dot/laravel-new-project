@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Help Center - Vendora | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* ----- FONTS ----- */
@@ -345,10 +348,10 @@
             padding: 100px 20px 120px;
             text-align: center;
             color: white;
-            background-image: linear-gradient(var(--overlay-dark), var(--overlay-dark)), url('{{ $heroImage ?? asset('images/help-center-bg.jpg') }}');
+            background-image: linear-gradient(var(--overlay-dark), var(--overlay-dark)), url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
+            transition: background-image 1s ease-in-out;
             isolation: isolate;
         }
 
@@ -801,10 +804,11 @@
 
         /* Contact Support */
         .support-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            flex-wrap: wrap;
             gap: 30px;
             margin-bottom: 60px;
+            align-items: flex-start;
         }
 
         .support-card {
@@ -814,6 +818,8 @@
             text-align: center;
             box-shadow: var(--shadow);
             transition: transform 0.3s;
+            flex: 1;
+            min-width: 260px;
         }
 
         .support-card:hover {
@@ -1141,7 +1147,7 @@
             }
 
             .support-section {
-                grid-template-columns: 1fr;
+                flex-direction: column;
             }
 
             .contact-methods {
@@ -1281,8 +1287,7 @@
     <nav class="navbar">
         <div class="brand-badge">
             <a href="{{ route('home') }}" class="brand">
-                <i class="ri-store-2-fill"></i>
-                Vendora
+                <img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:48px;width:48px;object-fit:cover;border-radius:50%;vertical-align:middle;">
             </a>
             
         </div>
@@ -1362,7 +1367,7 @@
     </div>
 
     <!-- Page Header with Dynamic Background -->
-    <section class="page-header" style="background-image: linear-gradient(var(--overlay-dark), var(--overlay-dark)), url('{{ $heroImage ?? asset('images/help-center-bg.jpg') }}');">
+    <section class="page-header" id="helpCenterHeader">
         <h1>How can we <span>help</span> you?</h1>
         <p>Search our help center or browse topics below to find answers to your questions.</p>
 
@@ -1442,50 +1447,42 @@
                     <!-- For Customers -->
                     <div class="category-card">
                         <div class="category-header">
-                            <div class="category-icon">
-                                <i class="ri-user-line"></i>
-                            </div>
+                            <div class="category-icon"><i class="ri-user-line"></i></div>
                             <h3 class="category-title">For Customers</h3>
                         </div>
                         <ul class="topic-list">
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Creating an account</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('register') }}?role=customer" class="topic-link">
+                                    <span>Creating an account</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>How to search for vendors</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('search.results') }}" class="topic-link">
+                                    <span>How to search for vendors</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Booking a service</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#for-customers" class="topic-link">
+                                    <span>Booking a service</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Payment with Chapa</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#for-customers" class="topic-link">
+                                    <span>Payment with Chapa</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Cash on delivery process</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#for-customers" class="topic-link">
+                                    <span>Cash on delivery process</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Cancellation policy</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#for-customers" class="topic-link">
+                                    <span>Cancellation policy</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                         </ul>
-                        <a href="#" class="view-all-link">
+                        <a href="{{ route('documentation') }}#for-customers" class="view-all-link">
                             View All <i class="ri-arrow-right-line"></i>
                         </a>
                     </div>
@@ -1493,50 +1490,42 @@
                     <!-- For Vendors -->
                     <div class="category-card">
                         <div class="category-header">
-                            <div class="category-icon">
-                                <i class="ri-store-line"></i>
-                            </div>
+                            <div class="category-icon"><i class="ri-store-line"></i></div>
                             <h3 class="category-title">For Vendors</h3>
                         </div>
                         <ul class="topic-list">
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Vendor registration</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('register') }}?role=vendor" class="topic-link">
+                                    <span>Vendor registration</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Verification process</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#for-vendors" class="topic-link">
+                                    <span>Verification process</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Managing your profile</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#for-vendors" class="topic-link">
+                                    <span>Managing your profile</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Adding products/services</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#for-vendors" class="topic-link">
+                                    <span>Adding products/services</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Getting paid via Chapa</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#for-vendors" class="topic-link">
+                                    <span>Getting paid via Chapa</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Cash on delivery setup</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#for-vendors" class="topic-link">
+                                    <span>Cash on delivery setup</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                         </ul>
-                        <a href="#" class="view-all-link">
+                        <a href="{{ route('documentation') }}#for-vendors" class="view-all-link">
                             View All <i class="ri-arrow-right-line"></i>
                         </a>
                     </div>
@@ -1544,50 +1533,42 @@
                     <!-- Payments & Billing -->
                     <div class="category-card">
                         <div class="category-header">
-                            <div class="category-icon">
-                                <i class="ri-bank-card-line"></i>
-                            </div>
+                            <div class="category-icon"><i class="ri-bank-card-line"></i></div>
                             <h3 class="category-title">Payments & Billing</h3>
                         </div>
                         <ul class="topic-list">
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>How to pay with Chapa</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#features" class="topic-link">
+                                    <span>How to pay with Chapa</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Setting up cash on delivery</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#features" class="topic-link">
+                                    <span>Setting up cash on delivery</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Payment security</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('trust-safety') }}" class="topic-link">
+                                    <span>Payment security</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Refunds and disputes</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#support" class="topic-link">
+                                    <span>Refunds and disputes</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Payment confirmation</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#features" class="topic-link">
+                                    <span>Payment confirmation</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                             <li class="topic-item">
-                                <a href="#" class="topic-link">
-                                    <span>Invoices and receipts</span>
-                                    <i class="ri-arrow-right-s-line"></i>
+                                <a href="{{ route('documentation') }}#features" class="topic-link">
+                                    <span>Invoices and receipts</span><i class="ri-arrow-right-s-line"></i>
                                 </a>
                             </li>
                         </ul>
-                        <a href="#" class="view-all-link">
+                        <a href="{{ route('documentation') }}#features" class="view-all-link">
                             View All <i class="ri-arrow-right-line"></i>
                         </a>
                     </div>
@@ -1643,20 +1624,65 @@
 
             <!-- Contact Support -->
             <section class="support-section">
-                <div class="support-card">
-                    <div class="support-icon">
-                        <i class="ri-message-line"></i>
-                    </div>
-                    <h3>Live Chat Support</h3>
-                    <p>Chat with our support team in real-time. Available 24/7 in Amharic and English.</p>
-                    <a href="#" class="support-btn">
-                        <i class="ri-chat-1-line"></i>
-                        Start Chat
-                    </a>
-                </div>
-                <div class="support-card">
+                <div class="support-card" style="flex:2;min-width:280px;">
                     <div class="support-icon">
                         <i class="ri-mail-send-line"></i>
+                    </div>
+                    <h3>Send Us a Message</h3>
+                    <p>Fill in the form below and we'll get back to you within 24 hours.</p>
+
+                    @if(session('success'))
+                        <div style="background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:14px;display:flex;align-items:center;gap:8px;">
+                            <i class="ri-checkbox-circle-line"></i> {{ session('success') }}
+                        </div>
+                    @endif
+                    @if(session('error'))
+                        <div style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:14px;display:flex;align-items:center;gap:8px;">
+                            <i class="ri-error-warning-line"></i> {{ session('error') }}
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('help.contact.submit') }}" style="width:100%;text-align:left;margin-top:8px;">
+                        @csrf
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                            <div>
+                                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text-dark);">Your Name</label>
+                                <input type="text" name="name" required value="{{ old('name', Auth::user()->name ?? '') }}"
+                                    placeholder="Full name"
+                                    style="width:100%;padding:10px 14px;border:1.5px solid var(--border-color);border-radius:8px;font-size:14px;outline:none;font-family:inherit;background:var(--bg-light);color:var(--text-dark);">
+                                @error('name')<span style="color:#ef4444;font-size:12px;">{{ $message }}</span>@enderror
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text-dark);">Email Address</label>
+                                <input type="email" name="email" required value="{{ old('email', Auth::user()->email ?? '') }}"
+                                    placeholder="your@email.com"
+                                    style="width:100%;padding:10px 14px;border:1.5px solid var(--border-color);border-radius:8px;font-size:14px;outline:none;font-family:inherit;background:var(--bg-light);color:var(--text-dark);">
+                                @error('email')<span style="color:#ef4444;font-size:12px;">{{ $message }}</span>@enderror
+                            </div>
+                        </div>
+                        <div style="margin-bottom:12px;">
+                            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text-dark);">Subject</label>
+                            <input type="text" name="subject" required value="{{ old('subject') }}"
+                                placeholder="What do you need help with?"
+                                style="width:100%;padding:10px 14px;border:1.5px solid var(--border-color);border-radius:8px;font-size:14px;outline:none;font-family:inherit;background:var(--bg-light);color:var(--text-dark);">
+                            @error('subject')<span style="color:#ef4444;font-size:12px;">{{ $message }}</span>@enderror
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text-dark);">Message</label>
+                            <textarea name="message" required rows="4" maxlength="2000"
+                                placeholder="Describe your issue or question in detail..."
+                                style="width:100%;padding:10px 14px;border:1.5px solid var(--border-color);border-radius:8px;font-size:14px;outline:none;resize:vertical;font-family:inherit;background:var(--bg-light);color:var(--text-dark);">{{ old('message') }}</textarea>
+                            @error('message')<span style="color:#ef4444;font-size:12px;">{{ $message }}</span>@enderror
+                        </div>
+                        <button type="submit" class="support-btn" style="width:100%;border:none;cursor:pointer;font-family:inherit;">
+                            <i class="ri-send-plane-line"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+
+                <div class="support-card" style="flex:1;min-width:220px;">
+                    <div class="support-icon">
+                        <i class="ri-mail-line"></i>
                     </div>
                     <h3>Email Support</h3>
                     <p>Send us an email and we'll get back to you within 24 hours.</p>
@@ -1687,11 +1713,11 @@
                 </div>
                 <div class="contact-method">
                     <div class="method-icon">
-                        <i class="ri-whatsapp-line"></i>
+                        <i class="ri-mail-line"></i>
                     </div>
-                    <div class="method-title">WhatsApp</div>
-                    <div class="method-detail">+251 91 234 5678</div>
-                    <div class="method-info">Text or voice support</div>
+                    <div class="method-title">Email Support</div>
+                    <div class="method-detail">support@vendora.com</div>
+                    <div class="method-info">Reply within 24 hours</div>
                 </div>
             </div>
 
@@ -1778,7 +1804,7 @@
     <footer>
         <div class="footer-content">
             <div class="footer-brand">
-                <h2><i class="ri-store-2-fill"></i> Vendora</h2>
+                <h2><img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:40px;width:40px;object-fit:cover;border-radius:50%;vertical-align:middle;"></h2>
                 <p class="footer-text">Connecting you with the best local professionals in Jimma and across Ethiopia. Simple, fast, and reliable.</p>
                 <div style="margin-top: 16px;">
                     
@@ -1790,8 +1816,6 @@
                     <ul>
                         <li><a href="{{ route('about') }}">About Us</a></li>
                         <li><a href="{{ route('careers') }}">Careers</a></li>
-                        <li><a href="{{ route('press') }}">Press</a></li>
-                        <li><a href="{{ route('blog') }}">Blog</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
@@ -1824,6 +1848,26 @@
     </footer>
 
     <script>
+        // ── Rotating hero background ──────────────────────────────────
+        (function() {
+            const header = document.getElementById('helpCenterHeader');
+            if (!header) return;
+            const images = [
+                'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80',
+                'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80',
+                'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1600&q=80',
+                'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&q=80',
+                'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600&q=80',
+                'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=1600&q=80',
+            ];
+            const overlay = 'linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55))';
+            let i = 0;
+            setInterval(() => {
+                i = (i + 1) % images.length;
+                header.style.backgroundImage = `${overlay}, url('${images[i]}')`;
+            }, 8000);
+        })();
+
         // Mobile menu toggle
         const menuToggle = document.getElementById('menuToggle');
         const mobileMenu = document.getElementById('mobileMenu');

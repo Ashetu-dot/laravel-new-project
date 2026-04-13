@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Community - Vendora | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* ----- FONTS ----- */
@@ -48,6 +51,22 @@
             --radius-md: 12px;
             --radius-lg: 16px;
         }
+
+        body.dark-mode {
+            --white: #1e293b;
+            --bg-light: #0f172a;
+            --text-dark: #f1f5f9;
+            --text-light: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 4px 20px rgba(0,0,0,0.4);
+            --shadow-hover: 0 8px 30px rgba(184,142,63,0.25);
+        }
+        body.dark-mode .navbar, body.dark-mode .mobile-menu { background-color: #1e293b; border-color: #334155; }
+        body.dark-mode .brand, body.dark-mode .nav-item { color: #f1f5f9; }
+        body.dark-mode .stat-card, body.dark-mode .group-card,
+        body.dark-mode .forum-topics, body.dark-mode .forum-sidebar,
+        body.dark-mode .sidebar-widget { background: #1e293b; border-color: #334155; }
+        body.dark-mode footer { background-color: #1e293b; border-color: #334155; }
 
         * {
             margin: 0;
@@ -1143,7 +1162,7 @@
         }
     </style>
 </head>
-<body>
+<body class="{{ session('theme') === 'dark' ? 'dark-mode' : '' }}">
 
     <!-- Session Messages -->
     @if(session('success'))
@@ -1171,8 +1190,7 @@
     <nav class="navbar">
         <div class="brand-badge">
             <a href="{{ route('home') }}" class="brand">
-                <i class="ri-store-2-fill"></i>
-                Vendora
+                <img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:48px;width:48px;object-fit:cover;border-radius:50%;vertical-align:middle;">
             </a>
             
         </div>
@@ -1183,12 +1201,12 @@
             @guest
                 <a href="{{ route('login') }}" class="nav-item">Log In</a>
                 <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
-            @else
-                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-                </form>
             @endguest
+            @include('partials.language-switcher')
+            <button id="themeToggle" onclick="toggleTheme()" title="Toggle theme"
+                style="background:none;border:1px solid var(--border-color);border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-dark);transition:all .2s;flex-shrink:0;">
+                <i class="{{ session('theme') === 'dark' ? 'ri-sun-line' : 'ri-moon-line' }}"></i>
+            </button>
         </div>
         <div class="menu-btn" id="menuToggle">
             <i class="ri-menu-line"></i>
@@ -1203,12 +1221,14 @@
         @guest
             <a href="{{ route('login') }}" class="nav-item">Log In</a>
             <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
-        @else
-            <form method="POST" action="{{ route('logout') }}" style="margin-top: 12px;">
-                @csrf
-                <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-            </form>
         @endguest
+        @include('partials.language-switcher')
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--border-color);margin-top:8px;">
+            <span style="font-size:14px;color:var(--text-light);">{{ session('theme') === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
+            <button onclick="toggleTheme()" style="background:none;border:1px solid var(--border-color);border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-dark);">
+                <i class="{{ session('theme') === 'dark' ? 'ri-sun-line' : 'ri-moon-line' }}"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Page Header -->
@@ -1222,32 +1242,19 @@
             <!-- Stats Section -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="ri-group-line"></i>
-                    </div>
-                    <div class="stat-value">{{ $totalMembers ?? '15k+' }}</div>
+                    <div class="stat-icon"><i class="ri-group-line"></i></div>
+                    <div class="stat-value">{{ number_format($totalMembers) }}</div>
                     <div class="stat-label">Community Members</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="ri-message-line"></i>
-                    </div>
-                    <div class="stat-value">{{ $dailyPosts ?? '500+' }}</div>
+                    <div class="stat-icon"><i class="ri-store-line"></i></div>
+                    <div class="stat-value">{{ $totalVendors > 0 ? $totalVendors . '+' : '500+' }}</div>
+                    <div class="stat-label">Active Vendors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="ri-message-line"></i></div>
+                    <div class="stat-value">{{ $dailyPosts > 0 ? $dailyPosts . '+' : 'Active' }}</div>
                     <div class="stat-label">Daily Discussions</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="ri-calendar-line"></i>
-                    </div>
-                    <div class="stat-value">{{ $monthlyEvents ?? '25+' }}</div>
-                    <div class="stat-label">Monthly Events</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="ri-user-star-line"></i>
-                    </div>
-                    <div class="stat-value">{{ $mentors ?? '50+' }}</div>
-                    <div class="stat-label">Active Mentors</div>
                 </div>
             </div>
 
@@ -1278,114 +1285,17 @@
                                 <li><i class="ri-check-line"></i> Live Q&A sessions</li>
                             </ul>
                             <div class="group-footer">
-                                <a href="#" class="group-btn">
+                                <a href="https://t.me/vendora_ethiopia" target="_blank" rel="noopener" class="group-btn">
                                     <i class="ri-telegram-line"></i>
                                     Join Telegram
                                 </a>
-                                <a href="#" class="group-btn group-btn-outline">
-                                    Preview Group
+                                <a href="{{ route('vendors.search') }}" class="group-btn group-btn-outline">
+                                    Browse Vendors
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- WhatsApp Group -->
-                    <div class="group-card">
-                        <div class="group-header">
-                            <div class="group-icon">
-                                <i class="ri-whatsapp-line"></i>
-                            </div>
-                            <div class="group-info">
-                                <h3>WhatsApp Community</h3>
-                                <div class="group-meta">
-                                    <span><i class="ri-user-line"></i> 3,800+ members</span>
-                                    <span><i class="ri-message-line"></i> Regional groups</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="group-content">
-                            <p class="group-description">Connect with local vendors in your area through our WhatsApp groups. Perfect for networking and local collaborations.</p>
-                            <ul class="group-features">
-                                <li><i class="ri-check-line"></i> City-specific groups</li>
-                                <li><i class="ri-check-line"></i> Category-based chats</li>
-                                <li><i class="ri-check-line"></i> Local opportunities</li>
-                                <li><i class="ri-check-line"></i> Event coordination</li>
-                            </ul>
-                            <div class="group-footer">
-                                <a href="#" class="group-btn">
-                                    <i class="ri-whatsapp-line"></i>
-                                    Join WhatsApp
-                                </a>
-                                <a href="#" class="group-btn group-btn-outline">
-                                    Find Your City
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Upcoming Events -->
-            <section class="events-section">
-                <h2 class="section-title">Upcoming <span>Events</span></h2>
-                <div class="events-grid">
-                    <div class="event-card">
-                        <div class="event-date">
-                            <div class="event-day">25</div>
-                            <div class="event-month">FEB</div>
-                        </div>
-                        <div class="event-content">
-                            <h3 class="event-title">Vendor Meetup - Jimma</h3>
-                            <div class="event-meta">
-                                <span><i class="ri-time-line"></i> 3:00 PM - 6:00 PM</span>
-                                <span><i class="ri-map-pin-line"></i> Jimma Cultural Center</span>
-                            </div>
-                            <p class="event-description">Network with local vendors, share experiences, and learn from successful entrepreneurs in Jimma.</p>
-                            <div class="event-footer">
-                                <span class="event-attendees"><i class="ri-user-line"></i> 45 attending</span>
-                                <a href="#" class="event-rsvp">RSVP</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="event-card">
-                        <div class="event-date">
-                            <div class="event-day">28</div>
-                            <div class="event-month">FEB</div>
-                        </div>
-                        <div class="event-content">
-                            <h3 class="event-title">Virtual Workshop: Marketing Tips</h3>
-                            <div class="event-meta">
-                                <span><i class="ri-time-line"></i> 10:00 AM - 12:00 PM</span>
-                                <span><i class="ri-video-line"></i> Online (Zoom)</span>
-                            </div>
-                            <p class="event-description">Learn effective marketing strategies to grow your business on Vendora from our expert panel.</p>
-                            <div class="event-footer">
-                                <span class="event-attendees"><i class="ri-user-line"></i> 120 registered</span>
-                                <a href="#" class="event-rsvp">Register</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="event-card">
-                        <div class="event-date">
-                            <div class="event-day">05</div>
-                            <div class="event-month">MAR</div>
-                        </div>
-                        <div class="event-content">
-                            <h3 class="event-title">Addis Ababa Vendor Expo</h3>
-                            <div class="event-meta">
-                                <span><i class="ri-time-line"></i> 9:00 AM - 5:00 PM</span>
-                                <span><i class="ri-map-pin-line"></i> Addis Ababa Exhibition Center</span>
-                            </div>
-                            <p class="event-description">Showcase your products, meet customers face-to-face, and connect with other vendors.</p>
-                            <div class="event-footer">
-                                <span class="event-attendees"><i class="ri-user-line"></i> 200+ attending</span>
-                                <a href="#" class="event-rsvp">Book Booth</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div style="text-align: center; margin-top: 30px;">
-                    <a href="#" class="view-all">View All Events <i class="ri-arrow-right-line"></i></a>
                 </div>
             </section>
 
@@ -1396,77 +1306,76 @@
                     <div class="forum-topics">
                         <div class="forum-header">
                             <h3>Recent Discussions</h3>
-                            <a href="#" class="view-all-link">View All <i class="ri-arrow-right-line"></i></a>
+                            <a href="{{ route('help-center') }}" class="view-all-link">Help Center <i class="ri-arrow-right-line"></i></a>
                         </div>
 
+                        @forelse($recentDiscussions as $discussion)
+                        <div class="topic-item">
+                            <div class="topic-avatar" style="overflow:hidden;padding:0;background:linear-gradient(135deg,var(--primary-color),var(--primary-hover));">
+                                @if($discussion->avatar)
+                                    <img src="{{ $discussion->avatar }}" alt="{{ $discussion->author }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                                @else
+                                    <span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:white;font-weight:600;">{{ $discussion->initials }}</span>
+                                @endif
+                            </div>
+                            <div class="topic-content">
+                                <div class="topic-title">
+                                    <a href="{{ route('search.results', ['query' => $discussion->search_query]) }}">{{ $discussion->title }}</a>
+                                </div>
+                                <div class="topic-meta">
+                                    <span><i class="ri-user-line"></i> {{ $discussion->author }}</span>
+                                    <span><i class="ri-time-line"></i> {{ $discussion->time_ago }}</span>
+                                </div>
+                            </div>
+                            <div class="topic-stats">
+                                <span class="topic-replies">{{ $discussion->replies }} {{ Str::plural('reply', $discussion->replies) }}</span>
+                            </div>
+                        </div>
+                        @empty
+                        {{-- Fallback static topics when no DB data --}}
                         <div class="topic-item">
                             <div class="topic-avatar">AT</div>
                             <div class="topic-content">
-                                <div class="topic-title">
-                                    <a href="#">How to price photography services in Jimma?</a>
-                                </div>
-                                <div class="topic-meta">
-                                    <span><i class="ri-user-line"></i> Azeb Tadesse</span>
-                                    <span><i class="ri-time-line"></i> 2 hours ago</span>
-                                </div>
+                                <div class="topic-title"><a href="{{ route('search.results', ['query' => 'photography']) }}">How to price photography services in Jimma?</a></div>
+                                <div class="topic-meta"><span><i class="ri-user-line"></i> Azeb Tadesse</span><span><i class="ri-time-line"></i> 2 hours ago</span></div>
                             </div>
-                            <div class="topic-stats">
-                                <span class="topic-replies">12 replies</span>
-                            </div>
+                            <div class="topic-stats"><span class="topic-replies">12 replies</span></div>
                         </div>
-
                         <div class="topic-item">
                             <div class="topic-avatar">TB</div>
                             <div class="topic-content">
-                                <div class="topic-title">
-                                    <a href="#">Best marketing strategies for new vendors</a>
-                                </div>
-                                <div class="topic-meta">
-                                    <span><i class="ri-user-line"></i> Tekle Berhan</span>
-                                    <span><i class="ri-time-line"></i> 5 hours ago</span>
-                                </div>
+                                <div class="topic-title"><a href="{{ route('search.results', ['query' => 'marketing']) }}">Best marketing strategies for new vendors</a></div>
+                                <div class="topic-meta"><span><i class="ri-user-line"></i> Tekle Berhan</span><span><i class="ri-time-line"></i> 5 hours ago</span></div>
                             </div>
-                            <div class="topic-stats">
-                                <span class="topic-replies">24 replies</span>
-                            </div>
+                            <div class="topic-stats"><span class="topic-replies">24 replies</span></div>
                         </div>
-
                         <div class="topic-item">
                             <div class="topic-avatar">SM</div>
                             <div class="topic-content">
-                                <div class="topic-title">
-                                    <a href="#">Dealing with difficult customers - advice needed</a>
-                                </div>
-                                <div class="topic-meta">
-                                    <span><i class="ri-user-line"></i> Sara Mohammed</span>
-                                    <span><i class="ri-time-line"></i> 1 day ago</span>
-                                </div>
+                                <div class="topic-title"><a href="{{ route('search.results', ['query' => 'customer service']) }}">Dealing with difficult customers - advice needed</a></div>
+                                <div class="topic-meta"><span><i class="ri-user-line"></i> Sara Mohammed</span><span><i class="ri-time-line"></i> 1 day ago</span></div>
                             </div>
-                            <div class="topic-stats">
-                                <span class="topic-replies">18 replies</span>
-                            </div>
+                            <div class="topic-stats"><span class="topic-replies">18 replies</span></div>
                         </div>
-
                         <div class="topic-item">
                             <div class="topic-avatar">DH</div>
                             <div class="topic-content">
-                                <div class="topic-title">
-                                    <a href="#">Equipment recommendations for starting photographers</a>
-                                </div>
-                                <div class="topic-meta">
-                                    <span><i class="ri-user-line"></i> Dawit Haile</span>
-                                    <span><i class="ri-time-line"></i> 2 days ago</span>
-                                </div>
+                                <div class="topic-title"><a href="{{ route('search.results', ['query' => 'photography']) }}">Equipment recommendations for starting photographers</a></div>
+                                <div class="topic-meta"><span><i class="ri-user-line"></i> Dawit Haile</span><span><i class="ri-time-line"></i> 2 days ago</span></div>
                             </div>
-                            <div class="topic-stats">
-                                <span class="topic-replies">31 replies</span>
-                            </div>
+                            <div class="topic-stats"><span class="topic-replies">31 replies</span></div>
                         </div>
+                        @endforelse
 
-                        <a href="#" class="new-topic-btn">
-                            <i class="ri-add-line"></i>
-                            Start New Discussion
-                        </a>
+                        @auth
+                            <button onclick="document.getElementById('newDiscussionModal').style.display='flex'" class="new-topic-btn">
+                                <i class="ri-add-line"></i> Start New Discussion
+                            </button>
+                        @else
+                            <a href="{{ route('login') }}" class="new-topic-btn">
+                                <i class="ri-login-box-line"></i> Sign in to Discuss
+                            </a>
+                        @endauth
                     </div>
 
                     <div class="forum-sidebar">
@@ -1474,100 +1383,92 @@
                             <h4 class="widget-title">Categories</h4>
                             <ul class="category-list">
                                 <li>
-                                    <a href="#"><i class="ri-price-tag-line"></i> General Discussion</a>
-                                    <span class="category-count">245</span>
+                                    <a href="{{ route('search.results') }}"><i class="ri-price-tag-line"></i> General Discussion</a>
+                                    <span class="category-count">{{ $forumCounts['general'] ?? 0 }}</span>
                                 </li>
                                 <li>
-                                    <a href="#"><i class="ri-store-line"></i> Business Tips</a>
-                                    <span class="category-count">189</span>
+                                    <a href="{{ route('list-service') }}"><i class="ri-store-line"></i> Business Tips</a>
+                                    <span class="category-count">{{ $forumCounts['business_tips'] ?? 0 }}</span>
                                 </li>
                                 <li>
-                                    <a href="#"><i class="ri-question-line"></i> Q&A</a>
-                                    <span class="category-count">312</span>
+                                    <a href="{{ route('help-center') }}"><i class="ri-question-line"></i> Q&A</a>
+                                    <span class="category-count">{{ $forumCounts['qa'] ?? 0 }}</span>
                                 </li>
                                 <li>
-                                    <a href="#"><i class="ri-megaphone-line"></i> Announcements</a>
-                                    <span class="category-count">56</span>
+                                    <a href="{{ route('documentation') }}"><i class="ri-megaphone-line"></i> Announcements</a>
+                                    <span class="category-count">{{ $forumCounts['announcements'] ?? 0 }}</span>
                                 </li>
                                 <li>
-                                    <a href="#"><i class="ri-handbag-line"></i> Job Opportunities</a>
-                                    <span class="category-count">98</span>
+                                    <a href="{{ route('search.results') }}"><i class="ri-handbag-line"></i> Find Vendors</a>
+                                    <span class="category-count">{{ $forumCounts['find_vendors'] ?? 0 }}</span>
                                 </li>
                             </ul>
                         </div>
 
                         <div class="sidebar-widget">
-                            <h4 class="widget-title">Active Now</h4>
+                            <h4 class="widget-title">Active Vendors</h4>
                             <div class="active-users">
-                                <div class="active-user online">AT</div>
-                                <div class="active-user online">TB</div>
-                                <div class="active-user">SM</div>
-                                <div class="active-user online">DH</div>
-                                <div class="active-user">BT</div>
-                                <div class="active-user">MA</div>
-                                <div class="active-user online">GB</div>
-                                <div class="active-user">HA</div>
+                                @forelse($recentVendors as $v)
+                                    <a href="{{ route('vendor.show', $v->id) }}" title="{{ $v->business_name ?? $v->name }}" style="text-decoration:none;">
+                                        <div class="active-user online" style="overflow:hidden;padding:0;">
+                                            <img src="{{ $v->avatar_url }}" alt="{{ $v->name }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                                        </div>
+                                    </a>
+                                @empty
+                                    @foreach(['AT','TB','SM','DH','BT','MA','GB','HA'] as $init)
+                                        <div class="active-user">{{ $init }}</div>
+                                    @endforeach
+                                @endforelse
                             </div>
-                            <p style="font-size: 13px; color: var(--text-light); margin-top: 10px;">24 members online</p>
+                            <p style="font-size:13px;color:var(--text-light);margin-top:10px;">
+                                {{ $onlineCount > 0 ? $onlineCount . ' members online' : ($totalVendors . ' active vendors') }}
+                            </p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Mentorship Program -->
-            <section class="mentorship-section">
-                <h2 class="section-title" style="color: white;">Mentorship <span style="color: white;">Program</span></h2>
-                <div class="mentorship-grid">
-                    <div class="mentorship-card">
-                        <div class="mentorship-header">
-                            <div class="mentorship-icon">
-                                <i class="ri-user-star-line"></i>
-                            </div>
-                            <h3 class="mentorship-title">Become a Mentor</h3>
-                        </div>
-                        <p class="mentorship-description">Share your expertise and help fellow vendors grow. Experienced vendors can apply to become mentors and guide newcomers.</p>
-                        <div class="mentorship-stats">
-                            <div class="mentorship-stat">
-                                <div class="mentorship-stat-value">35</div>
-                                <div class="mentorship-stat-label">Active Mentors</div>
-                            </div>
-                            <div class="mentorship-stat">
-                                <div class="mentorship-stat-value">120+</div>
-                                <div class="mentorship-stat-label">Mentees</div>
-                            </div>
-                        </div>
-                        <a href="#" class="mentorship-btn">Apply as Mentor</a>
-                    </div>
-                    <div class="mentorship-card">
-                        <div class="mentorship-header">
-                            <div class="mentorship-icon">
-                                <i class="ri-graduation-cap-line"></i>
-                            </div>
-                            <h3 class="mentorship-title">Find a Mentor</h3>
-                        </div>
-                        <p class="mentorship-description">Get personalized guidance from experienced vendors who have been where you are and can help you succeed.</p>
-                        <div class="mentorship-stats">
-                            <div class="mentorship-stat">
-                                <div class="mentorship-stat-value">8</div>
-                                <div class="mentorship-stat-label">Categories</div>
-                            </div>
-                            <div class="mentorship-stat">
-                                <div class="mentorship-stat-value">Free</div>
-                                <div class="mentorship-stat-label">For Members</div>
-                            </div>
-                        </div>
-                        <a href="#" class="mentorship-btn">Find a Mentor</a>
-                    </div>
-                </div>
-            </section>
         </div>
     </main>
+
+    <!-- New Discussion Modal -->
+    <div id="newDiscussionModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:var(--white);border-radius:16px;padding:32px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                <h3 style="font-size:20px;font-weight:700;color:var(--text-dark);">Start New Discussion</h3>
+                <button onclick="document.getElementById('newDiscussionModal').style.display='none'" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-light);">&times;</button>
+            </div>
+            <form method="POST" action="{{ route('community.discussion.store') }}">
+                @csrf
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;font-weight:600;font-size:14px;margin-bottom:6px;color:var(--text-dark);">Topic / Subject</label>
+                    <input type="text" name="subject" required placeholder="What would you like to discuss?" maxlength="255"
+                        style="width:100%;padding:12px 16px;border:2px solid var(--border-color);border-radius:10px;font-size:14px;outline:none;font-family:inherit;background:var(--bg-light);color:var(--text-dark);">
+                </div>
+                <div style="margin-bottom:24px;">
+                    <label style="display:block;font-weight:600;font-size:14px;margin-bottom:6px;color:var(--text-dark);">Message</label>
+                    <textarea name="message" required rows="5" placeholder="Share your thoughts, questions, or advice..." maxlength="2000"
+                        style="width:100%;padding:12px 16px;border:2px solid var(--border-color);border-radius:10px;font-size:14px;outline:none;resize:vertical;font-family:inherit;background:var(--bg-light);color:var(--text-dark);"></textarea>
+                </div>
+                <div style="display:flex;gap:12px;justify-content:flex-end;">
+                    <button type="button" onclick="document.getElementById('newDiscussionModal').style.display='none'"
+                        style="padding:10px 24px;border:2px solid var(--border-color);border-radius:50px;background:none;cursor:pointer;font-weight:600;color:var(--text-light);font-family:inherit;">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        style="padding:10px 24px;background:var(--primary-color);color:white;border:none;border-radius:50px;cursor:pointer;font-weight:600;font-family:inherit;">
+                        Post Discussion
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer>
         <div class="footer-content">
             <div class="footer-brand">
-                <h2><i class="ri-store-2-fill"></i> Vendora</h2>
+                <h2><img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:40px;width:40px;object-fit:cover;border-radius:50%;vertical-align:middle;"></h2>
                 <p class="footer-text">Connecting you with the best local professionals in Jimma and across Ethiopia. Simple, fast, and reliable.</p>
                 <div style="margin-top: 16px;">
                     
@@ -1579,8 +1480,6 @@
                     <ul>
                         <li><a href="{{ route('about') }}">About Us</a></li>
                         <li><a href="{{ route('careers') }}">Careers</a></li>
-                        <li><a href="{{ route('press') }}">Press</a></li>
-                        <li><a href="{{ route('blog') }}">Blog</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
@@ -1674,6 +1573,30 @@
         // Auto-hide alerts after 5 seconds
         setTimeout(() => {
             document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+
+        // Theme toggle
+        function toggleTheme() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.querySelectorAll('#themeToggle i').forEach(i => i.className = isDark ? 'ri-sun-line' : 'ri-moon-line');
+            fetch('{{ route("theme.toggle") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ theme: isDark ? 'dark' : 'light' })
+            }).catch(() => {});
+        }
+        (function() {
+            const saved = localStorage.getItem('theme') || '{{ session("theme", "light") }}';
+            if (saved === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.querySelectorAll('#themeToggle i').forEach(i => i.className = 'ri-sun-line');
+            }
+        })();
                 alert.style.transition = 'opacity 0.5s';
                 alert.style.opacity = '0';
                 setTimeout(() => alert.remove(), 500);

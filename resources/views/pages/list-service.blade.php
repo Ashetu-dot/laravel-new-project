@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>List Your Service - Vendora | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* ----- FONTS ----- */
@@ -48,6 +51,57 @@
             --radius-md: 12px;
             --radius-lg: 16px;
             --gradient-gold: linear-gradient(135deg, #B88E3F, #9c7832);
+        }
+
+        /* Dark mode */
+        body.dark-mode {
+            --white: #1e293b;
+            --bg-light: #0f172a;
+            --text-dark: #f1f5f9;
+            --text-light: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 4px 20px rgba(0,0,0,0.4);
+            --shadow-hover: 0 8px 30px rgba(184,142,63,0.25);
+        }
+
+        body.dark-mode .navbar,
+        body.dark-mode .mobile-menu {
+            background-color: #1e293b;
+            border-color: #334155;
+        }
+
+        body.dark-mode .brand,
+        body.dark-mode .nav-item,
+        body.dark-mode .nav-links a {
+            color: #f1f5f9;
+        }
+
+        body.dark-mode .faq-item,
+        body.dark-mode .pricing-card,
+        body.dark-mode .stat-card,
+        body.dark-mode .story-card,
+        body.dark-mode .testimonials-slider {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        body.dark-mode .faq-question span,
+        body.dark-mode .story-name,
+        body.dark-mode .story-business,
+        body.dark-mode .pricing-name,
+        body.dark-mode .stat-label,
+        body.dark-mode .stat-value {
+            color: #f1f5f9;
+        }
+
+        body.dark-mode .story-quote,
+        body.dark-mode .faq-answer {
+            color: #94a3b8;
+        }
+
+        body.dark-mode footer {
+            background-color: #1e293b;
+            border-color: #334155;
         }
 
         * {
@@ -280,11 +334,11 @@
             padding: 100px 20px;
             text-align: center;
             color: white;
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-                        url('{{ $heroImage ?? asset('images/vendor-bg.jpg') }}');
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+                        url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
+            transition: background-image 1s ease-in-out;
             isolation: isolate;
         }
 
@@ -509,7 +563,24 @@
         .category-card {
             background: var(--white);
             border-radius: var(--radius-md);
-            padding: 25px 15px;
+            padding: 0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            min-height: 180px;
+            overflow: hidden;
+        }
+
+        .category-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .category-card:hover .cat-bg {
+            transform: scale(1.08);
+        }            padding: 25px 15px;
             text-align: center;
             box-shadow: var(--shadow);
             transition: all 0.3s;
@@ -676,25 +747,34 @@
         .story-image {
             height: 180px;
             background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            background-size: cover;
+            background-position: center;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 48px;
+            align-items: flex-start;
+            justify-content: flex-end;
             position: relative;
+            overflow: hidden;
+        }
+
+        .story-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%);
         }
 
         .story-category {
             position: absolute;
             top: 15px;
             right: 15px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.2);
             backdrop-filter: blur(5px);
             padding: 4px 12px;
             border-radius: 50px;
             font-size: 11px;
             font-weight: 600;
             color: white;
+            z-index: 2;
         }
 
         .story-content {
@@ -1227,7 +1307,7 @@
         }
     </style>
 </head>
-<body>
+<body class="{{ session('theme') === 'dark' ? 'dark-mode' : '' }}">
 
     <!-- Session Messages -->
     @if(session('success'))
@@ -1255,10 +1335,8 @@
     <nav class="navbar">
         <div class="brand-badge">
             <a href="{{ route('home') }}" class="brand">
-                <i class="ri-store-2-fill"></i>
-                Vendora
+                <img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:48px;width:48px;object-fit:cover;border-radius:50%;vertical-align:middle;">
             </a>
-            
         </div>
         <div class="nav-links">
             <a href="{{ route('home') }}#categories" class="nav-item">Categories</a>
@@ -1268,12 +1346,10 @@
             @guest
                 <a href="{{ route('login') }}" class="nav-item">Log In</a>
                 <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
-            @else
-                <form method="POST" action="{{ route('logout') }}" style="display: inline;">
-                    @csrf
-                    <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-                </form>
             @endguest
+
+            @include('partials.language-switcher')
+            @include('partials.theme-toggle')
         </div>
         <div class="menu-btn" id="menuToggle">
             <i class="ri-menu-line"></i>
@@ -1289,16 +1365,20 @@
         @guest
             <a href="{{ route('login') }}" class="nav-item">Log In</a>
             <a href="{{ route('register') }}" class="nav-item btn-signup">Sign Up</a>
-        @else
-            <form method="POST" action="{{ route('logout') }}" style="margin-top: 12px;">
-                @csrf
-                <button type="submit" class="nav-item" style="background: none; border: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text-dark);">Logout</button>
-            </form>
         @endguest
+
+        @include('partials.language-switcher')
+
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--border-color);margin-top:8px;">
+            <span style="font-size:14px;color:var(--text-light);">{{ session('theme') === 'dark' ? 'Light Mode' : 'Dark Mode' }}</span>
+            <button onclick="toggleTheme()" style="background:none;border:1px solid var(--border-color);border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-dark);">
+                <i class="{{ session('theme') === 'dark' ? 'ri-sun-line' : 'ri-moon-line' }}"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Page Header with Dynamic Background -->
-    <section class="page-header" style="background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('{{ $heroImage ?? asset('images/vendor-bg.jpg') }}');">
+    <section class="page-header" id="listServiceHeroBg">
         <h1>List Your <span>Service</span></h1>
         <p>Join thousands of successful vendors in Jimma and across Ethiopia. Start growing your business today.</p>
     </section>
@@ -1323,7 +1403,7 @@
                             <li class="disabled"><i class="ri-close-line"></i> Analytics dashboard</li>
                             <li class="disabled"><i class="ri-close-line"></i> Priority support</li>
                         </ul>
-                        <a href="{{ route('register') }}" class="select-plan-btn">Get Started</a>
+                        <a href="{{ route('register') }}?role=vendor" class="select-plan-btn">Get Started</a>
                     </div>
 
                     <!-- Professional Plan (Popular) -->
@@ -1341,7 +1421,7 @@
                             <li><i class="ri-check-line"></i> Priority email support</li>
                             <li class="disabled"><i class="ri-close-line"></i> Featured listings</li>
                         </ul>
-                        <a href="{{ route('register') }}?plan=professional" class="select-plan-btn">Choose Plan</a>
+                        <a href="{{ route('register') }}?role=vendor&plan=professional" class="select-plan-btn">Choose Plan</a>
                     </div>
 
                     <!-- Business Plan -->
@@ -1358,7 +1438,7 @@
                             <li><i class="ri-check-line"></i> 24/7 phone support</li>
                             <li><i class="ri-check-line"></i> Featured listings</li>
                         </ul>
-                        <a href="{{ route('register') }}?plan=business" class="select-plan-btn">Choose Plan</a>
+                        <a href="{{ route('register') }}?role=vendor&plan=business" class="select-plan-btn">Choose Plan</a>
                     </div>
                 </div>
             </section>
@@ -1367,62 +1447,38 @@
             <section class="categories-section">
                 <h2 class="section-title">Popular Service <span>Categories</span></h2>
                 <div class="categories-grid">
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="ri-restaurant-line"></i>
+                    @php
+                        $cats = [
+                            ['key'=>'food',        'icon'=>'ri-restaurant-line',  'name'=>'Food & Catering',  'slug'=>'food',
+                             'img'=>'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop'],
+                            ['key'=>'photography', 'icon'=>'ri-camera-line',      'name'=>'Photography',      'slug'=>'photography',
+                             'img'=>'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop'],
+                            ['key'=>'home',        'icon'=>'ri-home-gear-line',   'name'=>'Home Services',    'slug'=>'home-services',
+                             'img'=>'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop'],
+                            ['key'=>'beauty',      'icon'=>'ri-heart-pulse-line', 'name'=>'Health & Beauty',  'slug'=>'health-beauty',
+                             'img'=>'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&h=300&fit=crop'],
+                            ['key'=>'automotive',  'icon'=>'ri-car-washing-line', 'name'=>'Automotive',       'slug'=>'automotive',
+                             'img'=>'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=300&fit=crop'],
+                            ['key'=>'events',      'icon'=>'ri-cake-line',        'name'=>'Events & Party',   'slug'=>'events',
+                             'img'=>'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop'],
+                            ['key'=>'tech',        'icon'=>'ri-computer-line',    'name'=>'Tech Support',     'slug'=>'tech-support',
+                             'img'=>'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&h=300&fit=crop'],
+                            ['key'=>'handicrafts', 'icon'=>'ri-palette-line',     'name'=>'Handicrafts',      'slug'=>'handicrafts',
+                             'img'=>'https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=400&h=300&fit=crop'],
+                        ];
+                    @endphp
+                    @foreach($cats as $cat)
+                    <a href="{{ route('search.results', ['query' => $cat['slug']]) }}" class="category-card" style="text-decoration:none;color:inherit;position:relative;overflow:hidden;">
+                        <div style="position:absolute;inset:0;background-image:url('{{ $cat['img'] }}');background-size:cover;background-position:center;transition:transform 0.4s;z-index:0;" class="cat-bg"></div>
+                        <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.25) 0%,rgba(0,0,0,0.65) 100%);z-index:1;"></div>
+                        <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px;">
+                            <h3 class="category-name" style="color:white;margin-top:0;">{{ $cat['name'] }}</h3>
+                            <div class="category-count" style="color:rgba(255,255,255,0.85);">
+                                {{ ($categoryVendors[$cat['key']] ?? 0) > 0 ? ($categoryVendors[$cat['key']] . '+') : 'Be first!' }} vendors
+                            </div>
                         </div>
-                        <h3 class="category-name">Food & Catering</h3>
-                        <div class="category-count">245+ vendors</div>
-                    </div>
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="ri-camera-line"></i>
-                        </div>
-                        <h3 class="category-name">Photography</h3>
-                        <div class="category-count">189+ vendors</div>
-                    </div>
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="ri-home-gear-line"></i>
-                        </div>
-                        <h3 class="category-name">Home Services</h3>
-                        <div class="category-count">312+ vendors</div>
-                    </div>
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="ri-heart-pulse-line"></i>
-                        </div>
-                        <h3 class="category-name">Health & Beauty</h3>
-                        <div class="category-count">178+ vendors</div>
-                    </div>
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="ri-car-washing-line"></i>
-                        </div>
-                        <h3 class="category-name">Automotive</h3>
-                        <div class="category-count">95+ vendors</div>
-                    </div>
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="ri-cake-line"></i>
-                        </div>
-                        <h3 class="category-name">Events & Party</h3>
-                        <div class="category-count">156+ vendors</div>
-                    </div>
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="ri-computer-line"></i>
-                        </div>
-                        <h3 class="category-name">Tech Support</h3>
-                        <div class="category-count">67+ vendors</div>
-                    </div>
-                    <div class="category-card">
-                        <div class="category-icon">
-                            <i class="ri-palette-line"></i>
-                        </div>
-                        <h3 class="category-name">Handicrafts</h3>
-                        <div class="category-count">134+ vendors</div>
-                    </div>
+                    </a>
+                    @endforeach
                 </div>
             </section>
 
@@ -1433,31 +1489,23 @@
                 <!-- Stats Grid -->
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="ri-store-line"></i>
-                        </div>
-                        <div class="stat-value">500+</div>
+                        <div class="stat-icon"><i class="ri-store-line"></i></div>
+                        <div class="stat-value">{{ $totalVendors > 0 ? $totalVendors . '+' : '500+' }}</div>
                         <div class="stat-label">Active Vendors</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="ri-bar-chart-line"></i>
-                        </div>
+                        <div class="stat-icon"><i class="ri-bar-chart-line"></i></div>
                         <div class="stat-value">150%</div>
                         <div class="stat-label">Average Growth</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="ri-money-dollar-circle-line"></i>
-                        </div>
-                        <div class="stat-value">5M+</div>
+                        <div class="stat-icon"><i class="ri-money-dollar-circle-line"></i></div>
+                        <div class="stat-value">{{ $totalRevenue > 0 ? number_format($totalRevenue / 1000000, 1) . 'M+' : '5M+' }}</div>
                         <div class="stat-label">Total ETB Earned</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="ri-customer-service-line"></i>
-                        </div>
-                        <div class="stat-value">50k+</div>
+                        <div class="stat-icon"><i class="ri-customer-service-line"></i></div>
+                        <div class="stat-value">{{ $totalCustomers > 0 ? number_format($totalCustomers / 1000, 0) . 'k+' : '50k+' }}</div>
                         <div class="stat-label">Happy Customers</div>
                     </div>
                 </div>
@@ -1475,8 +1523,7 @@
                 <div class="stories-grid" id="storiesGrid">
                     <!-- Story 1 -->
                     <div class="story-card" data-category="food">
-                        <div class="story-image">
-                            <i class="ri-restaurant-line"></i>
+                        <div class="story-image" style="background-image:url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=200&fit=crop');background-size:cover;background-position:center;">
                             <span class="story-category">Catering</span>
                         </div>
                         <div class="story-content">
@@ -1494,15 +1541,14 @@
                             <p class="story-quote">"My coffee business was struggling to reach customers. Within 3 months on Vendora, I'm now supplying to 20+ local cafes."</p>
                             <div class="story-meta">
                                 <span><i class="ri-bar-chart-line"></i> +300% growth</span>
-                                <a href="#" class="story-link">Read <i class="ri-arrow-right-line"></i></a>
+                                <a href="{{ route('search.results', ['query' => 'food catering']) }}" class="story-link">Find Vendors <i class="ri-arrow-right-line"></i></a>
                             </div>
                         </div>
                     </div>
 
                     <!-- Story 2 -->
                     <div class="story-card" data-category="photography">
-                        <div class="story-image">
-                            <i class="ri-camera-line"></i>
+                        <div class="story-image" style="background-image:url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=200&fit=crop');background-size:cover;background-position:center;">
                             <span class="story-category">Photography</span>
                         </div>
                         <div class="story-content">
@@ -1520,15 +1566,14 @@
                             <p class="story-quote">"I used to rely on word of mouth. Now 80% of my bookings come through Vendora. I've even hired two assistants to keep up!"</p>
                             <div class="story-meta">
                                 <span><i class="ri-camera-line"></i> 200+ shoots</span>
-                                <a href="#" class="story-link">Read <i class="ri-arrow-right-line"></i></a>
+                                <a href="{{ route('search.results', ['query' => 'photography']) }}" class="story-link">Find Vendors <i class="ri-arrow-right-line"></i></a>
                             </div>
                         </div>
                     </div>
 
                     <!-- Story 3 -->
                     <div class="story-card" data-category="services">
-                        <div class="story-image">
-                            <i class="ri-home-gear-line"></i>
+                        <div class="story-image" style="background-image:url('https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=200&fit=crop');background-size:cover;background-position:center;">
                             <span class="story-category">Home Services</span>
                         </div>
                         <div class="story-content">
@@ -1546,7 +1591,7 @@
                             <p class="story-quote">"The verified badge made all the difference. Customers trust me more and I'm getting calls from all over Jimma now."</p>
                             <div class="story-meta">
                                 <span><i class="ri-tools-line"></i> 500+ jobs</span>
-                                <a href="#" class="story-link">Read <i class="ri-arrow-right-line"></i></a>
+                                <a href="{{ route('search.results', ['query' => 'home services plumbing']) }}" class="story-link">Find Vendors <i class="ri-arrow-right-line"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1556,15 +1601,15 @@
                 <div class="impact-section">
                     <div class="impact-grid">
                         <div class="impact-item">
-                            <div class="impact-number">500+</div>
+                            <div class="impact-number">{{ $totalVendors > 0 ? $totalVendors . '+' : '500+' }}</div>
                             <div class="impact-label">Vendors Succeeded</div>
                         </div>
                         <div class="impact-item">
-                            <div class="impact-number">50k+</div>
+                            <div class="impact-number">{{ $totalCustomers > 0 ? number_format($totalCustomers / 1000, 0) . 'k+' : '50k+' }}</div>
                             <div class="impact-label">Happy Customers</div>
                         </div>
                         <div class="impact-item">
-                            <div class="impact-number">5M+ ETB</div>
+                            <div class="impact-number">{{ $totalRevenue > 0 ? number_format($totalRevenue / 1000000, 1) . 'M+ ETB' : '5M+ ETB' }}</div>
                             <div class="impact-label">Vendor Earnings</div>
                         </div>
                     </div>
@@ -1574,54 +1619,50 @@
                 <div class="testimonials-slider" id="testimonialSlider">
                     <div class="slider-container">
                         <div class="slider-track" id="sliderTrack">
+                            @forelse($testimonials as $t)
+                            <div class="testimonial-slide">
+                                <div class="slide-content">
+                                    <p class="slide-quote">"{{ $t->content }}"</p>
+                                    <div class="slide-author">
+                                        <div class="slide-avatar" style="overflow:hidden;border-radius:50%;">
+                                            <img src="{{ $t->avatar_url }}" alt="{{ $t->author_name }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                                        </div>
+                                        <div class="slide-info">
+                                            <h4>{{ $t->author_name }}</h4>
+                                            <p>{{ $t->author_role }} • Jimma</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @empty
                             <div class="testimonial-slide">
                                 <div class="slide-content">
                                     <p class="slide-quote">"Vendora completely changed my business. I never imagined I could reach so many customers. The platform is easy to use and the support team is always helpful."</p>
                                     <div class="slide-author">
                                         <div class="slide-avatar">AT</div>
-                                        <div class="slide-info">
-                                            <h4>Azeb Tadesse</h4>
-                                            <p>Caterer • Jimma</p>
-                                        </div>
+                                        <div class="slide-info"><h4>Azeb Tadesse</h4><p>Caterer • Jimma</p></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="testimonial-slide">
                                 <div class="slide-content">
-                                    <p class="slide-quote">"The verified badge helped build trust with customers immediately. My bookings increased by 200% in the first two months. Highly recommended!"</p>
+                                    <p class="slide-quote">"The verified badge helped build trust with customers immediately. My bookings increased by 200% in the first two months."</p>
                                     <div class="slide-author">
                                         <div class="slide-avatar">DH</div>
-                                        <div class="slide-info">
-                                            <h4>Dawit Haile</h4>
-                                            <p>Photographer • Jimma</p>
-                                        </div>
+                                        <div class="slide-info"><h4>Dawit Haile</h4><p>Photographer • Jimma</p></div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="testimonial-slide">
-                                <div class="slide-content">
-                                    <p class="slide-quote">"I was hesitant to join at first, but now I can't imagine running my business without Vendora. It's been a game-changer for my plumbing service."</p>
-                                    <div class="slide-author">
-                                        <div class="slide-avatar">BT</div>
-                                        <div class="slide-info">
-                                            <h4>Berhanu Tesfaye</h4>
-                                            <p>Plumber • Jimma</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            @endforelse
                         </div>
                     </div>
-                    <div class="slider-prev" onclick="prevSlide()">
-                        <i class="ri-arrow-left-s-line"></i>
-                    </div>
-                    <div class="slider-next" onclick="nextSlide()">
-                        <i class="ri-arrow-right-s-line"></i>
-                    </div>
+                    <div class="slider-prev" onclick="prevSlide()"><i class="ri-arrow-left-s-line"></i></div>
+                    <div class="slider-next" onclick="nextSlide()"><i class="ri-arrow-right-s-line"></i></div>
                     <div class="slider-nav" id="sliderNav">
-                        <div class="slider-dot active" onclick="goToSlide(0)"></div>
-                        <div class="slider-dot" onclick="goToSlide(1)"></div>
-                        <div class="slider-dot" onclick="goToSlide(2)"></div>
+                        @php $count = $testimonials->count() ?: 2; @endphp
+                        @for($d = 0; $d < $count; $d++)
+                            <div class="slider-dot {{ $d === 0 ? 'active' : '' }}" onclick="goToSlide({{ $d }})"></div>
+                        @endfor
                     </div>
                 </div>
             </section>
@@ -1677,7 +1718,7 @@
                 <p class="cta-text">Join hundreds of successful vendors in Jimma and across Ethiopia. Start listing your services today.</p>
                 <div class="cta-buttons">
                     @guest
-                        <a href="{{ route('register') }}" class="cta-btn">
+                        <a href="{{ route('register') }}?role=vendor" class="cta-btn">
                             <i class="ri-store-line"></i>
                             List Your Service Now
                         </a>
@@ -1692,7 +1733,7 @@
                                 Go to Dashboard
                             </a>
                         @else
-                            <a href="{{ route('register') }}?type=vendor" class="cta-btn">
+                            <a href="{{ route('register') }}?role=vendor" class="cta-btn">
                                 <i class="ri-store-line"></i>
                                 Become a Vendor
                             </a>
@@ -1707,7 +1748,7 @@
     <footer>
         <div class="footer-content">
             <div class="footer-brand">
-                <h2><i class="ri-store-2-fill"></i> Vendora</h2>
+                <h2><img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:40px;width:40px;object-fit:cover;border-radius:50%;vertical-align:middle;"></h2>
                 <p class="footer-text">Connecting you with the best local professionals in Jimma and across Ethiopia. Simple, fast, and reliable.</p>
                 <div style="margin-top: 16px;">
                     
@@ -1719,8 +1760,6 @@
                     <ul>
                         <li><a href="{{ route('about') }}">About Us</a></li>
                         <li><a href="{{ route('careers') }}">Careers</a></li>
-                        <li><a href="{{ route('press') }}">Press</a></li>
-                        <li><a href="{{ route('blog') }}">Blog</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
@@ -1754,6 +1793,26 @@
     </footer>
 
     <script>
+        // ── Rotating hero background ──────────────────────────────────
+        (function() {
+            const header = document.getElementById('listServiceHeroBg');
+            if (!header) return;
+            const images = [
+                'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80',
+                'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80',
+                'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1600&q=80',
+                'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&q=80',
+                'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600&q=80',
+                'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=1600&q=80',
+            ];
+            const overlay = 'linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7))';
+            let i = 0;
+            setInterval(() => {
+                i = (i + 1) % images.length;
+                header.style.backgroundImage = `${overlay}, url('${images[i]}')`;
+            }, 8000);
+        })();
+
         // Mobile menu toggle
         const menuToggle = document.getElementById('menuToggle');
         const mobileMenu = document.getElementById('mobileMenu');
@@ -1791,10 +1850,14 @@
             });
         }
 
-        // Category selection
+        // Category card click — navigate to filtered search
         document.querySelectorAll('.category-card').forEach(card => {
-            card.addEventListener('click', function() {
-                this.classList.toggle('selected');
+            card.addEventListener('click', function(e) {
+                // Only navigate if it's not already an <a> tag (handled by href)
+                if (this.tagName !== 'A') {
+                    const name = this.querySelector('.category-name')?.textContent?.toLowerCase().replace(/[^a-z0-9]+/g, '-') ?? '';
+                    window.location.href = '{{ route("search.results") }}?category=' + name;
+                }
             });
         });
 

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Careers - Vendora | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* Import Ethiopic font */
@@ -1419,6 +1422,35 @@
                 gap: 30px;
             }
         }
+        /* Media Inquiries */
+        .inquiries-section {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 50px;
+            box-shadow: var(--shadow);
+            margin-bottom: 60px;
+            border: 1px solid var(--border-color);
+        }
+        .inquiries-content { max-width: 600px; margin: 0 auto; text-align: center; }
+        .inquiries-title { font-size: 28px; font-weight: 700; margin-bottom: 16px; color: var(--text-primary); }
+        .inquiries-text { color: var(--text-secondary); margin-bottom: 30px; }
+        .contact-card { background: var(--bg-light); border-radius: var(--radius-md); padding: 30px; margin-top: 30px; border: 1px solid var(--border-color); }
+        .contact-item { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 10px; background: var(--card-bg); border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+        .contact-icon { width: 50px; height: 50px; background: rgba(184,142,63,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary-color); font-size: 24px; }
+        .contact-info { flex: 1; text-align: left; }
+        .contact-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+        .contact-value { font-weight: 600; color: var(--text-primary); }
+        .contact-value a { color: var(--primary-color); text-decoration: none; }
+        .contact-value a:hover { text-decoration: underline; }
+
+        /* Newsletter */
+        .newsletter-section { background: var(--primary-color); border-radius: var(--radius-lg); padding: 60px; color: white; text-align: center; }
+        .newsletter-title { font-size: 28px; font-weight: 700; margin-bottom: 16px; }
+        .newsletter-text { opacity: 0.9; margin-bottom: 30px; max-width: 500px; margin-left: auto; margin-right: auto; }
+        .newsletter-form { display: flex; gap: 10px; max-width: 500px; margin: 0 auto; }
+        .newsletter-input { flex: 1; padding: 15px 20px; border: none; border-radius: 50px; font-size: 16px; outline: none; }
+        .newsletter-btn { background: var(--text-dark); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+        .newsletter-btn:hover { background: black; transform: translateY(-2px); }
     </style>
 </head>
 <body data-theme="{{ session('theme', 'light') }}" lang="{{ session('locale', 'en') }}">
@@ -1658,8 +1690,7 @@
     <nav class="navbar">
         <div class="brand-badge">
             <a href="{{ route('home') }}" class="brand">
-                <i class="ri-store-2-fill"></i>
-                Vendora
+                <img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:48px;width:48px;object-fit:cover;border-radius:50%;vertical-align:middle;">
             </a>
             
         </div>
@@ -2215,13 +2246,68 @@
                 </div>
             </section>
         </div>
+
+            <!-- Media Inquiries -->
+            <section class="inquiries-section">
+                <div class="inquiries-content">
+                    <h2 class="inquiries-title">Media Inquiries</h2>
+                    <p class="inquiries-text">For press and media inquiries, please contact our communications team. We're happy to provide interviews, quotes, and additional information.</p>
+                    <div class="contact-card">
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="ri-mail-line"></i></div>
+                            <div class="contact-info">
+                                <div class="contact-label">Email</div>
+                                <div class="contact-value"><a href="mailto:press@vendora.com">press@vendora.com</a></div>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="ri-phone-line"></i></div>
+                            <div class="contact-info">
+                                <div class="contact-label">Phone</div>
+                                <div class="contact-value"><a href="tel:+251911234567">+251 91 123 4567</a></div>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon"><i class="ri-user-line"></i></div>
+                            <div class="contact-info">
+                                <div class="contact-label">Press Contact</div>
+                                <div class="contact-value">Azeb G/Hiwot</div>
+                                <div style="font-size:12px;color:var(--text-secondary);">Communications Manager</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Newsletter -->
+            <section class="newsletter-section">
+                <h2 class="newsletter-title">Stay Updated</h2>
+                <p class="newsletter-text">Subscribe to our newsletter to receive the latest news and announcements.</p>
+
+                @if(session('success'))
+                    <div style="background:rgba(255,255,255,0.2);border-radius:8px;padding:12px 20px;margin-bottom:16px;color:white;font-weight:500;">
+                        <i class="ri-checkbox-circle-line"></i> {{ session('success') }}
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div style="background:rgba(239,68,68,0.3);border-radius:8px;padding:12px 20px;margin-bottom:16px;color:white;font-weight:500;">
+                        <i class="ri-error-warning-line"></i> {{ session('error') }}
+                    </div>
+                @endif
+
+                <form class="newsletter-form" action="{{ route('press.subscribe') }}" method="POST">
+                    @csrf
+                    <input type="email" name="email" class="newsletter-input" placeholder="Your email address" required>
+                    <button type="submit" class="newsletter-btn">Subscribe <i class="ri-send-plane-line"></i></button>
+                </form>
+            </section>
     </main>
 
     <!-- Footer -->
     <footer>
         <div class="footer-content">
             <div class="footer-brand">
-                <h2><i class="ri-store-2-fill"></i> Vendora</h2>
+                <h2><img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:40px;width:40px;object-fit:cover;border-radius:50%;vertical-align:middle;"></h2>
                 <p class="footer-text">{{ $t['help_connect'] }}</p>
                 <div class="mt-4">
                     
@@ -2233,8 +2319,6 @@
                     <ul>
                         <li><a href="{{ route('about') }}">About Us</a></li>
                         <li><a href="{{ route('careers') }}">Careers</a></li>
-                        <li><a href="{{ route('press') }}">Press</a></li>
-                        <li><a href="{{ route('blog') }}">Blog</a></li>
                     </ul>
                 </div>
                 <div class="link-group">

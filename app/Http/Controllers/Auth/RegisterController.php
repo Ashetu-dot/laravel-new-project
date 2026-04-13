@@ -27,6 +27,10 @@ class RegisterController extends Controller
      */
     public function create()
     {
+        // Store referral code in session if present in URL
+        if (request()->has('ref')) {
+            session(['referral_code' => request('ref')]);
+        }
         return view('auth.register');
     }
 
@@ -87,6 +91,7 @@ class RegisterController extends Controller
                 'phone' => $request->phone,
                 'is_active' => ($request->role === 'vendor') ? false : true,
                 'email_verified_at' => null,
+                'referred_by' => $request->ref ?? session('referral_code'),
             ];
 
             // Add vendor-specific fields

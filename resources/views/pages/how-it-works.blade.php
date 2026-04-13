@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>How It Works - Vendora | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* ----- FONTS ----- */
@@ -1480,8 +1483,7 @@
     <nav class="navbar">
         <div class="brand-badge">
             <a href="{{ route('home') }}" class="brand">
-                <i class="ri-store-2-fill"></i>
-                Vendora
+                <img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:48px;width:48px;object-fit:cover;border-radius:50%;vertical-align:middle;">
             </a>
             
         </div>
@@ -1551,7 +1553,7 @@
 
     <!-- Hero (match home page style) -->
     <section class="hero">
-        <div class="hero-background" style="background-image: url('{{ isset($heroImage) ? asset($heroImage) : asset('images/hero-home.jpg') }}');"></div>
+        <div class="hero-background" id="howItWorksHeroBg" style="background-image: url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80');"></div>
         <div class="hero-overlay"></div>
         <div class="container">
             <h1>{{ $t['how_it_works'] }} <span>{{ $t['vendora'] }}</span> {{ $t['works'] }}</h1>
@@ -1887,7 +1889,7 @@
     <footer>
         <div class="footer-content">
             <div class="footer-brand">
-                <h2><i class="ri-store-2-fill"></i> Vendora</h2>
+                <h2><img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:40px;width:40px;object-fit:cover;border-radius:50%;vertical-align:middle;"></h2>
                 <p class="footer-text">Connecting you with the best local professionals in Jimma and across Ethiopia. Simple, fast, and reliable.</p>
                 <div style="margin-top: 16px;">
                     
@@ -1899,8 +1901,6 @@
                     <ul>
                         <li><a href="{{ route('about') }}">About Us</a></li>
                         <li><a href="{{ route('careers') }}">Careers</a></li>
-                        <li><a href="{{ route('press') }}">Press</a></li>
-                        <li><a href="{{ route('blog') }}">Blog</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
@@ -1933,6 +1933,25 @@
     </footer>
 
     <script>
+        // ── Rotating hero background ──────────────────────────────────
+        (function() {
+            const bg = document.getElementById('howItWorksHeroBg');
+            if (!bg) return;
+            const images = [
+                'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80',
+                'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80',
+                'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1600&q=80',
+                'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&q=80',
+                'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600&q=80',
+                'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=1600&q=80',
+            ];
+            let i = 0;
+            setInterval(() => {
+                i = (i + 1) % images.length;
+                bg.style.backgroundImage = `url('${images[i]}')`;
+            }, 8000);
+        })();
+
         // Mobile menu toggle
         const menuToggle = document.getElementById('menuToggle');
         const mobileMenu = document.getElementById('mobileMenu');

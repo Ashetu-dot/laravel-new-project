@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Edit User - Admin Dashboard | Vendora Marketplace</title>
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
     <style>
@@ -181,6 +184,13 @@
             color: white;
             font-weight: 600;
             margin-right: 12px;
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
         }
 
         .user-info h4 {
@@ -668,68 +678,8 @@
     </style>
 </head>
 <body>
-    <!-- Left Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <div class="brand">
-            <i class="ri-store-3-fill"></i>
-            Vendora
-        </div>
-
-        <div class="nav-menu">
-            <div class="nav-group">
-                <div class="nav-label">Main</div>
-                <a href="{{ route('admin.dashboard') }}" class="nav-item">
-                    <i class="ri-dashboard-line"></i>
-                    Dashboard
-                </a>
-                <a href="{{ route('admin.orders') }}" class="nav-item">
-                    <i class="ri-shopping-bag-3-line"></i>
-                    Orders
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">Management</div>
-                <a href="{{ route('admin.users') }}" class="nav-item active">
-                    <i class="ri-user-settings-line"></i>
-                    Users
-                </a>
-                <a href="{{ route('admin.users.pending') }}" class="nav-item">
-                    <i class="ri-user-star-line"></i>
-                    Pending Vendors
-                </a>
-                <a href="{{ route('admin.catalog') }}" class="nav-item">
-                    <i class="ri-archive-line"></i>
-                    Catalog
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">Admin</div>
-                <a href="{{ route('admin.settings') }}" class="nav-item">
-                    <i class="ri-settings-4-line"></i>
-                    Settings
-                </a>
-                <form method="POST" action="{{ route('admin.logout') }}" style="display: block; margin-top: 8px;">
-                    @csrf
-                    <button type="submit" class="logout-btn" style="background: none; border: none; color: var(--sidebar-text); cursor: pointer; font-size: 15px; display: flex; align-items: center; gap: 8px; padding: 12px; width: 100%; border-radius: 8px; transition: all 0.2s;">
-                        <i class="ri-logout-box-line"></i>
-                        Logout
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <div class="user-profile">
-            <div class="avatar">
-                {{ strtoupper(substr(auth()->user()->name ?? 'AD', 0, 2)) }}
-            </div>
-            <div class="user-info">
-                <h4>{{ auth()->user()->name ?? 'Admin User' }}</h4>
-                <p>{{ auth()->user()->role ?? 'Super Admin' }}</p>
-            </div>
-        </div>
-    </nav>
+    <!-- Sidebar -->
+    @include('partials.admin-sidebar')
 
     <!-- Main Content Area -->
     <main class="main-content">

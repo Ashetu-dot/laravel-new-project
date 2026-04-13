@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class CheckoutController extends Controller
 {
@@ -205,12 +206,18 @@ class CheckoutController extends Controller
                 // Convert created orders array to collection
                 $ordersCollection = collect($createdOrders);
 
-                // If payment method is Chapa, redirect to Chapa payment
+                // If payment method is Chapa, initiate Chapa payment
                 if ($validated['payment_method'] === 'chapa') {
-                    // For now, we'll mark as pending and show success
-                    // In production, you would integrate with Chapa API here
-                    // Example: $chapaUrl = $this->initiateChapaPayment($ordersCollection, $user);
-                    // return response()->json(['success' => true, 'redirect' => $chapaUrl]);
+                    $chapaUrl = $this->initiateChapaPayment($ordersCollection, $user);
+                    if ($chapaUrl) {
+                        return response()->json([
+                            'success' => true,
+                            'redirect' => $chapaUrl,
+                            'chapa' => true,
+                        ]);
+                    }
+                    // Fallback if Chapa init fails
+                    return response()->json(['success' => false, 'message' => 'Failed to initiate Chapa payment. Please try again.'], 500);
                 }
 
                 // Return success with order details
@@ -278,53 +285,117 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Initiate Chapa payment (placeholder for future integration).
-     * 
-     * To integrate Chapa:
-     * 1. Install Chapa PHP SDK: composer require chapa/chapa-php
-     * 2. Add CHAPA_SECRET_KEY to .env
-     * 3. Implement this method to create payment and return checkout URL
+     * Initiate Chapa payment and return checkout URL.
      */
     private function initiateChapaPayment($orders, $user)
     {
-        // Example Chapa integration (uncomment when ready):
-        /*
-        $chapa = new \Chapa\Chapa(env('CHAPA_SECRET_KEY'));
-        
-        $totalAmount = $orders->sum('total_amount');
-        $orderNumbers = $orders->pluck('order_number')->implode(', ');
-        
-        $payment = $chapa->initialize([
-            'amount' => $totalAmount,
-            'currency' => 'ETB',
-            'email' => $user->email,
-            'first_name' => $user->name,
-            'last_name' => '',
-            'phone_number' => $user->phone,
-            'tx_ref' => 'VND-' . time(),
-            'callback_url' => route('customer.checkout.chapa.callback'),
-            'return_url' => route('customer.orders.success', ['orders' => $orderNumbers]),
-            'customization' => [
-                'title' => 'Vendora Order Payment',
-                'description' => "Payment for orders: {$orderNumbers}"
-            ]
-        ]);
-        
-        return $payment['data']['checkout_url'];
-        */
-        
-        return null;
+        try {
+            $totalAmount = $orders->sum('total_amount');
+            $txRef       = 'VND-' . time() . '-' . $orders->first()->id;
+            $orderNums   = $orders->pluck('order_number')->implode(',');
+
+            // Store tx_ref → order numbers mapping in session for callback
+            session(['chapa_tx_ref' => $txRef, 'chapa_orders' => $orderNums]);
+
+            $nameParts = explode(' ', trim($user->name));
+            $firstName = $nameParts[0] ?? $user->name;
+            $lastName  = $nameParts[1] ?? 'User';
+
+            $payload = [
+                'amount'       => number_format($totalAmount, 2, '.', ''),
+                'currency'     => 'ETB',
+                'email'        => $user->email,
+                'first_name'   => $firstName,
+                'last_name'    => $lastName,
+                'phone_number' => $user->phone ?? '0911000000',
+                'tx_ref'       => $txRef,
+                'callback_url' => route('customer.checkout.chapa.callback'),
+                'return_url'   => route('customer.checkout.chapa.callback') . '?tx_ref=' . $txRef,
+                'customization' => [
+                    'title'       => 'Vendora Payment',
+                    'description' => 'Payment for order(s): ' . $orderNums,
+                ],
+            ];
+
+            $response = \Illuminate\Support\Facades\Http::withoutVerifying()
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . env('CHAPA_SECRET_KEY'),
+                    'Content-Type'  => 'application/json',
+                ])->post(env('CHAPA_BASE_URL', 'https://api.chapa.co/v1') . '/transaction/initialize', $payload);
+
+            $data = $response->json();
+
+            Log::info('Chapa init response', [
+                'status'  => $response->status(),
+                'body'    => $data,
+                'payload' => array_merge($payload, ['email' => '***']),
+            ]);
+
+            if ($response->successful() && isset($data['data']['checkout_url'])) {
+                return $data['data']['checkout_url'];
+            }
+
+            // Return the actual Chapa error message for debugging
+            $chapaMessage = $data['message'] ?? 'Unknown error from Chapa';
+            Log::error('Chapa init failed (' . $response->status() . '): ' . $chapaMessage);
+            throw new \Exception('Chapa: ' . $chapaMessage);
+
+        } catch (\Exception $e) {
+            Log::error('Chapa payment error: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
-     * Handle Chapa payment callback (placeholder for future integration).
+     * Handle Chapa payment callback — verify and update order status.
      */
     public function chapaCallback(Request $request)
     {
-        // Verify payment with Chapa
-        // Update order payment_status to 'paid'
-        // Send confirmation email
-        
-        return redirect()->route('customer.orders.success');
+        try {
+            $txRef = $request->get('tx_ref') ?? session('chapa_tx_ref');
+
+            if (!$txRef) {
+                return redirect()->route('customer.cart.index')->with('error', 'Payment reference not found.');
+            }
+
+            // Verify transaction with Chapa
+            $response = \Illuminate\Support\Facades\Http::withoutVerifying()
+                ->withHeaders([
+                    'Authorization' => 'Bearer ' . env('CHAPA_SECRET_KEY'),
+                ])->get(env('CHAPA_BASE_URL', 'https://api.chapa.co/v1') . '/transaction/verify/' . $txRef);
+
+            $data = $response->json();
+
+            if (!$response->successful() || ($data['data']['status'] ?? '') !== 'success') {
+                Log::warning('Chapa verification failed: ' . json_encode($data));
+                return redirect()->route('customer.cart.index')->with('error', 'Payment verification failed. Please contact support.');
+            }
+
+            // Get order numbers from session or tx_ref
+            $orderNums = session('chapa_orders', '');
+            if (!$orderNums) {
+                // Try to extract from tx_ref metadata
+                $orderNums = $data['data']['meta']['order_numbers'] ?? '';
+            }
+
+            if ($orderNums) {
+                $orderNumbers = explode(',', $orderNums);
+                Order::whereIn('order_number', $orderNumbers)
+                    ->update([
+                        'payment_status' => 'paid',
+                        'status'         => 'processing',
+                    ]);
+            }
+
+            // Clear session
+            session()->forget(['chapa_tx_ref', 'chapa_orders']);
+
+            return redirect()->route('customer.orders.success', ['orders' => $orderNums])
+                ->with('success', 'Payment successful! Your order is being processed.');
+
+        } catch (\Exception $e) {
+            Log::error('Chapa callback error: ' . $e->getMessage());
+            return redirect()->route('customer.cart.index')->with('error', 'Payment processing error. Please contact support.');
+        }
     }
 }

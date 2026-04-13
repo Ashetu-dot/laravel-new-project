@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Invite Friends - Vendora | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* ----- FONTS ----- */
@@ -377,11 +380,11 @@
             padding: 80px 20px 100px;
             text-align: center;
             color: white;
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-                        url('{{ $heroImage ?? asset('images/invite-bg.jpg') }}');
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                        url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
+            transition: background-image 1s ease-in-out;
             isolation: isolate;
         }
 
@@ -1370,8 +1373,7 @@
     <nav class="navbar">
         <div class="brand-badge">
             <a href="{{ route('home') }}" class="brand">
-                <i class="ri-store-2-fill"></i>
-                Vendora
+                <img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:48px;width:48px;object-fit:cover;border-radius:50%;vertical-align:middle;">
             </a>
             
         </div>
@@ -1445,7 +1447,7 @@
     </div>
 
     <!-- Page Header with Dynamic Background -->
-    <section class="page-header" style="background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('{{ $heroImage ?? asset('images/invite-bg.jpg') }}');">
+    <section class="page-header" id="inviteHeroBg">
         <h1>Invite <span>Friends</span></h1>
         <p>Share Vendora with your friends and earn rewards together!</p>
     </section>
@@ -1721,7 +1723,7 @@
     <footer>
         <div class="footer-content">
             <div class="footer-brand">
-                <h2><i class="ri-store-2-fill"></i> Vendora</h2>
+                <h2><img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:40px;width:40px;object-fit:cover;border-radius:50%;vertical-align:middle;"></h2>
                 <p class="footer-text">Connecting you with the best local professionals in Jimma and across Ethiopia. Simple, fast, and reliable.</p>
                 <div style="margin-top: 16px;">
                     
@@ -1733,8 +1735,6 @@
                     <ul>
                         <li><a href="{{ route('about') }}">About Us</a></li>
                         <li><a href="{{ route('careers') }}">Careers</a></li>
-                        <li><a href="{{ route('press') }}">Press</a></li>
-                        <li><a href="{{ route('blog') }}">Blog</a></li>
                     </ul>
                 </div>
                 <div class="link-group">
@@ -1767,6 +1767,26 @@
     </footer>
 
     <script>
+        // ── Rotating hero background ──────────────────────────────────
+        (function() {
+            const header = document.getElementById('inviteHeroBg');
+            if (!header) return;
+            const images = [
+                'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1600&q=80',
+                'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80',
+                'https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1600&q=80',
+                'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1600&q=80',
+                'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1600&q=80',
+                'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=1600&q=80',
+            ];
+            const overlay = 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6))';
+            let i = 0;
+            setInterval(() => {
+                i = (i + 1) % images.length;
+                header.style.backgroundImage = `${overlay}, url('${images[i]}')`;
+            }, 8000);
+        })();
+
         // Mobile menu toggle
         const menuToggle = document.getElementById('menuToggle');
         const mobileMenu = document.getElementById('mobileMenu');
@@ -1804,56 +1824,52 @@
             });
         }
 
+        // Referral link — set once from PHP
+        @auth
+        const REFERRAL_URL = '{{ url("/register?ref=" . (Auth::user()->referral_code ?? "")) }}';
+        const REFERRAL_CODE = '{{ Auth::user()->referral_code ?? "" }}';
+        @else
+        const REFERRAL_URL = '{{ url("/register") }}';
+        const REFERRAL_CODE = '';
+        @endauth
+
         // Copy referral code function
         function copyReferralCode() {
-            const codeElement = document.getElementById('referralCode');
-            const code = codeElement.textContent;
-
-            navigator.clipboard.writeText(code).then(function() {
-                showNotification('Referral code copied to clipboard: ' + code, 'success');
-            }, function() {
-                showNotification('Failed to copy code. Please select and copy manually.', 'error');
-            });
+            navigator.clipboard.writeText(REFERRAL_CODE).then(() => {
+                showNotification('Referral code copied: ' + REFERRAL_CODE, 'success');
+            }).catch(() => showNotification('Failed to copy. Please copy manually.', 'error'));
         }
 
         // Copy referral link function
         function copyReferralLink() {
-            const link = '{{ url("/register?ref=" . (Auth::user()->referral_code ?? "VENDORA" . rand(1000, 9999))) }}';
-
-            navigator.clipboard.writeText(link).then(function() {
+            navigator.clipboard.writeText(REFERRAL_URL).then(() => {
                 showNotification('Referral link copied to clipboard!', 'success');
-            }, function() {
-                showNotification('Failed to copy link. Please select and copy manually.', 'error');
-            });
+            }).catch(() => showNotification('Failed to copy. Please copy manually.', 'error'));
         }
 
         // Share functions
         function shareOnTelegram() {
-            const message = encodeURIComponent('Join me on Vendora to find amazing local services in Jimma! Use my referral code for a bonus: {{ Auth::user()->referral_code ?? "VENDORA" . rand(1000, 9999) }}');
-            const url = `https://t.me/share/url?url={{ urlencode(url('/')) }}&text=${message}`;
-            window.open(url, '_blank');
+            const msg = encodeURIComponent('Join me on Vendora — find amazing local services in Jimma! Use my referral link to get a bonus on signup: ' + REFERRAL_URL);
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(REFERRAL_URL)}&text=${msg}`, '_blank');
         }
 
         function shareOnFacebook() {
-            const url = `https://www.facebook.com/sharer/sharer.php?u={{ urlencode(url('/')) }}&quote=${encodeURIComponent('Join me on Vendora! Use my referral code for a bonus.')}`;
-            window.open(url, '_blank');
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(REFERRAL_URL)}`, '_blank');
         }
 
         function shareOnTwitter() {
-            const text = encodeURIComponent('Join me on Vendora to find amazing local services in Jimma! Use my referral code {{ Auth::user()->referral_code ?? "VENDORA" . rand(1000, 9999) }} for a bonus!');
-            const url = `https://twitter.com/intent/tweet?text=${text}&url={{ urlencode(url('/')) }}`;
-            window.open(url, '_blank');
+            const text = encodeURIComponent('Join me on Vendora to find amazing local services in Jimma! Use my referral link for a bonus: ' + REFERRAL_URL);
+            window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank');
         }
 
         function shareOnWhatsApp() {
-            const text = encodeURIComponent('Join me on Vendora to find amazing local services in Jimma! Use my referral code {{ Auth::user()->referral_code ?? "VENDORA" . rand(1000, 9999) }} for a bonus!');
-            const url = `https://wa.me/?text=${text}%20{{ urlencode(url('/')) }}`;
-            window.open(url, '_blank');
+            const text = encodeURIComponent('Join me on Vendora — find amazing local services in Jimma! Sign up with my referral link to get a bonus: ' + REFERRAL_URL);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
         }
 
         function shareOnEmail() {
             const subject = encodeURIComponent('Join me on Vendora!');
-            const body = encodeURIComponent('Hey,\n\nI\'ve been using Vendora to find amazing local services in Jimma. You should try it too! Sign up using my referral code {{ Auth::user()->referral_code ?? "VENDORA" . rand(1000, 9999) }} to get a bonus on signup!\n\nCheck it out: ' + '{{ url('/') }}');
+            const body = encodeURIComponent('Hey!\n\nI\'ve been using Vendora to find amazing local services in Jimma. Join me and get a bonus on signup!\n\nSign up here: ' + REFERRAL_URL);
             window.location.href = `mailto:?subject=${subject}&body=${body}`;
         }
 

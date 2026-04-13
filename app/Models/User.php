@@ -42,6 +42,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_active',
         'last_login_at',
         'referral_code',
+        'referred_by',
         'products_count',
         'rating',
         'total_reviews',

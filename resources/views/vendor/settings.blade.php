@@ -619,8 +619,7 @@
     <!-- Navbar -->
     <nav class="navbar">
         <a href="{{ route('home') }}" class="logo">
-            <i class="ri-store-3-fill"></i>
-            Vendora
+            <img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:48px;width:48px;object-fit:cover;border-radius:50%;vertical-align:middle;">
         </a>
         <div class="nav-links">
             <a href="{{ route('home') }}" class="nav-link">Home</a>

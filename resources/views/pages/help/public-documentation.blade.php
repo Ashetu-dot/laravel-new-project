@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Documentation - Vendora | Local Vendor Finder</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* Import fonts */
@@ -447,8 +450,7 @@
     <!-- Navigation -->
     <nav class="navbar">
         <a href="{{ route('home') }}" class="brand">
-            <i class="ri-store-2-fill"></i>
-            Vendora
+            <img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:48px;width:48px;object-fit:cover;border-radius:50%;vertical-align:middle;">
         </a>
 
         <div class="nav-links">
@@ -496,62 +498,68 @@
 
             <!-- Overview Section -->
             <section id="overview" class="doc-section">
-                <h2 class="section-title">
-                    <i class="ri-home-line"></i>
-                    Overview
-                </h2>
+                <h2 class="section-title"><i class="ri-home-line"></i> Overview</h2>
                 <div class="section-content">
-                    <p>
-                        Vendora is a comprehensive local vendor finder platform designed to connect customers with local businesses in Jimma, Ethiopia. Our platform makes it easy to discover, review, and engage with local vendors across various categories.
-                    </p>
-                    <p>
-                        Whether you're looking for restaurants, shops, services, or entertainment, Vendora helps you find the best local businesses with detailed information, customer reviews, and direct communication channels.
-                    </p>
-                    
+                    <p>Vendora is Ethiopia's premier local vendor marketplace, connecting customers with trusted local businesses in Jimma and across Ethiopia. Our platform makes it effortless to discover, compare, and engage with vendors across dozens of categories — from coffee roasters and handicraft artisans to home services and event planners.</p>
+                    <p>Founded in 2023 and launched in 2024, Vendora has grown to serve thousands of customers and hundreds of verified vendors. Every vendor on our platform undergoes a strict verification process to ensure quality and safety.</p>
                     <div class="alert alert-info">
                         <i class="ri-information-line"></i>
-                        <span>Vendora supports multiple languages including English, Amharic (አማርኛ), and Oromo (Afaan Oromoo) to serve our diverse community.</span>
+                        <span>Vendora is available in English, Amharic (አማርኛ), and Oromo (Afaan Oromoo). Switch languages using the language selector in the navigation bar.</span>
                     </div>
+                    <h4>What You Can Do on Vendora:</h4>
+                    <ul>
+                        <li>Discover and browse thousands of local vendors by category or location</li>
+                        <li>Read verified customer reviews and ratings before making decisions</li>
+                        <li>Place orders and track them in real time</li>
+                        <li>Message vendors directly through our secure messaging system</li>
+                        <li>Save favorite vendors to your wishlist for quick access</li>
+                        <li>Apply coupons and promotions for discounts on purchases</li>
+                    </ul>
                 </div>
             </section>
 
             <!-- Getting Started Section -->
             <section id="getting-started" class="doc-section">
-                <h2 class="section-title">
-                    <i class="ri-rocket-line"></i>
-                    Getting Started
-                </h2>
+                <h2 class="section-title"><i class="ri-rocket-line"></i> Getting Started</h2>
                 <div class="section-content">
-                    <p>Getting started with Vendora is simple and takes just a few minutes:</p>
+                    <h4>Step 1 — Create Your Account</h4>
                     <ul>
-                        <li><strong>Browse as Guest:</strong> Explore vendors and services without creating an account</li>
-                        <li><strong>Create Account:</strong> Sign up as a customer or vendor for full features</li>
-                        <li><strong>Verify Email:</strong> Complete email verification for security</li>
-                        <li><strong>Complete Profile:</strong> Add your information for better recommendations</li>
-                        <li><strong>Start Exploring:</strong> Search, review, and connect with local vendors</li>
+                        <li>Visit <a href="{{ route('register') }}" style="color:var(--primary-color)">Register</a> and choose <strong>Customer</strong> or <strong>Vendor</strong></li>
+                        <li>Enter your name, email address, and a secure password</li>
+                        <li>Agree to the Terms of Service and click <strong>Create Account</strong></li>
                     </ul>
-
+                    <h4>Step 2 — Verify Your Email</h4>
+                    <ul>
+                        <li>Check your inbox for a verification email from Vendora</li>
+                        <li>Click the verification link — if not received, check spam or request a new one</li>
+                    </ul>
+                    <h4>Step 3 — Complete Your Profile</h4>
+                    <ul>
+                        <li>Add your profile photo, phone number, and location</li>
+                        <li>Customers: set preferred categories for personalized recommendations</li>
+                        <li>Vendors: add your business name, description, and banner image</li>
+                    </ul>
+                    <h4>Step 4 — Start Exploring</h4>
+                    <ul>
+                        <li>Use the search bar to find vendors by name, category, or location</li>
+                        <li>Browse the homepage for featured vendors and popular categories</li>
+                        <li>Follow vendors you like to get updates on their latest products</li>
+                    </ul>
                     <div class="feature-grid">
                         <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="ri-search-line"></i>
-                            </div>
+                            <div class="feature-icon"><i class="ri-search-line"></i></div>
                             <h3 class="feature-title">Search & Discover</h3>
-                            <p class="feature-desc">Find local vendors by category, location, or keywords with our powerful search engine.</p>
+                            <p class="feature-desc">Find vendors by category, location, or keyword. Filter by rating, price, and more.</p>
                         </div>
                         <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="ri-star-line"></i>
-                            </div>
+                            <div class="feature-icon"><i class="ri-star-line"></i></div>
                             <h3 class="feature-title">Read Reviews</h3>
-                            <p class="feature-desc">Make informed decisions with authentic customer reviews and ratings.</p>
+                            <p class="feature-desc">Every review is from a verified customer. Make informed decisions with real feedback.</p>
                         </div>
                         <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="ri-message-line"></i>
-                            </div>
+                            <div class="feature-icon"><i class="ri-message-line"></i></div>
                             <h3 class="feature-title">Direct Contact</h3>
-                            <p class="feature-desc">Connect directly with vendors through our messaging system.</p>
+                            <p class="feature-desc">Message vendors directly. Ask questions and confirm orders securely.</p>
                         </div>
                     </div>
                 </div>
@@ -559,105 +567,176 @@
 
             <!-- For Customers Section -->
             <section id="for-customers" class="doc-section">
-                <h2 class="section-title">
-                    <i class="ri-user-line"></i>
-                    For Customers
-                </h2>
+                <h2 class="section-title"><i class="ri-user-line"></i> For Customers</h2>
                 <div class="section-content">
-                    <p>As a customer on Vendora, you have access to powerful tools to discover and engage with local businesses:</p>
-                    
-                    <h4>Key Features:</h4>
+                    <h4>Creating an Account</h4>
                     <ul>
-                        <li><strong>Advanced Search:</strong> Filter vendors by category, location, ratings, and more</li>
-                        <li><strong>Wishlist:</strong> Save your favorite vendors for quick access</li>
-                        <li><strong>Reviews & Ratings:</strong> Share your experiences and help others</li>
-                        <li><strong>Direct Messaging:</strong> Contact vendors directly through the platform</li>
-                        <li><strong>Order Tracking:</strong> Track your orders and purchases</li>
-                        <li><strong>Personalized Recommendations:</strong> Get suggestions based on your preferences</li>
+                        <li>Go to <a href="{{ route('register') }}" style="color:var(--primary-color)">Register</a> and select <strong>Customer</strong></li>
+                        <li>Fill in your name, email, and password — takes under a minute</li>
+                        <li>Verify your email to unlock all features including orders and messaging</li>
                     </ul>
-
+                    <h4>Searching for Vendors</h4>
+                    <ul>
+                        <li>Use the search bar to search by name, category, or keyword</li>
+                        <li>Filter results by location (e.g., "Jimma"), rating (4★+), or category</li>
+                        <li>Click any vendor card to view their full profile, products, and reviews</li>
+                    </ul>
+                    <h4>Placing an Order</h4>
+                    <ul>
+                        <li>Browse a vendor's products and click <strong>Add to Cart</strong></li>
+                        <li>Review your cart, apply any coupon codes, then proceed to checkout</li>
+                        <li>Choose your payment method: <strong>Chapa</strong> (online) or <strong>Cash on Delivery</strong></li>
+                        <li>Confirm your delivery address and place the order</li>
+                        <li>You'll receive an email confirmation with your order number</li>
+                    </ul>
+                    <h4>Payment with Chapa</h4>
+                    <ul>
+                        <li>Chapa supports bank transfers, mobile money (Telebirr), and debit/credit cards</li>
+                        <li>At checkout, select <strong>Pay with Chapa</strong> and follow the prompts</li>
+                        <li>Your payment is secured and encrypted — Vendora never stores your card details</li>
+                        <li>You'll receive a payment confirmation SMS and email immediately</li>
+                    </ul>
+                    <h4>Cash on Delivery</h4>
+                    <ul>
+                        <li>Select <strong>Cash on Delivery</strong> at checkout</li>
+                        <li>Pay the exact amount to the delivery person when your order arrives</li>
+                        <li>Available for orders within supported delivery zones in Jimma</li>
+                        <li>A delivery fee may apply depending on your location</li>
+                    </ul>
+                    <h4>Cancellation Policy</h4>
+                    <ul>
+                        <li>Orders can be cancelled within <strong>1 hour</strong> of placement if not yet processed</li>
+                        <li>Go to <strong>My Orders</strong> → select the order → click <strong>Cancel Order</strong></li>
+                        <li>Refunds for Chapa payments are processed within 3–5 business days</li>
+                        <li>Once an order is marked "Processing" or "Shipped", cancellation is not available</li>
+                    </ul>
                     <div class="alert alert-success">
                         <i class="ri-lightbulb-line"></i>
-                        <span>Pro tip: Use the wishlist feature to save vendors you're interested in and receive updates about their latest offerings!</span>
+                        <span>Pro tip: Follow vendors you love to get notified when they add new products or run promotions. Use the <strong>Wishlist</strong> to save items for later.</span>
                     </div>
                 </div>
             </section>
 
             <!-- For Vendors Section -->
             <section id="for-vendors" class="doc-section">
-                <h2 class="section-title">
-                    <i class="ri-store-line"></i>
-                    For Vendors
-                </h2>
+                <h2 class="section-title"><i class="ri-store-line"></i> For Vendors</h2>
                 <div class="section-content">
-                    <p>Grow your business with Vendora's comprehensive vendor platform:</p>
-                    
-                    <h4>Vendor Dashboard Features:</h4>
+                    <h4>Vendor Registration</h4>
                     <ul>
-                        <li><strong>Business Profile:</strong> Showcase your products, services, and business information</li>
-                        <li><strong>Product Management:</strong> Add, edit, and manage your product catalog</li>
-                        <li><strong>Order Management:</strong> Process and track customer orders efficiently</li>
-                        <li><strong>Customer Analytics:</strong> View insights about your customers and sales</li>
-                        <li><strong>Review Management:</strong> Respond to customer reviews and build your reputation</li>
-                        <li><strong>Promotion Tools:</strong> Create special offers and promotions</li>
+                        <li>Go to <a href="{{ route('register') }}" style="color:var(--primary-color)">Register</a> and select <strong>Vendor</strong></li>
+                        <li>Enter your business name, email, phone number, and password</li>
+                        <li>Verify your email address to activate your account</li>
+                        <li>Complete your business profile: add a description, location, and banner image</li>
                     </ul>
-
+                    <h4>Verification Process</h4>
+                    <ul>
+                        <li>Submit your business verification documents via <strong>Settings → Store Settings</strong></li>
+                        <li>Required: valid government ID, business license (if applicable), and proof of address</li>
+                        <li>Our team reviews submissions within <strong>24–48 hours</strong></li>
+                        <li>Once verified, your profile displays a <strong>Verified ✓</strong> badge — increasing customer trust</li>
+                    </ul>
+                    <h4>Managing Your Profile</h4>
+                    <ul>
+                        <li>Go to <strong>Vendor Dashboard → Settings</strong> to update your business info</li>
+                        <li>Upload a high-quality banner image (recommended: 1200×400px) and profile photo</li>
+                        <li>Add your business hours, phone number, website, and social media links</li>
+                        <li>Set your delivery zones and cash on delivery availability</li>
+                    </ul>
+                    <h4>Adding Products & Services</h4>
+                    <ul>
+                        <li>Go to <strong>Dashboard → Products → Add Product</strong></li>
+                        <li>Fill in: product name, description, price, stock quantity, and category</li>
+                        <li>Upload up to 5 high-quality product images</li>
+                        <li>Toggle <strong>Active</strong> to make the product visible to customers immediately</li>
+                    </ul>
+                    <h4>Getting Paid via Chapa</h4>
+                    <ul>
+                        <li>Connect your Chapa account in <strong>Settings → Payment Settings</strong></li>
+                        <li>Funds are held securely until order delivery is confirmed by the customer</li>
+                        <li>Payouts are processed every <strong>7 days</strong> to your registered bank account</li>
+                        <li>View earnings and payout history in <strong>Dashboard → Sales Report</strong></li>
+                    </ul>
+                    <h4>Cash on Delivery Setup</h4>
+                    <ul>
+                        <li>Enable cash on delivery in <strong>Settings → Delivery Settings</strong></li>
+                        <li>Set your supported delivery zones and delivery fee</li>
+                        <li>When a COD order is placed, confirm and arrange delivery via <strong>Dashboard → Orders</strong></li>
+                        <li>Mark orders as delivered once payment is collected from the customer</li>
+                    </ul>
                     <div class="alert alert-warning">
                         <i class="ri-alert-line"></i>
-                        <span>Vendor accounts require verification to ensure trust and authenticity for all customers.</span>
+                        <span>Vendor accounts require verification before products are visible to customers. Complete your profile and submit documents to get verified quickly.</span>
                     </div>
                 </div>
             </section>
 
             <!-- Features Section -->
             <section id="features" class="doc-section">
-                <h2 class="section-title">
-                    <i class="ri-star-line"></i>
-                    Platform Features
-                </h2>
+                <h2 class="section-title"><i class="ri-star-line"></i> Payments & Platform Features</h2>
                 <div class="section-content">
+                    <h4>Chapa Payment Integration</h4>
+                    <ul>
+                        <li>Supports <strong>bank transfers, Telebirr mobile money, and debit/credit cards</strong></li>
+                        <li>All transactions are encrypted with TLS 1.3 and PCI-DSS compliant</li>
+                        <li>Customers receive instant payment confirmation via SMS and email</li>
+                        <li>Vendors receive weekly payouts with full transaction history</li>
+                    </ul>
+                    <h4>Cash on Delivery</h4>
+                    <ul>
+                        <li>Available for orders within Jimma and supported zones</li>
+                        <li>No upfront payment required — pay when your order arrives</li>
+                        <li>Delivery fee is shown clearly at checkout before you confirm</li>
+                    </ul>
+                    <h4>Refunds & Disputes</h4>
+                    <ul>
+                        <li>Open a dispute within <strong>48 hours</strong> of expected delivery if your order has issues</li>
+                        <li>Go to <strong>My Orders → View Order → Report Issue</strong></li>
+                        <li>Our team resolves disputes within <strong>3–5 business days</strong></li>
+                        <li>Approved Chapa refunds are returned to your original payment method within 3–5 business days</li>
+                    </ul>
+                    <h4>Coupons & Promotions</h4>
+                    <ul>
+                        <li>Apply coupon codes at checkout in the <strong>Coupon Code</strong> field</li>
+                        <li>Find available coupons in <strong>Dashboard → My Coupons</strong></li>
+                        <li>Vendors create promotions in <strong>Vendor Dashboard → Promotions</strong></li>
+                        <li>Coupons have expiry dates and minimum order requirements — check details before applying</li>
+                    </ul>
+                    <h4>Invoices & Receipts</h4>
+                    <ul>
+                        <li>A digital receipt is emailed after every successful order</li>
+                        <li>Download invoices from <strong>My Orders → View Order → Download Invoice</strong></li>
+                        <li>Vendors download sales reports from <strong>Dashboard → Sales Report</strong></li>
+                    </ul>
                     <div class="feature-grid">
                         <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="ri-global-line"></i>
-                            </div>
-                            <h3 class="feature-title">Multi-language Support</h3>
-                            <p class="feature-desc">Available in English, Amharic, and Oromo to serve our diverse community.</p>
+                            <div class="feature-icon"><i class="ri-global-line"></i></div>
+                            <h3 class="feature-title">Multi-language</h3>
+                            <p class="feature-desc">English, Amharic, and Oromo — switch anytime from the navbar.</p>
                         </div>
                         <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="ri-smartphone-line"></i>
-                            </div>
-                            <h3 class="feature-title">Mobile Responsive</h3>
-                            <p class="feature-desc">Access Vendora on any device with our fully responsive design.</p>
+                            <div class="feature-icon"><i class="ri-smartphone-line"></i></div>
+                            <h3 class="feature-title">Mobile Friendly</h3>
+                            <p class="feature-desc">Fully responsive — works perfectly on phones, tablets, and desktops.</p>
                         </div>
                         <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="ri-shield-check-line"></i>
-                            </div>
-                            <h3 class="feature-title">Secure Platform</h3>
-                            <p class="feature-desc">Your data is protected with industry-standard security measures.</p>
+                            <div class="feature-icon"><i class="ri-shield-check-line"></i></div>
+                            <h3 class="feature-title">Secure & Verified</h3>
+                            <p class="feature-desc">All vendors are verified. Payments are encrypted and PCI-DSS compliant.</p>
                         </div>
                         <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="ri-map-pin-2-line"></i>
-                            </div>
+                            <div class="feature-icon"><i class="ri-map-pin-2-line"></i></div>
                             <h3 class="feature-title">Location-Based</h3>
-                            <p class="feature-desc">Find vendors near you with our location-based search system.</p>
+                            <p class="feature-desc">Find vendors near you with location-aware search and filtering.</p>
                         </div>
                         <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="ri-notification-line"></i>
-                            </div>
-                            <h3 class="feature-title">Real-time Updates</h3>
-                            <p class="feature-desc">Get instant notifications about orders, messages, and updates.</p>
+                            <div class="feature-icon"><i class="ri-notification-line"></i></div>
+                            <h3 class="feature-title">Real-time Notifications</h3>
+                            <p class="feature-desc">Instant alerts for orders, messages, promotions, and status updates.</p>
                         </div>
                         <div class="feature-card">
-                            <div class="feature-icon">
-                                <i class="ri-customer-service-line"></i>
-                            </div>
-                            <h3 class="feature-title">24/7 Support</h3>
-                            <p class="feature-desc">Our support team is always here to help you succeed.</p>
+                            <div class="feature-icon"><i class="ri-coupon-line"></i></div>
+                            <h3 class="feature-title">Coupons & Deals</h3>
+                            <p class="feature-desc">Save money with vendor coupons and platform-wide promotions.</p>
                         </div>
                     </div>
                 </div>
@@ -665,68 +744,68 @@
 
             <!-- Guidelines Section -->
             <section id="guidelines" class="doc-section">
-                <h2 class="section-title">
-                    <i class="ri-shield-check-line"></i>
-                    Community Guidelines
-                </h2>
+                <h2 class="section-title"><i class="ri-shield-check-line"></i> Community Guidelines</h2>
                 <div class="section-content">
-                    <p>To maintain a safe and trustworthy platform, please follow these guidelines:</p>
-                    
+                    <p>Vendora is built on trust. These guidelines keep our community safe, fair, and welcoming for everyone.</p>
                     <h4>For All Users:</h4>
                     <ul>
-                        <li>Be respectful and professional in all interactions</li>
-                        <li>Provide honest and accurate reviews</li>
-                        <li>Respect privacy and personal information</li>
-                        <li>Report suspicious activity to our support team</li>
+                        <li>Be respectful and professional — harassment or abuse results in account suspension</li>
+                        <li>Provide honest, accurate reviews based on real experiences only</li>
+                        <li>Never share personal information in public reviews or messages</li>
+                        <li>Report suspicious activity, fake listings, or policy violations immediately</li>
+                        <li>Do not conduct transactions outside the Vendora platform</li>
                     </ul>
-
                     <h4>For Vendors:</h4>
                     <ul>
-                        <li>Maintain accurate business information</li>
-                        <li>Respond promptly to customer inquiries</li>
-                        <li>Deliver products and services as described</li>
-                        <li>Honor all promotions and commitments</li>
+                        <li>Keep your business information accurate and up to date at all times</li>
+                        <li>Respond to customer messages within <strong>24 hours</strong></li>
+                        <li>Deliver products and services exactly as described — no substitutions without customer consent</li>
+                        <li>Honor all promotions, coupons, and pricing shown on your profile</li>
+                        <li>Do not post fake reviews or incentivize customers to leave biased feedback</li>
                     </ul>
-
                     <h4>For Customers:</h4>
                     <ul>
-                        <li>Provide constructive and fair feedback</li>
-                        <li>Honor your commitments and orders</li>
-                        <li>Communicate clearly with vendors</li>
-                        <li>Report any issues promptly</li>
+                        <li>Leave fair, constructive reviews — personal attacks on vendors are not permitted</li>
+                        <li>Honor your orders — repeated cancellations may restrict your account</li>
+                        <li>Communicate clearly and respectfully with vendors</li>
+                        <li>Report issues through the platform before leaving negative reviews</li>
                     </ul>
+                    <div class="alert alert-warning">
+                        <i class="ri-alert-line"></i>
+                        <span>Violations may result in warnings, temporary suspension, or permanent account removal depending on severity.</span>
+                    </div>
                 </div>
             </section>
 
             <!-- Support Section -->
             <section id="support" class="doc-section">
-                <h2 class="section-title">
-                    <i class="ri-customer-service-line"></i>
-                    Support & Help
-                </h2>
+                <h2 class="section-title"><i class="ri-customer-service-line"></i> Support & Help</h2>
                 <div class="section-content">
-                    <p>We're here to help you make the most of Vendora:</p>
-                    
-                    <h4>Get Help:</h4>
+                    <p>Our support team is based in Jimma and available in English, Amharic, and Oromo.</p>
+                    <h4>Self-Service Resources:</h4>
                     <ul>
-                        <li><strong>Help Center:</strong> Browse our comprehensive FAQ and guides</li>
-                        <li><strong>Contact Support:</strong> Reach out to our support team directly</li>
-                        <li><strong>Community Forum:</strong> Connect with other users and vendors</li>
-                        <li><strong>Video Tutorials:</strong> Watch step-by-step guides for common tasks</li>
+                        <li><strong><a href="{{ route('help-center') }}" style="color:var(--primary-color)">Help Center:</a></strong> Browse FAQs and step-by-step guides organized by topic</li>
+                        <li><strong><a href="{{ route('how-it-works') }}" style="color:var(--primary-color)">How It Works:</a></strong> Visual walkthrough of the platform for new users</li>
+                        <li><strong><a href="{{ route('trust-safety') }}" style="color:var(--primary-color)">Trust & Safety:</a></strong> Learn about our verification and security practices</li>
                     </ul>
-
+                    <h4>Contact Support:</h4>
+                    <ul>
+                        <li><strong>Email:</strong> <a href="mailto:support@vendora.com" style="color:var(--primary-color)">support@vendora.com</a> — response within 24 hours</li>
+                        <li><strong>Phone:</strong> <a href="tel:+251911234567" style="color:var(--primary-color)">+251 91 123 4567</a> — Mon–Fri, 8:00 AM – 6:00 PM</li>
+                        <li><strong>In-App Messaging:</strong> Use the <strong>Contact</strong> button on any vendor profile</li>
+                        <li><strong>Office:</strong> Jimma, Oromia, Ethiopia</li>
+                    </ul>
+                    <h4>Reporting Issues:</h4>
+                    <ul>
+                        <li><strong>Order problems:</strong> <strong>My Orders → View Order → Report Issue</strong></li>
+                        <li><strong>Vendor complaints:</strong> Use the <strong>Report</strong> button on the vendor's profile page</li>
+                        <li><strong>Payment disputes:</strong> Email <a href="mailto:payments@vendora.com" style="color:var(--primary-color)">payments@vendora.com</a> with your order number</li>
+                        <li><strong>Account issues:</strong> Email <a href="mailto:support@vendora.com" style="color:var(--primary-color)">support@vendora.com</a> with your registered email</li>
+                    </ul>
                     <div class="alert alert-info">
                         <i class="ri-mail-line"></i>
-                        <span>For urgent support, email us at support@vendora.com or call +251-XXX-XXXX</span>
+                        <span>For the fastest response, include your <strong>order number</strong> or <strong>account email</strong> in all support requests.</span>
                     </div>
-
-                    <h4>Contact Information:</h4>
-                    <ul>
-                        <li><strong>Email:</strong> support@vendora.com</li>
-                        <li><strong>Phone:</strong> +251-XXX-XXXX</li>
-                        <li><strong>Office:</strong> Jimma, Ethiopia</li>
-                        <li><strong>Hours:</strong> Monday - Friday, 9:00 AM - 6:00 PM</li>
-                    </ul>
                 </div>
             </section>
         </main>

@@ -165,6 +165,7 @@ class MessageController extends Controller
             'receiver_id' => 'required|exists:users,id',
             'content' => 'required|string|max:5000',
             'subject' => 'nullable|string|max:255',
+            'parent_id' => 'nullable|exists:messages,id',
         ]);
 
         try {
@@ -179,7 +180,7 @@ class MessageController extends Controller
             $message->subject = $request->subject ?? $this->generateSubject($request->content);
             $message->content = $request->content;
             $message->is_read = false;
-            $message->parent_id = null; // This is a root message
+            $message->parent_id = $request->parent_id ?? null;
             $message->save();
 
             // Load relationships for response

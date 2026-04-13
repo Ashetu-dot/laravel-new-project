@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Categories Management - Vendora Admin | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         @font-face {
@@ -1183,98 +1186,7 @@
 <body>
 
     <!-- Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <div class="brand">
-            <i class="ri-store-3-fill"></i>
-            Vendora
-            
-        </div>
-
-        <div class="nav-menu">
-            <div class="nav-group">
-                <div class="nav-label">DASHBOARD</div>
-                <a href="{{ route('admin.dashboard') }}" class="nav-item">
-                    <i class="ri-dashboard-line"></i> Dashboard
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">MANAGEMENT</div>
-                <a href="{{ route('admin.orders') }}" class="nav-item">
-                    <i class="ri-shopping-bag-3-line"></i> Orders
-                </a>
-                <a href="{{ route('admin.customers') }}" class="nav-item">
-                    <i class="ri-user-line"></i> Customers
-                </a>
-                <a href="{{ route('admin.vendors') }}" class="nav-item">
-                    <i class="ri-store-line"></i> Vendors
-                </a>
-                <a href="{{ route('admin.products') }}" class="nav-item">
-                    <i class="ri-shopping-cart-line"></i> Products
-                </a>
-                <a href="{{ route('admin.catalog.categories') }}" class="nav-item active">
-                    <i class="ri-price-tag-3-line"></i> Categories
-                </a>
-                <a href="{{ route('admin.inventory') }}" class="nav-item">
-                    <i class="ri-archive-line"></i> Inventory
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">MARKETING</div>
-                <a href="{{ route('admin.promotions.promotions') }}" class="nav-item">
-                    <i class="ri-megaphone-line"></i> Promotions
-                </a>
-                <a href="{{ route('admin.coupons') }}" class="nav-item">
-                    <i class="ri-coupon-line"></i> Coupons
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">ANALYTICS</div>
-                <a href="{{ route('admin.analytics') }}" class="nav-item">
-                    <i class="ri-bar-chart-2-line"></i> Analytics
-                </a>
-                <a href="{{ route('admin.reports') }}" class="nav-item">
-                    <i class="ri-file-list-3-line"></i> Reports
-                </a>
-            </div>
-
-            <div class="nav-group">
-                <div class="nav-label">SYSTEM</div>
-                <a href="{{ route('admin.admins.list') }}" class="nav-item">
-                    <i class="ri-shield-user-line"></i> Administrators
-                </a>
-                <a href="{{ route('admin.settings') }}" class="nav-item">
-                    <i class="ri-settings-4-line"></i> Settings
-                </a>
-                <a href="{{ route('admin.help') }}" class="nav-item">
-                    <i class="ri-question-line"></i> Help
-                </a>
-            </div>
-        </div>
-
-        <div class="user-profile">
-            <div class="avatar">
-                @if(Auth::user() && Auth::user()->profile_image)
-                    <img src="{{ asset('storage/' . Auth::user()->profile_image) }}" alt="{{ Auth::user()->name }}">
-                @else
-                    {{ strtoupper(substr(Auth::user()->name ?? 'A', 0, 2)) }}
-                @endif
-            </div>
-            <div class="user-info">
-                <h4>{{ Auth::user()->name ?? 'Admin' }}</h4>
-                <p>{{ ucfirst(Auth::user()->role ?? 'administrator') }}</p>
-            </div>
-        </div>
-
-        <form method="POST" action="{{ route('admin.logout') }}">
-            @csrf
-            <button type="submit" class="logout-btn" onclick="return confirm('Are you sure you want to logout?')">
-                <i class="ri-logout-box-line"></i> Logout
-            </button>
-        </form>
-    </nav>
+    @include('partials.admin-sidebar')
 
     <!-- Main Content -->
     <main class="main-content">
@@ -1311,392 +1223,358 @@
         <!-- Dashboard Content -->
         <div class="dashboard-container">
 
-            <!-- Alert Messages -->
+            {{-- Flash messages --}}
             @if(session('success'))
-                <div class="alert alert-success">
-                    <i class="ri-checkbox-circle-line"></i>
-                    {{ session('success') }}
-                </div>
+                <div class="alert alert-success"><i class="ri-checkbox-circle-line"></i> {{ session('success') }}</div>
             @endif
-
             @if(session('error'))
-                <div class="alert alert-error">
-                    <i class="ri-error-warning-line"></i>
-                    {{ session('error') }}
-                </div>
+                <div class="alert alert-error"><i class="ri-error-warning-line"></i> {{ session('error') }}</div>
             @endif
 
-            @if(session('warning'))
-                <div class="alert alert-warning">
-                    <i class="ri-alert-line"></i>
-                    {{ session('warning') }}
-                </div>
-            @endif
-
+            {{-- Page Header --}}
             <div class="page-header">
                 <div>
-                    <h1 class="page-title">
-                        <i class="ri-price-tag-3-line"></i>
-                        Categories Management
-                    </h1>
-                    <p class="page-subtitle">Organize products with categories and subcategories</p>
-                </div>
-                <div class="last-updated">
-                    <i class="ri-time-line"></i>
-                    Last updated: {{ now()->format('M d, Y H:i') }}
+                    <h1 class="page-title"><i class="ri-price-tag-3-line"></i> Catalog Management</h1>
+                    <p class="page-subtitle">Manage products and categories in one place</p>
                 </div>
             </div>
 
-            <!-- Stats Cards -->
+            {{-- Tabs --}}
+            <div style="display:flex;gap:0;border-bottom:2px solid var(--border-color);margin-bottom:24px;">
+                <a href="{{ route('admin.catalog.categories') }}"
+                   style="padding:12px 24px;font-weight:600;font-size:15px;text-decoration:none;border-bottom:3px solid {{ $tab !== 'products' ? 'var(--primary-gold)' : 'transparent' }};color:{{ $tab !== 'products' ? 'var(--primary-gold)' : 'var(--text-secondary)' }};margin-bottom:-2px;display:flex;align-items:center;gap:8px;">
+                    <i class="ri-price-tag-3-line"></i> Categories
+                    <span style="background:var(--primary-gold);color:white;padding:2px 8px;border-radius:12px;font-size:11px;">{{ $totalCategories }}</span>
+                </a>
+                <a href="{{ route('admin.catalog.categories') }}?tab=products"
+                   style="padding:12px 24px;font-weight:600;font-size:15px;text-decoration:none;border-bottom:3px solid {{ $tab === 'products' ? 'var(--primary-gold)' : 'transparent' }};color:{{ $tab === 'products' ? 'var(--primary-gold)' : 'var(--text-secondary)' }};margin-bottom:-2px;display:flex;align-items:center;gap:8px;">
+                    <i class="ri-shopping-cart-line"></i> Products
+                    <span style="background:var(--accent-blue);color:white;padding:2px 8px;border-radius:12px;font-size:11px;">{{ $products->total() }}</span>
+                </a>
+            </div>
+
+            {{-- ═══════════════════════════════════════════════════════════ --}}
+            {{-- CATEGORIES TAB --}}
+            {{-- ═══════════════════════════════════════════════════════════ --}}
+            @if($tab !== 'products')
+
+            {{-- Stats --}}
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon bg-blue-light">
-                        <i class="ri-price-tag-3-line"></i>
-                    </div>
-                    <div class="stat-info">
-                        <div class="stat-label">Total Categories</div>
-                        <div class="stat-number">{{ number_format($totalCategories ?? $categories->total() ?? 0) }}</div>
-                    </div>
+                    <div class="stat-icon bg-blue-light"><i class="ri-price-tag-3-line"></i></div>
+                    <div class="stat-info"><div class="stat-label">Total Categories</div><div class="stat-number">{{ number_format($totalCategories) }}</div></div>
                 </div>
-
                 <div class="stat-card">
-                    <div class="stat-icon bg-green-light">
-                        <i class="ri-price-tag-line"></i>
-                    </div>
-                    <div class="stat-info">
-                        <div class="stat-label">Active Categories</div>
-                        <div class="stat-number">{{ number_format($activeCategories ?? $categories->where('is_active', true)->count() ?? 0) }}</div>
-                    </div>
+                    <div class="stat-icon bg-green-light"><i class="ri-check-line"></i></div>
+                    <div class="stat-info"><div class="stat-label">Active</div><div class="stat-number">{{ number_format($activeCategories) }}</div></div>
                 </div>
-
                 <div class="stat-card">
-                    <div class="stat-icon bg-purple-light">
-                        <i class="ri-product-hunt-line"></i>
-                    </div>
-                    <div class="stat-info">
-                        <div class="stat-label">Total Products</div>
-                        <div class="stat-number">{{ number_format($totalProductsInCategories ?? $categories->sum('products_count') ?? 0) }}</div>
-                    </div>
+                    <div class="stat-icon bg-purple-light"><i class="ri-product-hunt-line"></i></div>
+                    <div class="stat-info"><div class="stat-label">Total Products</div><div class="stat-number">{{ number_format($totalProductsInCategories) }}</div></div>
                 </div>
             </div>
 
-            <!-- Action Bar -->
-            <div class="action-bar">
-                <div>
-                    <a href="{{ route('admin.catalog.categories.create') }}" class="btn btn-primary">
-                        <i class="ri-add-line"></i> Add New Category
-                    </a>
+            {{-- Action bar --}}
+            <div class="action-bar" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <a href="{{ route('admin.catalog.categories') }}" class="quick-action-btn {{ !request('filter') ? 'active' : '' }}"><i class="ri-list-check"></i> All</a>
+                    <a href="{{ route('admin.catalog.categories') }}?filter=active" class="quick-action-btn {{ request('filter')=='active' ? 'active' : '' }}"><i class="ri-check-line"></i> Active</a>
+                    <a href="{{ route('admin.catalog.categories') }}?filter=inactive" class="quick-action-btn {{ request('filter')=='inactive' ? 'active' : '' }}"><i class="ri-close-line"></i> Inactive</a>
+                    <a href="{{ route('admin.catalog.categories') }}?filter=parent" class="quick-action-btn {{ request('filter')=='parent' ? 'active' : '' }}"><i class="ri-price-tag-line"></i> Parents</a>
+                    <a href="{{ route('admin.catalog.categories') }}?filter=child" class="quick-action-btn {{ request('filter')=='child' ? 'active' : '' }}"><i class="ri-price-tag-2-line"></i> Sub</a>
+                    <a href="{{ route('admin.catalog.categories.export') }}" class="quick-action-btn"><i class="ri-download-line"></i> Export</a>
                 </div>
+                <a href="{{ route('admin.catalog.categories.create') }}" class="btn btn-primary"><i class="ri-add-line"></i> Add Category</a>
             </div>
 
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <a href="{{ route('admin.catalog.categories') }}" class="quick-action-btn {{ !request('filter') ? 'active' : '' }}">
-                    <i class="ri-list-check"></i> All Categories
-                </a>
-                <a href="{{ route('admin.catalog.categories') }}?filter=active" class="quick-action-btn {{ request('filter') == 'active' ? 'active' : '' }}">
-                    <i class="ri-check-line"></i> Active Only
-                </a>
-                <a href="{{ route('admin.catalog.categories') }}?filter=inactive" class="quick-action-btn {{ request('filter') == 'inactive' ? 'active' : '' }}">
-                    <i class="ri-close-line"></i> Inactive Only
-                </a>
-                <a href="{{ route('admin.catalog.categories') }}?filter=parent" class="quick-action-btn {{ request('filter') == 'parent' ? 'active' : '' }}">
-                    <i class="ri-price-tag-line"></i> Parent Categories
-                </a>
-                <a href="{{ route('admin.catalog.categories') }}?filter=child" class="quick-action-btn {{ request('filter') == 'child' ? 'active' : '' }}">
-                    <i class="ri-price-tag-2-line"></i> Subcategories
-                </a>
-                <a href="{{ route('admin.catalog.categories.export') }}" class="quick-action-btn">
-                    <i class="ri-download-line"></i> Export
-                </a>
-            </div>
-
-            <!-- Categories Table -->
+            {{-- Categories Table --}}
             <div class="table-container">
                 <div class="table-header">
-                    <h3 class="table-title">
-                        <i class="ri-price-tag-3-line"></i>
-                        Categories List
-                    </h3>
-                    <div class="results-info">
-                        <i class="ri-file-list-line"></i>
-                        Showing <strong>{{ $categories->firstItem() ?? 0 }}</strong> - <strong>{{ $categories->lastItem() ?? 0 }}</strong>
-                        of <strong>{{ $categories->total() ?? 0 }}</strong> categories
-                    </div>
+                    <h3 class="table-title"><i class="ri-price-tag-3-line"></i> Categories</h3>
+                    <div class="results-info">{{ $categories->firstItem() ?? 0 }}–{{ $categories->lastItem() ?? 0 }} of {{ $categories->total() }}</div>
                 </div>
-
                 <table>
                     <thead>
                         <tr>
-                            <th>Category</th>
-                            <th>Slug</th>
-                            <th>Parent Category</th>
-                            <th>Products</th>
-                            <th>Status</th>
-                            <th>Created</th>
-                            <th>Actions</th>
+                            <th>Category</th><th>Slug</th><th>Parent</th><th>Products</th><th>Status</th><th>Created</th><th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($categories ?? [] as $category)
+                        @forelse($categories as $cat)
                         <tr>
                             <td>
                                 <div class="category-name">
-                                    @if($category->image)
-                                        <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="category-icon" style="object-fit: cover;">
+                                    @if($cat->image)
+                                        <img src="{{ $cat->image_url ?? asset('storage/'.$cat->image) }}" alt="{{ $cat->name }}" class="category-icon" style="object-fit:cover;border-radius:8px;">
                                     @else
-                                        <div class="category-icon bg-gold-light">
-                                            <i class="{{ $category->icon ?? 'ri-price-tag-line' }}"></i>
-                                        </div>
+                                        <div class="category-icon bg-gold-light"><i class="{{ $cat->icon ?? 'ri-price-tag-line' }}"></i></div>
                                     @endif
                                     <div class="category-details">
-                                        <span style="font-weight: 600;">{{ $category->name }}</span>
-                                        <span class="category-id">ID: #{{ $category->id }}</span>
+                                        <span style="font-weight:600;">{{ $cat->name }}</span>
+                                        <span class="category-id">ID: #{{ $cat->id }}</span>
                                     </div>
                                 </div>
-
-                                <!-- Show child categories if any -->
-                                @if($category->children && $category->children->count() > 0)
+                                @if($cat->children && $cat->children->count() > 0)
                                 <div class="child-categories">
-                                    @foreach($category->children->take(3) as $child)
-                                    <div class="child-category-item">
-                                        <i class="ri-price-tag-2-line"></i>
-                                        <span>{{ $child->name }}</span>
-                                        <span class="product-count">({{ $child->products_count ?? 0 }} products)</span>
-                                    </div>
+                                    @foreach($cat->children->take(3) as $child)
+                                    <div class="child-category-item"><i class="ri-price-tag-2-line"></i> {{ $child->name }} <span class="product-count">({{ $child->products_count ?? 0 }})</span></div>
                                     @endforeach
-                                    @if($category->children->count() > 3)
-                                    <div class="more-categories">
-                                        <i class="ri-more-line"></i>
-                                        <span>+{{ $category->children->count() - 3 }} more subcategories</span>
-                                    </div>
-                                    @endif
+                                    @if($cat->children->count() > 3)<div class="more-categories"><i class="ri-more-line"></i> +{{ $cat->children->count()-3 }} more</div>@endif
                                 </div>
                                 @endif
                             </td>
-                            <td><code>{{ $category->slug }}</code></td>
+                            <td><code>{{ $cat->slug }}</code></td>
                             <td>
-                                @if($category->parent_id)
-                                    @php
-                                        $parent = \App\Models\Category::find($category->parent_id);
-                                    @endphp
-                                    <span class="status-badge status-active" style="background-color: #e0f2fe; color: #0369a1;">
-                                        {{ $parent->name ?? 'N/A' }}
-                                    </span>
-                                @else
-                                    <span style="color: var(--text-secondary);">—</span>
-                                @endif
+                                @if($cat->parent_id)
+                                    @php $parent = \App\Models\Category::find($cat->parent_id); @endphp
+                                    <span class="status-badge" style="background:#e0f2fe;color:#0369a1;">{{ $parent->name ?? 'N/A' }}</span>
+                                @else <span style="color:var(--text-secondary);">—</span> @endif
                             </td>
+                            <td><strong>{{ $cat->products_count ?? 0 }}</strong></td>
+                            <td><span class="status-badge status-{{ $cat->is_active ? 'active' : 'inactive' }}">{{ $cat->is_active ? 'Active' : 'Inactive' }}</span></td>
                             <td>
-                                <span style="font-weight: 600;">{{ $category->products_count ?? 0 }}</span>
-                            </td>
-                            <td>
-                                <span class="status-badge status-{{ $category->is_active ? 'active' : 'inactive' }}">
-                                    {{ $category->is_active ? 'Active' : 'Inactive' }}
-                                </span>
-                            </td>
-                            <td>
-                                @if($category->created_at)
-                                    <div>{{ $category->created_at->format('M d, Y') }}</div>
-                                    <div style="font-size: 11px; color: var(--text-secondary);">{{ $category->created_at->diffForHumans() }}</div>
-                                @else
-                                    <div>N/A</div>
-                                @endif
+                                @if($cat->created_at)
+                                    <div>{{ $cat->created_at->format('M d, Y') }}</div>
+                                    <div style="font-size:11px;color:var(--text-secondary);">{{ $cat->created_at->diffForHumans() }}</div>
+                                @else N/A @endif
                             </td>
                             <td>
                                 <div class="action-buttons">
-                                    <a href="{{ route('admin.catalog.categories.edit', $category->id) }}" class="action-btn" title="Edit Category">
-                                        <i class="ri-edit-line"></i>
-                                    </a>
-                                    <a href="{{ route('admin.products') }}?category={{ $category->id }}" class="action-btn" title="View Products">
-                                        <i class="ri-eye-line"></i>
-                                    </a>
-                                    <form action="{{ route('admin.catalog.categories.toggle-status', $category->id) }}" method="POST" style="display: inline;">
-                                        @csrf
-                                        <button type="submit" class="action-btn" title="{{ $category->is_active ? 'Deactivate' : 'Activate' }}">
-                                            <i class="ri-{{ $category->is_active ? 'pause' : 'play' }}-line"></i>
-                                        </button>
+                                    <a href="{{ route('admin.catalog.categories.edit', $cat->id) }}" class="action-btn" title="Edit"><i class="ri-edit-line"></i></a>
+                                    <a href="{{ route('admin.catalog.categories') }}?tab=products&category={{ $cat->id }}" class="action-btn" title="View Products"><i class="ri-eye-line"></i></a>
+                                    <form action="{{ route('admin.catalog.categories.toggle-status', $cat->id) }}" method="POST" style="display:inline;">@csrf
+                                        <button type="submit" class="action-btn" title="{{ $cat->is_active ? 'Deactivate' : 'Activate' }}"><i class="ri-{{ $cat->is_active ? 'pause' : 'play' }}-line"></i></button>
                                     </form>
-                                    <form action="{{ route('admin.catalog.categories.destroy', $category->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this category? This will affect all products in this category.')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="action-btn delete" title="Delete Category">
-                                            <i class="ri-delete-bin-line"></i>
-                                        </button>
+                                    <form action="{{ route('admin.catalog.categories.destroy', $cat->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this category?')">@csrf @method('DELETE')
+                                        <button type="submit" class="action-btn delete" title="Delete"><i class="ri-delete-bin-line"></i></button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                         @empty
-                        <tr>
-                            <td colspan="7" style="text-align: center; padding: 60px;">
-                                <div class="empty-state">
-                                    <i class="ri-price-tag-3-line empty-icon"></i>
-                                    <h3 class="empty-title">No categories found</h3>
-                                    <p class="empty-text">Get started by creating your first category to organize your products</p>
-                                    <a href="{{ route('admin.catalog.categories.create') }}" class="btn btn-primary">
-                                        <i class="ri-add-line"></i> Add New Category
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
+                        <tr><td colspan="7" style="text-align:center;padding:60px;">
+                            <div class="empty-state">
+                                <i class="ri-price-tag-3-line empty-icon"></i>
+                                <h3 class="empty-title">No categories found</h3>
+                                <a href="{{ route('admin.catalog.categories.create') }}" class="btn btn-primary"><i class="ri-add-line"></i> Add Category</a>
+                            </div>
+                        </td></tr>
                         @endforelse
                     </tbody>
                 </table>
-
-                <!-- Enhanced Pagination -->
-                @if(method_exists($categories, 'links') && $categories->hasPages())
-                <div class="pagination-wrapper">
-                    <div class="pagination-info">
-                        <i class="ri-file-list-line"></i>
-                        Showing <strong>{{ $categories->firstItem() }}</strong> - <strong>{{ $categories->lastItem() }}</strong>
-                        of <strong>{{ $categories->total() }}</strong> results
-                    </div>
-
-                    <div class="pagination">
-                        {{-- Previous Page Link --}}
-                        @if($categories->onFirstPage())
-                            <span class="pagination-item disabled">
-                                <i class="ri-arrow-left-s-line"></i>
-                            </span>
-                        @else
-                            <a href="{{ $categories->previousPageUrl() }}" class="pagination-item">
-                                <i class="ri-arrow-left-s-line"></i>
-                            </a>
-                        @endif
-
-                        {{-- Pagination Elements --}}
-                        @foreach($categories->getUrlRange(1, $categories->lastPage()) as $page => $url)
-                            @if($page == $categories->currentPage())
-                                <span class="pagination-item active">{{ $page }}</span>
-                            @elseif($page == 1 || $page == $categories->lastPage() || abs($page - $categories->currentPage()) <= 2)
-                                <a href="{{ $url }}" class="pagination-item">{{ $page }}</a>
-                            @elseif($page == 2 || $page == $categories->lastPage() - 1)
-                                <span class="pagination-dots">...</span>
-                            @endif
-                        @endforeach
-
-                        {{-- Next Page Link --}}
-                        @if($categories->hasMorePages())
-                            <a href="{{ $categories->nextPageUrl() }}" class="pagination-item">
-                                <i class="ri-arrow-right-s-line"></i>
-                            </a>
-                        @else
-                            <span class="pagination-item disabled">
-                                <i class="ri-arrow-right-s-line"></i>
-                            </span>
-                        @endif
-                    </div>
+                @if($categories->hasPages())
+                <div class="pagination-wrapper" style="padding:16px 24px;display:flex;justify-content:flex-end;">
+                    {{ $categories->appends(request()->except('page'))->links() }}
                 </div>
                 @endif
             </div>
-        </div>
+
+            {{-- ═══════════════════════════════════════════════════════════ --}}
+            {{-- PRODUCTS TAB --}}
+            {{-- ═══════════════════════════════════════════════════════════ --}}
+            @else
+
+            {{-- Products Filters --}}
+            <div class="filters-card" style="background:var(--card-bg);border-radius:12px;padding:20px 24px;margin-bottom:20px;border:1px solid var(--border-color);">
+                <form method="GET" action="{{ route('admin.catalog.categories') }}">
+                    <input type="hidden" name="tab" value="products">
+                    <div class="filter-row" style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;">
+                        <div class="filter-group" style="flex:1;min-width:180px;">
+                            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px;"><i class="ri-search-line"></i> Search</label>
+                            <input type="text" name="prod_search" placeholder="Product name..." value="{{ $search }}" style="width:100%;padding:8px 12px;border:1px solid var(--border-color);border-radius:8px;font-size:14px;outline:none;">
+                        </div>
+                        <div class="filter-group" style="flex:1;min-width:160px;">
+                            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px;"><i class="ri-price-tag-3-line"></i> Category</label>
+                            <select name="category" style="width:100%;padding:8px 12px;border:1px solid var(--border-color);border-radius:8px;font-size:14px;outline:none;">
+                                <option value="">All Categories</option>
+                                @foreach($allCategories as $c)
+                                    <option value="{{ $c->id }}" {{ $category == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="filter-group" style="flex:1;min-width:160px;">
+                            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px;"><i class="ri-store-line"></i> Vendor</label>
+                            <select name="vendor" style="width:100%;padding:8px 12px;border:1px solid var(--border-color);border-radius:8px;font-size:14px;outline:none;">
+                                <option value="">All Vendors</option>
+                                @foreach($vendors as $v)
+                                    <option value="{{ $v->id }}" {{ $vendor == $v->id ? 'selected' : '' }}>{{ $v->business_name ?? $v->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="filter-group" style="flex:1;min-width:140px;">
+                            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px;"><i class="ri-toggle-line"></i> Status</label>
+                            <select name="status" style="width:100%;padding:8px 12px;border:1px solid var(--border-color);border-radius:8px;font-size:14px;outline:none;">
+                                <option value="">All</option>
+                                <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Active</option>
+                                <option value="inactive" {{ $status === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            </select>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button type="submit" class="btn btn-primary"><i class="ri-filter-line"></i> Filter</button>
+                            @if($search || $category || $vendor || $status)
+                                <a href="{{ route('admin.catalog.categories') }}?tab=products" class="btn btn-secondary"><i class="ri-close-line"></i> Clear</a>
+                            @endif
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Products action bar --}}
+            <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+                <a href="{{ route('admin.catalog.products.create') }}" class="btn btn-primary"><i class="ri-add-line"></i> Add Product</a>
+            </div>
+
+            {{-- Products Table --}}
+            <div class="table-container">
+                <div class="table-header">
+                    <h3 class="table-title"><i class="ri-shopping-cart-line"></i> Products</h3>
+                    <div class="results-info">{{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} of {{ $products->total() }}</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th><th>Category</th><th>Vendor</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($products as $product)
+                        <tr>
+                            <td>
+                                <div class="product-cell" style="display:flex;align-items:center;gap:12px;">
+                                    <div class="product-image" style="width:56px;height:56px;border-radius:8px;overflow:hidden;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        @php
+                                            $pImg = $product->first_image;
+                                            $pUrl = $pImg ? (filter_var($pImg, FILTER_VALIDATE_URL) ? $pImg : asset('storage/'.ltrim($pImg,'/'))) : null;
+                                        @endphp
+                                        @if($pUrl)
+                                            <img src="{{ $pUrl }}" alt="{{ $product->name }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.src='{{ $product->placeholder_image }}'">
+                                        @else
+                                            <i class="ri-image-line" style="font-size:24px;color:#9ca3af;"></i>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:600;">{{ Str::limit($product->name, 40) }}</div>
+                                        @if($product->sku)<div style="font-size:12px;color:var(--text-secondary);">SKU: {{ $product->sku }}</div>@endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                @if($product->category && is_object($product->category))
+                                    <span class="status-badge" style="background:#e0f2fe;color:#0369a1;">{{ $product->category->name }}</span>
+                                @elseif($product->category && is_string($product->category))
+                                    <span class="status-badge" style="background:#e0f2fe;color:#0369a1;">{{ $product->category }}</span>
+                                @else
+                                    <span style="color:var(--text-secondary);">—</span>
+                                @endif
+                            </td>
+                            <td>{{ $product->vendor->business_name ?? $product->vendor->name ?? '—' }}</td>
+                            <td>
+                                <strong>{{ number_format($product->price, 2) }} ETB</strong>
+                                @if($product->sale_price)<div style="font-size:12px;color:var(--accent-green);">Sale: {{ number_format($product->sale_price, 2) }}</div>@endif
+                            </td>
+                            <td>
+                                @if($product->stock == 0)
+                                    <span class="status-badge status-inactive">Out of Stock</span>
+                                @elseif($product->stock <= 10)
+                                    <span class="status-badge" style="background:#fef3c7;color:#92400e;">{{ $product->stock }} (Low)</span>
+                                @else
+                                    <span style="font-weight:600;color:var(--accent-green);">{{ $product->stock }}</span>
+                                @endif
+                            </td>
+                            <td><span class="status-badge status-{{ $product->is_active ? 'active' : 'inactive' }}">{{ $product->is_active ? 'Active' : 'Inactive' }}</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{{ route('admin.catalog.products.show', $product->id) }}" class="action-btn" title="View"><i class="ri-eye-line"></i></a>
+                                    <a href="{{ route('admin.catalog.products.edit', $product->id) }}" class="action-btn" title="Edit"><i class="ri-edit-line"></i></a>
+                                    <button onclick="toggleProduct({{ $product->id }}, this)" class="action-btn" title="{{ $product->is_active ? 'Deactivate' : 'Activate' }}">
+                                        <i class="ri-{{ $product->is_active ? 'pause' : 'play' }}-line"></i>
+                                    </button>
+                                    <button onclick="deleteProduct({{ $product->id }}, this)" class="action-btn delete" title="Delete"><i class="ri-delete-bin-line"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="7" style="text-align:center;padding:60px;">
+                            <div class="empty-state">
+                                <i class="ri-shopping-cart-line empty-icon"></i>
+                                <h3 class="empty-title">No products found</h3>
+                                <a href="{{ route('admin.catalog.products.create') }}" class="btn btn-primary"><i class="ri-add-line"></i> Add Product</a>
+                            </div>
+                        </td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                @if($products->hasPages())
+                <div class="pagination-wrapper" style="padding:16px 24px;display:flex;justify-content:flex-end;">
+                    {{ $products->appends(request()->except('page'))->links() }}
+                </div>
+                @endif
+            </div>
+
+            @endif {{-- end tab --}}
+
+        </div>{{-- end dashboard-container --}}
     </main>
 
     <script>
-        // CSRF Token
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         // Mobile menu toggle
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.getElementById('menuToggle');
-            const sidebar = document.getElementById('sidebar');
-            const body = document.body;
-
+            const sidebar    = document.getElementById('sidebar');
             if (menuToggle && sidebar) {
-                menuToggle.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    sidebar.classList.toggle('active');
-
-                    // Change icon based on state
-                    const icon = this.querySelector('i');
-                    if (icon) {
-                        icon.className = sidebar.classList.contains('active') ? 'ri-close-line' : 'ri-menu-line';
-                    }
-
-                    // Prevent body scroll when sidebar is open on mobile
-                    if (window.innerWidth <= 1024) {
-                        body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-                    }
-                });
-
-                // Close sidebar when clicking outside on mobile
-                document.addEventListener('click', function(event) {
-                    if (window.innerWidth <= 1024) {
-                        if (!sidebar.contains(event.target) && !menuToggle.contains(event.target) && sidebar.classList.contains('active')) {
-                            sidebar.classList.remove('active');
-                            const icon = menuToggle.querySelector('i');
-                            if (icon) icon.className = 'ri-menu-line';
-                            body.style.overflow = '';
-                        }
-                    }
-                });
-
-                // Handle escape key
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+                menuToggle.addEventListener('click', () => sidebar.classList.toggle('active'));
+                document.addEventListener('click', e => {
+                    if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target))
                         sidebar.classList.remove('active');
-                        const icon = menuToggle.querySelector('i');
-                        if (icon) icon.className = 'ri-menu-line';
-                        body.style.overflow = '';
-                    }
-                });
-
-                // Close sidebar on window resize if open
-                window.addEventListener('resize', function() {
-                    if (window.innerWidth > 1024 && sidebar.classList.contains('active')) {
-                        sidebar.classList.remove('active');
-                        const icon = menuToggle.querySelector('i');
-                        if (icon) icon.className = 'ri-menu-line';
-                        body.style.overflow = '';
-                    }
                 });
             }
 
-            // Highlight quick action buttons based on current filter
-            const urlParams = new URLSearchParams(window.location.search);
-            const filter = urlParams.get('filter');
-            if (filter) {
-                document.querySelectorAll('.quick-action-btn').forEach(btn => {
-                    if (btn.href.includes(`filter=${filter}`)) {
-                        btn.classList.add('active');
-                    }
-                });
-            }
-
-            // Auto-hide alerts after 5 seconds
+            // Auto-hide alerts
             setTimeout(() => {
-                document.querySelectorAll('.alert').forEach(alert => {
-                    alert.style.transition = 'opacity 0.5s';
-                    alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 500);
+                document.querySelectorAll('.alert').forEach(a => {
+                    a.style.transition = 'opacity .5s';
+                    a.style.opacity = '0';
+                    setTimeout(() => a.remove(), 500);
                 });
             }, 5000);
-
-            // Confirm delete actions
-            document.querySelectorAll('form[onsubmit]').forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    if (!confirm('Are you sure you want to perform this action?')) {
-                        e.preventDefault();
-                    }
-                });
-            });
         });
 
-        // Add keyboard shortcut for search (Ctrl+K)
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                e.preventDefault();
-                document.querySelector('.search-bar input')?.focus();
-            }
-        });
+        // Toggle product status via AJAX
+        function toggleProduct(id, btn) {
+            fetch(`/admin/catalog/products/${id}/toggle-status`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    const icon = btn.querySelector('i');
+                    icon.className = data.status ? 'ri-pause-line' : 'ri-play-line';
+                    btn.title = data.status ? 'Deactivate' : 'Activate';
+                    const row = btn.closest('tr');
+                    const badge = row.querySelector('.status-badge:last-of-type');
+                    if (badge) { badge.textContent = data.status ? 'Active' : 'Inactive'; badge.className = 'status-badge status-' + (data.status ? 'active' : 'inactive'); }
+                }
+            })
+            .catch(() => alert('Failed to update status'));
+        }
+
+        // Delete product via AJAX
+        function deleteProduct(id, btn) {
+            if (!confirm('Delete this product? This cannot be undone.')) return;
+            fetch(`/admin/catalog/products/${id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) btn.closest('tr').remove();
+                else alert(data.message || 'Failed to delete');
+            })
+            .catch(() => alert('Failed to delete product'));
+        }
     </script>
-
-    @if(app()->environment('local'))
-        <!-- Development environment indicator -->
-        <div style="position: fixed; bottom: 10px; right: 10px; background: #FFD700; color: #000; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; opacity: 0.5; z-index: 9999;">
-            DEV MODE
-        </div>
-    @endif
 </body>
 </html>

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>About Us - Vendora | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* Import Ethiopic font */
@@ -1203,8 +1206,7 @@
     <nav class="navbar">
         <div class="brand-badge">
             <a href="{{ route('home') }}" class="brand">
-                <i class="ri-store-2-fill"></i>
-                Vendora
+                <img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:48px;width:48px;object-fit:cover;border-radius:50%;vertical-align:middle;">
             </a>
             
         </div>
@@ -1221,11 +1223,7 @@
                 <div class="profile-container">
                     <div class="profile-trigger" id="profileTrigger">
                         <div class="profile-avatar">
-                            @if(Auth::user()->avatar)
-                                <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
-                            @else
-                                {{ strtoupper(substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2)) }}
-                            @endif
+                            <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
                         </div>
                         <span class="profile-name">{{ Auth::user()->business_name ?? Auth::user()->name }}</span>
                         <i class="ri-arrow-down-s-line" id="dropdownArrow"></i>
@@ -1234,11 +1232,7 @@
                     <div class="profile-dropdown" id="profileDropdown">
                         <div class="dropdown-header">
                             <div class="dropdown-avatar">
-                                @if(Auth::user()->avatar)
-                                    <img src="{{ Storage::url(Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                                @else
-                                    {{ strtoupper(substr(Auth::user()->business_name ?? Auth::user()->name, 0, 2)) }}
-                                @endif
+                                <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
                             </div>
                             <div class="dropdown-user-info">
                                 <h4>{{ Auth::user()->business_name ?? Auth::user()->name }}</h4>
@@ -1496,37 +1490,6 @@
                 <p>To become Ethiopia's most trusted marketplace for local vendors, fostering economic growth and community connections across all major cities. We envision a future where finding quality local services is just a click away, and where every Ethiopian has access to reliable, vetted professionals for their every need.</p>
             </div>
 
-            <!-- Story Card -->
-            <div class="card">
-                <h2>
-                    <i class="ri-history-line"></i>
-                    Our Story
-                </h2>
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-year">2023</div>
-                        <div class="timeline-content">
-                            <strong>The Idea</strong>
-                            <p>Founded in Jimma, Vendora started as a simple idea: connect local artisans and service providers with the community through a trusted platform.</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-year">2024</div>
-                        <div class="timeline-content">
-                            <strong>Launch</strong>
-                            <p>Officially launched in Jimma with 50+ vendors across 10 categories. Within months, we grew to serve thousands of customers.</p>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-year">2025</div>
-                        <div class="timeline-content">
-                            <strong>Expansion</strong>
-                            <p>Expanded to Addis Ababa, Bahir Dar, and Hawassa. Now serving {{ number_format($vendorCount) }}+ vendors and {{ number_format($customerCount) }}+ customers across Ethiopia.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Values Card -->
             <div class="card">
                 <h2>
@@ -1576,67 +1539,48 @@
                 <div class="team-grid">
                     <div class="team-member">
                         <div class="member-avatar">
-                            <img src="https://ui-avatars.com/api/?name=Ashetu+Bedada&background=B88E3F&color=fff&size=120" alt="Ashetu Bedada">
+                            <img src="{{ asset('storage/avatars/Ash.jpg') }}" alt="Ashetu Bedada" onerror="this.src='https://ui-avatars.com/api/?name=Ashetu+Bedada&background=B88E3F&color=fff&size=120'">
                         </div>
                         <div class="member-name">Ashetu Bedada</div>
                         <div class="member-role">Founder & CEO</div>
                     </div>
                     <div class="team-member">
                         <div class="member-avatar">
-                            <img src="https://ui-avatars.com/api/?name=Lewi+Teddese&background=B88E3F&color=fff&size=120" alt="Lewi Teddese">
+                            <img src="{{ asset('storage/avatars/Lew.jpg') }}" alt="Lewi Teddese" onerror="this.src='https://ui-avatars.com/api/?name=Lewi+Teddese&background=B88E3F&color=fff&size=120'">
                         </div>
                         <div class="member-name">Lewi Teddese</div>
                         <div class="member-role">Chief Technology Officer</div>
                     </div>
                     <div class="team-member">
                         <div class="member-avatar">
-                            <img src="https://ui-avatars.com/api/?name=Hiwot+Tariku&background=B88E3F&color=fff&size=120" alt="Hiwot Tariku">
+                            <img src="{{ asset('storage/avatars/Ash.jpg') }}" alt="Hiwot Tariku" onerror="this.src='https://ui-avatars.com/api/?name=Hiwot+Tariku&background=B88E3F&color=fff&size=120'">
                         </div>
                         <div class="member-name">Hiwot Tariku</div>
                         <div class="member-role">Operations Manager</div>
                     </div>
                     <div class="team-member">
                         <div class="member-avatar">
-                            <img src="https://ui-avatars.com/api/?name=Hasset+Mulgeta&background=B88E3F&color=fff&size=120" alt="Hasset Mulgeta">
+                            <img src="{{ asset('storage/avatars/Ash.jpg') }}" alt="Hasset Mulgeta" onerror="this.src='https://ui-avatars.com/api/?name=Hasset+Mulgeta&background=B88E3F&color=fff&size=120'">
                         </div>
                         <div class="member-name">Hasset Mulgeta</div>
                         <div class="member-role">Marketing Director</div>
                     </div>
                     <div class="team-member">
                         <div class="member-avatar">
-                            <img src="https://ui-avatars.com/api/?name=Mamo+Obse&background=B88E3F&color=fff&size=120" alt="Mamo Obse">
+                            <img src="{{ asset('storage/avatars/Ash.jpg') }}" alt="Mamo Obse" onerror="this.src='https://ui-avatars.com/api/?name=Mamo+Obse&background=B88E3F&color=fff&size=120'">
                         </div>
                         <div class="member-name">Mamo Obse</div>
                         <div class="member-role">Community Manager</div>
                     </div>
                     <div class="team-member">
                         <div class="member-avatar">
-                            <img src="https://ui-avatars.com/api/?name=Samuel+Gizahew&background=B88E3F&color=fff&size=120" alt="Samuel Gizahew">
+                            <img src="{{ asset('storage/avatars/Ash.jpg') }}" alt="Samuel Gizahew" onerror="this.src='https://ui-avatars.com/api/?name=Samuel+Gizahew&background=B88E3F&color=fff&size=120'">
                         </div>
                         <div class="member-name">Samuel Gizahew</div>
                         <div class="member-role">Lead Developer</div>
                     </div>
                 </div>
             </div>
-
-            <!-- Recent Testimonials from Database -->
-            @if($recentTestimonials->count() > 0)
-            <div class="card">
-                <h2>
-                    <i class="ri-chat-quote-line"></i>
-                    What Our Customers Say
-                </h2>
-                <div class="testimonial-grid">
-                    @foreach($recentTestimonials as $testimonial)
-                    <div class="testimonial-item">
-                        <p class="testimonial-text">"{{ $testimonial->content }}"</p>
-                        <div class="testimonial-author">- {{ $testimonial->author_name }}</div>
-                        <div style="font-size: 12px; color: var(--text-secondary);">{{ $testimonial->author_role }}</div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
 
             <!-- Why Choose Us Card -->
             <div class="card">
@@ -1673,10 +1617,6 @@
                             Go to Dashboard
                         </a>
                     @endguest
-                    <a href="{{ route('home') }}" class="btn btn-outline">
-                        <i class="ri-home-line"></i>
-                        Back to Home
-                    </a>
                 </div>
             </div>
         </div>
@@ -1686,7 +1626,7 @@
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-brand">
-                <h2><i class="ri-store-2-fill"></i> Vendora</h2>
+                <h2><img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:40px;width:40px;object-fit:cover;border-radius:50%;vertical-align:middle;"></h2>
                 <p class="footer-text">Connecting you with the best local professionals in Jimma and across Ethiopia.</p>
                 <div class="mt-4">
                     
@@ -1698,8 +1638,6 @@
                     <ul>
                         <li><a href="{{ route('about') }}">About Us</a></li>
                         <li><a href="{{ route('careers') }}">Careers</a></li>
-                        <li><a href="{{ route('press') }}">Press</a></li>
-                        <li><a href="{{ route('blog') }}">Blog</a></li>
                     </ul>
                 </div>
                 <div class="link-group">

@@ -1228,9 +1228,13 @@ public function store(AdminLoginRequest $request)
      */
     public function products(Request $request)
     {
+        $tab = $request->get('tab', 'products');
+
+        // Products data
         $search = $request->get('search');
         $category = $request->get('category');
         $vendor = $request->get('vendor');
+        $status = $request->get('status');
 
         $query = Product::with(['vendor', 'category']);
 
@@ -1249,11 +1253,44 @@ public function store(AdminLoginRequest $request)
             $query->where('vendor_id', $vendor);
         }
 
-        $products = $query->orderBy('created_at', 'desc')->paginate(15);
-        $categories = Category::all();
-        $vendors = User::where('role', 'vendor')->select('id', 'business_name')->get();
+        if ($status === 'active')   $query->where('is_active', true);
+        if ($status === 'inactive') $query->where('is_active', false);
 
-        return view('admin.catalog.products', compact('products', 'categories', 'vendors', 'search', 'category', 'vendor'));
+        $products = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+        $categories = Category::all();
+        $allCategories = $categories;
+        $vendors = User::where('role', 'vendor')->select('id', 'business_name', 'name')->get();
+
+        // Categories tab data
+        $catSearch = $request->get('cat_search');
+        $catFilter = $request->get('cat_filter');
+        $catQuery  = Category::withCount('products');
+        if ($catSearch) $catQuery->where('name', 'like', "%{$catSearch}%");
+        if ($catFilter === 'active')   $catQuery->where('is_active', true);
+        if ($catFilter === 'inactive') $catQuery->where('is_active', false);
+        if ($catFilter === 'parent')   $catQuery->whereNull('parent_id');
+        if ($catFilter === 'child')    $catQuery->whereNotNull('parent_id');
+        $categoriesPaginated = $catQuery->with('children')->paginate(15, ['*'], 'cat_page')->withQueryString();
+
+        $totalCategories           = Category::count();
+        $activeCategories          = Category::where('is_active', true)->count();
+        $totalProductsInCategories = Product::count();
+
+        // Header counts
+        try { $unreadNotificationsCount = \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count(); } catch (\Exception $e) { $unreadNotificationsCount = 0; }
+        try { $unreadMessagesCount = \App\Models\Message::where('receiver_id', Auth::id())->where('is_read', false)->count(); } catch (\Exception $e) { $unreadMessagesCount = 0; }
+
+        $pendingOrdersCount  = Order::where('status', 'pending')->count();
+        $pendingVendorsCount = User::where('role', 'vendor')->whereNull('email_verified_at')->count();
+
+        return view('admin.catalog.products', compact(
+            'products', 'categories', 'allCategories', 'vendors',
+            'search', 'category', 'vendor', 'status', 'tab',
+            'categoriesPaginated', 'totalCategories', 'activeCategories', 'totalProductsInCategories',
+            'catSearch', 'catFilter',
+            'unreadNotificationsCount', 'unreadMessagesCount',
+            'pendingOrdersCount', 'pendingVendorsCount'
+        ));
     }
 
     /**
@@ -1482,10 +1519,52 @@ public function store(AdminLoginRequest $request)
     /**
      * Display categories listing.
      */
-    public function categories()
+    public function categories(Request $request)
     {
-        $categories = Category::withCount('products')->paginate(15);
-        return view('admin.catalog.categories', compact('categories'));
+        $tab = $request->get('tab', 'categories');
+
+        // Categories data
+        $catSearch = $request->get('search');
+        $catFilter = $request->get('filter');
+        $catQuery  = Category::withCount('products');
+        if ($catSearch) $catQuery->where('name', 'like', "%{$catSearch}%");
+        if ($catFilter === 'active')   $catQuery->where('is_active', true);
+        if ($catFilter === 'inactive') $catQuery->where('is_active', false);
+        if ($catFilter === 'parent')   $catQuery->whereNull('parent_id');
+        if ($catFilter === 'child')    $catQuery->whereNotNull('parent_id');
+        $categories = $catQuery->with('children')->paginate(15)->withQueryString();
+
+        $totalCategories          = Category::count();
+        $activeCategories         = Category::where('is_active', true)->count();
+        $totalProductsInCategories = \App\Models\Product::count();
+
+        // Products data
+        $search   = $request->get('prod_search');
+        $category = $request->get('category');
+        $vendor   = $request->get('vendor');
+        $status   = $request->get('status');
+
+        $prodQuery = \App\Models\Product::with(['vendor', 'category']);
+        if ($search)   $prodQuery->where(fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('description', 'like', "%{$search}%"));
+        if ($category) $prodQuery->where('category_id', $category);
+        if ($vendor)   $prodQuery->where('vendor_id', $vendor);
+        if ($status === 'active')   $prodQuery->where('is_active', true);
+        if ($status === 'inactive') $prodQuery->where('is_active', false);
+        $products = $prodQuery->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
+        $allCategories = Category::all();
+        $vendors       = \App\Models\User::where('role', 'vendor')->select('id', 'business_name', 'name')->get();
+
+        // Header counts
+        try { $unreadNotificationsCount = \App\Models\Notification::where('user_id', Auth::id())->where('is_read', false)->count(); } catch (\Exception $e) { $unreadNotificationsCount = 0; }
+        try { $unreadMessagesCount = \App\Models\Message::where('receiver_id', Auth::id())->where('is_read', false)->count(); } catch (\Exception $e) { $unreadMessagesCount = 0; }
+
+        return view('admin.catalog.categories', compact(
+            'categories', 'totalCategories', 'activeCategories', 'totalProductsInCategories',
+            'products', 'allCategories', 'vendors',
+            'search', 'category', 'vendor', 'status', 'tab',
+            'unreadNotificationsCount', 'unreadMessagesCount'
+        ));
     }
 
     /**

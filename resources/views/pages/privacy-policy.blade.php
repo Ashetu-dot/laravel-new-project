@@ -7,6 +7,9 @@
     <meta name="theme-color" content="#B88E3F">
     <title>Privacy Policy - Vendora | Jimma, Ethiopia</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         @font-face {
@@ -1008,8 +1011,7 @@
     <!-- Navigation -->
     <nav class="navbar">
         <a href="{{ route('home') }}" class="logo">
-            <i class="ri-store-3-fill"></i>
-            Vendora
+            <img src="{{ asset('images/logo.png') }}" alt="Vendora" style="height:48px;width:48px;object-fit:cover;border-radius:50%;vertical-align:middle;">
             
         </a>
         <div class="nav-links">
@@ -1411,7 +1413,6 @@
                     <li><a href="{{ route('home') }}">Home</a></li>
                     <li><a href="{{ route('about') }}">About Us</a></li>
                     <li><a href="{{ route('help-center') }}">Help Center</a></li>
-                    <li><a href="{{ route('blog') }}">Blog</a></li>
                 </ul>
             </div>
             <div class="footer-section">
